@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Dumbbell, BookOpen, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
@@ -8,6 +8,17 @@ import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
+
+const starts = (path: string, ...prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(p + '/'))
+
+/** Bottom tabs. Each one stays lit on the screens you reach from it. */
+const TABS = [
+  { to: '/', label: 'Train', icon: Dumbbell, match: (p: string) => p === '/' || starts(p, '/workout', '/session', '/programs') },
+  { to: '/profile', label: 'Progress', icon: TrendingUp, match: (p: string) => starts(p, '/profile', '/exercises', '/exercise') },
+  { to: '/history', label: 'History', icon: History, match: (p: string) => starts(p, '/history') },
+  { to: '/body', label: 'Body', icon: Scale, match: (p: string) => starts(p, '/body') },
+  { to: '/settings', label: 'Settings', icon: Settings, match: (p: string) => starts(p, '/settings', '/help') }
+]
 
 const RING_R = 30
 const RING_C = 2 * Math.PI * RING_R
@@ -173,32 +184,25 @@ export default function Layout() {
       </div>
       <RestBar inSession={inSession} />
       <Toasts />
-      {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && !rest && <ResumeBar />}
-      {!inSession && <nav className="nav" aria-label="Main">
-        <div className="nav-inner">
-          <NavLink to="/" end className={({ isActive }) => (isActive || inSession ? 'active' : '')}>
-            <Dumbbell size={22} aria-hidden />
-            Train
-          </NavLink>
-          <NavLink to="/exercises">
-            <BookOpen size={22} aria-hidden />
-            Exercises
-          </NavLink>
-          <NavLink to="/history">
-            <History size={22} aria-hidden />
-            History
-          </NavLink>
-          <NavLink to="/body">
-            <Scale size={22} aria-hidden />
-            Body
-          </NavLink>
-          <NavLink to="/settings">
-            <Settings size={22} aria-hidden />
-            Settings
-          </NavLink>
-        </div>
-      </nav>}
+      {/* the live workout gets the whole screen; the nav comes back when you leave it */}
+      {!inSession && (
+        <nav className="nav" aria-label="Main">
+          <div className="nav-inner">
+            {TABS.map((t) => {
+              const on = t.match(loc.pathname)
+              return (
+                <Link key={t.to} to={t.to} className={on ? 'active' : ''} aria-current={on ? 'page' : undefined}>
+                  <span className="nav-ico" aria-hidden>
+                    <t.icon size={22} />
+                  </span>
+                  {t.label}
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
+      )}
     </>
   )
 }

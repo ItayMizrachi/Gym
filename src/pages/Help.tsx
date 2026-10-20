@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, Disc, TrendingUp } from 'lucide-react'
+import { Check, Disc, TrendingUp } from 'lucide-react'
+import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
 
 function Sec({ title, children }: { title: string; children: React.ReactNode }) {
@@ -12,15 +12,9 @@ function Sec({ title, children }: { title: string; children: React.ReactNode }) 
 }
 
 export default function Help() {
-  const nav = useNavigate()
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head">
-        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
-          <ArrowLeft size={22} />
-        </button>
-        <h1>How it works</h1>
-      </div>
+      <PageHeader title="How it works" sub="Short answers about every part of GymLog." back={true} />
 
       <Sec title="Set types">
         <div className="help-legend">

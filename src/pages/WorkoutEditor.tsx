@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Link2, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Link2, Plus, Trash2 } from 'lucide-react'
 import { MoveToFolderSheet } from '../components/FolderSheet'
 import { folderOf, NO_FOLDER } from '../lib/folders'
 import { useStore } from '../lib/store'
 import { duplicateWorkout, removeWorkout } from '../lib/actions'
 import { ExercisePicker } from '../components/ExercisePicker'
-import { Confirm, Empty, NumInput, Thumb, Toggle } from '../components/ui'
+import { Confirm, Empty, NumInput, PageHeader, Thumb, Toggle } from '../components/ui'
 import { fmtKg, fmtRest, parseRest } from '../lib/format'
 import { uid } from '../lib/uid'
 import { WorkoutExercise } from '../lib/types'
@@ -50,11 +50,8 @@ export default function WorkoutEditor() {
   const w = db.workouts.find((x) => x.id === id)
   if (!w)
     return (
-      <div className="card">
-        Workout not found.{' '}
-        <button className="btn sm" onClick={() => nav('/')}>
-          Back
-        </button>
+      <div className="stack">
+        <PageHeader title="Workout not found" sub="It may have been deleted." back="/" />
       </div>
     )
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -188,19 +185,11 @@ export default function WorkoutEditor() {
 
   return (
     <div className="stack" style={{ gap: 'var(--s3)' }}>
-      <div className="page-head" style={{ marginBottom: 'var(--s1)' }}>
-        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
-          <ArrowLeft size={22} />
-        </button>
-        <div className="grow">
-          <h1 className="ellipsis" style={{ fontSize: 30 }}>
-            {w.name || 'Untitled workout'}
-          </h1>
-          <div className="small muted" style={{ marginTop: 2 }}>
-            {wes.length} exercise{wes.length === 1 ? '' : 's'} · {totalSets} sets
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={w.name || 'Untitled workout'}
+        sub={`${wes.length} exercise${wes.length === 1 ? '' : 's'} · ${totalSets} sets. Changes save by themselves.`}
+        back="/"
+      />
 
       <div className="card stack">
         <label className="field">
