@@ -1,0 +1,294 @@
+/* Exercise library: photo thumbs, the big start/end photo, library rows and the detail page.
+   Only existing tokens from styles.css. */
+
+/* library photos are shot on white: keep them on a light chalk disc so the edge reads on graphite */
+.thumb.lib-thumb {
+  border-radius: 50%;
+  background: var(--chalk-plate);
+  border-color: var(--line-strong);
+}
+.thumb.lib-thumb img {
+  object-fit: cover;
+}
+
+/* ------------------------------------------------------------ big photo */
+.lib-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--chalk-plate);
+  border: 1px solid var(--line);
+  padding: 0;
+  cursor: pointer;
+}
+.lib-photo:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.lib-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.lib-photo.failed {
+  background: var(--card2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  cursor: default;
+}
+.lib-frames {
+  position: absolute;
+  left: 50%;
+  bottom: var(--s3);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.lib-frames span {
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  transition: background var(--t) var(--ease), color var(--t) var(--ease);
+}
+.lib-frames span.on {
+  background: var(--card3);
+  color: var(--text);
+}
+
+/* -------------------------------------------------------- library list */
+.lib-seg {
+  margin-bottom: var(--s1);
+}
+.lib-filter-row {
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--s4));
+  padding: 2px var(--s4);
+}
+.lib-filter-row::-webkit-scrollbar {
+  display: none;
+}
+/* tappable filter pill: 40px tall chip, a full 44px hit area */
+.lib-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+}
+.lib-pill::after {
+  content: '';
+  position: absolute;
+  inset: -2px 0;
+}
+.lib-pill.on {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+.lib-pill svg {
+  flex: none;
+}
+
+/* "Add" on a library row: a real button next to the row's own tap target */
+.lib-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.lib-row + .lib-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--inset, 70px);
+  height: 1px;
+  background: var(--line);
+}
+.lib-row > .list-row {
+  flex: 1;
+  min-width: 0;
+  padding-right: var(--s2);
+}
+.lib-row > .list-row::before {
+  display: none;
+}
+.lib-add {
+  flex: none;
+  min-width: 64px;
+  min-height: 40px;
+  margin-right: 14px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.lib-add.done {
+  border-color: var(--ok-line);
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.lib-level {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.lib-more {
+  width: 100%;
+  margin-top: var(--s3);
+}
+.lib-note {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: center;
+  padding: var(--s4) var(--s4) 0;
+}
+.lib-note a {
+  color: var(--text-2);
+  text-decoration: underline;
+}
+
+/* skeleton rows while the library loads */
+.lib-skel {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 10px 14px;
+  min-height: 68px;
+}
+.lib-skel .c {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--card2);
+}
+.lib-skel .l {
+  height: 12px;
+  border-radius: var(--r-xs);
+  background: var(--card2);
+}
+
+/* ------------------------------------------------------------- detail */
+.lib-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s2);
+}
+.lib-facts > div {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--s3);
+  min-width: 0;
+}
+.lib-facts .v {
+  font-weight: 600;
+  font-size: var(--fs-base);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.lib-facts .l {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-top: 2px;
+}
+.lib-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+.lib-steps li {
+  counter-increment: step;
+  display: flex;
+  gap: var(--s3);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+.lib-steps li::before {
+  content: counter(step);
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+.lib-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.lib-actions .btn {
+  min-height: 52px;
+  width: 100%;
+}
+.lib-muscle-line {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.lib-muscle-line b {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lib-frames span {
+    transition: none;
+  }
+}
+
+/* round icon in the "Add to workout" sheet, same footprint as a 44px thumb */
+.lib-wo-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--card2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

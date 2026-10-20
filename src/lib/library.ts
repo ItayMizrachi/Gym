@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Exercise, Tracking } from './types'
 import { nowIso, uid } from './uid'
-import { libIdForExercise, libPath } from './libraryLinks'
+import { NAME_TO_LIB, libIdForExercise, libPath } from './libraryLinks'
 
 export * from './libraryLinks'
 
@@ -109,16 +109,18 @@ export interface LibraryFilter {
   level?: string
 }
 
+const SHORT: Record<string, string> = { db: 'dumbbell', bb: 'barbell', kb: 'kettlebell', bw: 'bodyweight' }
+const POPULAR = new Set(Object.values(NAME_TO_LIB))
 const any = (v: string | undefined) => !v || v === 'All'
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 
 /**
- * Every word of the query must appear in the name, a muscle or the equipment ("db curl" style shorthands aside).
+ * Every word of the query must appear in the name, a muscle or the equipment (db, bb and kb are understood).
  * Names that start with the query rank first, then names containing it, then A–Z.
  */
 export function searchLibrary(list: LibraryExercise[], f: LibraryFilter): LibraryExercise[] {
   const q = norm(f.q ?? '')
-  const words = q ? q.split(' ') : []
+  const words = q ? q.split(' ').map((w) => SHORT[w] ?? w) : []
   const out = list.filter((e) => {
     if (!any(f.muscle) && !e.muscles.includes(f.muscle!)) return false
     if (!any(f.equipment) && e.equipment !== f.equipment) return false
@@ -127,7 +129,8 @@ export function searchLibrary(list: LibraryExercise[], f: LibraryFilter): Librar
     const hay = norm([e.name, ...e.muscles, ...e.secondary, e.equipment].join(' '))
     return words.every((w) => hay.includes(w))
   })
-  if (!q) return out
+  // no query: the well-known gym lifts (the ones the built-in plans use) first, then A–Z
+  if (!q) return [...out].sort((a, b) => Number(!POPULAR.has(a.id)) - Number(!POPULAR.has(b.id)))
   const rank = (e: LibraryExercise) => {
     const n = norm(e.name)
     return n.startsWith(q) ? 0 : n.includes(q) ? 1 : words.every((w) => n.includes(w)) ? 2 : 3
