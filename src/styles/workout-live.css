@@ -1,0 +1,287 @@
+/* ================= workout live: timed sets, summary header, picker, keypad, tips ================= */
+
+/* ---------- timed / reps-only set rows ---------- */
+.set-row .span2 { grid-column: span 2; }
+.num.time { font-variant-numeric: tabular-nums; }
+.num.time.running { border-color: var(--accent); color: var(--accent); }
+.sw {
+  height: var(--tap);
+  border-radius: var(--r-sm);
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--t-fast) var(--ease);
+}
+.sw:active { transform: scale(0.92); }
+.sw.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sw:disabled { opacity: 0.35; }
+
+/* ---------- body map ---------- */
+.bodymap { display: block; width: auto; }
+.bodymap .bm-body { fill: var(--card2); }
+.bodymap .bm-m { fill: var(--line-strong); }
+.bodymap .bm-m.on { fill: var(--accent); }
+
+/* ---------- live summary strip in the workout header ---------- */
+.ls-strip { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+.ls-stat { flex: 1; min-width: 0; }
+.ls-stat .v,
+.ls-stat .sp-clock {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ls-stat .u { font-size: 13px; color: var(--muted); margin-left: 2px; font-weight: 500; }
+.ls-stat .l { font-size: 12px; color: var(--muted); }
+.ls-map {
+  flex: none;
+  min-width: 56px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 4px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+.ls-map:active { transform: scale(0.96); }
+.ls-map-lg { display: flex; justify-content: center; }
+.ls-rows { display: flex; flex-direction: column; gap: 10px; }
+.ls-row { display: grid; grid-template-columns: 92px 1fr 44px; gap: 10px; align-items: center; font-size: 15px; }
+.ls-row .bar { position: relative; height: 10px; border-radius: 5px; background: var(--card2); overflow: hidden; }
+.ls-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.ls-row .bar .plan { background: var(--line-strong); }
+.ls-row .bar .done { background: var(--accent); }
+.ls-row .n { text-align: right; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ls-stat .sp-clock { display: block; }
+
+/* ---------- exercise picker ---------- */
+.chips.wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+.xp-filters { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--s3); }
+.xp-check {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line-strong);
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 16px;
+}
+.xp-check.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.list-row.xp-on { background: var(--card2); }
+.xp-foot {
+  position: sticky;
+  bottom: calc(-1 * (var(--safe-b) + var(--s5)));
+  z-index: 2;
+  display: flex;
+  gap: var(--s2);
+  margin: var(--s3) calc(-1 * var(--s4)) calc(-1 * (var(--safe-b) + var(--s5)));
+  padding: var(--s3) var(--s4) calc(var(--safe-b) + var(--s3));
+  background: var(--bg2);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- number keypad ---------- */
+.kp-native { display: contents; }
+.kp-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  padding: 0 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.kp-field.empty { color: var(--faint); }
+.kp-field.active { border-color: var(--accent); box-shadow: var(--focus); background: var(--card); }
+.kp-field:disabled { opacity: 1; }
+.kp-spacer { height: 300px; }
+.kp {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 6px 8px calc(var(--safe-b) + 8px);
+  background: var(--bg2);
+  border-top: 1px solid var(--line-strong);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+  animation: sheet-up 0.22s var(--ease-spring);
+}
+.kp-bar { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.kp-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  min-width: 44px;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.kp-tool.on { background: var(--accent-soft); color: var(--accent); }
+.kp-tool:active { background: var(--card2); }
+.kp-label { font-size: 13px; color: var(--muted); text-align: right; padding-right: 2px; font-variant-numeric: tabular-nums; }
+.kp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
+.kp-grid.calc { grid-template-columns: repeat(5, 1fr); }
+.kp-key {
+  height: 50px;
+  border-radius: var(--r-sm);
+  background: var(--card2);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t-fast) var(--ease);
+}
+.kp-key:active { background: var(--card3); }
+.kp-key.fn { background: var(--card); color: var(--text-2); font-size: 20px; }
+.kp-key.op { background: var(--card); color: var(--accent); }
+.kp-key.next { background: var(--accent); color: var(--accent-ink); font-family: var(--body); font-size: 17px; font-weight: 700; }
+.kp-key.span2 { grid-column: span 2; }
+.kp-key.span3 { grid-column: span 3; }
+
+/* ---------- workout tips ---------- */
+.first-hint {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--text-2);
+  background: var(--card2);
+}
+.set-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lg-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--chalk-plate);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  margin-left: 4px;
+}
+.lg-dot:first-child { margin-left: 0; }
+.lg-dot.warmup { border: 2px dashed #8a8984; color: #b8b6ae; }
+.lg-dot.drop { border-color: var(--plate-blue); color: var(--plate-blue); }
+.lg-dot.failure { border-color: var(--danger); color: var(--danger); }
+
+.cm { position: fixed; inset: 0; z-index: 80; }
+.cm-hole {
+  position: fixed;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(8, 9, 11, 0.72);
+  pointer-events: none;
+  transition: top 0.2s var(--ease), left 0.2s var(--ease), width 0.2s var(--ease), height 0.2s var(--ease);
+}
+.cm-note {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  max-width: 420px;
+  padding: 14px 14px 10px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-float);
+}
+.cm-arrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  transform: rotate(45deg);
+}
+.cm-note.below .cm-arrow { top: -9px; border-right: 0; border-bottom: 0; }
+.cm-note.above .cm-arrow { bottom: -9px; border-left: 0; border-top: 0; }
+.cm-step { font-size: 12px; color: var(--accent); font-weight: 600; }
+.cm-title { font-family: var(--display); font-size: 21px; font-weight: 650; margin-top: 2px; }
+.cm-text { font-size: 15px; color: var(--text-2); margin-top: 4px; line-height: 1.35; }
+.cm-actions { display: flex; justify-content: space-between; margin-top: 10px; }
+.cm-actions .btn { min-height: 44px; }
+
+/* ================= Hevy-style clarity for the workout screen, picker and exercise list ================= */
+
+/* round exercise thumbnails everywhere (ExerciseThumb) */
+.thumb.round { border-radius: 50%; overflow: hidden; }
+.thumb.round.tile::before { width: 84%; }
+
+/* exercise card: simple card, generous spacing, clear hierarchy */
+.ex { padding: var(--s4); border-radius: var(--r-lg); box-shadow: none; }
+.ex .ex-head { gap: var(--s3); align-items: flex-start; }
+.ex .ex-head > button:first-child { flex: none; border-radius: 50%; }
+.ex .ex-name { font-family: var(--body); font-size: 18px; font-weight: 600; line-height: 1.2; }
+.wl-meta { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.wl-plan { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; font-size: 13px; color: var(--muted); }
+
+/* set table: Set / Previous / kg / Reps / ✓ ; completed rows tinted green */
+.ex .sets { gap: 4px; margin-top: var(--s3); }
+.ex .sets .set-row { margin: 0 -8px; padding: 3px 8px; border-radius: var(--r-sm); transition: background var(--t) var(--ease); }
+.ex .sets .set-row .hdr { font-size: 13px; font-weight: 600; color: var(--muted); }
+.ex .sets .set-row.done { background: var(--ok-soft); }
+.ex .sets .set-row.done .num { background: transparent; border-color: transparent; }
+.ex .sets .set-row.done .prev { color: var(--text-2); }
+.ex .prev { font-family: var(--body); font-size: 15px; font-variant-numeric: tabular-nums; }
+.ex .num { font-variant-numeric: tabular-nums; }
+
+/* add-set row: one wide button, two small ones */
+.wl-addrow { display: flex; gap: var(--s2); margin-top: var(--s3); }
+.wl-addrow .btn { min-height: 44px; }
+.wl-addrow .wl-addset { flex: 1; background: var(--card2); font-weight: 600; }
+.wl-addrow .btn.sm { padding: 0 12px; color: var(--text-2); }
+
+/* big, clear add-exercise button (tonal so Finish stays the one primary action) */
+.btn.wl-addex {
+  width: 100%;
+  min-height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+/* lists in the picker and the Exercises tab: bigger, calmer rows */
+.xl-page .list-row .title,
+.xp-list .list-row .title { font-size: 16px; font-weight: 600; }
+.xl-page .list-row .meta,
+.xp-list .list-row .meta { font-size: 14px; color: var(--muted); }
+.xp-foot .btn { min-height: 52px; font-size: 17px; }

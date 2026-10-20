@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ChevronRight, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { MUSCLES, SetKind } from '../lib/types'
+import { EQUIPMENT, MUSCLES, SetKind, Tracking, trackingOf } from '../lib/types'
+import { fmtTime, setLabel, TRACKING_LABEL } from '../lib/tracking'
 import { Confirm, ImageField } from '../components/ui'
 import { LineChart } from '../components/Chart'
 import { exerciseHistory, priorSets, recordsFor, sessionDate } from '../lib/pr'
@@ -23,6 +24,17 @@ export default function ExerciseDetail() {
 
   const rec = useMemo(() => recordsFor(priorSets(db, id ?? '')), [db, id])
   const hist = useMemo(() => exerciseHistory(db, id ?? ''), [db, id])
+  const longest = useMemo(() => {
+    let best: { sec: number; date: string } | null = null
+    for (const s of db.sessions) {
+      if (!s.finished_at) continue
+      for (const e of s.data.exercises) {
+        if (e.exercise_id !== id) continue
+        for (const x of e.sets) if (x.done && x.kind !== 'warmup' && (x.time_sec ?? 0) > (best?.sec ?? 0)) best = { sec: x.time_sec!, date: sessionDate(s) }
+      }
+    }
+    return best
+  }, [db.sessions, id])
   const recent = useMemo(() => {
     const rows: { date: string; name: string; session: string; sets: { kind: SetKind; text: string }[] }[] = []
     for (const s of [...db.sessions].filter((x) => x.finished_at).sort((a, b) => (sessionDate(b) > sessionDate(a) ? 1 : -1))) {
@@ -32,12 +44,12 @@ export default function ExerciseDetail() {
         date: sessionDate(s),
         name: s.name,
         session: s.id,
-        sets: e.sets.filter((x) => x.done).map((x) => ({ kind: x.kind, text: `${fmtKg(x.weight)}×${x.reps}` }))
+        sets: e.sets.filter((x) => x.done).map((x) => ({ kind: x.kind, text: setLabel(x, trackingOf(ex), false) }))
       })
       if (rows.length >= 8) break
     }
     return rows
-  }, [db.sessions, id])
+  }, [db.sessions, id, ex?.tracking])
 
   if (!ex)
     return (
@@ -61,7 +73,7 @@ export default function ExerciseDetail() {
             {ex.name}
           </h1>
           <div className="small muted" style={{ marginTop: 2 }}>
-            {ex.muscle} · rest {fmtRest(ex.rest_sec)}
+            {[ex.muscle, ex.equipment].filter(Boolean).join(' · ')} · rest {fmtRest(ex.rest_sec)}
           </div>
         </div>
       </div>
@@ -79,7 +91,18 @@ export default function ExerciseDetail() {
           <h2>Personal records</h2>
           <Trophy size={18} color="var(--accent)" aria-hidden />
         </div>
-        {rec.heaviest ? (
+        {trackingOf(ex) === 'time' ? (
+          longest ? (
+            <div className="pr-hero">
+              <div className="stat gold">
+                <div className="v">{fmtTime(longest.sec)}</div>
+                <div className="l">Longest set · {fmtDate(longest.date, true)}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="muted small">Log this exercise in a workout and your longest set will appear here.</div>
+          )
+        ) : rec.heaviest ? (
           <>
             <div className="pr-hero">
               <div className="stat gold">
@@ -228,6 +251,33 @@ export default function ExerciseDetail() {
             />
           </label>
         </div>
+      </div>
+
+      <div className="card stack">
+        <h2>What do you record?</h2>
+        <div className="seg" role="radiogroup" aria-label="What do you record">
+          {(['weight_reps', 'reps', 'time'] as Tracking[]).map((t) => (
+            <button key={t} role="radio" aria-checked={trackingOf(ex) === t} className={trackingOf(ex) === t ? 'on' : ''} onClick={() => upd({ tracking: t }, 0)}>
+              {TRACKING_LABEL[t]}
+            </button>
+          ))}
+        </div>
+        <div className="small muted">
+          {trackingOf(ex) === 'time'
+            ? 'Each set is a duration, with a stopwatch. Good for planks, cardio and warm-ups.'
+            : trackingOf(ex) === 'reps'
+              ? 'Each set is just reps. Good for body-weight moves.'
+              : 'Each set is a weight and a number of reps.'}
+        </div>
+        <label className="field">
+          Equipment
+          <select className="select" value={ex.equipment ?? ''} onChange={(e) => upd({ equipment: e.target.value }, 0)}>
+            <option value="">Not set</option>
+            {EQUIPMENT.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <button className="btn danger" onClick={() => setConfirmDel(true)}>

@@ -1,5 +1,5 @@
 import { useStore } from './store'
-import { DB, Exercise, Session, SessionExercise, SessionSet, SetKind, Workout } from './types'
+import { DB, Exercise, Session, SessionExercise, SessionSet, SetKind, Workout, trackingOf } from './types'
 import { lastPerformance } from './pr'
 import { nowIso, uid } from './uid'
 import { roundTo } from './format'
@@ -115,7 +115,8 @@ export function addExerciseToSession(sessionId: string, exercise: Exercise) {
   const s = db.sessions.find((x) => x.id === sessionId)
   if (!s) return
   const last = lastPerformance(db, exercise.id, sessionId)
-  const lastWorkCount = last?.sets.filter((x) => x.kind === 'work' || x.kind === 'failure').length ?? 3
+  // a timed exercise (warm-up, plank) usually starts with one set; everything else with three
+  const lastWorkCount = last?.sets.filter((x) => x.kind === 'work' || x.kind === 'failure').length ?? (trackingOf(exercise) === 'time' ? 1 : 3)
   const se = buildSessionExercise(db, exercise, {
     sets: Math.max(1, lastWorkCount),
     rep_min: 8,
