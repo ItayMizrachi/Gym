@@ -1,0 +1,367 @@
+/* progress-profile session: workout summary, edit mode, Progress page, photo compare */
+
+/* ---------- summary stats ---------- */
+.sum-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+}
+.sum-grid .stat.wide {
+  grid-column: span 2;
+}
+.sum-grid .stat.pr .v {
+  color: var(--accent);
+}
+.est {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------- workout photo ---------- */
+.sd-photo .thumb.lg {
+  aspect-ratio: 4 / 5;
+}
+
+/* ---------- muscle split ---------- */
+.split-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 42px;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 32px;
+  font-size: var(--fs-sm);
+}
+.split-bar {
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--bg2);
+  overflow: hidden;
+}
+.split-bar i {
+  display: block;
+  height: 100%;
+  background: var(--chalk-plate);
+  border-radius: inherit;
+}
+.split-row .pct {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ---------- set list ---------- */
+.sd-sets {
+  display: flex;
+  flex-direction: column;
+}
+.sd-set {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  min-height: 40px;
+  border-top: 1px solid var(--line);
+}
+.sd-set:first-child {
+  border-top: 0;
+}
+.sd-set .no {
+  width: 24px;
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--muted);
+}
+.sd-set .what {
+  flex: 1;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.sd-set .what .x {
+  color: var(--muted);
+  margin: 0 4px;
+  font-weight: 500;
+}
+.sd-set.pr .what {
+  color: var(--accent);
+}
+
+/* ---------- edit mode ---------- */
+.ed-set {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr 44px;
+  gap: var(--s2);
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+.ed-set.one {
+  grid-template-columns: 44px 1fr 44px;
+}
+.ed-set:first-of-type {
+  border-top: 0;
+}
+.ed-set .num,
+.ed-set .input {
+  width: 100%;
+  min-height: var(--tap);
+  text-align: center;
+}
+.ed-kind {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  display: grid;
+  place-items: center;
+}
+.ed-head {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr 44px;
+  gap: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: center;
+}
+.ed-head.one {
+  grid-template-columns: 44px 1fr 44px;
+}
+.ed-bar {
+  position: sticky;
+  bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
+  z-index: 5;
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s2);
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-float);
+}
+.ed-bar .btn {
+  flex: 1;
+}
+.ed-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ed-time .num {
+  min-width: 0;
+}
+
+/* ---------- weekly bars ---------- */
+.wbars-read {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+  margin-bottom: 6px;
+}
+.wbars-read .kpi {
+  font-size: 28px;
+}
+.wbars-bar {
+  fill: var(--chalk-plate);
+  opacity: 0.55;
+}
+.wbars-bar.on {
+  fill: var(--accent);
+  opacity: 1;
+}
+.wbars-axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.wbars-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.wbars-label {
+  fill: var(--muted);
+  font-size: 10px;
+  font-family: var(--body);
+}
+
+/* ---------- progress page ---------- */
+.prof-totals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+}
+.prof-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  justify-content: space-between;
+  margin-bottom: var(--s3);
+}
+.prof-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+.prof-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 52px;
+  padding: 0 var(--s3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-align: left;
+}
+.prof-link svg {
+  color: var(--muted);
+  flex: none;
+}
+.prof-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+/* calendar with workout names */
+.cal.named .cal-cell {
+  aspect-ratio: auto;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 1px 4px;
+  gap: 2px;
+}
+.cal.named .cal-cell.pad {
+  min-height: 0;
+}
+.cal-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+/* ---------- progress photo compare ---------- */
+.cmp-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 2px;
+  scrollbar-width: none;
+}
+.cmp-strip::-webkit-scrollbar {
+  display: none;
+}
+.cmp-strip button {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+}
+.cmp-strip button.on {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* ---------- Hevy-style stat row: small plain label, big number ---------- */
+.hv-card {
+  padding: var(--s4) var(--s4) var(--s3);
+}
+.hv-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.1fr) minmax(0, 0.75fr) minmax(0, 1fr);
+  gap: var(--s2);
+}
+.hv-stats.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.hv-l {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.hv-v {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hv-v.pr {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hv-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px var(--s2);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.hv-foot b {
+  color: var(--text);
+}
+.hv-foot .tiny {
+  color: var(--muted);
+}
+.thumb.round {
+  border-radius: 50%;
+}
+.hv-exname {
+  font-family: var(--display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.15;
+  min-width: 0;
+}
+.prof-seg {
+  flex-direction: column;
+}
+.prof-seg .seg button {
+  min-height: 36px;
+}
+.wbars-read .kpi {
+  font-size: 34px;
+}
+.wbars-label {
+  font-size: 11px;
+}
+.split-row {
+  min-height: 36px;
+  font-size: var(--fs-base);
+}
+.split-bar {
+  height: 12px;
+}
+.sd-set {
+  min-height: 44px;
+}
+.sd-set .what {
+  font-size: 20px;
+}

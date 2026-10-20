@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Camera, Plus, Scale, Trash2 } from 'lucide-react'
+import { Camera, Plus, Scale, Share2, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
 import { LineChart } from '../components/Chart'
 import { Confirm, Empty, ImageField, NumInput, Sheet, Thumb, useImageUrl } from '../components/ui'
 import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
+import { renderCompareCard, shareOrDownload } from '../lib/shareCard'
+import '../styles/progress.css'
 
 const DAY = 86400000
 const ts = (d: string) => new Date(d + 'T12:00:00').getTime()
@@ -116,25 +118,89 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
   )
 }
 
-function PhotoCompare({ first, latest }: { first: Metric; latest: Metric }) {
-  const a = useImageUrl(first.photo_path)
-  const b = useImageUrl(latest.photo_path)
+function PhotoSide({ m, label, photos, onPick, picking }: { m: Metric; label: string; photos: Metric[]; onPick: (m: Metric) => void; picking: boolean }) {
+  const u = useImageUrl(m.photo_path)
   return (
-    <div className="row" style={{ alignItems: 'flex-start' }}>
-      {[
-        { m: first, u: a, l: 'First' },
-        { m: latest, u: b, l: 'Latest' }
-      ].map(({ m, u, l }) => (
-        <div key={l} className="grow stack" style={{ gap: 4 }}>
-          <div className="thumb" style={{ width: '100%', height: 'auto', aspectRatio: '3/4', borderRadius: 14 }}>
-            {u && <img src={u} alt="" />}
-          </div>
-          <div className="small center">
-            <b>{l}</b> · {fmtDate(m.date, true)}
-          </div>
-          <div className="small center muted">{m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : ''}</div>
+    <div className="grow stack" style={{ gap: 4, minWidth: 0, flexBasis: 0 }}>
+      <div className="thumb" style={{ width: '100%', height: 'auto', aspectRatio: '3/4', borderRadius: 14 }}>
+        {u && <img src={u} alt={`${label} photo, ${fmtDate(m.date, true)}`} />}
+      </div>
+      <div className="small center">
+        <b>{label}</b> · {fmtDate(m.date, true)}
+      </div>
+      <div className="small center muted">{m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : ' '}</div>
+      {picking && (
+        <div className="cmp-strip" role="listbox" aria-label={`Pick the ${label.toLowerCase()} photo`}>
+          {photos.map((p) => (
+            <button key={p.id} role="option" aria-selected={p.id === m.id} className={p.id === m.id ? 'on' : ''} onClick={() => onPick(p)}>
+              <Thumb path={p.photo_path} size={44} />
+              <span className="tiny">{fmtDate(p.date)}</span>
+            </button>
+          ))}
         </div>
-      ))}
+      )}
+    </div>
+  )
+}
+
+/** Two progress photos side by side; "Compare" picks any two, Share renders the pair to an image. */
+function PhotoCompare({ photos }: { photos: Metric[] }) {
+  const repo = useStore((s) => s.repo)
+  const toast = useStore((s) => s.toast)
+  const [aId, setAId] = useState<string | null>(null)
+  const [bId, setBId] = useState<string | null>(null)
+  const [picking, setPicking] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const a = photos.find((p) => p.id === aId) ?? photos[0]
+  const b = photos.find((p) => p.id === bId) ?? photos[photos.length - 1]
+  const [older, newer] = a.date <= b.date ? [a, b] : [b, a]
+  const days = Math.round((ts(newer.date) - ts(older.date)) / DAY)
+  const dKg = older.weight_kg != null && newer.weight_kg != null ? Math.round((newer.weight_kg - older.weight_kg) * 10) / 10 : null
+  const caption =
+    days > 0
+      ? `${dKg != null ? `${dKg > 0 ? '+' : dKg < 0 ? '−' : '±'}${fmtKg(Math.abs(dKg))} kg in ` : ''}${days} day${days === 1 ? '' : 's'}`
+      : null
+
+  async function share() {
+    if (!repo) return
+    setSharing(true)
+    try {
+      const [ua, ub] = await Promise.all([repo.imageUrl(a.photo_path), repo.imageUrl(b.photo_path)])
+      if (!ua || !ub) throw new Error('Photo not available offline')
+      const kg = (m: Metric) => (m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : null)
+      const blob = await renderCompareCard(
+        { url: ua, date: fmtDate(a.date, true), weight: kg(a) },
+        { url: ub, date: fmtDate(b.date, true), weight: kg(b) },
+        caption
+      )
+      const res = await shareOrDownload(blob, `gymlog-progress-${older.date}-${newer.date}.png`, caption ? `My progress: ${caption}` : 'My progress')
+      if (res === 'downloaded') toast({ kind: 'info', text: 'Comparison image saved' })
+    } catch (e: any) {
+      toast({ kind: 'error', text: 'Could not create the image', sub: String(e?.message ?? e) })
+    } finally {
+      setSharing(false)
+    }
+  }
+
+  return (
+    <div className="card stack">
+      <div className="card-head">
+        <h2>Progress photos</h2>
+        <div className="row" style={{ gap: 'var(--s2)' }}>
+          <button className={`btn sm${picking ? ' primary' : ''}`} onClick={() => setPicking(!picking)} aria-pressed={picking}>
+            {picking ? 'Done' : 'Compare'}
+          </button>
+          <button className="btn icon sm" onClick={share} disabled={sharing} aria-label="Share comparison">
+            <Share2 size={18} />
+          </button>
+        </div>
+      </div>
+      {picking && <div className="small muted">Pick a photo under each side.</div>}
+      <div className="row" style={{ alignItems: 'flex-start' }}>
+        <PhotoSide m={a} label="Before" photos={photos} onPick={(m) => setAId(m.id)} picking={picking} />
+        <PhotoSide m={b} label="After" photos={photos} onPick={(m) => setBId(m.id)} picking={picking} />
+      </div>
+      {caption && <div className="small center muted">{caption}</div>}
     </div>
   )
 }
@@ -265,10 +331,7 @@ export default function Body() {
       )}
 
       {withPhotos.length >= 2 && (
-        <div className="card stack">
-          <h2>Progress photos</h2>
-          <PhotoCompare first={withPhotos[0]} latest={withPhotos[withPhotos.length - 1]} />
-        </div>
+        <PhotoCompare photos={withPhotos} />
       )}
       {withPhotos.length > 0 && (
         <section>

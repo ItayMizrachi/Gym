@@ -12,7 +12,7 @@
  * - Every function takes `now` explicitly (defaulting to the current time) so results are reproducible.
  */
 import { DB, Session, SessionSet, Workout } from './types'
-import { sessionDate } from './pr'
+import { evaluateSet, priorSets, sessionDate } from './pr'
 
 const DAY = 86_400_000
 
@@ -59,6 +59,8 @@ export function muscleSetWeight(x: SessionSet): number {
 export interface SessionSummary {
   sets: number
   volume: number
+  /** reps over counted sets (time-only sets add none) */
+  reps: number
   exercises: number
   minutes: number
 }
@@ -66,6 +68,7 @@ export interface SessionSummary {
 export function summarizeSession(s: Session): SessionSummary {
   let sets = 0
   let volume = 0
+  let reps = 0
   let exercises = 0
   for (const e of s.data.exercises) {
     let any = false
@@ -74,12 +77,13 @@ export function summarizeSession(s: Session): SessionSummary {
         sets++
         any = true
         volume += x.weight * (x.reps ?? 0)
+        reps += x.reps ?? 0
       }
     if (any) exercises++
   }
   const end = s.finished_at ? new Date(s.finished_at).getTime() : new Date(s.started_at).getTime()
   const minutes = Math.max(0, Math.round((end - new Date(s.started_at).getTime()) / 60000))
-  return { sets, volume, exercises, minutes }
+  return { sets, volume, reps, exercises, minutes }
 }
 
 /** Finished sessions, oldest first. */
@@ -359,4 +363,134 @@ export function relativeDay(iso: string, now = new Date()): string {
   if (d === 1) return 'yesterday'
   if (d < 14) return `${d} days ago`
   return `${Math.round(d / 7)} weeks ago`
+}
+
+/* ---------- full workout summary ---------- */
+
+/** Body weight used when the user has never logged one. */
+export const DEFAULT_BODY_KG = 75
+/**
+ * MET for a whole strength session, rests included. The Compendium of Physical Activities lists
+ * 3.5 for light and 6.0 for vigorous resistance training; 5.0 sits in between.
+ */
+export const STRENGTH_MET = 5
+
+/** Latest logged body weight in kg, or null. */
+export function latestBodyWeight(db: DB): number | null {
+  let best: { date: string; kg: number } | null = null
+  for (const m of db.metrics) if (m.weight_kg != null && m.weight_kg > 0 && (!best || m.date > best.date)) best = { date: m.date, kg: m.weight_kg }
+  return best?.kg ?? null
+}
+
+/** Rough energy estimate: MET × kg × hours, rounded to 5 kcal. */
+export function estimateCalories(minutes: number, bodyKg: number | null | undefined, met = STRENGTH_MET): number {
+  const kg = bodyKg && bodyKg > 0 ? bodyKg : DEFAULT_BODY_KG
+  return Math.round((met * kg * Math.max(0, minutes)) / 60 / 5) * 5
+}
+
+export interface MuscleShare {
+  muscle: string
+  sets: number
+  /** 0–100, share of this session's counted sets */
+  pct: number
+}
+
+/** Share of counted sets per muscle in one session (drop = 0.5), biggest first. */
+export function muscleSplit(db: DB, s: Session): MuscleShare[] {
+  const muscleOf = new Map(db.exercises.map((e) => [e.id, e.muscle || 'Other']))
+  const tally = new Map<string, number>()
+  for (const e of s.data.exercises) {
+    const n = e.sets.reduce((a, x) => a + muscleSetWeight(x), 0)
+    if (!n) continue
+    const m = muscleOf.get(e.exercise_id) ?? 'Other'
+    tally.set(m, (tally.get(m) ?? 0) + n)
+  }
+  const total = [...tally.values()].reduce((a, b) => a + b, 0)
+  return [...tally]
+    .map(([muscle, sets]) => ({ muscle, sets, pct: total ? Math.round((sets / total) * 100) : 0 }))
+    .sort((a, b) => b.sets - a.sets || a.muscle.localeCompare(b.muscle))
+}
+
+/** Ids of the sets in `s` that set a record (same rules as sessionPRs in pr.ts). */
+export function prSetIds(db: DB, s: Session): Set<string> {
+  const out = new Set<string>()
+  const d = sessionDate(s)
+  for (const ex of s.data.exercises) {
+    const running = priorSets(db, ex.exercise_id, s.id).filter((p) => p.date < d)
+    const done = ex.sets
+      .filter((x) => x.done && x.reps != null && x.reps > 0 && (x.kind === 'work' || x.kind === 'failure'))
+      .sort((a, b) => (a.done_at ?? '').localeCompare(b.done_at ?? ''))
+    for (const x of done) {
+      if (evaluateSet(running, x.weight, x.reps!).types.length) out.add(x.id)
+      running.push({ exercise_id: ex.exercise_id, weight: x.weight, reps: x.reps!, kind: x.kind, session_id: s.id, date: d, set_id: x.id })
+    }
+  }
+  return out
+}
+
+/* ---------- profile ---------- */
+
+export type WeekMetric = 'duration' | 'volume' | 'reps'
+export type WeekRange = '4w' | '3m' | '1y'
+export const RANGE_WEEKS: Record<WeekRange, number> = { '4w': 4, '3m': 13, '1y': 52 }
+
+export interface WeekValue {
+  start: Date
+  /** minutes, kg or reps depending on the metric */
+  value: number
+}
+
+/** One bar per week (oldest first, current week last) for the Progress chart. */
+export function weeklySeries(db: DB, metric: WeekMetric, range: WeekRange, now = new Date(), weekStartsOn = 0): WeekValue[] {
+  const n = RANGE_WEEKS[range]
+  const cur = startOfWeek(now, weekStartsOn)
+  const first = addDays(cur, -7 * (n - 1))
+  const out: WeekValue[] = Array.from({ length: n }, (_, i) => ({ start: addDays(first, 7 * i), value: 0 }))
+  for (const s of db.sessions) {
+    if (!s.finished_at) continue
+    const t = new Date(sessionDate(s)).getTime()
+    if (t < first.getTime() || t >= addDays(cur, 7).getTime()) continue
+    const i = out.findIndex((w, j) => t >= w.start.getTime() && (j === n - 1 || t < out[j + 1].start.getTime()))
+    if (i < 0) continue
+    const m = summarizeSession(s)
+    out[i].value += metric === 'duration' ? m.minutes : metric === 'volume' ? m.volume : m.reps
+  }
+  return out
+}
+
+export interface Totals {
+  workouts: number
+  minutes: number
+  volume: number
+}
+
+export function totals(db: DB): Totals {
+  const out: Totals = { workouts: 0, minutes: 0, volume: 0 }
+  for (const s of finishedSessions(db)) {
+    const m = summarizeSession(s)
+    out.workouts++
+    out.minutes += m.minutes
+    out.volume += m.volume
+  }
+  return out
+}
+
+/** Days of the current week so far (today included) without a finished workout. */
+export function restDaysThisWeek(db: DB, now = new Date(), weekStartsOn = 0): number {
+  const ws = startOfWeek(now, weekStartsOn)
+  const days = trainingDays(db)
+  let rest = 0
+  for (let d = ws; dayKey(d) <= dayKey(now); d = addDays(d, 1)) if (!days.has(dayKey(d))) rest++
+  return rest
+}
+
+/** Short names of the workouts done on each training day, e.g. "Upper A". */
+export function dayNames(db: DB): Map<string, string[]> {
+  const out = new Map<string, string[]>()
+  for (const s of finishedSessions(db)) {
+    const k = dayKey(sessionDate(s))
+    const name = s.name.replace(/\s*\([^)]*\)\s*$/, '') || s.name
+    out.set(k, [...(out.get(k) ?? []), name])
+  }
+  return out
 }
