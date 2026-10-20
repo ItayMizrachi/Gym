@@ -1,19 +1,47 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background:#141518">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>GymLog</title>
+    <meta name="description" content="Workout, PR and body-weight tracker" />
     <meta name="theme-color" content="#141518" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="GymLog" />
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <title>GymLog</title>
+    <!-- iOS launch screens (portrait). Generated from the app mark; see README "Icons and splash screens". -->
+    <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1320x2868.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1290x2796.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1260x2736.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1206x2622.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1179x2556.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1284x2778.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1170x2532.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1125x2436.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1242x2688.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/iphone-828x1792.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/iphone-1242x2208.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/iphone-750x1334.png" />
+    <style>
+      /* Paint the brand colour before any CSS or JS arrives: no white flash on launch. */
+      html, body { background: #141518; margin: 0; }
+      .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #141518; }
+      .boot-splash svg { width: 160px; height: 160px; display: block; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown until React renders; the same mark, size and position as the iOS launch screen and the in-app boot screen. -->
+      <div class="boot-splash" aria-label="GymLog is loading" role="status">
+        <svg viewBox="0 0 512 512" aria-hidden="true"><rect x="44" y="242" width="424" height="28" rx="14" fill="#e9e6df"/><rect x="106" y="106" width="62" height="300" rx="22" fill="#f0b92a"/><rect x="344" y="106" width="62" height="300" rx="22" fill="#f0b92a"/><rect x="60" y="160" width="38" height="192" rx="16" fill="#f0b92a"/><rect x="414" y="160" width="38" height="192" rx="16" fill="#f0b92a"/><rect x="174" y="226" width="20" height="60" rx="6" fill="#9a978f"/><rect x="318" y="226" width="20" height="60" rx="6" fill="#9a978f"/></svg>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
