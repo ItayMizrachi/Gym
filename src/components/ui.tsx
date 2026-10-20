@@ -104,6 +104,23 @@ export function ImageField({
     }
   }
 
+  const input = <input ref={inputRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
+
+  // large, empty: one big dashed drop zone instead of a lone small button
+  if (large && !url)
+    return (
+      <>
+        {input}
+        <button type="button" className="photo-drop" disabled={busy} onClick={() => inputRef.current?.click()}>
+          <span className="photo-drop-icon">
+            <Camera size={22} />
+          </span>
+          <span style={{ fontWeight: 600 }}>{busy ? 'Uploading…' : label}</span>
+          <span className="tiny muted">{busy ? '' : 'Take one or pick from your library'}</span>
+        </button>
+      </>
+    )
+
   return (
     <div className="stack" style={{ gap: 8 }}>
       {url && (
@@ -112,7 +129,7 @@ export function ImageField({
         </div>
       )}
       <div className="row" style={{ flexWrap: 'wrap' }}>
-        <input ref={inputRef} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
+        {input}
         <button className="btn sm" disabled={busy} onClick={() => inputRef.current?.click()}>
           <Camera size={16} /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
         </button>

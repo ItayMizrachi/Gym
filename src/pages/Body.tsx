@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Camera, Plus, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
 import { LineChart } from '../components/Chart'
@@ -72,16 +72,14 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
   return (
     <Sheet title={entry ? 'Edit entry' : 'Log body weight'} onClose={cancel}>
       <div className="stack">
-        <div className="row">
-          <label className="field grow">
-            Weight (kg)
-            <NumInput className="input" value={weight} onChange={setWeight} placeholder="e.g. 78.4" />
-          </label>
-          <label className="field grow">
-            Date
-            <input className="input" type="date" value={date} max={todayStr()} onChange={(e) => setDate(e.target.value || todayStr())} />
-          </label>
+        <div className="weigh-in">
+          <NumInput className="weigh-num" value={weight} onChange={setWeight} placeholder="0.0" ariaLabel="Weight in kg" />
+          <span className="weigh-unit">kg</span>
         </div>
+        <label className="field">
+          Date
+          <input className="input" type="date" value={date} max={todayStr()} onChange={(e) => setDate(e.target.value || todayStr())} />
+        </label>
         <label className="field">
           Note
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="morning, after breakfast, flexed…" />
@@ -174,55 +172,72 @@ export default function Body() {
     a != null && b != null ? Math.round((a - b) * 10) / 10 : null
   const fmtDelta = (v: number | null) => (v == null ? '–' : `${v > 0 ? '+' : ''}${v}`)
 
+  const prevOf = (m: Metric) => {
+    const i = entries.findIndex((e) => e.id === m.id)
+    return i > 0 ? entries[i - 1] : null
+  }
+  const rateClass = rate == null || Math.abs(rate) < 0.05 ? '' : rate > 0 ? 'up' : 'down'
+
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head">
+    <div className="stack" style={{ gap: 'var(--s4)' }}>
+      <div className="page-head" style={{ marginBottom: 0 }}>
         <h1>Body</h1>
         <button className="btn primary" onClick={() => setEditing('new')}>
-          <Plus size={18} /> Log
+          <Plus size={18} /> Log weight
         </button>
       </div>
 
       {!entries.length ? (
-        <Empty title="Track your weight" text="Log your weight every day. The chart smooths it with a 7-day average so one salty dinner does not scare you.">
+        <Empty
+          icon={<Scale size={24} />}
+          title="Track your weight"
+          text="Log your weight every day. The chart smooths it with a 7-day average so one salty dinner does not scare you."
+        >
           <button className="btn primary" onClick={() => setEditing('new')}>
             <Plus size={18} /> Log first entry
           </button>
         </Empty>
       ) : (
         <>
-          <div className="stat-grid">
-            <div className="stat">
-              <div className="v">{fmtKg(cur.weight_kg)}</div>
-              <div className="l">latest · {fmtDate(cur.date)}</div>
+          <div className="card stack" style={{ gap: 'var(--s3)' }}>
+            <div className="body-hero">
+              <div>
+                <div className="small muted">Latest · {fmtDate(cur.date)}</div>
+                <div className="big">
+                  {fmtKg(cur.weight_kg)}
+                  <span className="u">kg</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div className="kpi" style={{ fontSize: 26 }}>
+                  {avgNow != null ? fmtKg(Math.round(avgNow * 10) / 10) : '–'}
+                </div>
+                <div className="tiny muted">7-day average</div>
+                <div className={`kpi ${rateClass}`} style={{ fontSize: 18, marginTop: 6 }}>
+                  {rate == null ? '–' : `${rate > 0 ? '+' : ''}${(Math.round(rate * 100) / 100).toFixed(2)}`}
+                  <span className="tiny muted" style={{ fontFamily: 'var(--body)', marginLeft: 4 }}>kg/wk</span>
+                </div>
+              </div>
             </div>
-            <div className="stat">
-              <div className="v">{avgNow != null ? fmtKg(Math.round(avgNow * 10) / 10) : '–'}</div>
-              <div className="l">7-day average</div>
-            </div>
-            <div className="stat">
-              <div className={`v ${rate == null ? '' : rate > 0 ? 'up' : rate < 0 ? 'down' : ''}`}>{rate == null ? '–' : `${rate > 0 ? '+' : ''}${(Math.round(rate * 100) / 100).toFixed(2)}`}</div>
-              <div className="l">kg / week (4 wk trend)</div>
-            </div>
-          </div>
-          <div className="stat-grid">
-            <div className="stat">
-              <div className="v">{fmtDelta(delta(cur.weight_kg, d7?.weight_kg))}</div>
-              <div className="l">vs 7 days ago</div>
-            </div>
-            <div className="stat">
-              <div className="v">{fmtDelta(delta(cur.weight_kg, d30?.weight_kg))}</div>
-              <div className="l">vs 30 days ago</div>
-            </div>
-            <div className="stat">
-              <div className="v">{fmtDelta(delta(cur.weight_kg, first.weight_kg))}</div>
-              <div className="l">since {fmtDate(first.date)}</div>
+            <div className="delta-row">
+              <div>
+                <div className="kpi">{fmtDelta(delta(cur.weight_kg, d7?.weight_kg))}</div>
+                <div className="l">vs 7 days ago</div>
+              </div>
+              <div>
+                <div className="kpi">{fmtDelta(delta(cur.weight_kg, d30?.weight_kg))}</div>
+                <div className="l">vs 30 days ago</div>
+              </div>
+              <div>
+                <div className="kpi">{fmtDelta(delta(cur.weight_kg, first.weight_kg))}</div>
+                <div className="l">since {fmtDate(first.date)}</div>
+              </div>
             </div>
           </div>
 
           <div className="card stack">
-            <div className="row">
-              <h2 className="grow">Weight</h2>
+            <div className="card-head">
+              <h2>Trend</h2>
               <div className="seg">
                 {(['30', '90', 'all'] as const).map((r) => (
                   <button key={r} className={range === r ? 'on' : ''} onClick={() => setRange(r)}>
@@ -235,8 +250,14 @@ export default function Body() {
               unit=" kg"
               digits={1}
               series={[
-                { name: 'Daily', color: '#8a8984', points: shown.map((e) => ({ t: ts(e.date), y: e.weight_kg! })), width: 1.4 },
-                { name: '7-day avg', color: '#f0b92a', points: movingAvg(entries).filter((p) => shown.some((s) => ts(s.date) === p.t)), dots: false, width: 2.6 }
+                { name: 'Daily', color: '#6f6e69', points: shown.map((e) => ({ t: ts(e.date), y: e.weight_kg! })), width: 1.4 },
+                {
+                  name: '7-day avg',
+                  color: '#f0b92a',
+                  points: movingAvg(entries).filter((p) => shown.some((s) => ts(s.date) === p.t)),
+                  dots: false,
+                  width: 2.6
+                }
               ]}
             />
           </div>
@@ -250,33 +271,51 @@ export default function Body() {
         </div>
       )}
       {withPhotos.length > 0 && (
-        <div className="card stack">
-          <h2>All photos</h2>
+        <section>
+          <div className="section-label">
+            <span>All photos</span>
+            <span className="count">{withPhotos.length}</span>
+          </div>
           <div className="photo-grid">
             {[...withPhotos].reverse().map((m) => (
-              <button key={m.id} onClick={() => setEditing(m)} aria-label={`Photo from ${m.date}`}>
+              <button key={m.id} className="stack" style={{ gap: 4 }} onClick={() => setEditing(m)} aria-label={`Photo from ${m.date}`}>
                 <Thumb path={m.photo_path} />
                 <div className="tiny muted center">{fmtDate(m.date)}</div>
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {all.length > 0 && (
-        <div>
-          <h2 style={{ margin: '4px 0 10px' }}>Entries</h2>
-          {all.map((m) => (
-            <button key={m.id} className="list-item" style={{ width: '100%', textAlign: 'left' }} onClick={() => setEditing(m)}>
-              {m.photo_path && <Thumb path={m.photo_path} size={44} />}
-              <div className="grow">
-                <div style={{ fontWeight: 650 }}>{fmtDateLong(m.date)}</div>
-                {m.note && <div className="small muted">{m.note}</div>}
-              </div>
-              <div style={{ fontWeight: 750, fontSize: 18 }}>{m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : '📷'}</div>
-            </button>
-          ))}
-        </div>
+        <section>
+          <div className="section-label">
+            <span>Entries</span>
+            <span className="count">{all.length}</span>
+          </div>
+          <div className="list-group">
+            {all.map((m) => {
+              const p = m.weight_kg != null ? prevOf(m) : null
+              const d = p ? delta(m.weight_kg, p.weight_kg) : null
+              return (
+                <button key={m.id} className="list-row" style={{ minHeight: 56 }} onClick={() => setEditing(m)}>
+                  {m.photo_path && <Thumb path={m.photo_path} size={40} />}
+                  <div className="grow">
+                    <div className="title">{fmtDateLong(m.date)}</div>
+                    {m.note && <div className="meta ellipsis">{m.note}</div>}
+                  </div>
+                  <div className="trail">
+                    <div className="kpi">
+                      {m.weight_kg != null ? fmtKg(m.weight_kg) : <Camera size={18} className="muted" />}
+                      {m.weight_kg != null && <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>kg</span>}
+                    </div>
+                    {d != null && d !== 0 && <div className="tiny muted tnum">{fmtDelta(d)}</div>}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
       )}
 
       {editing && <EntrySheet entry={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}

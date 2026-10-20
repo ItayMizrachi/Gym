@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { MUSCLES } from '../lib/types'
+import { MUSCLES, SetKind } from '../lib/types'
 import { Confirm, ImageField } from '../components/ui'
 import { LineChart } from '../components/Chart'
 import { exerciseHistory, priorSets, recordsFor, sessionDate } from '../lib/pr'
 import { fmtDate, fmtKg, fmtRest, parseRest } from '../lib/format'
 import { removeExercise } from '../lib/actions'
+
+const REP_COLS = [1, 3, 5, 6, 8, 10, 12, 15]
 
 export default function ExerciseDetail() {
   const { id } = useParams()
@@ -22,108 +24,99 @@ export default function ExerciseDetail() {
   const rec = useMemo(() => recordsFor(priorSets(db, id ?? '')), [db, id])
   const hist = useMemo(() => exerciseHistory(db, id ?? ''), [db, id])
   const recent = useMemo(() => {
-    const rows: { date: string; sets: string; session: string }[] = []
+    const rows: { date: string; name: string; session: string; sets: { kind: SetKind; text: string }[] }[] = []
     for (const s of [...db.sessions].filter((x) => x.finished_at).sort((a, b) => (sessionDate(b) > sessionDate(a) ? 1 : -1))) {
       const e = s.data.exercises.find((x) => x.exercise_id === id)
       if (!e) continue
       rows.push({
         date: sessionDate(s),
+        name: s.name,
         session: s.id,
-        sets: e.sets
-          .filter((x) => x.done)
-          .map((x) => `${x.kind === 'drop' ? 'D ' : x.kind === 'warmup' ? 'W ' : x.kind === 'failure' ? 'F ' : ''}${fmtKg(x.weight)}×${x.reps}`)
-          .join(' · ')
+        sets: e.sets.filter((x) => x.done).map((x) => ({ kind: x.kind, text: `${fmtKg(x.weight)}×${x.reps}` }))
       })
       if (rows.length >= 8) break
     }
     return rows
   }, [db.sessions, id])
 
-  if (!ex) return <div className="card">Exercise not found. <button className="btn sm" onClick={() => nav('/exercises')}>Back</button></div>
+  if (!ex)
+    return (
+      <div className="card" style={{ marginTop: 'var(--s5)' }}>
+        Exercise not found.{' '}
+        <button className="btn sm" onClick={() => nav('/exercises')}>
+          Back
+        </button>
+      </div>
+    )
   const upd = (p: Partial<typeof ex>, debounce = 400) => save('exercises', { ...ex, ...p }, { debounce })
 
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head">
+    <div className="stack" style={{ gap: 'var(--s4)' }}>
+      <div className="page-head" style={{ marginBottom: 0 }}>
         <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
           <ArrowLeft size={22} />
         </button>
-        <h1 className="ellipsis">{ex.name}</h1>
-      </div>
-
-      <div className="card stack">
-        <ImageField path={ex.image_path} folder="exercises" large onChange={(p) => save('exercises', { ...ex, image_path: p })} label="Add a photo of the exercise / machine" />
-        <label className="field">
-          Name
-          <input className="input" value={ex.name} onChange={(e) => upd({ name: e.target.value })} />
-        </label>
-        <div className="row">
-          <label className="field grow">
-            Muscle
-            <select className="select" value={ex.muscle} onChange={(e) => upd({ muscle: e.target.value }, 0)}>
-              {MUSCLES.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </select>
-          </label>
-          <label className="field grow">
-            Default rest (m:ss)
-            <input
-              className="input"
-              inputMode="numeric"
-              value={restText ?? fmtRest(ex.rest_sec)}
-              onFocus={() => setRestText(fmtRest(ex.rest_sec))}
-              onChange={(e) => setRestText(e.target.value)}
-              onBlur={() => {
-                if (restText != null) upd({ rest_sec: parseRest(restText) }, 0)
-                setRestText(null)
-              }}
-            />
-          </label>
+        <div className="grow">
+          <h1 className="ellipsis" style={{ fontSize: 30 }}>
+            {ex.name}
+          </h1>
+          <div className="small muted" style={{ marginTop: 2 }}>
+            {ex.muscle} · rest {fmtRest(ex.rest_sec)}
+          </div>
         </div>
-        <label className="field">
-          Setup (seat height, pad position, pin, grip…)
-          <textarea className="textarea" placeholder="e.g. Seat 4, back pad 3, handles on the lower position" value={ex.setup} onChange={(e) => upd({ setup: e.target.value })} />
-        </label>
-        <label className="field">
-          Notes & cues
-          <textarea className="textarea" placeholder="What is it, how to do it, what to feel…" value={ex.notes} onChange={(e) => upd({ notes: e.target.value })} />
-        </label>
       </div>
 
+      <ImageField
+        path={ex.image_path}
+        folder="exercises"
+        large
+        onChange={(p) => save('exercises', { ...ex, image_path: p })}
+        label="Add a photo of the machine"
+      />
+
       <div className="card stack">
-        <h2>Personal records</h2>
+        <div className="card-head">
+          <h2>Personal records</h2>
+          <Trophy size={18} color="var(--accent)" aria-hidden />
+        </div>
         {rec.heaviest ? (
           <>
-            <div className="stat-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="pr-hero">
+              <div className="stat gold">
+                <div className="v">
+                  {rec.bestE1rm ? fmtKg(Math.round(rec.bestE1rm.value * 10) / 10) : '–'}
+                  <span className="u">kg</span>
+                </div>
+                <div className="l">Best est. 1RM</div>
+              </div>
               <div className="stat">
                 <div className="v">
-                  {fmtKg(rec.heaviest.weight)}×{rec.heaviest.reps}
+                  {fmtKg(rec.heaviest.weight)}
+                  <span className="u">kg</span>
+                  <span style={{ fontSize: '0.7em', marginLeft: 4 }}>×{rec.heaviest.reps}</span>
                 </div>
-                <div className="l">heaviest set · {fmtDate(rec.heaviest.date, true)}</div>
-              </div>
-              <div className="stat">
-                <div className="v">{rec.bestE1rm ? fmtKg(Math.round(rec.bestE1rm.value * 10) / 10) : '–'}</div>
-                <div className="l">best est. 1RM</div>
+                <div className="l">Heaviest set · {fmtDate(rec.heaviest.date, true)}</div>
               </div>
             </div>
-            <div className="small muted">Best weight for N reps</div>
-            <table className="t">
-              <tbody>
-                {rec.repTable
-                  .filter((r) => [1, 3, 5, 6, 8, 10, 12, 15].includes(r.reps))
-                  .map((r) => (
-                    <tr key={r.reps}>
-                      <td>{r.reps} {r.reps === 1 ? 'rep' : 'reps'}</td>
-                      <td>
-                        <b>{fmtKg(r.weight)} kg</b>
-                      </td>
-                      <td className="muted">{fmtDate(r.date, true)}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-            <div className="tiny muted">Warm-up and drop sets never count towards records. Est. 1RM uses the Epley formula (reps capped at 12).</div>
+            <div className="small muted" style={{ marginBottom: -4 }}>
+              Best weight (kg) for at least N reps
+            </div>
+            <div className="reps-table">
+              {REP_COLS.map((n) => {
+                const row = rec.repTable.find((r) => r.reps === n)
+                return (
+                  <div key={n} title={row ? fmtDate(row.date, true) : undefined}>
+                    <div className="r">
+                      {n} {n === 1 ? 'rep' : 'reps'}
+                    </div>
+                    <div className={`w ${row ? '' : 'none'}`}>{row ? fmtKg(row.weight) : '–'}</div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="tiny muted">
+              Warm-up and drop sets never count towards records. Est. 1RM uses the Epley formula (reps capped at 12).
+            </div>
           </>
         ) : (
           <div className="muted small">Log this exercise in a workout and your records will appear here.</div>
@@ -132,8 +125,8 @@ export default function ExerciseDetail() {
 
       {hist.length > 1 && (
         <div className="card stack">
-          <div className="row">
-            <h2 className="grow">Progress</h2>
+          <div className="card-head">
+            <h2>Progress</h2>
             <div className="seg">
               <button className={metric === 'e1rm' ? 'on' : ''} onClick={() => setMetric('e1rm')}>
                 Est. 1RM
@@ -156,17 +149,86 @@ export default function ExerciseDetail() {
         </div>
       )}
 
+      <div className="card stack">
+        <h2>Setup &amp; cues</h2>
+        <label className="field">
+          Machine setup (seat, pads, pin, grip)
+          <textarea
+            className="textarea"
+            placeholder="e.g. Seat 4, back pad 3, handles on the lower position"
+            value={ex.setup}
+            onChange={(e) => upd({ setup: e.target.value })}
+          />
+        </label>
+        <label className="field">
+          Notes &amp; cues
+          <textarea
+            className="textarea"
+            placeholder="What is it, how to do it, what to feel…"
+            value={ex.notes}
+            onChange={(e) => upd({ notes: e.target.value })}
+          />
+        </label>
+      </div>
+
       {recent.length > 0 && (
-        <div className="card">
-          <h2 style={{ marginBottom: 8 }}>Recent sessions</h2>
-          {recent.map((r) => (
-            <button key={r.session} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 0', borderTop: '1px solid var(--line)' }} onClick={() => nav(`/history/${r.session}`)}>
-              <div className="small muted">{fmtDate(r.date, true)}</div>
-              <div>{r.sets}</div>
-            </button>
-          ))}
-        </div>
+        <section>
+          <div className="section-label">Recent sessions</div>
+          <div className="list-group">
+            {recent.map((r) => (
+              <button key={r.session} className="list-row" onClick={() => nav(`/history/${r.session}`)}>
+                <div className="grow">
+                  <div className="row" style={{ gap: 6 }}>
+                    <span className="title">{fmtDate(r.date, true)}</span>
+                    <span className="small muted ellipsis">{r.name}</span>
+                  </div>
+                  <div className="set-pills">
+                    {r.sets.map((x, i) => (
+                      <span key={i} className={`set-pill ${x.kind === 'work' ? '' : x.kind}`}>
+                        {x.text}
+                      </span>
+                    ))}
+                    {!r.sets.length && <span className="small muted">No sets ticked</span>}
+                  </div>
+                </div>
+                <ChevronRight size={18} className="chev" />
+              </button>
+            ))}
+          </div>
+        </section>
       )}
+
+      <div className="card stack">
+        <h2>Details</h2>
+        <label className="field">
+          Name
+          <input className="input" value={ex.name} onChange={(e) => upd({ name: e.target.value })} />
+        </label>
+        <div className="row" style={{ alignItems: 'flex-start', gap: 'var(--s3)' }}>
+          <label className="field grow">
+            Muscle
+            <select className="select" value={ex.muscle} onChange={(e) => upd({ muscle: e.target.value }, 0)}>
+              {MUSCLES.map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+          </label>
+          <label className="field grow">
+            Default rest (m:ss)
+            <input
+              className="input tnum"
+              inputMode="numeric"
+              value={restText ?? fmtRest(ex.rest_sec)}
+              onFocus={() => setRestText(fmtRest(ex.rest_sec))}
+              onChange={(e) => setRestText(e.target.value)}
+              onBlur={() => {
+                if (restText != null) upd({ rest_sec: parseRest(restText) }, 0)
+                setRestText(null)
+              }}
+            />
+          </label>
+        </div>
+      </div>
 
       <button className="btn danger" onClick={() => setConfirmDel(true)}>
         <Trash2 size={16} /> Delete exercise
