@@ -699,7 +699,7 @@ export default function SessionPage() {
             <ChevronLeft size={22} />
           </button>
           <div className="grow" style={{ minWidth: 0 }}>
-            <div className="sp-name ellipsis">{session.name}</div>
+            <h1 className="sp-name ellipsis">{session.name}</h1>
           </div>
           <button
             className="btn primary sp-finish"

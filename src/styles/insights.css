@@ -575,11 +575,11 @@
 }
 .kind-tag.drop {
   border-color: var(--plate-blue);
-  color: var(--plate-blue);
+  color: var(--blue-text);
 }
 .kind-tag.failure {
   border-color: var(--danger);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 .kind-tag.warmup {
   border-style: dashed;

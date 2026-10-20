@@ -40,10 +40,12 @@
   --ok-line: rgba(95, 207, 143, 0.38);
   --warn: #f0b92a;
   --danger: #f0594f;
+  --danger-text: #ff6b61; /* lifted red for 4.5:1 text on tinted backgrounds */
   --danger-ink: #1a0705;
   --danger-soft: rgba(240, 89, 79, 0.12);
   --danger-line: rgba(240, 89, 79, 0.4);
   --plate-blue: #4a8df0;
+  --blue-text: #6ea4f5; /* the same plate blue, lifted for 4.5:1 text on tinted backgrounds */
   --blue-ink: #08111f;
   --blue-soft: rgba(74, 141, 240, 0.13);
   --blue-line: rgba(74, 141, 240, 0.42);
@@ -354,7 +356,7 @@ table.t,
   background: #52b97e;
 }
 .btn.danger {
-  color: var(--danger);
+  color: var(--danger-text);
   border-color: var(--danger-line);
   background: var(--danger-soft);
 }
@@ -517,12 +519,12 @@ div.field {
 .chip.blue {
   background: var(--blue-soft);
   border-color: var(--blue-line);
-  color: var(--plate-blue);
+  color: var(--blue-text);
 }
 .chip.danger {
   background: var(--danger-soft);
   border-color: var(--danger-line);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 .chips {
   display: flex;
@@ -932,7 +934,7 @@ div.field {
   color: var(--ok);
 }
 .down {
-  color: var(--danger);
+  color: var(--danger-text);
 }
 
 /* ================================================ exercise cards (session) */
@@ -1076,11 +1078,11 @@ div.field {
 }
 .kind.drop {
   border-color: var(--plate-blue);
-  color: var(--plate-blue);
+  color: var(--blue-text);
 }
 .kind.failure {
   border-color: var(--danger);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 .set-row.done .kind {
   background: var(--chalk-plate);
@@ -1157,7 +1159,7 @@ div.field {
   color: var(--accent);
 }
 .set-hint.near {
-  color: var(--plate-blue);
+  color: var(--blue-text);
 }
 
 /* =============================================================== charts */
@@ -1490,7 +1492,7 @@ table.t td {
 .login .msg.err {
   background: var(--danger-soft);
   border-color: var(--danger-line);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 .login .fine {
   font-size: var(--fs-xs);
@@ -1676,7 +1678,7 @@ table.t td {
   gap: 6px;
   font-size: var(--fs-xs);
   font-weight: 600;
-  color: var(--plate-blue);
+  color: var(--blue-text);
   margin: var(--s1) 0 -4px 6px;
 }
 /* superset group: blue rail joining consecutive members */
@@ -1804,11 +1806,11 @@ table.t td {
   color: var(--text-2);
 }
 .set-pill.drop {
-  color: var(--plate-blue);
+  color: var(--blue-text);
   border-color: var(--blue-line);
 }
 .set-pill.failure {
-  color: var(--danger);
+  color: var(--danger-text);
   border-color: var(--danger-line);
 }
 .set-pill.warmup {

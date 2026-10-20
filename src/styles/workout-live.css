@@ -200,8 +200,8 @@
 }
 .lg-dot:first-child { margin-left: 0; }
 .lg-dot.warmup { border: 2px dashed #8a8984; color: #b8b6ae; }
-.lg-dot.drop { border-color: var(--plate-blue); color: var(--plate-blue); }
-.lg-dot.failure { border-color: var(--danger); color: var(--danger); }
+.lg-dot.drop { border-color: var(--plate-blue); color: var(--blue-text); }
+.lg-dot.failure { border-color: var(--danger); color: var(--danger-text); }
 
 .cm { position: fixed; inset: 0; z-index: 80; }
 .cm-hole {

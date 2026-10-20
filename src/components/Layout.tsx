@@ -181,9 +181,9 @@ export default function Layout() {
   return (
     <>
       <SyncDot />
-      <div className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
+      <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
         <Outlet />
-      </div>
+      </main>
       <RestBar inSession={inSession} />
       <Toasts />
       {!inSession && !rest && <ResumeBar />}
