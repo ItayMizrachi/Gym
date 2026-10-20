@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
-import { Download, LogOut, Sparkles, Upload } from 'lucide-react'
+import { ChevronRight, Download, HelpCircle, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { reopenWelcome } from '../components/Welcome'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
@@ -59,6 +61,7 @@ export default function SettingsPage() {
   const [awake, setAwake] = useState(flag('gymlog:awake'))
   const [confirmImport, setConfirmImport] = useState<DB | null>(null)
   const prefs = usePrefs()
+  const nav = useNavigate()
   const [perm, setPerm] = useState(notifyPermission())
 
   function loadStarter() {
@@ -102,6 +105,17 @@ export default function SettingsPage() {
     <div className="stack" style={{ gap: 14 }}>
       <div className="page-head">
         <h1>Settings</h1>
+      </div>
+
+      <div className="card stack">
+        <h2>Help</h2>
+        <div className="small muted">New here? Start with these.</div>
+        <button className="btn primary" onClick={() => nav('/help')}>
+          <HelpCircle size={16} /> How GymLog works <ChevronRight size={16} />
+        </button>
+        <button className="btn" onClick={reopenWelcome}>
+          <PlayCircle size={16} /> Show the welcome tour
+        </button>
       </div>
 
       <div className="card stack">

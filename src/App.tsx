@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from './lib/store'
 import { startNextWorkout } from './lib/shortcuts'
@@ -16,6 +16,8 @@ import HistoryPage from './pages/History'
 import SessionDetail from './pages/SessionDetail'
 import Body from './pages/Body'
 import SettingsPage from './pages/Settings'
+import Help from './pages/Help'
+import Welcome, { seen } from './components/Welcome'
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
 function useLaunchShortcut(ready: boolean) {
@@ -35,6 +37,16 @@ export default function App() {
     void boot()
   }, [boot])
   useLaunchShortcut(phase === 'ready')
+  const userId = useStore((s) => s.user?.id ?? 'local')
+  const [welcome, setWelcome] = useState(false)
+  useEffect(() => {
+    if (phase === 'ready') setWelcome(!seen('welcome'))
+  }, [phase, userId])
+  useEffect(() => {
+    const open = () => setWelcome(true)
+    window.addEventListener('gymlog:welcome', open)
+    return () => window.removeEventListener('gymlog:welcome', open)
+  }, [])
 
   return (
     <>
@@ -58,9 +70,11 @@ export default function App() {
               <Route path="/history/:id" element={<SessionDetail />} />
               <Route path="/body" element={<Body />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/help" element={<Help />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
+          {welcome && <Welcome onDone={() => setWelcome(false)} />}
         </div>
       )}
       <UpdateBanner />
