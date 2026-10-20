@@ -42,34 +42,80 @@ export default function Login() {
 
   return (
     <div className="login">
-      <img className="logo" src="icon.svg" alt="" />
-      <div>
-        <h1 style={{ fontSize: 32, letterSpacing: -0.6 }}>GymLog</h1>
-        <div className="muted">Workouts, personal records and body weight. Your data, your account.</div>
+      <div className="login-brand">
+        <img className="logo" src="icon.svg" alt="" width={72} height={72} />
+        <h1>
+          Gym<span>Log</span>
+        </h1>
+        <div className="login-plates" aria-hidden>
+          <i style={{ height: 30, background: 'var(--danger)' }} />
+          <i style={{ height: 26, background: 'var(--plate-blue)' }} />
+          <i style={{ height: 22, background: 'var(--accent)' }} />
+          <i style={{ height: 18, background: 'var(--ok)' }} />
+        </div>
+        <div className="tag">Every set, every record, every weigh-in. Your training logbook, synced to your account.</div>
       </div>
-      {bootError && <div className="card" style={{ borderColor: '#6b2a31', color: 'var(--danger)' }}>{bootError}</div>}
-      <button className="btn primary block" onClick={google} disabled={busy}>
+
+      {bootError && <div className="msg err">{bootError}</div>}
+
+      <button className="btn google block" onClick={google} disabled={busy}>
         <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
-          <path fill="#fff" d="M44.5 20H24v8.5h11.8C34.7 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 4.1 29.6 2 24 2 11.8 2 2 11.8 2 24s9.8 22 22 22c11 0 21-8 21-22 0-1.3-.2-2.7-.5-4z" />
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
         </svg>
         Continue with Google
       </button>
-      <div className="divider">or email</div>
-      <form className="stack" onSubmit={emailAuth}>
-        <input className="input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
-        <input className="input" type="password" placeholder="Password (6+ characters)" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={6} autoComplete={mode === 'in' ? 'current-password' : 'new-password'} />
-        <button className="btn block" disabled={busy}>
-          {mode === 'in' ? 'Sign in' : 'Create account'}
+
+      <div className="divider">or with email</div>
+
+      <form className="stack" style={{ gap: 'var(--s2)' }} onSubmit={emailAuth}>
+        <input
+          className="input"
+          type="email"
+          placeholder="Email"
+          aria-label="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+          inputMode="email"
+        />
+        <input
+          className="input"
+          type="password"
+          placeholder={mode === 'in' ? 'Password' : 'Password (6+ characters)'}
+          aria-label="Password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          required
+          minLength={6}
+          autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
+        />
+        <button className="btn primary block" disabled={busy} style={{ marginTop: 'var(--s1)' }}>
+          {busy ? 'One moment…' : mode === 'in' ? 'Sign in' : 'Create account'}
         </button>
         <button type="button" className="btn ghost sm" onClick={() => setMode(mode === 'in' ? 'up' : 'in')}>
-          {mode === 'in' ? 'No account yet? Sign up' : 'Have an account? Sign in'}
+          {mode === 'in' ? (
+            <span>
+              No account yet? <b style={{ color: 'var(--text)' }}>Sign up</b>
+            </span>
+          ) : (
+            <span>
+              Have an account? <b style={{ color: 'var(--text)' }}>Sign in</b>
+            </span>
+          )}
         </button>
       </form>
-      {msg && <div className="small" style={{ color: 'var(--warn)' }}>{msg}</div>}
+
+      {msg && <div className="msg">{msg}</div>}
+
       <div className="divider">or</div>
       <button className="btn block" onClick={() => enterLocal()}>
-        Try demo (data stays on this device)
+        Try the demo
       </button>
+      <div className="fine">Demo data stays on this device only.</div>
     </div>
   )
 }

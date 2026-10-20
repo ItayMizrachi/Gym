@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { ArrowLeft, Plus, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Exercise, MUSCLES } from '../lib/types'
 import { nowIso, uid } from '../lib/uid'
@@ -25,66 +25,125 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
   const [name, setName] = useState(initialName)
   const [muscle, setMuscle] = useState('Chest')
   return (
-    <div className="stack">
+    <form
+      className="stack"
+      onSubmit={(ev) => {
+        ev.preventDefault()
+        if (name.trim()) onCreated(createExercise(name, muscle))
+      }}
+    >
       <label className="field">
         Name
-        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Incline Dumbbell Press" autoFocus />
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Incline Dumbbell Press" autoFocus enterKeyHint="done" />
       </label>
-      <label className="field">
+      <div className="field">
         Muscle group
-        <select className="select" value={muscle} onChange={(e) => setMuscle(e.target.value)}>
+        <div className="chips" style={{ flexWrap: 'wrap', margin: 0, padding: 0 }}>
           {MUSCLES.map((m) => (
-            <option key={m}>{m}</option>
+            <button type="button" key={m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(m)}>
+              {m}
+            </button>
           ))}
-        </select>
-      </label>
-      <button className="btn primary" disabled={!name.trim()} onClick={() => onCreated(createExercise(name, muscle))}>
+        </div>
+      </div>
+      <button className="btn primary" type="submit" disabled={!name.trim()}>
         <Plus size={18} /> Create exercise
       </button>
-    </div>
+    </form>
   )
 }
 
 export function ExercisePicker({ onPick, onClose }: { onPick: (e: Exercise) => void; onClose: () => void }) {
   const exercises = useStore((s) => s.db.exercises)
+  const sessions = useStore((s) => s.db.sessions)
   const [q, setQ] = useState('')
   const [creating, setCreating] = useState(false)
-  const list = useMemo(
+
+  /** exercises from the most recent sessions, newest first */
+  const recentIds = useMemo(() => {
+    const ids: string[] = []
+    const sorted = [...sessions].sort((a, b) => (b.started_at > a.started_at ? 1 : -1))
+    for (const s of sorted) {
+      for (const e of s.data.exercises) if (!ids.includes(e.exercise_id)) ids.push(e.exercise_id)
+      if (ids.length >= 6) break
+    }
+    return ids.slice(0, 6)
+  }, [sessions])
+
+  const needle = q.trim().toLowerCase()
+  const matches = useMemo(
     () =>
       exercises
-        .filter((e) => e.name.toLowerCase().includes(q.toLowerCase()) || e.muscle.toLowerCase().includes(q.toLowerCase()))
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [exercises, q]
+        .filter((e) => !needle || e.name.toLowerCase().includes(needle) || e.muscle.toLowerCase().includes(needle))
+        .sort((a, b) => {
+          // names that start with the query rank first
+          if (needle) {
+            const sa = a.name.toLowerCase().startsWith(needle) ? 0 : 1
+            const sb = b.name.toLowerCase().startsWith(needle) ? 0 : 1
+            if (sa !== sb) return sa - sb
+          }
+          return a.name.localeCompare(b.name)
+        }),
+    [exercises, needle]
   )
-  if (creating)
-    return (
-      <Sheet title="New exercise" onClose={() => setCreating(false)}>
-        <NewExerciseForm initialName={q} onCreated={(e) => onPick(e)} />
-      </Sheet>
-    )
-  return (
-    <Sheet title="Pick exercise" onClose={onClose}>
-      <div className="stack">
-        <div className="row" style={{ position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: 12, color: 'var(--muted)' }} />
-          <input className="input" style={{ paddingLeft: 38 }} placeholder="Search name or muscle" value={q} onChange={(e) => setQ(e.target.value)} />
-        </div>
-        <button className="btn" onClick={() => setCreating(true)}>
-          <Plus size={18} /> New exercise{q ? ` “${q}”` : ''}
-        </button>
-        <div>
-          {list.map((e) => (
-            <button key={e.id} className="list-item" style={{ width: '100%', textAlign: 'left' }} onClick={() => onPick(e)}>
-              <Thumb path={e.image_path} size={40} />
-              <div className="grow">
-                <div style={{ fontWeight: 650 }}>{e.name}</div>
-                <div className="small muted">{e.muscle}</div>
-              </div>
-            </button>
-          ))}
-          {!list.length && <div className="muted center small" style={{ padding: 16 }}>No matches</div>}
-        </div>
+  const recent = needle ? [] : recentIds.map((id) => exercises.find((e) => e.id === id)).filter((e): e is Exercise => !!e)
+  const rest = needle ? matches : matches.filter((e) => !recentIds.includes(e.id))
+  const exact = exercises.some((e) => e.name.trim().toLowerCase() === needle)
+
+  const row = (e: Exercise) => (
+    <button key={e.id} className="list-row" onClick={() => onPick(e)}>
+      <Thumb path={e.image_path} name={e.name} size={40} />
+      <div className="grow">
+        <div className="title ellipsis">{e.name}</div>
+        <div className="meta">{e.muscle}</div>
       </div>
+      <Plus size={18} className="chev" />
+    </button>
+  )
+
+  return (
+    <Sheet title={creating ? 'New exercise' : 'Add exercise'} onClose={onClose}>
+      {creating ? (
+        <div className="stack">
+          <button className="btn ghost sm" style={{ alignSelf: 'flex-start', marginLeft: -8 }} onClick={() => setCreating(false)}>
+            <ArrowLeft size={16} /> Back to list
+          </button>
+          <NewExerciseForm initialName={q} onCreated={(e) => onPick(e)} />
+        </div>
+      ) : (
+        <div className="stack" style={{ gap: 0 }}>
+          <div className="search" style={{ marginBottom: 'var(--s3)' }}>
+            <Search size={18} />
+            <input className="input" type="search" enterKeyHint="search" placeholder="Search name or muscle" value={q} onChange={(e) => setQ(e.target.value)} />
+            {q && (
+              <button className="clear" onClick={() => setQ('')} aria-label="Clear search">
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          {!exact && (
+            <button className="create-inline" onClick={() => setCreating(true)}>
+              <span className="plus">
+                <Plus size={20} />
+              </span>
+              <span className="grow ellipsis">{q.trim() ? `Create “${q.trim()}”` : 'Create a new exercise'}</span>
+            </button>
+          )}
+          {recent.length > 0 && (
+            <>
+              <div className="picker-sec">Recent</div>
+              <div className="list-group" style={{ ['--inset' as string]: '66px' }}>{recent.map(row)}</div>
+            </>
+          )}
+          {rest.length > 0 && (
+            <>
+              <div className="picker-sec">{needle ? `${rest.length} result${rest.length === 1 ? '' : 's'}` : 'All exercises'}</div>
+              <div className="list-group" style={{ ['--inset' as string]: '66px' }}>{rest.map(row)}</div>
+            </>
+          )}
+          {needle && !rest.length && <div className="muted center small" style={{ padding: 'var(--s4)' }}>No exercise matches “{q.trim()}”.</div>}
+        </div>
+      )}
     </Sheet>
   )
 }
