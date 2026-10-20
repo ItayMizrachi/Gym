@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { PROGRAMS, buildProgram, fmtTarget, freeFolderName, programById } from './programs'
+import {
+  PROGRAMS,
+  SINGLES,
+  WEEKLIES,
+  buildProgram,
+  estimateMinutes,
+  filterPrograms,
+  fmtTarget,
+  freeFolderName,
+  gearOf,
+  programById,
+  programMeta
+} from './programs'
+import { X } from './programCatalog'
 import { EQUIPMENT, Exercise, MUSCLES, Workout } from './types'
 
 const ex = (name: string, id = name): Exercise => ({
@@ -16,25 +29,65 @@ const ex = (name: string, id = name): Exercise => ({
 const wk = (folder: string | undefined, position: number): Workout => ({ id: `w${position}`, user_id: 'u', name: 'x', notes: '', position, created_at: '', folder })
 
 describe('program library', () => {
-  it('has 5–6 well-formed programs with unique ids', () => {
-    expect(PROGRAMS.length).toBeGreaterThanOrEqual(5)
+  it('has about 20 single workouts and 10 weekly programs with unique ids', () => {
+    expect(SINGLES.length).toBeGreaterThanOrEqual(20)
+    expect(WEEKLIES.length).toBeGreaterThanOrEqual(10)
+    expect(SINGLES.every((p) => p.kind === 'single' && p.workouts.length === 1 && p.days === 1)).toBe(true)
+    expect(WEEKLIES.every((p) => p.kind === 'weekly' && p.days >= 2 && p.workouts.length >= 2)).toBe(true)
     expect(new Set(PROGRAMS.map((p) => p.id)).size).toBe(PROGRAMS.length)
+  })
+
+  it('every program has a description and every exercise has name, muscle, equipment and tracking', () => {
     for (const p of PROGRAMS) {
-      expect(p.description.length).toBeGreaterThan(40)
-      expect(p.workouts.length).toBeGreaterThan(0)
+      expect(p.description.length, p.id).toBeGreaterThan(20)
+      expect(new Set(p.workouts.map((w) => w.name)).size, `${p.id} workout names`).toBe(p.workouts.length)
       for (const w of p.workouts)
         for (const e of w.exercises) {
-          expect(MUSCLES).toContain(e.muscle)
-          expect(EQUIPMENT).toContain(e.equipment)
+          expect(e.name.trim(), p.id).not.toBe('')
+          expect(MUSCLES, e.name).toContain(e.muscle)
+          expect(EQUIPMENT, e.name).toContain(e.equipment)
+          expect(['weight_reps', 'reps', 'time'], e.name).toContain(e.tracking)
           expect(e.sets).toBeGreaterThan(0)
           expect(e.rep_min).toBeGreaterThan(0)
           expect(e.rep_max).toBeGreaterThanOrEqual(e.rep_min)
+          expect(e.rest_sec).toBeGreaterThanOrEqual(0)
         }
     }
   })
 
+  it('uses one definition per exercise name across all programs', () => {
+    const seen = new Map<string, string>()
+    for (const p of PROGRAMS)
+      for (const w of p.workouts)
+        for (const e of w.exercises) {
+          const sig = `${e.muscle}|${e.equipment}|${e.tracking}`
+          const k = e.name.toLowerCase()
+          if (seen.has(k)) expect(seen.get(k), e.name).toBe(sig)
+          else seen.set(k, sig)
+        }
+    // the catalog itself has no duplicate names
+    const names = Object.values(X).map((e) => e.name.toLowerCase())
+    expect(new Set(names).size).toBe(names.length)
+  })
+
+  it('works out equipment, length and filters', () => {
+    expect(gearOf(programById('bodyweight-home')!)).toBe('none')
+    expect(gearOf(programById('mobility')!)).toBe('none')
+    expect(gearOf(programById('dumbbell-full-body')!)).toBe('home')
+    expect(gearOf(programById('machines-only')!)).toBe('gym')
+    const quick = programById('full-body-quick')!
+    expect(estimateMinutes(quick.workouts[0])).toBeLessThanOrEqual(35)
+    expect(programMeta(quick)).toMatch(/^About \d+ min · Gym$/)
+    expect(programMeta(programById('ppl-3')!)).toBe('3 days a week · Gym')
+    const beginnersAtHome = filterPrograms(PROGRAMS, { level: 'Beginner', gear: 'none', size: null })
+    expect(beginnersAtHome.map((p) => p.id)).toContain('bodyweight-home')
+    expect(beginnersAtHome.every((p) => p.level === 'Beginner' && gearOf(p) === 'none')).toBe(true)
+    expect(filterPrograms(WEEKLIES, { level: null, gear: null, size: '5-6' }).every((p) => p.days >= 5)).toBe(true)
+  })
+
   it('looks programs up by id', () => {
     expect(programById('strength-5x5')?.name).toBe('5×5 Strength')
+    expect(programById('push')?.kind).toBe('single')
     expect(programById('nope')).toBeUndefined()
   })
 
@@ -99,6 +152,16 @@ describe('buildProgram', () => {
     const r = buildProgram(programById('strength-5x5')!, 'u', [], [])
     const first = r.workout_exercises[0]
     expect([first.sets, first.rep_min, first.rep_max, first.rest_sec, first.weight]).toEqual([5, 5, 5, 180, 0])
+  })
+})
+
+describe('single workouts', () => {
+  it('save without a folder and as one workout', () => {
+    const r = buildProgram(programById('core')!, 'u', [], [wk('PPL', 0)])
+    expect(r.folder).toBe('')
+    expect(r.workouts).toHaveLength(1)
+    expect(r.workouts[0].folder).toBe('')
+    expect(r.workouts[0].name).toBe('Core')
   })
 })
 

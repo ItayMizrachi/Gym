@@ -1,59 +1,146 @@
 /* ================= programs-nav session: programs library, folders, home links, editor help, settings, a11y ================= */
+
+/* ---------- programs: tabs ---------- */
+.pg-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.pg-tabs button {
+  min-height: 56px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+.pg-tabs button.on { background: var(--card2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.pg-tabs button:focus-visible { outline: none; box-shadow: var(--focus); }
+.pg-tab-sub { font-size: 12px; font-weight: 500; color: var(--muted); }
+
+/* ---------- programs: filters ---------- */
+.pg-filter .chips { padding-top: 0; padding-bottom: 0; }
+.pg-filter .chips .chip { min-height: 40px; font-size: 14px; }
+.pg-count { display: flex; align-items: center; justify-content: space-between; min-height: 44px; color: var(--text-2); font-weight: 600; }
+.pg-empty { text-align: center; color: var(--text-2); padding: 32px 16px; }
+
+/* ---------- programs: cards ---------- */
 .pg-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
+  padding: 16px;
   text-align: left;
   font: inherit;
   color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
   cursor: pointer;
+  transition: background var(--t) var(--ease), transform var(--t-fast) var(--ease);
 }
-.pg-card:active { background: var(--card2); }
+.pg-card:active { background: var(--card2); transform: scale(0.99); }
 .pg-card:focus-visible { outline: none; box-shadow: var(--focus); }
-.pg-name { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.1; }
+.pg-card-top { display: flex; align-items: flex-start; gap: 12px; }
+.pg-name { font-size: 20px; font-weight: 700; line-height: 1.2; }
+.pg-meta { font-size: 14px; color: var(--text-2); margin-top: 4px; }
 .pg-blurb {
   color: var(--text-2);
   font-size: 15px;
-  line-height: 1.4;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.pg-foot { display: flex; align-items: center; gap: 8px; }
-.pg-foot > .small.muted { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pg-foot { display: flex; align-items: center; gap: 10px; }
+.pg-avs { display: flex; flex: none; }
+.pg-avs .pg-av + .pg-av, .pg-avs .pg-more { margin-left: -4px; }
+.pg-avs .pg-av { box-shadow: 0 0 0 2px var(--card); }
+.pg-more {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--card3); color: var(--text-2); font-size: 12px; font-weight: 600;
+  box-shadow: 0 0 0 2px var(--card);
+}
 .pg-have { display: inline-flex; align-items: center; gap: 4px; color: var(--ok); font-weight: 600; }
 .pg-arrow { color: var(--muted); flex: none; }
 
-.pg-level { flex: none; }
+/* round exercise badge (stands in for a photo) */
+.pg-av {
+  flex: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card3);
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pg-level {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
 .pg-level.beginner { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
 .pg-level.intermediate { background: var(--blue-soft); border-color: var(--blue-line); color: var(--plate-blue); }
 .pg-level.advanced { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger); }
 
-.pg-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
-.pg-chips .chip { cursor: default; min-height: 32px; padding: 0 12px; }
-.pg-chips .chip::after { display: none; }
-.pg-chips .chip:active { transform: none; }
-.pg-desc { margin: 0; color: var(--text-2); font-size: var(--fs-md); line-height: 1.45; }
-
-.pg-added { border-color: var(--ok-line); }
-.pg-added .row > svg { color: var(--ok); flex: none; }
+/* ---------- programs: detail ---------- */
+.pg-facts { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--text-2); font-size: 15px; }
+.pg-facts > span { display: inline-flex; align-items: center; gap: 6px; }
+.pg-facts svg { color: var(--muted); }
+.pg-desc { margin: 0; color: var(--text); font-size: 17px; line-height: 1.5; }
+.pg-actions { display: flex; flex-direction: column; gap: 10px; }
+.pg-big { width: 100%; min-height: 52px; font-size: 17px; border-radius: 12px; }
+.pg-center { text-align: center; }
+.pg-added {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px; border-radius: 16px;
+  background: var(--ok-soft); border: 1px solid var(--ok-line); color: var(--text);
+}
+.pg-added > svg { color: var(--ok); flex: none; margin-top: 1px; }
+.pg-added .small { color: var(--text-2); margin-top: 2px; }
 
 .pg-workout { display: flex; flex-direction: column; gap: 8px; }
+.pg-workout-head { display: flex; flex-direction: column; gap: 2px; }
 .pg-workout h2 { font-size: 22px; margin: 0; }
-.pg-ex { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.pg-ex li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
+.pg-note { color: var(--text-2); font-size: 15px; }
+.pg-ex { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.pg-ex li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 68px; }
+.pg-ex li + li { border-top: 1px solid var(--line); }
+.pg-ex li.ss { box-shadow: inset 3px 0 0 var(--plate-blue); }
+.pg-ex-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.pg-ex-meta { font-size: 14px; color: var(--text-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.pg-ss { display: inline-flex; align-items: center; gap: 3px; color: var(--plate-blue); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-card { transition: none; }
+  .pg-card:active { transform: none; }
 }
-.pg-ex li.ss { border-left: 3px solid var(--plate-blue); padding-left: 10px; }
-.pg-ex-name { font-weight: 600; line-height: 1.25; }
-.pg-ex-target { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
-.pg-ex-target svg { vertical-align: -1px; }
 
 /* folders on the Train tab */
 .fold { display: flex; flex-direction: column; gap: 8px; }
