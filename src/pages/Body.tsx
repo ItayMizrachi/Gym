@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Camera, Plus, Scale, Share2, Trash2 } from 'lucide-react'
+import { Camera, Plus, Ruler, Scale, Share2, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
 import { LineChart } from '../components/Chart'
@@ -7,6 +7,8 @@ import { Confirm, Empty, ImageField, NumInput, Sheet, Thumb, useImageUrl } from 
 import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
 import { renderCompareCard, shareOrDownload } from '../lib/shareCard'
+import { MeasureFields, MeasureValues, MeasuresCard } from '../components/Measures'
+import { cleanMeasures, measureInfo, rememberUsedFields } from '../lib/measures'
 import '../styles/progress.css'
 
 const DAY = 86400000
@@ -35,7 +37,7 @@ function weeklyRate(entries: Metric[], days = 28): number | null {
   return (num / den) * 7
 }
 
-function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => void }) {
+function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Metric | null; onClose: () => void; measuresOpen?: boolean }) {
   const metrics = useStore((s) => s.db.metrics)
   const save = useStore((s) => s.save)
   const remove = useStore((s) => s.remove)
@@ -44,7 +46,10 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
   const [weight, setWeight] = useState<number | null>(entry?.weight_kg ?? metrics.slice().sort((a, b) => b.date.localeCompare(a.date))[0]?.weight_kg ?? null)
   const [note, setNote] = useState(entry?.note ?? '')
   const [photo, setPhoto] = useState<string | null>(entry?.photo_path ?? null)
+  const [measures, setMeasures] = useState<MeasureValues>(entry?.measures ?? {})
+  const [showMeasures, setShowMeasures] = useState(measuresOpen || !!cleanMeasures(entry?.measures ?? {}))
   const [confirm, setConfirm] = useState(false)
+  const cleaned = cleanMeasures(measures)
   const repo = useStore((s) => s.repo)
   const original = entry?.photo_path ?? null
 
@@ -57,6 +62,8 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
   function commit() {
     // one entry per day: logging the same date again updates it
     const existing = entry ?? metrics.find((m) => m.date === date)
+    // logging a new entry on a day that has one adds to its measurements instead of dropping them
+    const merged = entry ? cleaned : cleanMeasures({ ...(existing?.measures ?? {}), ...(cleaned ?? {}) })
     const row: Metric = {
       id: existing?.id ?? uid(),
       user_id: existing?.user_id ?? user?.id ?? 'local',
@@ -64,15 +71,19 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
       weight_kg: weight,
       note,
       photo_path: photo,
+      // only send the column when there is something to store, so saves keep working before the
+      // database upgrade (supabase/schema.sql) has been run
+      ...(merged || existing?.measures ? { measures: merged } : {}),
       created_at: existing?.created_at ?? nowIso()
     }
+    if (cleaned) rememberUsedFields(Object.keys(cleaned))
     save('metrics', row)
     if (original && original !== photo) void repo?.deleteImage(original)
     onClose()
   }
 
   return (
-    <Sheet title={entry ? 'Edit entry' : 'Log body weight'} onClose={cancel}>
+    <Sheet title={entry ? 'Edit entry' : measuresOpen ? 'Log measurements' : 'Log body weight'} onClose={cancel}>
       <div className="stack">
         <div className="weigh-in">
           <NumInput className="weigh-num" value={weight} onChange={setWeight} placeholder="0.0" ariaLabel="Weight in kg" />
@@ -91,7 +102,15 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
           if (photo && photo !== original) void repo?.deleteImage(photo)
           setPhoto(p)
         }} label="Add progress photo" autoDelete={false} />
-        <button className="btn primary" disabled={weight == null && !photo} onClick={commit}>
+        <MeasureFields
+          metrics={metrics}
+          date={date}
+          values={measures}
+          onChange={setMeasures}
+          open={showMeasures}
+          onToggle={() => setShowMeasures(!showMeasures)}
+        />
+        <button className="btn primary" disabled={weight == null && !photo && !cleaned} onClick={commit}>
           Save
         </button>
         {entry && (
@@ -116,6 +135,15 @@ function EntrySheet({ entry, onClose }: { entry: Metric | null; onClose: () => v
       )}
     </Sheet>
   )
+}
+
+/** "Waist 84 · Chest 102 · note" line under an entry */
+function entryMeta(m: Metric): string {
+  const parts = Object.entries(cleanMeasures(m.measures ?? {}) ?? {}).map(([k, v]) => {
+    const info = measureInfo(k)
+    return `${info?.short ?? k} ${v}${info?.unit === '%' ? '%' : ''}`
+  })
+  return [...parts, m.note].filter(Boolean).join(' · ')
 }
 
 function PhotoSide({ m, label, photos, onPick, picking }: { m: Metric; label: string; photos: Metric[]; onPick: (m: Metric) => void; picking: boolean }) {
@@ -207,7 +235,7 @@ function PhotoCompare({ photos }: { photos: Metric[] }) {
 
 export default function Body() {
   const metrics = useStore((s) => s.db.metrics)
-  const [editing, setEditing] = useState<Metric | 'new' | null>(null)
+  const [editing, setEditing] = useState<Metric | 'new' | 'measures' | null>(null)
   const [range, setRange] = useState<'30' | '90' | 'all'>('90')
 
   const entries = useMemo(
@@ -330,6 +358,8 @@ export default function Body() {
         </>
       )}
 
+      <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
+
       {withPhotos.length >= 2 && (
         <PhotoCompare photos={withPhotos} />
       )}
@@ -365,11 +395,17 @@ export default function Body() {
                   {m.photo_path && <Thumb path={m.photo_path} size={40} />}
                   <div className="grow">
                     <div className="title entry-date">{fmtDateLong(m.date)}</div>
-                    {m.note && <div className="meta ellipsis">{m.note}</div>}
+                    {(m.note || m.measures) && <div className="meta ellipsis">{entryMeta(m)}</div>}
                   </div>
                   <div className="trail">
                     <div className="kpi">
-                      {m.weight_kg != null ? fmtKg(m.weight_kg) : <Camera size={18} className="muted" />}
+                      {m.weight_kg != null ? (
+                        fmtKg(m.weight_kg)
+                      ) : m.photo_path ? (
+                        <Camera size={18} className="muted" aria-label="Photo only" />
+                      ) : (
+                        <Ruler size={18} className="muted" aria-label="Measurements only" />
+                      )}
                       {m.weight_kg != null && <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>kg</span>}
                     </div>
                     {d != null && d !== 0 && <div className="tiny muted tnum">{fmtDelta(d)}</div>}
@@ -381,7 +417,13 @@ export default function Body() {
         </section>
       )}
 
-      {editing && <EntrySheet entry={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
+      {editing && (
+        <EntrySheet
+          entry={editing === 'new' || editing === 'measures' ? null : editing}
+          measuresOpen={editing === 'measures'}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </div>
   )
 }
