@@ -302,6 +302,9 @@ table.t,
   transition: transform var(--t-fast) var(--ease), background var(--t) var(--ease), border-color var(--t) var(--ease),
     opacity var(--t) var(--ease);
 }
+.btn svg {
+  flex: none;
+}
 .btn:active {
   transform: scale(0.97);
   background: var(--card3);
@@ -1958,4 +1961,42 @@ input[type='search']::-webkit-search-decoration {
   font-size: 24px;
   font-weight: 600;
   color: var(--muted);
+}
+
+/* workout editor: collapsible rows */
+.we-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap);
+  text-align: left;
+}
+.we-caret {
+  color: var(--faint);
+  flex: none;
+  transition: transform var(--t) var(--ease);
+}
+.we-card.open .we-caret {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+.we-card.open {
+  border-color: var(--line-strong);
+}
+.we-card.open .we-body {
+  animation: fade 0.2s ease-out;
+}
+.we-card .reorder .btn {
+  width: 40px;
+  min-height: 30px;
+  padding: 0;
+  color: var(--text-2);
+}
+.we-card .reorder .btn:disabled {
+  opacity: 0.25;
+}
+.we-card .we-head {
+  padding-right: 4px;
 }
