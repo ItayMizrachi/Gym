@@ -195,7 +195,7 @@ export default function Home() {
           <div className="muted">Choose a ready-made program, or build your own workouts. Then start one and log each set as you go.</div>
           <ol className="welcome-steps">
             <li>
-              <b>Pick a program.</b> Ready-made plans for 3 to 6 days a week, at the gym or at home.
+              <b>Pick a program.</b> Start a ready-made workout right now, or add a plan for the whole week.
             </li>
             <li>
               <b>Train.</b> Weights fill in from last time; tick each set to start the rest timer.
@@ -435,7 +435,7 @@ export default function Home() {
             <LayoutGrid size={20} aria-hidden />
             <span className="grow">
               <span className="home-link-t">Browse programs</span>
-              <span className="tiny muted">Add a ready-made plan to your workouts</span>
+              <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
             </span>
             <ChevronRight size={18} aria-hidden />
           </button>

@@ -302,7 +302,7 @@ export default function WorkoutEditor() {
         />
       )}
 
-      <button className="btn primary block" onClick={() => setPicking(true)}>
+      <button className="btn primary block we-add" onClick={() => setPicking(true)}>
         <Plus size={18} /> Add exercises
       </button>
 

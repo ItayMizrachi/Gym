@@ -228,3 +228,15 @@
 .wl-dots button { position: relative; }
 .wl-dots button::after { content: ''; position: absolute; inset: -18px -8px; }
 .sheet:focus, .wl:focus { outline: none; }
+
+/* Hevy-style primary actions on the screens this session owns: full width, 52px, larger label */
+.ins-home .btn.primary.block,
+.ins-home .welcome .btn.block,
+.we-add,
+.set-link.primary {
+  min-height: 52px;
+  font-size: 17px;
+  border-radius: 12px;
+}
+.ins-home .welcome h2 { font-size: 26px; }
+.ins-home .welcome .muted { color: var(--text-2); font-size: 16px; line-height: 1.45; }

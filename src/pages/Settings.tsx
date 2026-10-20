@@ -272,7 +272,7 @@ export default function SettingsPage() {
         'Data & backup',
         'Add ready-made workouts, or save and restore everything.',
         <>
-          {link('Browse programs', 'Ready-made plans for 3 to 6 days a week', <LayoutGrid size={18} aria-hidden />, () => nav('/programs'))}
+          {link('Browse programs', '20 single workouts and 10 weekly plans', <LayoutGrid size={18} aria-hidden />, () => nav('/programs'))}
           <button className="btn" onClick={loadStarter}>
             <Sparkles size={16} aria-hidden /> Add the starter plan (4 workouts)
           </button>

@@ -18,15 +18,16 @@ export default function Help() {
 
       <Sec title="Getting started">
         <p>
-          On <b>Train</b>, tap <b>Browse programs</b> and add one. Its workouts appear on Train. Tap <Play size={13} aria-label="Start" /> on a
-          workout to begin, and log each set as you go.
+          On <b>Train</b>, tap <b>Browse programs</b>. Pick a single workout and tap <b>Start now</b>, or add a weekly program. Its workouts
+          appear on Train: tap <Play size={13} aria-label="Start" /> to begin, and log each set as you go.
         </p>
       </Sec>
 
       <Sec title="Programs">
         <p>
-          Ready-made plans for 3 to 6 days a week, at the gym or at home. Open one to see every workout and exercise, then tap{' '}
-          <b>Add to my workouts</b>. You can change anything afterwards. Find them on Train or in Settings.
+          <b>Single workouts</b> are one session you can start right away, or save to your workouts. <b>Weekly programs</b> are plans for 2 to 6
+          days a week. Tap <b>Add program</b> and their workouts appear on Train in their own folder. Filter by level, equipment and length. You
+          can change anything afterwards.
         </p>
       </Sec>
 
