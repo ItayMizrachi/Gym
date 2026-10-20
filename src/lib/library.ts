@@ -185,9 +185,9 @@ function stem(w: string) {
 const PHRASES: [RegExp, string][] = [
   [/pec deck/g, 'butterfly'],
   [/skull crusher/g, 'skullcrusher'],
-  [/flye/g, 'fly'],
-  [/ohp/g, 'overhead press'],
-  [/rdl/g, 'romanian deadlift']
+  [/\bflye\b/g, 'fly'],
+  [/\bohp\b/g, 'overhead press'],
+  [/\brdl\b/g, 'romanian deadlift']
 ]
 const tokens = (s: string) =>
   PHRASES.reduce((t, [re, to]) => t.replace(re, to), norm(s))
