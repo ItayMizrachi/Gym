@@ -694,6 +694,10 @@ export default function SessionPage() {
             addExerciseToSession(session.id, ex)
             setPicking(false)
           }}
+          onPickMany={(list) => {
+            for (const ex of list) addExerciseToSession(session.id, ex)
+            setPicking(false)
+          }}
         />
       )}
 

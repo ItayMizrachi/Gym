@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, ChevronRight, Plus, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { MUSCLES } from '../lib/types'
-import { NewExerciseForm } from '../components/ExercisePicker'
+import { Exercise, MUSCLES, trackingOf } from '../lib/types'
+import { FilterChips, NewExerciseForm } from '../components/ExercisePicker'
+import { facets, filterExercises, recentExerciseIds } from '../lib/exerciseFilters'
 import { Empty, Sheet, Thumb } from '../components/ui'
 import { priorSets, recordsFor } from '../lib/pr'
 import { fmtKg } from '../lib/format'
@@ -13,6 +14,7 @@ export default function Exercises() {
   const db = useStore((s) => s.db)
   const [q, setQ] = useState('')
   const [muscle, setMuscle] = useState<string>('All')
+  const [eq, setEq] = useState<string>('All')
   const [creating, setCreating] = useState(false)
 
   const records = useMemo(() => {
@@ -21,20 +23,50 @@ export default function Exercises() {
     return m
   }, [db])
 
-  const counts = useMemo(() => {
-    const c = new Map<string, number>()
-    for (const e of db.exercises) c.set(e.muscle, (c.get(e.muscle) ?? 0) + 1)
-    return c
-  }, [db.exercises])
+  const { muscles, equipment } = useMemo(() => facets(db.exercises), [db.exercises])
+  const filtering = !!q.trim() || muscle !== 'All' || eq !== 'All'
+  const recent = useMemo(
+    () => (filtering ? [] : recentExerciseIds(db.sessions, 4).map((id) => db.exercises.find((e) => e.id === id)).filter((e): e is Exercise => !!e)),
+    [db.sessions, db.exercises, filtering]
+  )
 
   const groups = useMemo(() => {
-    const needle = q.trim().toLowerCase()
-    const list = db.exercises
-      .filter((e) => (muscle === 'All' || e.muscle === muscle) && (!needle || e.name.toLowerCase().includes(needle) || e.muscle.toLowerCase().includes(needle)))
-      .sort((a, b) => a.name.localeCompare(b.name))
+    const list = filterExercises(db.exercises, { q, muscle, equipment: eq }).sort((a, b) => a.name.localeCompare(b.name))
     const order = [...MUSCLES, ...new Set(list.map((e) => e.muscle).filter((m) => !MUSCLES.includes(m)))]
     return order.map((m) => ({ muscle: m, items: list.filter((e) => e.muscle === m) })).filter((g) => g.items.length)
-  }, [db.exercises, q, muscle])
+  }, [db.exercises, q, muscle, eq])
+
+  const row = (e: Exercise, withMuscle = false) => {
+    const rec = records.get(e.id)
+    const best = trackingOf(e) === 'weight_reps' && rec?.bestE1rm ? Math.round(rec.bestE1rm.value) : null
+    const bestSet = rec?.heaviest
+      ? trackingOf(e) === 'weight_reps' || rec.heaviest.weight > 0
+        ? `Best ${fmtKg(rec.heaviest.weight)} kg × ${rec.heaviest.reps}`
+        : `Best ${Math.max(...rec.repTable.map((r) => r.reps))} reps`
+      : trackingOf(e) === 'time'
+        ? 'Timed'
+        : 'Not logged yet'
+    const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
+    return (
+      <button key={e.id} className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
+        <Thumb path={e.image_path} name={e.name} size={44} />
+        <div className="grow">
+          <div className="title ellipsis">{e.name}</div>
+          <div className="meta ellipsis">{meta}</div>
+        </div>
+        {best != null && (
+          <div className="trail">
+            <div className="kpi">
+              {best}
+              <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>kg</span>
+            </div>
+            <div className="tiny muted">est. 1RM</div>
+          </div>
+        )}
+        <ChevronRight size={18} className="chev" />
+      </button>
+    )
+  }
 
   const total = groups.reduce((a, g) => a + g.items.length, 0)
 
@@ -64,13 +96,16 @@ export default function Exercises() {
               </button>
             )}
           </div>
-          <div className="chips" role="tablist" aria-label="Muscle group">
-            {['All', ...MUSCLES.filter((m) => counts.has(m))].map((m) => (
-              <button key={m} role="tab" aria-selected={muscle === m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(m)}>
-                {m} <span className="n">{m === 'All' ? db.exercises.length : counts.get(m)}</span>
-              </button>
-            ))}
-          </div>
+          <FilterChips muscles={muscles} equipment={equipment} muscle={muscle} eq={eq} setMuscle={setMuscle} setEq={setEq} />
+
+          {recent.length > 0 && (
+            <section>
+              <div className="section-label">
+                <span>Recent</span>
+              </div>
+              <div className="list-group" style={{ ['--inset' as string]: '70px' }}>{recent.map((e) => row(e, true))}</div>
+            </section>
+          )}
 
           {groups.map((g) => (
             <section key={g.muscle}>
@@ -79,37 +114,13 @@ export default function Exercises() {
                 <span className="count">{g.items.length}</span>
               </div>
               <div className="list-group" style={{ ['--inset' as string]: '70px' }}>
-                {g.items.map((e) => {
-                  const rec = records.get(e.id)
-                  const best = rec?.bestE1rm ? Math.round(rec.bestE1rm.value) : null
-                  return (
-                    <button key={e.id} className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
-                      <Thumb path={e.image_path} name={e.name} size={44} />
-                      <div className="grow">
-                        <div className="title ellipsis">{e.name}</div>
-                        <div className="meta ellipsis">
-                          {rec?.heaviest ? `Best set ${fmtKg(rec.heaviest.weight)} kg × ${rec.heaviest.reps}` : 'Not logged yet'}
-                        </div>
-                      </div>
-                      {best != null && (
-                        <div className="trail">
-                          <div className="kpi">
-                            {best}
-                            <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>kg</span>
-                          </div>
-                          <div className="tiny muted">est. 1RM</div>
-                        </div>
-                      )}
-                      <ChevronRight size={18} className="chev" />
-                    </button>
-                  )
-                })}
+                {g.items.map((e) => row(e))}
               </div>
             </section>
           ))}
           {!total && (
             <div className="muted center small" style={{ padding: 'var(--s5)' }}>
-              No exercises match “{q}”.{' '}
+              No exercises match{q.trim() ? ` “${q.trim()}”` : ' these filters'}.{' '}
               <button className="btn ghost sm" style={{ color: 'var(--accent)' }} onClick={() => setCreating(true)}>
                 Create it
               </button>
