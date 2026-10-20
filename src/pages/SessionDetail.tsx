@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronDown, Pencil, Share2, Trash2, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
@@ -23,7 +23,7 @@ import '../styles/insights.css'
 import '../styles/progress.css'
 
 const KIND: Record<string, string> = { work: '', failure: 'F', drop: 'D', warmup: 'W' }
-const PR_LABEL = { weight: 'heaviest', e1rm: 'est. 1RM', reps: 'rep record' } as const
+const PR_LABEL = { weight: 'heaviest weight', e1rm: 'best est. 1-rep max', reps: 'most reps' } as const
 
 /** "80 kg × 8", "12 reps", "+10 kg × 12", "1:30" depending on what the exercise tracks. */
 function SetText({ x, tracking }: { x: SessionSet; tracking: Tracking }) {
@@ -214,7 +214,7 @@ export default function SessionDetail() {
     <div className="stack" style={{ gap: 18 }}>
       <div className="page-head">
         <button className="btn icon ghost" onClick={() => nav(fresh ? '/history' : (-1 as any))} aria-label="Back">
-          <ArrowLeft size={22} />
+          <ChevronLeft size={26} />
         </button>
         <div className="grow">
           <h1 className="ellipsis">{fresh ? 'Summary' : s.name}</h1>

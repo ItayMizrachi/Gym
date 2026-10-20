@@ -3,7 +3,7 @@
 
 .ins-title {
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 650;
   line-height: 1.1;
 }
@@ -15,7 +15,7 @@
 .sec-head h2 {
   flex: 1;
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 650;
 }
 
@@ -30,8 +30,8 @@
   background: #2b2409;
   color: var(--accent);
   font-family: var(--display);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 650;
   line-height: 1;
 }
 .streak-pill .u {
@@ -79,10 +79,11 @@
 }
 .hero-name {
   font-family: var(--display);
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1;
   padding-right: 70px;
+  letter-spacing: var(--track-tight);
 }
 .hero-meta {
   display: flex;
@@ -113,8 +114,9 @@
 }
 .welcome h2 {
   font-family: var(--display);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
+  letter-spacing: var(--track-tight);
 }
 .welcome-mark {
   width: 52px;
@@ -228,7 +230,7 @@
 .mbar-v {
   text-align: right;
   font-family: var(--display);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -245,7 +247,7 @@
 .mbar-track.bare span {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -260,7 +262,7 @@
 }
 .cal-wd {
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   padding-bottom: 2px;
 }
@@ -344,7 +346,7 @@
 }
 .trow-name {
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 650;
   line-height: 1.15;
 }
@@ -382,9 +384,10 @@
 }
 .trend-v {
   font-family: var(--display);
-  font-size: 32px;
-  font-weight: 650;
+  font-size: 28px;
+  font-weight: 700;
   line-height: 1;
+  letter-spacing: var(--track-tight);
 }
 .month-head {
   display: flex;
@@ -398,7 +401,7 @@
 .month-head h2 {
   flex: 1;
   font-family: var(--display);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 650;
 }
 .hrow {
@@ -424,9 +427,10 @@
 }
 .hdate .d {
   font-family: var(--display);
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: var(--track-tight);
 }
 .hdate .w {
   font-size: 12px;
@@ -434,7 +438,7 @@
 }
 .hname {
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 650;
   line-height: 1.15;
 }
@@ -477,9 +481,10 @@
 }
 .done-title {
   font-family: var(--display);
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: var(--track-tight);
 }
 .done-sub {
   color: var(--muted);
@@ -553,7 +558,7 @@
 }
 .pr-item .w {
   font-family: var(--display);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 650;
   white-space: nowrap;
 }
@@ -565,16 +570,16 @@
   border-radius: 50%;
   border: 2px solid #bdbab2;
   font-family: var(--display);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 650;
 }
 .kind-tag.drop {
   border-color: var(--plate-blue);
-  color: var(--plate-blue);
+  color: var(--blue-text);
 }
 .kind-tag.failure {
   border-color: var(--danger);
-  color: var(--danger);
+  color: var(--danger-text);
 }
 .kind-tag.warmup {
   border-style: dashed;
@@ -585,11 +590,42 @@
   display: block;
   margin-top: 4px;
   font-family: var(--display);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--muted);
 }
 .ins-actions .btn {
   padding: 0 10px;
   white-space: nowrap;
+}
+
+/* ---------- design pass: workout rows with one clear Start ---------- */
+.tlist { border-radius: var(--r-lg); }
+.trow { gap: var(--s1); padding: 10px 12px 10px var(--s4); min-height: 68px; }
+.trow-name { font-size: 17px; }
+.trow .trow-more { color: var(--muted); }
+.trow .btn.trow-start {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+  font-weight: 650;
+  gap: 6px;
+}
+.trow.next .btn.trow-start { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ins-actions { gap: var(--s2); }
+.ins-actions .btn { min-height: var(--btn-h); }
+.stat .delta { white-space: normal; line-height: 1.25; }
+.ins-home > .page-head { align-items: center; }
+.ins-home > .page-head h1 { white-space: nowrap; }
+@media (max-width: 360px) {
+  .ins-home > .page-head h1 { font-size: 24px; }
+}
+@media (max-width: 360px) {
+  .trow .trow-more { display: none; }
+  .trow { padding-left: var(--s3); }
+  .ins-actions .btn { font-size: 15px; padding: 0 8px; }
+  .ins-actions .btn svg { display: none; }
 }

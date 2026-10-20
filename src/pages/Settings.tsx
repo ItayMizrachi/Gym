@@ -1,5 +1,5 @@
 import { ReactNode, useRef, useState } from 'react'
-import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
+import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
 import { useStore } from '../lib/store'
@@ -139,7 +139,7 @@ export default function SettingsPage() {
         'Help',
         'New here? Start with these.',
         <>
-          {link('How GymLog works', '', <HelpCircle size={18} aria-hidden />, () => nav('/help'), true)}
+          {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
           {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
           <div className="tiny muted">
             <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
@@ -150,22 +150,33 @@ export default function SettingsPage() {
 
       {group(
         'Account',
-        repo?.mode === 'cloud' ? 'Who you are signed in as.' : 'Where your data is kept.',
+        'Your Google account.',
         <>
           {repo?.mode === 'cloud' ? (
-            <div className="small muted">
-              Signed in as <b style={{ color: 'var(--text)' }}>{user?.email ?? user?.id}</b>. Your data syncs across devices and is only visible to
-              you.
-            </div>
+            <>
+              <div className="acct-row">
+                <div className="acct-avatar" aria-hidden>
+                  {(user?.email ?? '?').slice(0, 1).toUpperCase()}
+                </div>
+                <div className="grow" style={{ minWidth: 0 }}>
+                  <div className="acct-email ellipsis">{user?.email ?? user?.id}</div>
+                  <div className="small muted">Signed in with Google · synced across your devices</div>
+                </div>
+              </div>
+              <button className="btn secondary block" onClick={() => signOut()}>
+                <LogOut size={16} aria-hidden /> Sign out
+              </button>
+            </>
           ) : (
-            <div className="small muted">
-              Demo mode: your data lives only in this browser.
-              {cloudConfigured ? ' Sign in to sync it across devices.' : ' Cloud sync is not configured for this install (see README).'}
-            </div>
+            <>
+              <div className="small muted">Not signed in. Workouts are saved on this device only.</div>
+              {cloudConfigured && (
+                <button className="btn primary block" onClick={() => signOut()}>
+                  <LogIn size={18} aria-hidden /> Sign in with Google
+                </button>
+              )}
+            </>
           )}
-          <button className="btn" onClick={() => signOut()}>
-            <LogOut size={16} aria-hidden /> {repo?.mode === 'cloud' ? 'Sign out' : cloudConfigured ? 'Leave demo / sign in' : 'Reload demo'}
-          </button>
         </>
       )}
 

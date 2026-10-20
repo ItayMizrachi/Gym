@@ -32,7 +32,7 @@ function fit(ctx: CanvasRenderingContext2D, text: string, maxW: number): string 
 
 export async function renderShareCard(d: ShareCardData): Promise<Blob> {
   const C = {
-    bg: token('--bg', '#141518'),
+    bg: token('--bg', '#0f1013'),
     card: token('--card', '#1f2126'),
     card2: token('--card2', '#292c32'),
     line: token('--line', '#34383f'),
@@ -42,14 +42,14 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
     ok: token('--ok', '#5fcf8f'),
     danger: token('--danger', '#f0594f')
   }
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
-  const body = `'Barlow', 'Segoe UI', Roboto, Arial, sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
+  const body = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   try {
     await Promise.all([
-      document.fonts.load(`700 120px 'Barlow Condensed'`),
-      document.fonts.load(`600 40px 'Barlow Condensed'`),
-      document.fonts.load(`500 36px 'Barlow'`),
-      document.fonts.load(`600 36px 'Barlow'`)
+      document.fonts.load(`700 120px 'Inter Variable'`),
+      document.fonts.load(`600 40px 'Inter Variable'`),
+      document.fonts.load(`500 36px 'Inter Variable'`),
+      document.fonts.load(`600 36px 'Inter Variable'`)
     ])
   } catch {
     /* fall back to system fonts */
@@ -189,7 +189,7 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
 }
 
 function drawFooter(ctx: CanvasRenderingContext2D, H: number, L: number, C: { accent: string; bg: string; text: string }) {
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   ctx.fillStyle = C.accent
   ctx.beginPath()
   ctx.arc(L + 18, H - 92, 18, 0, Math.PI * 2)
@@ -230,7 +230,7 @@ export async function shareOrDownload(blob: Blob, filename: string, text: string
 /* ---------- progress photo comparison ---------- */
 
 export interface ComparePhoto {
-  /** any URL the browser can fetch (object URL in demo mode, signed URL in the cloud) */
+  /** any URL the browser can fetch (object URL in local mode, signed URL in the cloud) */
   url: string
   date: string // already formatted
   weight: string | null // e.g. "81.2 kg"
@@ -253,17 +253,17 @@ function drawCover(ctx: CanvasRenderingContext2D, img: ImageBitmap, x: number, y
 /** Two progress photos side by side with date and weight, as a PNG. */
 export async function renderCompareCard(a: ComparePhoto, b: ComparePhoto, caption: string | null): Promise<Blob> {
   const C = {
-    bg: token('--bg', '#141518'),
+    bg: token('--bg', '#0f1013'),
     card: token('--card', '#1f2126'),
     line: token('--line', '#34383f'),
     text: token('--text', '#eceae4'),
     muted: token('--muted', '#9b9a94'),
     accent: token('--accent', '#f0b92a')
   }
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
-  const body = `'Barlow', 'Segoe UI', Roboto, Arial, sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
+  const body = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   try {
-    await Promise.all([document.fonts.load(`700 80px 'Barlow Condensed'`), document.fonts.load(`500 36px 'Barlow'`)])
+    await Promise.all([document.fonts.load(`700 80px 'Inter Variable'`), document.fonts.load(`500 36px 'Inter Variable'`)])
   } catch {
     /* system fonts */
   }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -56,11 +56,11 @@ function splitName(name: string): [string, string] {
 
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
-  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last week</div>
+  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
   return (
     <div className={`delta ${d > 0 ? 'up' : 'down'}`}>
       {d > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-      {fmt(Math.abs(d))} vs last week
+      {fmt(Math.abs(d))} vs last wk
     </div>
   )
 }
@@ -81,7 +81,6 @@ export default function Home() {
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
   const user = useStore((s) => s.user)
-  const repoMode = useStore((s) => s.repo?.mode)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
   const [moving, setMoving] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -152,19 +151,10 @@ export default function Home() {
           >
             <Flame size={16} aria-hidden />
             <span>{streak.current}</span>
-            <span className="u">wk streak</span>
+            <span className="u">wk</span>
           </div>
         )}
-        <button className="btn icon ghost ph-help" onClick={() => nav('/help')} aria-label="How it works">
-          <HelpCircle size={22} />
-        </button>
       </div>
-
-      {repoMode === 'local' && (
-        <div className="card small" style={{ borderColor: '#5c4a0f', color: 'var(--warn)' }}>
-          Demo mode: data is saved only on this device. Sign in (Settings) to sync across devices.
-        </div>
-      )}
 
       {active && (
         <div className="banner stack" style={{ gap: 8 }}>
@@ -257,6 +247,88 @@ export default function Home() {
         </div>
       )}
 
+      <div className="row ins-actions">
+        {workouts.length > 0 && (
+          <button className="btn secondary grow" onClick={newWorkout}>
+            <Plus size={18} /> New workout
+          </button>
+        )}
+        <button
+          className="btn secondary grow"
+          disabled={!!active}
+          onClick={() => {
+            primeAudio()
+            nav(`/session/${startEmptySession()}`)
+          }}
+        >
+          <Zap size={18} /> Empty workout
+        </button>
+      </div>
+      {workouts.length > 0 && (
+        <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
+          <div className="sec-head">
+            <h2>Your workouts</h2>
+            <span className="small muted">
+              {workouts.length} workout{workouts.length === 1 ? '' : 's'}
+            </span>
+          </div>
+          {groups.map((g) => {
+            const shut = folded.includes(g.label)
+            return (
+              <div key={g.label} className="fold">
+                {groups.length > 1 && (
+                  <div className="row" style={{ gap: 4 }}>
+                    <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
+                      <ChevronDown size={18} className="fold-caret" aria-hidden />
+                      {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
+                      <h2 className="ellipsis">{g.label}</h2>
+                      <span className="small muted">{g.workouts.length}</span>
+                    </button>
+                    {g.folder && (
+                      <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
+                        <MoreHorizontal size={18} />
+                      </button>
+                    )}
+                  </div>
+                )}
+                {!shut && (
+                  <div className="tlist">
+                    {g.workouts.map((w) => {
+                      const info = templateInfo(db, w)
+                      const isNext = next?.workout.id === w.id
+                      return (
+                        <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
+                          <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                            <div className="trow-name ellipsis">{w.name}</div>
+                            <div className="small muted ellipsis">
+                              {info.wes.length} exercises · {info.sets} sets
+                              {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
+                            </div>
+                          </button>
+                          <button className="btn icon ghost trow-more" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
+                            <FolderInput size={18} />
+                          </button>
+                          <button
+                            className="btn sm trow-start"
+                            disabled={!!active || info.wes.length === 0}
+                            onClick={() => start(w)}
+                            aria-label={`Start ${w.name}`}
+                          >
+                            <Play size={14} aria-hidden /> Start
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </section>
+      )}
+      {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
+      {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
+
       {finished.length > 0 && (
         <>
           <section className="stack" style={{ gap: 10 }}>
@@ -344,91 +416,6 @@ export default function Home() {
         </>
       )}
 
-      {workouts.length > 0 && (
-        <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
-          <div className="sec-head">
-            <h2>Your workouts</h2>
-            <span className="small muted">
-              {workouts.length} workout{workouts.length === 1 ? '' : 's'}
-            </span>
-          </div>
-          {groups.map((g) => {
-            const shut = folded.includes(g.label)
-            return (
-              <div key={g.label} className="fold">
-                {groups.length > 1 && (
-                  <div className="row" style={{ gap: 4 }}>
-                    <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
-                      <ChevronDown size={18} className="fold-caret" aria-hidden />
-                      {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
-                      <h2 className="ellipsis">{g.label}</h2>
-                      <span className="small muted">{g.workouts.length}</span>
-                    </button>
-                    {g.folder && (
-                      <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
-                        <MoreHorizontal size={18} />
-                      </button>
-                    )}
-                  </div>
-                )}
-                {!shut && (
-                  <div className="tlist">
-                    {g.workouts.map((w) => {
-                      const info = templateInfo(db, w)
-                      const isNext = next?.workout.id === w.id
-                      return (
-                        <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
-                          <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                            <div className="trow-name ellipsis">{w.name}</div>
-                            <div className="small muted ellipsis">
-                              {info.wes.length} exercises · {info.sets} sets
-                              {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
-                            </div>
-                          </button>
-                          <button className="btn icon sm ghost" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
-                            <FolderInput size={16} />
-                          </button>
-                          <button className="btn icon sm ghost" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            className="btn icon sm"
-                            disabled={!!active || info.wes.length === 0}
-                            onClick={() => start(w)}
-                            aria-label={`Start ${w.name}`}
-                          >
-                            <Play size={16} />
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </section>
-      )}
-      {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
-      {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
-
-      <div className="row ins-actions">
-        {workouts.length > 0 && (
-          <button className="btn grow" onClick={newWorkout}>
-            <Plus size={18} /> New workout
-          </button>
-        )}
-        <button
-          className="btn grow"
-          disabled={!!active}
-          onClick={() => {
-            primeAudio()
-            nav(`/session/${startEmptySession()}`)
-          }}
-        >
-          <Zap size={18} /> Empty workout
-        </button>
-      </div>
       <div className="list-group home-links">
         {workouts.length > 0 && (
           <button className="list-row" onClick={() => nav('/programs')}>

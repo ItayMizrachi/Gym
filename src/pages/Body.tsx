@@ -364,7 +364,7 @@ export default function Body() {
                 <button key={m.id} className="list-row" style={{ minHeight: 56 }} onClick={() => setEditing(m)}>
                   {m.photo_path && <Thumb path={m.photo_path} size={40} />}
                   <div className="grow">
-                    <div className="title">{fmtDateLong(m.date)}</div>
+                    <div className="title entry-date">{fmtDateLong(m.date)}</div>
                     {m.note && <div className="meta ellipsis">{m.note}</div>}
                   </div>
                   <div className="trail">
