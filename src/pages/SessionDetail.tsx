@@ -5,6 +5,7 @@ import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { Confirm, ImageField } from '../components/ui'
+import { SessionEditor } from '../components/SessionEditor'
 import {
   estimateCalories,
   fmtMinutes,
@@ -59,6 +60,7 @@ export default function SessionDetail() {
   const [confirm, setConfirm] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [allMuscles, setAllMuscles] = useState(false)
+  const [editing, setEditing] = useState(false)
   const save = useStore((st) => st.save)
   const s = db.sessions.find((x) => x.id === id)
   const prs = useMemo(() => (s ? sessionPRs(db, s) : []), [db, s])
@@ -67,6 +69,8 @@ export default function SessionDetail() {
   const bodyKg = useMemo(() => latestBodyWeight(db), [db])
   const prev = useMemo(() => (s ? previousOfTemplate(db, s) : null), [db, s])
   if (!s) return <div className="card">Session not found. <button className="btn sm" onClick={() => nav('/history')}>History</button></div>
+
+  if (editing) return <SessionEditor session={s} onDone={() => setEditing(false)} />
 
   const m = summarizeSession(s)
   const pm = prev ? summarizeSession(prev) : null
@@ -334,6 +338,9 @@ export default function SessionDetail() {
         </div>
       )}
 
+      <button className="btn" onClick={() => setEditing(true)}>
+        <Pencil size={16} /> Edit workout
+      </button>
       <button className="btn danger" onClick={() => setConfirm(true)}>
         <Trash2 size={16} /> Delete this workout
       </button>
