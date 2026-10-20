@@ -112,16 +112,54 @@ export function isRetryable(err: any): boolean {
   return !err?.code && /fetch|network|load failed|timeout|timed out|aborted|offline/i.test(msg)
 }
 
+/**
+ * The database is missing a column or table the app sends (the app was updated but supabase/schema.sql was
+ * not re-run). Retrying cannot work yet, but dropping the change would lose data, so it stays queued.
+ */
+export function isSchemaMismatch(err: any): boolean {
+  const code = String(err?.code ?? '')
+  return code === 'PGRST204' || code === 'PGRST205' || code === '42703' || code === '42P01'
+}
+
+const RETRY_MS = [5_000, 15_000, 30_000, 60_000]
+const SIGNED_URL_SEC = 12 * 3600 // photos: one signed link lasts 12 h ...
+const SIGNED_URL_REUSE_MS = 11 * 3600 * 1000 // ... and is reused for 11 h (same URL = browser cache hit)
+
 export class SupabaseRepo implements Repo {
   mode = 'cloud' as const
   private urlCache = new Map<string, { url: string; at: number }>()
+  private urlPending = new Map<string, Promise<string | null>>()
   private outbox: Op[] = []
   private cache: DB = emptyDB()
   private flushing: Promise<void> | null = null
   private blocked = false // last attempt hit a network error
+  private retryTimer: ReturnType<typeof setTimeout> | null = null
+  private retries = 0
+  private schemaWarned = false
   private handlers: { onQueue: (n: number) => void; onError: (msg: string) => void } | null = null
 
-  constructor(private sb: SupabaseClient, public userId: string) {}
+  constructor(private sb: SupabaseClient, public userId: string) {
+    // The 'online' event alone is not enough on phones (gym wifi without internet, app resumed after hours with
+    // an expired token): also retry after a token refresh and whenever the app comes back to the front.
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'TOKEN_REFRESHED' && this.outbox.length) setTimeout(() => void this.flushQueue(), 0)
+    })
+    if (typeof document !== 'undefined')
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.outbox.length) void this.flushQueue()
+      })
+  }
+
+  /** Try again later with growing gaps (5 s, 15 s, 30 s, then every minute) while changes are waiting. */
+  private scheduleRetry() {
+    if (this.retryTimer) return
+    const wait = RETRY_MS[Math.min(this.retries, RETRY_MS.length - 1)]
+    this.retries++
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null
+      void this.flushQueue()
+    }, wait)
+  }
 
   setHandlers(h: { onQueue: (n: number) => void; onError: (msg: string) => void }) {
     this.handlers = h
@@ -158,6 +196,8 @@ export class SupabaseRepo implements Repo {
 
   async loadAll(): Promise<DB> {
     this.outbox = (await get<Op[]>(this.k('outbox'))) ?? []
+    const links = await get<[string, { url: string; at: number }][]>(this.k('signed'))
+    if (links) this.urlCache = new Map(links)
     const saved = await get<DB>(this.k('cache'))
     this.cache = { ...emptyDB(), ...(saved ?? {}) }
     this.handlers?.onQueue(this.outbox.length)
@@ -241,12 +281,25 @@ export class SupabaseRepo implements Repo {
       }
       if (!error) {
         this.blocked = false
+        this.retries = 0
+        this.schemaWarned = false
         this.outbox.shift()
         await this.saveOutbox()
         continue
       }
+      if (isSchemaMismatch(error)) {
+        this.blocked = true
+        if (!this.schemaWarned) {
+          this.schemaWarned = true
+          this.handlers?.onError(
+            `The database needs an update: run supabase/schema.sql again in Supabase. Your changes are kept on this phone. (${error.message ?? error})`
+          )
+        }
+        return // keep everything; retried on the next change, reconnect or app resume
+      }
       if (isRetryable(error)) {
         this.blocked = true
+        this.scheduleRetry()
         return // keep everything, try again when the network is back
       }
       this.outbox.shift() // the server refused this change; retrying will not help
@@ -265,14 +318,33 @@ export class SupabaseRepo implements Repo {
     return path
   }
 
-  async imageUrl(path: string | null): Promise<string | null> {
-    if (!path) return null
+  /**
+   * Photos live in a private bucket, so each one needs a signed link. Links are remembered on the device: the
+   * same link keeps hitting the browser cache, and offline an old link still works because the service worker
+   * caches photos by path (vite.config.ts, 'gymlog-photos').
+   */
+  imageUrl(path: string | null): Promise<string | null> {
+    if (!path) return Promise.resolve(null)
     const c = this.urlCache.get(path)
-    if (c && Date.now() - c.at < 45 * 60 * 1000) return c.url
-    const { data, error } = await this.sb.storage.from(BUCKET).createSignedUrl(path, 3600)
-    if (error || !data) return null
-    this.urlCache.set(path, { url: data.signedUrl, at: Date.now() })
-    return data.signedUrl
+    if (c && Date.now() - c.at < SIGNED_URL_REUSE_MS) return Promise.resolve(c.url)
+    // many thumbnails can ask for the same photo at once: one request each
+    const pending = this.urlPending.get(path)
+    if (pending) return pending
+    const p = this.signUrl(path, c?.url ?? null).finally(() => this.urlPending.delete(path))
+    this.urlPending.set(path, p)
+    return p
+  }
+
+  private async signUrl(path: string, stale: string | null): Promise<string | null> {
+    try {
+      const { data, error } = await this.sb.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_SEC)
+      if (error || !data) return stale
+      this.urlCache.set(path, { url: data.signedUrl, at: Date.now() })
+      void set(this.k('signed'), [...this.urlCache])
+      return data.signedUrl
+    } catch {
+      return stale // offline: the old link is answered from the service worker's photo cache
+    }
   }
 
   async deleteImage(path: string | null) {
@@ -283,5 +355,6 @@ export class SupabaseRepo implements Repo {
       /* best effort */
     }
     this.urlCache.delete(path)
+    void set(this.k('signed'), [...this.urlCache])
   }
 }

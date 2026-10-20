@@ -1,5 +1,8 @@
 -- GymLog schema. Paste this whole file into Supabase -> SQL Editor -> Run.
 -- Every table is protected by row level security: a signed-in user can only ever see and change their own rows.
+--
+-- Safe to run again at any time (after an app update, or if you are unsure it ran): it only creates what is
+-- missing and never deletes data. New columns are added in the "Upgrades" section at the bottom.
 
 create table if not exists public.exercises (
   id uuid primary key,
@@ -65,6 +68,14 @@ create index if not exists workout_exercises_workout_idx on public.workout_exerc
 create index if not exists sessions_user_started_idx on public.sessions (user_id, started_at desc);
 create index if not exists metrics_user_date_idx on public.metrics (user_id, date desc);
 
+-- API access ---------------------------------------------------------------
+-- Newer Supabase projects can be created with "automatically expose new tables" switched off; grant explicitly
+-- so the app can reach the tables either way. Row level security below still limits every user to their rows.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on
+  public.exercises, public.workouts, public.workout_exercises, public.sessions, public.metrics
+  to authenticated;
+
 -- Row level security -------------------------------------------------------
 alter table public.exercises enable row level security;
 alter table public.workouts enable row level security;
@@ -88,6 +99,10 @@ end $$;
 insert into storage.buckets (id, name, public)
 values ('gymlog', 'gymlog', false)
 on conflict (id) do nothing;
+-- photos are resized JPEGs on the phone; refuse anything else or anything huge
+update storage.buckets
+set file_size_limit = 10485760, allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp']
+where id = 'gymlog';
 
 drop policy if exists "gymlog own files read" on storage.objects;
 drop policy if exists "gymlog own files insert" on storage.objects;
@@ -102,3 +117,12 @@ create policy "gymlog own files update" on storage.objects for update to authent
   using (bucket_id = 'gymlog' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "gymlog own files delete" on storage.objects for delete to authenticated
   using (bucket_id = 'gymlog' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- Upgrades -----------------------------------------------------------------
+-- When the app starts saving a new field, add it here as `add column if not exists`, so re-running this file
+-- upgrades an existing project. (Until it is run, the app keeps such changes queued on the phone and shows
+-- "The database needs an update".) Example:
+--   alter table public.exercises add column if not exists equipment text not null default '';
+
+-- Ask the API to reload its schema cache right away, so new columns work without waiting.
+notify pgrst, 'reload schema';
