@@ -8,10 +8,11 @@ import { addExerciseToSession, discardSession, finishSession, newSet, toggleProg
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
-import { Confirm, NumInput, Sheet, Thumb, useImageUrl } from '../components/ui'
+import { Confirm, NumInput, Sheet, Thumb, Toggle, useImageUrl } from '../components/ui'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
 import { BodyMap } from '../components/BodyMap'
+import { KeypadProvider, KpField, useKeypadMode } from '../components/Keypad'
 import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/muscles'
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
@@ -93,6 +94,7 @@ function RpeSheet({ value, onPick, onClose }: { value: number | null | undefined
 function useLongPress(onLong: () => void, ms = 500) {
   const t = useRef<ReturnType<typeof setTimeout> | null>(null)
   const start = useRef<{ x: number; y: number } | null>(null)
+  const fired = useRef(false)
   const stop = () => {
     if (t.current) clearTimeout(t.current)
     t.current = null
@@ -101,8 +103,10 @@ function useLongPress(onLong: () => void, ms = 500) {
   return {
     onPointerDown: (e: React.PointerEvent) => {
       start.current = { x: e.clientX, y: e.clientY }
+      fired.current = false
       t.current = setTimeout(() => {
         stop()
+        fired.current = true
         ;(document.activeElement as HTMLElement | null)?.blur?.()
         onLong()
       }, ms)
@@ -113,15 +117,25 @@ function useLongPress(onLong: () => void, ms = 500) {
     onPointerUp: stop,
     onPointerCancel: stop,
     onPointerLeave: stop,
-    onContextMenu: (e: React.MouseEvent) => e.preventDefault()
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+    // the tap that ends a long press should not also open the field
+    onClickCapture: (e: React.MouseEvent) => {
+      if (fired.current) {
+        fired.current = false
+        e.stopPropagation()
+      }
+    }
   }
 }
 
-function KgCell({ value, onChange, onLong }: { value: number; onChange: (n: number | null) => void; onLong: () => void }) {
+function KgCell({ id, label, value, onChange, onLong }: { id: string; label: string; value: number; onChange: (n: number | null) => void; onLong: () => void }) {
   const lp = useLongPress(onLong)
   return (
     <div className="kg-hold" {...lp}>
-      <NumInput value={value} onChange={onChange} ariaLabel="Weight kg (hold for plates)" />
+      <KpField
+        spec={{ id: `${id}:kg`, kind: 'kg', value, label: `${label} · kg`, onChange }}
+        native={<NumInput value={value} onChange={onChange} ariaLabel="Weight kg (hold for plates)" />}
+      />
     </div>
   )
 }
@@ -423,6 +437,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           const nextUndone = se.sets.findIndex((x) => !x.done && ELIGIBLE.has(x.kind))
           const need = i === nextUndone && tracking !== 'time' ? repsForPR(runningPrior(s.id), s.weight) : null
           const hintReps = need != null && need <= 20 ? need : null
+          const setNo = s.kind === 'work' ? String(workNo(i)) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'
           const nearTarget = hintReps != null && se.rep_max ? hintReps <= se.rep_max + 2 : false
           return (
             <div key={s.id} style={{ display: 'contents' }}>
@@ -437,26 +452,52 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
                 <div className="prev">{prevLabel(prev, tracking)}</div>
                 {tracking === 'time' ? (
                   <>
-                    <TimeInput
-                      value={watches.has(s.id) ? watchSec(s.id) : s.time_sec}
-                      running={watches.has(s.id)}
-                      placeholder={prev?.time_sec ? fmtTime(prev.time_sec) : ''}
-                      onChange={(sec) => patchSet(s.id, { time_sec: sec })}
+                    <KpField
+                      spec={{
+                        id: `${s.id}:time`,
+                        kind: 'time',
+                        value: s.time_sec ?? null,
+                        placeholder: prev?.time_sec ?? null,
+                        label: `Set ${setNo} · time`,
+                        onChange: (sec) => patchSet(s.id, { time_sec: sec })
+                      }}
+                      className={`num time ${watches.has(s.id) ? 'running' : ''}`}
+                      disabled={watches.has(s.id) || s.done}
+                      display={watches.has(s.id) ? fmtTime(watchSec(s.id)) : undefined}
+                      native={
+                        <TimeInput
+                          value={watches.has(s.id) ? watchSec(s.id) : s.time_sec}
+                          running={watches.has(s.id)}
+                          placeholder={prev?.time_sec ? fmtTime(prev.time_sec) : ''}
+                          onChange={(sec) => patchSet(s.id, { time_sec: sec })}
+                        />
+                      }
                     />
                     <StopwatchBtn set={s} onStop={(sec) => patchSet(s.id, { time_sec: sec || null }, true)} />
                   </>
                 ) : (
                 <>
                 {tracking === 'weight_reps' && (
-                  <KgCell value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} onLong={() => setPlateSet(s.id)} />
+                  <KgCell id={s.id} label={`Set ${setNo}`} value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} onLong={() => setPlateSet(s.id)} />
                 )}
-                <NumInput
-                  value={s.reps}
-                  decimal={false}
-                  placeholder={prev?.reps != null ? String(prev.reps) : se.rep_min ? String(se.rep_min) : ''}
-                  onChange={(n) => patchSet(s.id, { reps: n == null ? null : Math.round(n) })}
-                  ariaLabel="Reps"
+                <KpField
+                  spec={{
+                    id: `${s.id}:reps`,
+                    kind: 'reps',
+                    value: s.reps,
+                    placeholder: prev?.reps ?? (se.rep_min || null),
+                    label: `Set ${setNo} · reps`,
+                    onChange: (n) => patchSet(s.id, { reps: n == null ? null : Math.round(n) })
+                  }}
                   className={tracking === 'reps' ? 'num span2' : 'num'}
+                  native={<NumInput
+                    value={s.reps}
+                    decimal={false}
+                    placeholder={prev?.reps != null ? String(prev.reps) : se.rep_min ? String(se.rep_min) : ''}
+                    onChange={(n) => patchSet(s.id, { reps: n == null ? null : Math.round(n) })}
+                    ariaLabel="Reps"
+                    className={tracking === 'reps' ? 'num span2' : 'num'}
+                  />}
                 />
                 </>
                 )}
@@ -618,6 +659,7 @@ export default function SessionPage() {
   }
 
   return (
+    <KeypadProvider>
     <div className="stack" style={{ gap: 14 }}>
       <div className="sp-head">
         <div className="sp-row">
@@ -748,6 +790,7 @@ export default function SessionPage() {
         />
       )}
     </div>
+    </KeypadProvider>
   )
 }
 
@@ -800,6 +843,7 @@ function MoreSheet({
   onRemove: () => void
 }) {
   const [rest, setRest] = useState(fmtRest(se.rest_sec))
+  const [kpMode, setKpMode] = useKeypadMode()
   return (
     <Sheet title={se.name} onClose={onClose}>
       <div className="stack">
@@ -831,6 +875,7 @@ function MoreSheet({
         >
           Remove last set row
         </button>
+        <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
         <button className="btn danger" onClick={onRemove}>
           <Trash2 size={16} /> Remove exercise from workout
         </button>

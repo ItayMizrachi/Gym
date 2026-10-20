@@ -93,3 +93,74 @@
   background: var(--bg2);
   border-top: 1px solid var(--line);
 }
+
+/* ---------- number keypad ---------- */
+.kp-native { display: contents; }
+.kp-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  padding: 0 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.kp-field.empty { color: var(--faint); }
+.kp-field.active { border-color: var(--accent); box-shadow: var(--focus); background: var(--card); }
+.kp-field:disabled { opacity: 1; }
+.kp-spacer { height: 300px; }
+.kp {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 6px 8px calc(var(--safe-b) + 8px);
+  background: var(--bg2);
+  border-top: 1px solid var(--line-strong);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.45);
+  animation: sheet-up 0.22s var(--ease-spring);
+}
+.kp-bar { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.kp-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  min-width: 44px;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.kp-tool.on { background: var(--accent-soft); color: var(--accent); }
+.kp-tool:active { background: var(--card2); }
+.kp-label { font-size: 13px; color: var(--muted); text-align: right; padding-right: 2px; font-variant-numeric: tabular-nums; }
+.kp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
+.kp-grid.calc { grid-template-columns: repeat(5, 1fr); }
+.kp-key {
+  height: 50px;
+  border-radius: var(--r-sm);
+  background: var(--card2);
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t-fast) var(--ease);
+}
+.kp-key:active { background: var(--card3); }
+.kp-key.fn { background: var(--card); color: var(--text-2); font-size: 20px; }
+.kp-key.op { background: var(--card); color: var(--accent); }
+.kp-key.next { background: var(--accent); color: var(--accent-ink); font-family: var(--body); font-size: 17px; font-weight: 700; }
+.kp-key.span2 { grid-column: span 2; }
+.kp-key.span3 { grid-column: span 3; }
