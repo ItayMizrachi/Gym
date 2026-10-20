@@ -28,8 +28,9 @@
 - **Faster start:** the first download is about a quarter smaller (secondary screens load when first opened and
   are still cached for offline use).
 
-## In progress
-- Next from the roadmap: delete account and data from inside the app.
+## In progress (parallel sessions, each opens a PR that the coordinator merges)
+- Delete account and data (Settings → Account), body measurements (Body tab), records + achievements + weekly goal,
+  smart warm-ups + 1RM tools.
 
 ## Needs you
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
