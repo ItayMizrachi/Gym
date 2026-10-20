@@ -1,16 +1,48 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, Check, Share2, Trash2, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronDown, Pencil, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
-import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
-import { Confirm } from '../components/ui'
-import { fmtMinutes, fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
+import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
+import { Confirm, ImageField } from '../components/ui'
+import {
+  estimateCalories,
+  fmtMinutes,
+  fmtSets,
+  fmtVolume,
+  latestBodyWeight,
+  muscleSplit,
+  previousOfTemplate,
+  prSetIds,
+  summarizeSession
+} from '../lib/stats'
 import { renderShareCard, shareOrDownload } from '../lib/shareCard'
+import { SessionSet, Tracking, trackingOf } from '../lib/types'
 import '../styles/insights.css'
+import '../styles/progress.css'
 
 const KIND: Record<string, string> = { work: '', failure: 'F', drop: 'D', warmup: 'W' }
 const PR_LABEL = { weight: 'heaviest', e1rm: 'est. 1RM', reps: 'rep record' } as const
+
+/** "80 kg × 8", "12 reps", "+10 kg × 12", "1:30" depending on what the exercise tracks. */
+function SetText({ x, tracking }: { x: SessionSet; tracking: Tracking }) {
+  if (tracking === 'time' || (x.time_sec != null && x.reps == null)) return <>{fmtClock(x.time_sec ?? 0)}</>
+  if (tracking === 'reps')
+    return x.weight > 0 ? (
+      <>
+        +{fmtKg(x.weight)} kg<span className="x">×</span>
+        {x.reps ?? 0}
+      </>
+    ) : (
+      <>{x.reps ?? 0} reps</>
+    )
+  return (
+    <>
+      {fmtKg(x.weight)} kg<span className="x">×</span>
+      {x.reps ?? 0}
+    </>
+  )
+}
 
 function signed(n: number, fmt: (x: number) => string): string {
   return `${n > 0 ? '+' : n < 0 ? '−' : '±'}${fmt(Math.abs(n))}`
@@ -26,8 +58,13 @@ export default function SessionDetail() {
   const toast = useStore((s) => s.toast)
   const [confirm, setConfirm] = useState(false)
   const [sharing, setSharing] = useState(false)
+  const [allMuscles, setAllMuscles] = useState(false)
+  const save = useStore((st) => st.save)
   const s = db.sessions.find((x) => x.id === id)
   const prs = useMemo(() => (s ? sessionPRs(db, s) : []), [db, s])
+  const prIds = useMemo(() => (s ? prSetIds(db, s) : new Set<string>()), [db, s])
+  const split = useMemo(() => (s ? muscleSplit(db, s) : []), [db, s])
+  const bodyKg = useMemo(() => latestBodyWeight(db), [db])
   const prev = useMemo(() => (s ? previousOfTemplate(db, s) : null), [db, s])
   if (!s) return <div className="card">Session not found. <button className="btn sm" onClick={() => nav('/history')}>History</button></div>
 
@@ -62,20 +99,76 @@ export default function SessionDetail() {
     }
   }
 
+  const kcal = estimateCalories(m.minutes, bodyKg)
   const stats = (
-    <div className="stat-grid">
+    <div className="sum-grid">
       <div className="stat">
-        <div className="v">{m.minutes}</div>
-        <div className="l">minutes</div>
-      </div>
-      <div className="stat">
-        <div className="v">{m.sets}</div>
-        <div className="l">sets</div>
+        <div className="v">{fmtMinutes(m.minutes).replace(/ min$/, '')}</div>
+        <div className="l">{m.minutes < 60 ? 'minutes' : 'duration'}</div>
       </div>
       <div className="stat">
         <div className="v">{fmtVolume(m.volume).replace(/ (kg|t)$/, '')}</div>
         <div className="l">{m.volume >= 1000 ? 'tonnes' : 'kg'} lifted</div>
       </div>
+      <div className="stat">
+        <div className="v">{m.sets}</div>
+        <div className="l">sets</div>
+      </div>
+      <div className={`stat${prs.length ? ' pr' : ''}`}>
+        <div className="v">{prs.length}</div>
+        <div className="l">record{prs.length === 1 ? '' : 's'}</div>
+      </div>
+      <div className="stat wide">
+        <div className="v">
+          {kcal}
+          <span className="u">kcal</span>
+        </div>
+        <div className="l">
+          calories burned <span className="est">estimate</span>
+          <div className="tiny" style={{ marginTop: 2 }}>
+            From time and {bodyKg ? `your weight (${fmtKg(bodyKg)} kg)` : 'an average 75 kg'}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const shownSplit = allMuscles ? split : split.slice(0, 3)
+  const muscles = split.length > 0 && (
+    <div className="card">
+      <div className="ins-title" style={{ marginBottom: 6 }}>
+        Muscle split
+      </div>
+      {shownSplit.map((x) => (
+        <div key={x.muscle} className="split-row">
+          <span className="ellipsis">{x.muscle}</span>
+          <span className="split-bar">
+            <i style={{ width: `${Math.max(2, x.pct)}%` }} />
+          </span>
+          <span className="pct">{x.pct}%</span>
+        </div>
+      ))}
+      {split.length > 3 && (
+        <button className="btn sm ghost" style={{ marginTop: 4 }} onClick={() => setAllMuscles(!allMuscles)}>
+          <ChevronDown size={16} style={{ transform: allMuscles ? 'rotate(180deg)' : undefined }} />
+          {allMuscles ? 'Show less' : `Show ${split.length - 3} more`}
+        </button>
+      )}
+      <div className="tiny muted" style={{ marginTop: 4 }}>
+        Share of working sets. {fmtSets(split.reduce((a, x) => a + x.sets, 0))} sets in total.
+      </div>
+    </div>
+  )
+
+  const photo = (
+    <div className="card sd-photo">
+      <ImageField
+        path={s.data.photo_path ?? null}
+        folder="sessions"
+        large
+        label="Add a workout photo"
+        onChange={(p) => save('sessions', { ...s, data: { ...s.data, photo_path: p } })}
+      />
     </div>
   )
 
@@ -177,6 +270,10 @@ export default function SessionDetail() {
 
       {comparison}
 
+      {photo}
+
+      {muscles}
+
       {fresh && (
         <div className="row">
           <button className="btn grow" onClick={share} disabled={sharing}>
@@ -191,40 +288,41 @@ export default function SessionDetail() {
       {s.data.exercises.map((e, i) => {
         const done = e.sets.filter((x) => x.done)
         if (!done.length) return null
+        const tracking = trackingOf(db.exercises.find((x) => x.id === e.exercise_id))
+        const hasPr = done.some((x) => prIds.has(x.id))
         let n = 0
         return (
           <div key={i} className="card">
-            <div className="row" style={{ marginBottom: 6 }}>
+            <div className="row" style={{ marginBottom: 4 }}>
               <div className="grow" style={{ fontWeight: 700 }}>
                 {nameOf(e.exercise_id, e.name)}
               </div>
-              {prs.some((p) => p.exercise_id === e.exercise_id) && (
+              {hasPr && (
                 <span className="chip pr">
                   <Trophy size={12} /> PR
                 </span>
               )}
             </div>
-            <table className="t">
-              <thead>
-                <tr>
-                  <th>Set</th>
-                  <th>kg</th>
-                  <th>Reps</th>
-                </tr>
-              </thead>
-              <tbody>
-                {done.map((x) => {
-                  if (x.kind === 'work') n++
-                  return (
-                    <tr key={x.id}>
-                      <td>{KIND[x.kind] ? <span className={`kind-tag ${x.kind}`}>{KIND[x.kind]}</span> : n}</td>
-                      <td>{fmtKg(x.weight)}</td>
-                      <td>{x.reps}</td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+            <div className="sd-sets">
+              {done.map((x) => {
+                if (x.kind !== 'warmup') n++
+                const pr = prIds.has(x.id)
+                return (
+                  <div key={x.id} className={`sd-set${pr ? ' pr' : ''}`}>
+                    <span className="no">{KIND[x.kind] ? <span className={`kind-tag ${x.kind}`}>{KIND[x.kind]}</span> : n}</span>
+                    <span className="what">
+                      <SetText x={x} tracking={tracking} />
+                    </span>
+                    {x.rpe != null && <span className="small muted">RPE {x.rpe}</span>}
+                    {pr && (
+                      <span className="chip pr" aria-label="Record set">
+                        <Trophy size={12} />
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )
       })}
