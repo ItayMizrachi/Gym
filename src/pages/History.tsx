@@ -4,7 +4,7 @@ import { ChevronRight, Clock, Layers, Trophy, Weight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs } from '../lib/pr'
 import { Session } from '../lib/types'
-import { Empty } from '../components/ui'
+import { Empty, Thumb } from '../components/ui'
 import { SparkBars } from '../components/Sparkline'
 import { finishedSessions, fmtMinutes, fmtVolume, summarizeSession, SessionSummary, weeklyTrend } from '../lib/stats'
 import '../styles/insights.css'
@@ -148,6 +148,7 @@ export default function HistoryPage() {
                           </span>
                         </div>
                       </div>
+                      {s.data.photo_path && <Thumb path={s.data.photo_path} size={44} />}
                       {prs > 0 && (
                         <span className="chip pr">
                           <Trophy size={12} /> {prs}

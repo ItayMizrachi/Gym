@@ -5,17 +5,22 @@ import '../styles/insights.css'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
-/** Month calendar with training days shaded by how many sets were done that day. */
+/**
+ * Month calendar with training days shaded by how many sets were done that day.
+ * Pass `names` (day key → workout names) to print the workout name under each training day.
+ */
 export function CalendarHeat({
   days,
   now = new Date(),
   weekStartsOn = 0,
-  onDay
+  onDay,
+  names
 }: {
   days: Map<string, TrainingDay>
   now?: Date
   weekStartsOn?: number
   onDay?: (key: string, day: TrainingDay) => void
+  names?: Map<string, string[]>
 }) {
   const [offset, setOffset] = useState(0)
   const view = new Date(now.getFullYear(), now.getMonth() + offset, 1)
@@ -29,7 +34,7 @@ export function CalendarHeat({
   const labels = [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)]
 
   return (
-    <div className="cal">
+    <div className={`cal${names ? ' named' : ''}`}>
       <div className="row cal-head">
         <div className="grow">
           <div className="ins-title">{view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</div>
@@ -63,7 +68,13 @@ export function CalendarHeat({
               onClick={() => d && onDay?.(k, d)}
               aria-label={`${k}${d ? `, ${d.workouts} workout${d.workouts > 1 ? 's' : ''}, ${d.sets} sets` : ''}`}
             >
-              {Number(k.slice(8))}
+              <span className="cal-n">{Number(k.slice(8))}</span>
+              {names && d && (
+                <span className="cal-name">
+                  {names.get(k)?.[0] ?? ''}
+                  {(names.get(k)?.length ?? 0) > 1 && ' +'}
+                </span>
+              )}
             </button>
           )
         })}

@@ -153,3 +153,101 @@
 .ed-time .num {
   min-width: 0;
 }
+
+/* ---------- weekly bars ---------- */
+.wbars-read {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+  margin-bottom: 6px;
+}
+.wbars-read .kpi {
+  font-size: 28px;
+}
+.wbars-bar {
+  fill: var(--chalk-plate);
+  opacity: 0.55;
+}
+.wbars-bar.on {
+  fill: var(--accent);
+  opacity: 1;
+}
+.wbars-axis {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.wbars-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.wbars-label {
+  fill: var(--muted);
+  font-size: 10px;
+  font-family: var(--body);
+}
+
+/* ---------- progress page ---------- */
+.prof-totals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+}
+.prof-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  justify-content: space-between;
+  margin-bottom: var(--s3);
+}
+.prof-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+.prof-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 52px;
+  padding: 0 var(--s3);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-align: left;
+}
+.prof-link svg {
+  color: var(--muted);
+  flex: none;
+}
+.prof-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+/* calendar with workout names */
+.cal.named .cal-cell {
+  aspect-ratio: auto;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 6px 1px 4px;
+  gap: 2px;
+}
+.cal.named .cal-cell.pad {
+  min-height: 0;
+}
+.cal-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  line-height: 1.1;
+  font-weight: 600;
+}
