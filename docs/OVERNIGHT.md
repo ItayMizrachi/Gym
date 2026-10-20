@@ -11,8 +11,12 @@
 - **A picture for every exercise:** starter plan and all 30 ready-made programs show real photos; your own
   exercises get a matching picture automatically; tapping any picture opens "How to do it".
 
+- **Workout on the lock screen:** Settings → "Show workout on lock screen". While you train, the lock screen shows
+  the exercise, which set you are on and the rest countdown with a progress bar; ⏭ skips rest, ⏮ adds 15 s.
+  It uses the music card, so it replaces Spotify while on (that's why it's off by default). Explained in Help.
+
 ## In progress
-- Lock-screen workout status (rest countdown on the lock screen) — being built in the coordinator session.
+- Next from the roadmap: personalised start for new users (goal, experience, days → recommended program).
 
 ## Needs you
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

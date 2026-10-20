@@ -9,6 +9,8 @@ export interface Prefs {
   plates: number[]
   showRpe: boolean
   restNotify: boolean
+  /** show the running workout on the lock screen ("now playing" card) */
+  lockScreen: boolean
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -16,7 +18,8 @@ export const DEFAULT_PREFS: Prefs = {
   barKg: 20,
   plates: [25, 20, 15, 10, 5, 2.5, 1.25],
   showRpe: false,
-  restNotify: false
+  restNotify: false,
+  lockScreen: false
 }
 
 const KEY = 'gymlog:prefs'

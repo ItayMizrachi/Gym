@@ -37,7 +37,7 @@ Always keep something in progress. When the "Next" list runs low:
   every exercise in plans and programs, add your own.
 
 ## Next (priority order)
-1. **Lock-screen workout status.** While a workout runs, show the current exercise and the rest countdown on the
+1. ~~**Lock-screen workout status.**~~ Shipped 21 Oct (Media Session card, opt-in). While a workout runs, show the current exercise and the rest countdown on the
    phone's lock screen. In a PWA this is done with the Media Session API (a "now playing" card, opt-in because it
    takes over the music card), plus a rest-over notification where the platform allows it (Android; iOS needs
    web push). Real iOS Live Activities need a native app; note this honestly in Help.

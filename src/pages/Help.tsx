@@ -117,6 +117,17 @@ export default function Help() {
         <p>Starts when you log a set. Use −15 / +15 to adjust it. It beeps and vibrates when rest is over.</p>
       </Sec>
 
+      <Sec title="Workout on the lock screen">
+        <p>
+          Turn on <b>Show workout on lock screen</b> in Settings. While you train, the lock screen shows the current exercise,
+          the set you are on and the rest countdown. Its buttons skip the rest (⏭) or add 15 seconds (⏮).
+        </p>
+        <p className="muted">
+          It uses the same card as music, so it replaces Spotify or other audio while it is on. A true iPhone Live Activity
+          needs an App Store app; this is the closest a web app can get.
+        </p>
+      </Sec>
+
       <Sec title="Saving and offline">
         <div>
           <span className="help-dot">

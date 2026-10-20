@@ -11,6 +11,7 @@ import { primeAudio, beep } from '../lib/beep'
 import { cloudConfigured } from '../lib/supabase'
 import { usePrefs } from '../lib/prefs'
 import { notifyPermission, notifySupported, requestNotify } from '../lib/notify'
+import { lockScreenSupported, startLockScreen } from '../lib/lockscreen'
 import { fmtKg } from '../lib/format'
 import '../styles/workout-flow.css'
 import '../styles/programs-nav.css'
@@ -209,6 +210,16 @@ export default function SettingsPage() {
               if (!ok) toast({ kind: 'info', text: 'Notifications are not allowed', sub: 'The beep and vibration still work while the app is open.' })
             }
           )}
+          {lockScreenSupported() &&
+            toggleRow(
+              'Show workout on lock screen',
+              'Current exercise and rest countdown on the lock screen, with skip and +15 s buttons. While on, it replaces the music card (Spotify and others).',
+              prefs.lockScreen,
+              (v) => {
+                prefs.setPrefs({ lockScreen: v })
+                if (v) void startLockScreen() // this tap counts as the gesture browsers need
+              }
+            )}
           {toggleRow('Keep screen awake', 'During a workout, where the phone allows it', awake, (v) => {
             setAwake(v)
             setFlag('gymlog:awake', v)

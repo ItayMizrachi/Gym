@@ -6,6 +6,8 @@ import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
 import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
+import { lockInfo, lockScreenActive, lockScreenSupported, setLockScreenActions, startLockScreen, stopLockScreen, updateLockScreen } from '../lib/lockscreen'
+import { libIdForExercise, libImageUrl } from '../lib/libraryLinks'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
 
@@ -106,6 +108,46 @@ function RestBar({ inSession }: { inSession: boolean }) {
   )
 }
 
+/** Keeps the lock-screen "now playing" card in step with the running workout (opt-in in Settings). */
+function LockScreenSync() {
+  const enabled = usePrefs((s) => s.lockScreen)
+  const active = useStore((s) => s.db.sessions.find((x) => !x.finished_at) ?? null)
+  const activeId = active?.id ?? null
+
+  // start the silent audio on the next tap (browsers only allow playback from a gesture); stop when done
+  useEffect(() => {
+    if (!enabled || !activeId || !lockScreenSupported()) {
+      stopLockScreen()
+      return
+    }
+    const st = useStore.getState
+    setLockScreenActions({ skip: () => st().clearRest(), more: () => st().adjustRest(15) })
+    if (lockScreenActive()) return
+    const kick = () => void startLockScreen()
+    window.addEventListener('pointerdown', kick, { once: true, capture: true })
+    return () => window.removeEventListener('pointerdown', kick, { capture: true })
+  }, [enabled, activeId])
+
+  useEffect(() => {
+    if (!enabled || !activeId) return
+    const push = () => {
+      const s = useStore.getState()
+      const session = s.db.sessions.find((x) => x.id === activeId)
+      if (!session) return
+      const info = lockInfo(session, s.rest, Date.now())
+      const ex = s.db.exercises.find((e) => e.id === info.exerciseId)
+      const lib = libIdForExercise(ex)
+      updateLockScreen(info, lib ? libImageUrl(lib) : null)
+    }
+    push()
+    const id = setInterval(push, 1000)
+    return () => clearInterval(id)
+  }, [enabled, activeId])
+
+  useEffect(() => () => stopLockScreen(), [])
+  return null
+}
+
 function Toasts() {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
@@ -185,6 +227,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <RestBar inSession={inSession} />
+      <LockScreenSync />
       <Toasts />
       {!inSession && !rest && <ResumeBar />}
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
