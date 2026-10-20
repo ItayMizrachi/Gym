@@ -237,3 +237,51 @@
 .cm-text { font-size: 15px; color: var(--text-2); margin-top: 4px; line-height: 1.35; }
 .cm-actions { display: flex; justify-content: space-between; margin-top: 10px; }
 .cm-actions .btn { min-height: 44px; }
+
+/* ================= Hevy-style clarity for the workout screen, picker and exercise list ================= */
+
+/* round exercise thumbnails everywhere (ExerciseThumb) */
+.thumb.round { border-radius: 50%; overflow: hidden; }
+.thumb.round.tile::before { width: 84%; }
+
+/* exercise card: simple card, generous spacing, clear hierarchy */
+.ex { padding: var(--s4); border-radius: var(--r-lg); box-shadow: none; }
+.ex .ex-head { gap: var(--s3); align-items: flex-start; }
+.ex .ex-head > button:first-child { flex: none; border-radius: 50%; }
+.ex .ex-name { font-family: var(--body); font-size: 18px; font-weight: 600; line-height: 1.2; }
+.wl-meta { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+.wl-plan { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; font-size: 13px; color: var(--muted); }
+
+/* set table: Set / Previous / kg / Reps / ✓ ; completed rows tinted green */
+.ex .sets { gap: 4px; margin-top: var(--s3); }
+.ex .sets .set-row { margin: 0 -8px; padding: 3px 8px; border-radius: var(--r-sm); transition: background var(--t) var(--ease); }
+.ex .sets .set-row .hdr { font-size: 13px; font-weight: 600; color: var(--muted); }
+.ex .sets .set-row.done { background: var(--ok-soft); }
+.ex .sets .set-row.done .num { background: transparent; border-color: transparent; }
+.ex .sets .set-row.done .prev { color: var(--text-2); }
+.ex .prev { font-family: var(--body); font-size: 15px; font-variant-numeric: tabular-nums; }
+.ex .num { font-variant-numeric: tabular-nums; }
+
+/* add-set row: one wide button, two small ones */
+.wl-addrow { display: flex; gap: var(--s2); margin-top: var(--s3); }
+.wl-addrow .btn { min-height: 44px; }
+.wl-addrow .wl-addset { flex: 1; background: var(--card2); font-weight: 600; }
+.wl-addrow .btn.sm { padding: 0 12px; color: var(--text-2); }
+
+/* big, clear add-exercise button (tonal so Finish stays the one primary action) */
+.btn.wl-addex {
+  width: 100%;
+  min-height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+/* lists in the picker and the Exercises tab: bigger, calmer rows */
+.xl-page .list-row .title,
+.xp-list .list-row .title { font-size: 16px; font-weight: 600; }
+.xl-page .list-row .meta,
+.xp-list .list-row .meta { font-size: 14px; color: var(--muted); }
+.xp-foot .btn { min-height: 52px; font-size: 17px; }

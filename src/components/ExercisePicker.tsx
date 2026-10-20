@@ -5,7 +5,8 @@ import { EQUIPMENT, Exercise, MUSCLES, Tracking } from '../lib/types'
 import { nowIso, uid } from '../lib/uid'
 import { exerciseMeta, facets, filterExercises, recentExerciseIds } from '../lib/exerciseFilters'
 import { TRACKING_LABEL } from '../lib/tracking'
-import { Sheet, Thumb } from './ui'
+import { Sheet } from './ui'
+import { ExerciseThumb } from './ExerciseImage'
 import '../styles/workout-live.css'
 
 export function createExercise(name: string, muscle: string, opts: { equipment?: string; tracking?: Tracking } = {}): Exercise {
@@ -183,7 +184,7 @@ export function ExercisePicker({
     const on = picked.includes(e.id)
     return (
       <button key={e.id} className={`list-row ${on ? 'xp-on' : ''}`} onClick={() => (multi ? toggle(e.id) : onPick(e))} aria-pressed={multi ? on : undefined}>
-        <Thumb path={e.image_path} name={e.name} size={40} />
+        <ExerciseThumb exercise={e} size={44} />
         <div className="grow">
           <div className="title ellipsis">{e.name}</div>
           <div className="meta ellipsis">{exerciseMeta(e)}</div>
@@ -220,7 +221,7 @@ export function ExercisePicker({
           />
         </div>
       ) : (
-        <div className="stack" style={{ gap: 0 }}>
+        <div className="stack xp-list" style={{ gap: 0 }}>
           <div className="search" style={{ marginBottom: 'var(--s2)' }}>
             <Search size={18} />
             <input className="input" type="search" enterKeyHint="search" placeholder="Search exercises" value={q} onChange={(e) => setQ(e.target.value)} />

@@ -5,7 +5,8 @@ import { useStore } from '../lib/store'
 import { Exercise, MUSCLES, trackingOf } from '../lib/types'
 import { FilterChips, NewExerciseForm } from '../components/ExercisePicker'
 import { facets, filterExercises, recentExerciseIds } from '../lib/exerciseFilters'
-import { Empty, Sheet, Thumb } from '../components/ui'
+import { Empty, Sheet } from '../components/ui'
+import { ExerciseThumb } from '../components/ExerciseImage'
 import { priorSets, recordsFor } from '../lib/pr'
 import { fmtKg } from '../lib/format'
 
@@ -49,7 +50,7 @@ export default function Exercises() {
     const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
     return (
       <button key={e.id} className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
-        <Thumb path={e.image_path} name={e.name} size={44} />
+        <ExerciseThumb exercise={e} size={48} />
         <div className="grow">
           <div className="title ellipsis">{e.name}</div>
           <div className="meta ellipsis">{meta}</div>
@@ -71,7 +72,7 @@ export default function Exercises() {
   const total = groups.reduce((a, g) => a + g.items.length, 0)
 
   return (
-    <div className="stack" style={{ gap: 'var(--s3)' }}>
+    <div className="stack xl-page" style={{ gap: 'var(--s3)' }}>
       <div className="page-head">
         <h1>Exercises</h1>
         <button className="btn primary icon" onClick={() => setCreating(true)} aria-label="New exercise">

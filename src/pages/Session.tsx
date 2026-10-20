@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
@@ -8,10 +8,12 @@ import { addExerciseToSession, discardSession, finishSession, newSet, toggleProg
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
-import { Confirm, NumInput, Sheet, Thumb, Toggle, useImageUrl } from '../components/ui'
+import { Confirm, NumInput, Sheet, Toggle, useImageUrl } from '../components/ui'
+import { exerciseMeta } from '../lib/exerciseFilters'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
 import { BodyMap } from '../components/BodyMap'
+import { ExerciseThumb, exerciseImagePath } from '../components/ExerciseImage'
 import { KeypadProvider, KpField, useKeypadMode } from '../components/Keypad'
 import { CoachMarks, CoachStep } from '../components/CoachMarks'
 import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/muscles'
@@ -214,7 +216,7 @@ function StopwatchBtn({ set, onStop }: { set: SessionSet; onStop: (sec: number) 
 }
 
 function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOpen: () => void }) {
-  const url = useImageUrl(ex.image_path)
+  const url = useImageUrl(exerciseImagePath(ex))
   const db = useStore((s) => s.db)
   const rec = useMemo(() => recordsFor(priorSets(db, ex.id)), [db, ex.id])
   return (
@@ -359,22 +361,20 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
     <div className={`ex ${se.superset ? 'ss' : ''}`}>
       <div className="ex-head">
         <button onClick={() => setInfo(true)} aria-label="Exercise info">
-          <Thumb path={ex?.image_path} />
+          <ExerciseThumb exercise={ex} name={se.name} size={48} />
         </button>
         <div className="grow" onClick={() => setInfo(true)}>
           <div className="ex-name">{ex?.name ?? se.name}</div>
-          <div className="row small muted" style={{ gap: 6, flexWrap: 'wrap' }}>
+          {ex && <div className="wl-meta ellipsis">{exerciseMeta(ex)}</div>}
+          <div className="wl-plan">
             {se.superset && <span className="chip blue">Superset {se.superset}</span>}
             <span>
               {tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest {fmtRest(se.rest_sec)}
             </span>
           </div>
         </div>
-        <button className="btn icon sm" onClick={() => setInfo(true)} aria-label="Info">
-          <Info size={16} />
-        </button>
-        <button className="btn icon sm" onClick={onMore} aria-label="More">
-          <MoreHorizontal size={16} />
+        <button className="btn icon ghost" onClick={onMore} aria-label={`More options for ${ex?.name ?? se.name}`}>
+          <MoreHorizontal size={20} />
         </button>
       </div>
 
@@ -424,7 +424,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       <div className={`sets t-${tracking}`}>
         <div className="set-row">
           <div className="hdr">Set</div>
-          <div className="hdr">Prev</div>
+          <div className="hdr">Previous</div>
           {tracking === 'time' ? (
             <div className="hdr span2">Time</div>
           ) : tracking === 'reps' ? (
@@ -548,9 +548,9 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
           <span className="lg-dot failure">F</span> failure
         </div>
       )}
-      <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
+      <div className="wl-addrow">
         <button
-          className="btn sm"
+          className="btn wl-addset"
           onClick={() =>
             mutate(
               (e) => {
@@ -561,7 +561,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
             )
           }
         >
-          <Plus size={14} /> Set
+          <Plus size={18} /> Add set
         </button>
         {tracking === 'weight_reps' && (
         <button
@@ -736,8 +736,8 @@ export default function SessionPage() {
         <ExerciseCard key={i + session.data.exercises[i].exercise_id} session={session} index={i} onMore={() => setMoreIdx(i)} showLegend={i === 0 && loggedEver < 5} />
       ))}
 
-      <button className="btn" onClick={() => setPicking(true)}>
-        <Plus size={18} /> Add exercise
+      <button className="btn wl-addex" onClick={() => setPicking(true)}>
+        <Plus size={20} /> Add exercise
       </button>
 
       <label className="field">
