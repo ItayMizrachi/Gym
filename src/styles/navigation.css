@@ -1,0 +1,46 @@
+/* navigation: resume strip, shared page header */
+.resume-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
+  width: calc(100% - 24px);
+  max-width: 520px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--accent);
+  background: var(--surface, #1d1f22);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  z-index: 40;
+}
+.resume-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ok);
+  flex: none;
+}
+.resume-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-weight: 650;
+}
+.app:has(~ .resume-bar) {
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 84px);
+}
+.nav a {
+  min-height: 44px;
+}
+.ph-back {
+  margin-left: -8px;
+  min-width: 44px;
+  min-height: 44px;
+}

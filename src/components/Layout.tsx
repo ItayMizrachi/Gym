@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Dumbbell, BookOpen, History, Scale, Settings, Check, SkipForward } from 'lucide-react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Dumbbell, BookOpen, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
 import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
 import '../styles/workout-flow.css'
+import '../styles/navigation.css'
 
 const RING_R = 30
 const RING_C = 2 * Math.PI * RING_R
@@ -131,10 +132,39 @@ function SyncDot() {
   )
 }
 
+/** "Workout in progress · 12:34 · Resume" strip above the nav on every tab while a session is open. */
+function ResumeBar() {
+  const nav = useNavigate()
+  const active = useStore((s) => s.db.sessions.find((x) => !x.finished_at))
+  const [, tick] = useState(0)
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => tick((n) => n + 1), 1000)
+    return () => clearInterval(id)
+  }, [active?.id])
+  if (!active) return null
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(active.started_at).getTime()) / 1000))
+  return (
+    <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Resume ${active.name}`}>
+      <span className="resume-dot" aria-hidden />
+      <span className="grow ellipsis">
+        <b>{active.name}</b> <span className="muted">· {fmtClock(secs)}</span>
+      </span>
+      <span className="resume-go">
+        <Play size={16} /> Resume
+      </span>
+    </button>
+  )
+}
+
 export default function Layout() {
   const rest = useStore((s) => s.rest)
   const loc = useLocation()
   const inSession = loc.pathname.startsWith('/session')
+  // a new screen starts at the top, not wherever the last one was scrolled to
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [loc.pathname])
   return (
     <>
       <SyncDot />
@@ -144,26 +174,27 @@ export default function Layout() {
       <RestBar inSession={inSession} />
       <Toasts />
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
-      {!inSession && <nav className="nav">
+      {!inSession && !rest && <ResumeBar />}
+      {!inSession && <nav className="nav" aria-label="Main">
         <div className="nav-inner">
           <NavLink to="/" end className={({ isActive }) => (isActive || inSession ? 'active' : '')}>
-            <Dumbbell size={22} />
-            Workouts
+            <Dumbbell size={22} aria-hidden />
+            Train
           </NavLink>
           <NavLink to="/exercises">
-            <BookOpen size={22} />
+            <BookOpen size={22} aria-hidden />
             Exercises
           </NavLink>
           <NavLink to="/history">
-            <History size={22} />
+            <History size={22} aria-hidden />
             History
           </NavLink>
           <NavLink to="/body">
-            <Scale size={22} />
+            <Scale size={22} aria-hidden />
             Body
           </NavLink>
           <NavLink to="/settings">
-            <Settings size={22} />
+            <Settings size={22} aria-hidden />
             Settings
           </NavLink>
         </div>

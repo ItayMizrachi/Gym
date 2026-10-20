@@ -1,5 +1,6 @@
 import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
-import { X, Camera, Trash2 } from 'lucide-react'
+import { X, Camera, Trash2, ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
 
@@ -397,6 +398,43 @@ export function SkeletonList({ rows = 4 }: { rows?: number }) {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+/**
+ * Shared screen header: title, one plain line on what the screen is for, an optional
+ * back arrow (sub-screens) and the primary action on the right.
+ */
+export function PageHeader({
+  title,
+  sub,
+  back,
+  action
+}: {
+  title: ReactNode
+  sub?: ReactNode
+  /** route to go back to; true = browser back */
+  back?: string | true
+  action?: ReactNode
+}) {
+  const nav = useNavigate()
+  return (
+    <div className="page-head ph">
+      {back && (
+        <button
+          className="btn icon ghost ph-back"
+          aria-label="Back"
+          onClick={() => (back === true ? nav(-1) : nav(back))}
+        >
+          <ArrowLeft size={22} />
+        </button>
+      )}
+      <div className="grow" style={{ minWidth: 0 }}>
+        <h1 className="ellipsis">{title}</h1>
+        {sub && <div className="sub">{sub}</div>}
+      </div>
+      {action}
     </div>
   )
 }
