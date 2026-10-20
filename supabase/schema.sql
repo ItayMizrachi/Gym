@@ -123,6 +123,9 @@ create policy "gymlog own files delete" on storage.objects for delete to authent
 -- upgrades an existing project. (Until it is run, the app keeps such changes queued on the phone and shows
 -- "The database needs an update".) Example:
 --   alter table public.exercises add column if not exists equipment text not null default '';
+alter table public.exercises add column if not exists equipment text not null default '';
+alter table public.exercises add column if not exists tracking text not null default 'weight_reps';
+alter table public.workouts add column if not exists folder text not null default '';
 
 -- Ask the API to reload its schema cache right away, so new columns work without waiting.
 notify pgrst, 'reload schema';

@@ -12,7 +12,14 @@ export interface Exercise {
   image_path: string | null
   rest_sec: number
   created_at: string
+  /** e.g. 'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight' (see EQUIPMENT); '' or missing on old rows */
+  equipment?: string
+  /** what a set records; missing on old rows = 'weight_reps' (use trackingOf) */
+  tracking?: Tracking
 }
+
+export type Tracking = 'weight_reps' | 'reps' | 'time'
+export const trackingOf = (e: { tracking?: Tracking } | null | undefined): Tracking => e?.tracking ?? 'weight_reps'
 
 export interface Workout {
   id: string
@@ -21,6 +28,8 @@ export interface Workout {
   notes: string
   position: number
   created_at: string
+  /** folder name for grouping on the Train tab; '' or missing = no folder */
+  folder?: string
 }
 
 export interface WorkoutExercise {
@@ -48,6 +57,8 @@ export interface SessionSet {
   done_at: string | null
   /** optional effort rating, 6–10 in 0.5 steps */
   rpe?: number | null
+  /** seconds, for 'time' tracked exercises (plank, cardio, warm-up) */
+  time_sec?: number | null
 }
 
 export interface SessionExercise {
@@ -71,7 +82,7 @@ export interface Session {
   started_at: string
   finished_at: string | null
   notes: string
-  data: { exercises: SessionExercise[] }
+  data: { exercises: SessionExercise[]; /** photo taken for this workout */ photo_path?: string | null }
 }
 
 export interface Metric {
@@ -101,6 +112,8 @@ export const emptyDB = (): DB => ({
   sessions: [],
   metrics: []
 })
+
+export const EQUIPMENT = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Smith', 'Bodyweight', 'Kettlebell', 'Band', 'Other']
 
 export const MUSCLES = [
   'Chest',

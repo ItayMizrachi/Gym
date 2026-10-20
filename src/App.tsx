@@ -17,6 +17,8 @@ import SessionDetail from './pages/SessionDetail'
 import Body from './pages/Body'
 import SettingsPage from './pages/Settings'
 import Help from './pages/Help'
+import Profile from './pages/Profile'
+import Programs from './pages/Programs'
 import Welcome, { seen } from './components/Welcome'
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
@@ -71,6 +73,8 @@ export default function App() {
               <Route path="/body" element={<Body />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/programs" element={<Programs />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
