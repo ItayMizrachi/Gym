@@ -18,3 +18,47 @@
 .sw:active { transform: scale(0.92); }
 .sw.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .sw:disabled { opacity: 0.35; }
+
+/* ---------- body map ---------- */
+.bodymap { display: block; width: auto; }
+.bodymap .bm-body { fill: var(--card2); }
+.bodymap .bm-m { fill: var(--line-strong); }
+.bodymap .bm-m.on { fill: var(--accent); }
+
+/* ---------- live summary strip in the workout header ---------- */
+.ls-strip { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+.ls-stat { flex: 1; min-width: 0; }
+.ls-stat .v,
+.ls-stat .sp-clock {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ls-stat .u { font-size: 13px; color: var(--muted); margin-left: 2px; font-weight: 500; }
+.ls-stat .l { font-size: 12px; color: var(--muted); }
+.ls-map {
+  flex: none;
+  min-width: 56px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 4px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+.ls-map:active { transform: scale(0.96); }
+.ls-map-lg { display: flex; justify-content: center; }
+.ls-rows { display: flex; flex-direction: column; gap: 10px; }
+.ls-row { display: grid; grid-template-columns: 92px 1fr 44px; gap: 10px; align-items: center; font-size: 15px; }
+.ls-row .bar { position: relative; height: 10px; border-radius: 5px; background: var(--card2); overflow: hidden; }
+.ls-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
+.ls-row .bar .plan { background: var(--line-strong); }
+.ls-row .bar .done { background: var(--accent); }
+.ls-row .n { text-align: right; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ls-stat .sp-clock { display: block; }

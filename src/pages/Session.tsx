@@ -11,6 +11,8 @@ import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Thumb, useImageUrl } from '../components/ui'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
+import { BodyMap } from '../components/BodyMap'
+import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/muscles'
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
 import '../styles/workout-live.css'
@@ -582,6 +584,7 @@ export default function SessionPage() {
   const [moreIdx, setMoreIdx] = useState<number | null>(null)
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [showMuscles, setShowMuscles] = useState(false)
   useWakeLock()
 
   useEffect(() => {
@@ -595,6 +598,8 @@ export default function SessionPage() {
 
   if (!session) return <div className="card">Workout not found. <button className="btn sm" onClick={() => nav('/')}>Home</button></div>
 
+  const muscles = muscleSets(session, db.exercises)
+  const volume = Math.round(sessionVolume(session))
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
 
@@ -621,12 +626,6 @@ export default function SessionPage() {
           </button>
           <div className="grow" style={{ minWidth: 0 }}>
             <div className="sp-name ellipsis">{session.name}</div>
-            <div className="sp-meta">
-              <ElapsedClock start={session.started_at} />
-              <span>
-                {doneSets}/{totalSets} sets
-              </span>
-            </div>
           </div>
           <button className="btn icon sm ghost" onClick={() => nav('/help')} aria-label="How it works">
             <HelpCircle size={20} />
@@ -636,6 +635,29 @@ export default function SessionPage() {
             onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
           >
             <Flag size={16} /> Finish
+          </button>
+        </div>
+        <div className="ls-strip">
+          <div className="ls-stat">
+            <ElapsedClock start={session.started_at} />
+            <div className="l">Duration</div>
+          </div>
+          <div className="ls-stat">
+            <div className="v">
+              {volume.toLocaleString('en-US')}
+              <span className="u">kg</span>
+            </div>
+            <div className="l">Volume</div>
+          </div>
+          <div className="ls-stat">
+            <div className="v">
+              {doneSets}
+              <span className="u">/{totalSets}</span>
+            </div>
+            <div className="l">Sets</div>
+          </div>
+          <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label="Sets per muscle">
+            <BodyMap intensity={liveIntensity(muscles)} height={46} />
           </button>
         </div>
         <div className="sp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={totalSets} aria-valuenow={doneSets}>
@@ -694,6 +716,8 @@ export default function SessionPage() {
         />
       )}
 
+      {showMuscles && <MusclesSheet rows={muscles} onClose={() => setShowMuscles(false)} />}
+
       {confirmFinish && (
         <Confirm
           title="Finish workout?"
@@ -720,6 +744,37 @@ export default function SessionPage() {
         />
       )}
     </div>
+  )
+}
+
+function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => void }) {
+  const max = Math.max(1, ...rows.map((r) => r.planned))
+  return (
+    <Sheet title="Muscles in this workout" onClose={onClose}>
+      <div className="stack">
+        <div className="ls-map-lg">
+          <BodyMap intensity={liveIntensity(rows)} height={190} />
+        </div>
+        <div className="tiny muted center">Bright = sets logged · dim = still to do</div>
+        {rows.length === 0 && <div className="small muted center">Add an exercise to see which muscles it works.</div>}
+        <div className="ls-rows">
+          {rows.map((r) => (
+            <div key={r.muscle} className="ls-row">
+              <div className="name">{r.muscle}</div>
+              <div className="bar" aria-hidden>
+                <div className="plan" style={{ width: `${(r.planned / max) * 100}%` }} />
+                <div className="done" style={{ width: `${(r.done / max) * 100}%` }} />
+              </div>
+              <div className="n">
+                {r.done}
+                <span className="muted">/{r.planned}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="tiny muted">Warm-up sets are not counted.</div>
+      </div>
+    </Sheet>
   )
 }
 
