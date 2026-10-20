@@ -56,8 +56,8 @@ Always keep something in progress. When the "Next" list runs low:
 11. **Google verification readiness** so the "unverified app" notice disappears (privacy/terms pages exist).
 
 ## Found in self-review
-- Program cards: some exercise thumbs stay grey (loading or unmatched) — check every program card shows photos.
-- Google button on the login screen: icon overlaps the text in some widths — check the GIS button sizing.
+- ~~Program cards grey thumbs~~ — checked: photos were still loading, all resolve.
+- ~~Google button overlap~~ — fixed: logo on the left (Google still shows the account's language, e.g. Hebrew).
 
 ## Later / ideas
 - Rest-day suggestions and deload hints from training load.

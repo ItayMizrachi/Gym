@@ -70,7 +70,9 @@ export async function renderGoogleButton(el: HTMLElement, onError: (msg: string)
     size: 'large',
     text: 'continue_with',
     shape: 'pill',
-    logo_alignment: 'center',
+    // the UI is English; without this Google follows the browser language and RTL text collides with the logo
+    locale: 'en',
+    logo_alignment: 'left',
     width: Math.min(400, Math.max(200, Math.round(el.getBoundingClientRect().width)))
   })
   return true
