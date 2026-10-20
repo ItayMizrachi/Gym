@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Dumbbell, BookOpen, History, Scale, Settings, Check, Minus, Plus, SkipForward } from 'lucide-react'
+import { Dumbbell, BookOpen, History, Scale, Settings, Check, SkipForward } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
+import { usePrefs } from '../lib/prefs'
+import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
+import '../styles/workout-flow.css'
 
-function RestBar() {
+const RING_R = 30
+const RING_C = 2 * Math.PI * RING_R
+
+function RestBar({ inSession }: { inSession: boolean }) {
   const rest = useStore((s) => s.rest)
   const clear = useStore((s) => s.clearRest)
   const adjust = useStore((s) => s.adjustRest)
+  const restNotify = usePrefs((s) => s.restNotify)
   const [, tick] = useState(0)
 
   useEffect(() => {
@@ -30,35 +37,59 @@ function RestBar() {
     return () => clearInterval(id)
   }, [rest?.endsAt, rest?.finished])
 
+  // background alert: (re)scheduled whenever the end time moves, cancelled on skip / OK.
+  // Reaching the end (finished) leaves it alone so the pending alert still fires while hidden.
+  useEffect(() => {
+    if (!rest || !restNotify) cancelRestNotification()
+    else if (!rest.finished) scheduleRestNotification(rest.endsAt, rest.label)
+  }, [rest?.endsAt, rest == null, restNotify])
+
   if (!rest) return null
   const left = Math.max(0, (rest.endsAt - Date.now()) / 1000)
-  const pct = rest.finished ? 100 : Math.min(100, ((rest.total - left) / rest.total) * 100)
+  const frac = rest.finished ? 1 : Math.min(1, Math.max(0, (rest.total - left) / rest.total))
   return (
-    <div className={`rest ${rest.finished ? 'done' : ''}`}>
-      <div className="row">
-        <div className="time">{rest.finished ? 'Go!' : fmtClock(Math.ceil(left))}</div>
-        <div className="grow">
-          <div className="small" style={{ fontWeight: 650 }}>
-            {rest.finished ? 'Rest over' : 'Rest'}
-          </div>
-          <div className="tiny muted ellipsis">{rest.label}</div>
-        </div>
-        {!rest.finished && (
-          <>
-            <button className="btn icon sm" onClick={() => adjust(-15)} aria-label="minus 15 seconds">
-              <Minus size={16} />
-            </button>
-            <button className="btn icon sm" onClick={() => adjust(15)} aria-label="plus 15 seconds">
-              <Plus size={16} />
-            </button>
-          </>
-        )}
-        <button className="btn sm" onClick={clear}>
-          {rest.finished ? <Check size={16} /> : <SkipForward size={16} />}
-          {rest.finished ? 'OK' : 'Skip'}
-        </button>
+    <div className={`rp ${rest.finished ? 'done' : ''} ${inSession ? 'full' : ''}`} role="timer" aria-live="off">
+      <div className="rp-ring">
+        <svg viewBox="0 0 72 72" aria-hidden>
+          <circle className="track" cx="36" cy="36" r={RING_R} />
+          <circle
+            className="fill"
+            cx="36"
+            cy="36"
+            r={RING_R}
+            strokeDasharray={RING_C}
+            strokeDashoffset={RING_C * (1 - frac)}
+            transform="rotate(-90 36 36)"
+          />
+        </svg>
+        <div className="rp-time">{rest.finished ? 'Go' : fmtClock(Math.ceil(left))}</div>
       </div>
-      <div className="bar" style={{ width: `${pct}%` }} />
+      <div className="rp-body">
+        <div className="rp-title">
+          <span>{rest.finished ? 'Rest over' : 'Resting'}</span>
+          {!rest.finished && <span className="muted"> · {fmtClock(rest.total)}</span>}
+        </div>
+        <div className="rp-label ellipsis">{rest.label}</div>
+        <div className="rp-ctrl">
+          {rest.finished ? (
+            <button className="btn sm ok grow" onClick={clear}>
+              <Check size={16} /> Next set
+            </button>
+          ) : (
+            <>
+              <button className="btn sm" onClick={() => adjust(-15)} aria-label="Minus 15 seconds">
+                −15s
+              </button>
+              <button className="btn sm" onClick={() => adjust(15)} aria-label="Plus 15 seconds">
+                +15s
+              </button>
+              <button className="btn sm grow" onClick={clear}>
+                <SkipForward size={16} /> Skip
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -107,12 +138,13 @@ export default function Layout() {
   return (
     <>
       <SyncDot />
-      <div className={`app ${rest ? 'has-rest' : ''}`}>
+      <div className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
         <Outlet />
       </div>
-      <RestBar />
+      <RestBar inSession={inSession} />
       <Toasts />
-      <nav className="nav">
+      {/* the live workout gets the whole screen; the nav comes back when you leave it */}
+      {!inSession && <nav className="nav">
         <div className="nav-inner">
           <NavLink to="/" end className={({ isActive }) => (isActive || inSession ? 'active' : '')}>
             <Dumbbell size={22} />
@@ -135,7 +167,7 @@ export default function Layout() {
             Settings
           </NavLink>
         </div>
-      </nav>
+      </nav>}
     </>
   )
 }
