@@ -19,6 +19,12 @@ const REP_COLS = [1, 3, 5, 6, 8, 10, 12, 15]
 
 export default function ExerciseDetail() {
   const { id } = useParams()
+  // library entries open on the same route, as /exercise/lib:<id>
+  if (id?.startsWith('lib:')) return <LibraryDetail key={id} id={decodeURIComponent(id.slice(4))} />
+  return <MyExerciseDetail key={id} id={id} />
+}
+
+function MyExerciseDetail({ id }: { id: string | undefined }) {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
