@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LayoutGrid, Plus, Sparkles } from 'lucide-react'
+import { LayoutGrid, Plus, Sparkles, Wand2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
+import FindProgram from './FindProgram'
 import '../styles/onboarding.css'
 import '../styles/programs-nav.css'
 
@@ -62,6 +63,7 @@ const CARDS = [
 
 export default function Welcome({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0)
+  const [finder, setFinder] = useState(false)
   const nav = useNavigate()
   const save = useStore((s) => s.save)
   const db = useStore((s) => s.db)
@@ -82,6 +84,7 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
     nav('/')
   }
   let x0 = 0
+  if (finder) return <FindProgram onDone={close} />
   return (
     <div
       ref={box}
@@ -124,8 +127,11 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
           <>
             {db.workouts.length === 0 && (
               <>
+                <button className="btn primary block" onClick={() => setFinder(true)}>
+                  <Wand2 size={18} /> Find my program
+                </button>
                 <button
-                  className="btn primary block"
+                  className="btn block"
                   onClick={() => {
                     close()
                     nav('/programs')

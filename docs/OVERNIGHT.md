@@ -15,8 +15,12 @@
   the exercise, which set you are on and the rest countdown with a progress bar; ⏭ skips rest, ⏮ adds 15 s.
   It uses the music card, so it replaces Spotify while on (that's why it's off by default). Explained in Help.
 
+- **Find my program:** 4 quick questions (goal, experience, days a week, equipment) → the best-fitting ready-made
+  program plus two alternatives, added in one tap. It's the main button at the end of the welcome tour and a card at
+  the top of the Programs page.
+
 ## In progress
-- Next from the roadmap: personalised start for new users (goal, experience, days → recommended program).
+- Next from the roadmap: import from Hevy / Strong (CSV).
 
 ## Needs you
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

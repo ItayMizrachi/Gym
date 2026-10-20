@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target } from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target, Wand2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import {
   GEAR_LABEL,
@@ -25,6 +25,7 @@ import { addProgram, startProgramWorkout } from '../lib/programStart'
 import { primeAudio } from '../lib/beep'
 import { fmtRest } from '../lib/format'
 import { PageHeader } from '../components/ui'
+import FindProgram from '../components/FindProgram'
 import '../styles/programs-nav.css'
 import { ExerciseThumb } from '../components/ExerciseImage'
 import { ThumbButton } from '../components/ExerciseHowTo'
@@ -223,6 +224,7 @@ export default function Programs() {
   const workouts = useStore((s) => s.db.workouts)
   const kind: Kind = params.get('tab') === 'weekly' ? 'weekly' : 'single'
   const [filters, setFilters] = useState<Record<Kind, ProgramFilter>>({ single: NO_FILTER, weekly: NO_FILTER })
+  const [finder, setFinder] = useState(false)
   const f = filters[kind]
   const setF = (patch: Partial<ProgramFilter>) => setFilters({ ...filters, [kind]: { ...f, ...patch } })
   const all = kind === 'single' ? SINGLES : WEEKLIES
@@ -238,6 +240,16 @@ export default function Programs() {
   return (
     <div className="stack pg" style={{ gap: 16 }}>
       <PageHeader title="Programs" sub="Pick a ready-made plan instead of building your own." back="/" />
+
+      <button className="pg-finder" onClick={() => setFinder(true)}>
+        <Wand2 size={22} aria-hidden />
+        <span className="grow">
+          <span className="pg-finder-t">Not sure where to start?</span>
+          <span className="pg-finder-d">Answer 4 quick questions and get the program that fits you.</span>
+        </span>
+        <ChevronRight size={18} aria-hidden />
+      </button>
+      {finder && <FindProgram onDone={() => setFinder(false)} />}
 
       <div className="pg-tabs" role="tablist" aria-label="Kind of plan">
         {(['single', 'weekly'] as Kind[]).map((k) => (

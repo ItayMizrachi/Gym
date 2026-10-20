@@ -41,7 +41,7 @@ Always keep something in progress. When the "Next" list runs low:
    phone's lock screen. In a PWA this is done with the Media Session API (a "now playing" card, opt-in because it
    takes over the music card), plus a rest-over notification where the platform allows it (Android; iOS needs
    web push). Real iOS Live Activities need a native app; note this honestly in Help.
-2. **Personalised start.** First-run questions (goal, experience, days per week, equipment) → recommend one of the
+2. ~~**Personalised start.**~~ Shipped 21 Oct ("Find my program"). First-run questions (goal, experience, days per week, equipment) → recommend one of the
    ready-made programs, one tap to add it.
 3. **Import from Hevy / Strong (CSV).** Lets people switch without losing history.
 4. **Speed.** Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
@@ -54,6 +54,10 @@ Always keep something in progress. When the "Next" list runs low:
 9. **Smart warm-ups.** One tap generates warm-up sets ramping to the first work weight.
 10. **Tools.** 1RM calculator and plate calculator reachable from anywhere.
 11. **Google verification readiness** so the "unverified app" notice disappears (privacy/terms pages exist).
+
+## Found in self-review
+- Program cards: some exercise thumbs stay grey (loading or unmatched) — check every program card shows photos.
+- Google button on the login screen: icon overlaps the text in some widths — check the GIS button sizing.
 
 ## Later / ideas
 - Rest-day suggestions and deload hints from training load.
