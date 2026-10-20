@@ -14,13 +14,13 @@ export function WeekBars({
   const [sel, setSel] = useState(values.length - 1)
   useEffect(() => setSel(values.length - 1), [values.length])
   const W = 340
-  const H = 150
+  const H = 200
   const top = 18
   const bottom = 22
   const max = Math.max(1, ...values)
   const n = values.length
   const slot = W / n
-  const bw = Math.max(2, Math.min(28, slot * 0.68))
+  const bw = Math.max(2, Math.min(34, slot * 0.7))
   const chartH = H - top - bottom
   const label = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   // a few evenly spaced date labels, always including the first and last week

@@ -278,3 +278,90 @@
   border-color: var(--accent);
   color: var(--text);
 }
+
+/* ---------- Hevy-style stat row: small plain label, big number ---------- */
+.hv-card {
+  padding: var(--s4) var(--s4) var(--s3);
+}
+.hv-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.1fr) minmax(0, 0.75fr) minmax(0, 1fr);
+  gap: var(--s2);
+}
+.hv-stats.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.hv-l {
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.hv-v {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hv-v.pr {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hv-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px var(--s2);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+}
+.hv-foot b {
+  color: var(--text);
+}
+.hv-foot .tiny {
+  color: var(--muted);
+}
+.thumb.round {
+  border-radius: 50%;
+}
+.hv-exname {
+  font-family: var(--display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.15;
+  min-width: 0;
+}
+.prof-seg {
+  flex-direction: column;
+}
+.prof-seg .seg button {
+  min-height: 36px;
+}
+.wbars-read .kpi {
+  font-size: 34px;
+}
+.wbars-label {
+  font-size: 11px;
+}
+.split-row {
+  min-height: 36px;
+  font-size: var(--fs-base);
+}
+.split-bar {
+  height: 12px;
+}
+.sd-set {
+  min-height: 44px;
+}
+.sd-set .what {
+  font-size: 20px;
+}

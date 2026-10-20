@@ -64,38 +64,40 @@ export default function Profile() {
   ]
 
   return (
-    <div className="stack" style={{ gap: 14 }}>
+    <div className="stack" style={{ gap: 18 }}>
       <PageHeader title="Progress" sub="Your training at a glance." />
 
       {sum.workouts === 0 ? (
         <Empty title="Nothing here yet" text="Finish your first workout and your weekly chart, totals and calendar show up here." />
       ) : (
         <>
-          <div className="prof-totals">
-            <div className="stat">
-              <div className="v">{sum.workouts}</div>
-              <div className="l">workout{sum.workouts === 1 ? '' : 's'}</div>
-            </div>
-            <div className="stat">
-              <div className="v">{hours(sum.minutes)}</div>
-              <div className="l">total time</div>
-            </div>
-            <div className="stat">
-              <div className="v">{fmtVolume(sum.volume)}</div>
-              <div className="l">lifted</div>
+          <div className="card hv-card">
+            <div className="hv-stats three">
+              <div>
+                <div className="hv-l">Workouts</div>
+                <div className="hv-v">{sum.workouts}</div>
+              </div>
+              <div>
+                <div className="hv-l">Total time</div>
+                <div className="hv-v">{hours(sum.minutes)}</div>
+              </div>
+              <div>
+                <div className="hv-l">Volume</div>
+                <div className="hv-v">{fmtVolume(sum.volume)}</div>
+              </div>
             </div>
           </div>
 
           <div className="card">
             <div className="prof-seg">
-              <div className="seg" role="tablist" aria-label="What to show">
+              <div className="seg block" role="tablist" aria-label="What to show">
                 {METRICS.map((m) => (
                   <button key={m.id} className={metric === m.id ? 'on' : ''} onClick={() => setMetric(m.id)} aria-pressed={metric === m.id}>
                     {m.label}
                   </button>
                 ))}
               </div>
-              <div className="seg" role="tablist" aria-label="Time range">
+              <div className="seg block" role="tablist" aria-label="Time range">
                 {RANGES.map((r) => (
                   <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id}>
                     {r.label}

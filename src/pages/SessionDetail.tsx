@@ -4,7 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronDown, Pencil, Share2, Tras
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
-import { Confirm, ImageField } from '../components/ui'
+import { Confirm, ImageField, Thumb } from '../components/ui'
 import { SessionEditor } from '../components/SessionEditor'
 import {
   estimateCalories,
@@ -104,35 +104,34 @@ export default function SessionDetail() {
   }
 
   const kcal = estimateCalories(m.minutes, bodyKg)
+  const vol = fmtVolume(m.volume)
   const stats = (
-    <div className="sum-grid">
-      <div className="stat">
-        <div className="v">{fmtMinutes(m.minutes).replace(/ min$/, '')}</div>
-        <div className="l">{m.minutes < 60 ? 'minutes' : 'duration'}</div>
-      </div>
-      <div className="stat">
-        <div className="v">{fmtVolume(m.volume).replace(/ (kg|t)$/, '')}</div>
-        <div className="l">{m.volume >= 1000 ? 'tonnes' : 'kg'} lifted</div>
-      </div>
-      <div className="stat">
-        <div className="v">{m.sets}</div>
-        <div className="l">sets</div>
-      </div>
-      <div className={`stat${prs.length ? ' pr' : ''}`}>
-        <div className="v">{prs.length}</div>
-        <div className="l">record{prs.length === 1 ? '' : 's'}</div>
-      </div>
-      <div className="stat wide">
-        <div className="v">
-          {kcal}
-          <span className="u">kcal</span>
+    <div className="card hv-card">
+      <div className="hv-stats">
+        <div>
+          <div className="hv-l">Time</div>
+          <div className="hv-v">{m.minutes < 60 ? `${m.minutes} min` : `${Math.floor(m.minutes / 60)}h ${m.minutes % 60}m`}</div>
         </div>
-        <div className="l">
-          calories burned <span className="est">estimate</span>
-          <div className="tiny" style={{ marginTop: 2 }}>
-            From time and {bodyKg ? `your weight (${fmtKg(bodyKg)} kg)` : 'an average 75 kg'}
+        <div>
+          <div className="hv-l">Volume</div>
+          <div className="hv-v">{vol}</div>
+        </div>
+        <div>
+          <div className="hv-l">Sets</div>
+          <div className="hv-v">{m.sets}</div>
+        </div>
+        <div>
+          <div className="hv-l">Records</div>
+          <div className={`hv-v${prs.length ? ' pr' : ''}`}>
+            {prs.length > 0 && <Trophy size={16} />} {prs.length}
           </div>
         </div>
+      </div>
+      <div className="hv-foot">
+        <span>
+          Calories <b>{kcal} kcal</b> <span className="est">estimate</span>
+        </span>
+        <span className="tiny">from time and {bodyKg ? `your ${fmtKg(bodyKg)} kg` : 'an average 75 kg'}</span>
       </div>
     </div>
   )
@@ -212,7 +211,7 @@ export default function SessionDetail() {
   )
 
   return (
-    <div className="stack" style={{ gap: 14 }}>
+    <div className="stack" style={{ gap: 18 }}>
       <div className="page-head">
         <button className="btn icon ghost" onClick={() => nav(fresh ? '/history' : (-1 as any))} aria-label="Back">
           <ArrowLeft size={22} />
@@ -292,15 +291,15 @@ export default function SessionDetail() {
       {s.data.exercises.map((e, i) => {
         const done = e.sets.filter((x) => x.done)
         if (!done.length) return null
-        const tracking = trackingOf(db.exercises.find((x) => x.id === e.exercise_id))
+        const exOf = db.exercises.find((x) => x.id === e.exercise_id)
+        const tracking = trackingOf(exOf)
         const hasPr = done.some((x) => prIds.has(x.id))
         let n = 0
         return (
           <div key={i} className="card">
-            <div className="row" style={{ marginBottom: 4 }}>
-              <div className="grow" style={{ fontWeight: 700 }}>
-                {nameOf(e.exercise_id, e.name)}
-              </div>
+            <div className="row" style={{ marginBottom: 8 }}>
+              <Thumb path={exOf?.image_path} name={nameOf(e.exercise_id, e.name)} muscle={exOf?.muscle} size={44} className="round" />
+              <div className="grow hv-exname">{nameOf(e.exercise_id, e.name)}</div>
               {hasPr && (
                 <span className="chip pr">
                   <Trophy size={12} /> PR
