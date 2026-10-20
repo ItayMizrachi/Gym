@@ -21,8 +21,8 @@ export function LibRow({ e, added, onOpen, onAdd }: { e: LibraryExercise; added:
         </div>
       </button>
       {added ? (
-        <span className="lib-add done" aria-label={`${e.name} is in my exercises`}>
-          <Check size={16} /> Added
+        <span className="lib-add done">
+          <Check size={16} aria-hidden /> Added
         </span>
       ) : (
         <button className="lib-add" onClick={onAdd} aria-label={`Add ${e.name} to my exercises`}>
@@ -35,7 +35,8 @@ export function LibRow({ e, added, onOpen, onAdd }: { e: LibraryExercise; added:
 
 export function LibSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="list-group" aria-busy="true" aria-label="Loading the exercise library">
+    <div className="list-group" role="status" aria-busy="true">
+      <span className="lib-sr">Loading the exercise library</span>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="lib-skel">
           <div className="c" />

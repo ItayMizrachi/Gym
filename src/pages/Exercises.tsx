@@ -142,9 +142,9 @@ export default function Exercises() {
         )}
       </div>
 
-      <div className="seg lib-seg" role="tablist" aria-label="Which exercises">
+      <div className="seg lib-seg" role="group" aria-label="Which exercises">
         {TABS.map((t) => (
-          <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, 'all')} style={{ flex: 1 }}>
+          <button key={t.id} aria-pressed={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, 'all')} style={{ flex: 1 }}>
             {t.label}
           </button>
         ))}
@@ -178,7 +178,7 @@ export default function Exercises() {
           {tab === 'all' && (
             <div className="section-label" style={{ marginBottom: 0 }}>
               <span>My exercises</span>
-              <span className="count">{mine.length}</span>
+              <span className="count lib-count">{mine.length}</span>
             </div>
           )}
           {!db.exercises.length ? (
@@ -219,7 +219,7 @@ export default function Exercises() {
                 <section key={g.muscle}>
                   <div className="section-label">
                     <span>{g.muscle}</span>
-                    <span className="count">{g.items.length}</span>
+                    <span className="count lib-count">{g.items.length}</span>
                   </div>
                   <div className="list-group" style={{ ['--inset' as string]: '74px' }}>
                     {g.items.map((e) => row(e))}
@@ -242,7 +242,7 @@ export default function Exercises() {
         <section>
           <div className="section-label" style={{ marginTop: tab === 'all' ? 'var(--s3)' : undefined }}>
             <span>Library</span>
-            {lib && <span className="count">{libMatches.length}</span>}
+            {lib && <span className="count lib-count">{libMatches.length}</span>}
           </div>
           {libError ? (
             <div className="empty">

@@ -292,3 +292,25 @@
   align-items: center;
   justify-content: center;
 }
+
+/* counts next to section labels: --muted keeps 4.5:1 (the shared --faint is 3.6:1) */
+.section-label .lib-count {
+  color: var(--muted);
+}
+/* the All / Mine / Library switch: a full-size thumb target */
+.lib-seg {
+  display: flex;
+}
+.lib-seg button {
+  min-height: 40px;
+}
+/* text for screen readers only */
+.lib-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
