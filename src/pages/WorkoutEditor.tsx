@@ -7,7 +7,8 @@ import { folderOf, NO_FOLDER } from '../lib/folders'
 import { useStore } from '../lib/store'
 import { duplicateWorkout, removeWorkout } from '../lib/actions'
 import { ExercisePicker } from '../components/ExercisePicker'
-import { Confirm, Empty, NumInput, PageHeader, Thumb, Toggle } from '../components/ui'
+import { Confirm, Empty, NumInput, PageHeader, Toggle } from '../components/ui'
+import { ExerciseThumb } from '../components/ExerciseImage'
 import { fmtKg, fmtRest, parseRest } from '../lib/format'
 import { uid } from '../lib/uid'
 import { Exercise, WorkoutExercise, trackingOf } from '../lib/types'
@@ -123,7 +124,7 @@ export default function WorkoutEditor() {
       <div key={we.id} className={`we-card ${we.superset ? 'ss' : ''} ${open === we.id ? 'open' : ''}`}>
         <div className="we-head">
           <button className="we-toggle" onClick={() => setOpen(open === we.id ? null : we.id)} aria-expanded={open === we.id}>
-            <Thumb path={ex?.image_path} name={ex?.name} size={44} className="round" />
+            <ExerciseThumb exercise={ex} size={44} />
             <div className="grow" style={{ minWidth: 0 }}>
               <div className="we-name">
                 {ex?.name ?? 'Deleted exercise'}

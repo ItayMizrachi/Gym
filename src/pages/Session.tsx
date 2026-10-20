@@ -8,12 +8,13 @@ import { addExerciseToSession, discardSession, finishSession, newSet, toggleProg
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
-import { Confirm, NumInput, Sheet, Toggle, useImageUrl } from '../components/ui'
+import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
 import { exerciseMeta } from '../lib/exerciseFilters'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
 import { BodyMap } from '../components/BodyMap'
-import { ExerciseThumb, exerciseImagePath } from '../components/ExerciseImage'
+import { ExerciseThumb } from '../components/ExerciseImage'
+import { HowToBody } from '../components/ExerciseHowTo'
 import { KeypadProvider, KpField, useKeypadMode } from '../components/Keypad'
 import { CoachMarks, CoachStep } from '../components/CoachMarks'
 import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/muscles'
@@ -216,19 +217,12 @@ function StopwatchBtn({ set, onStop }: { set: SessionSet; onStop: (sec: number) 
 }
 
 function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOpen: () => void }) {
-  const url = useImageUrl(exerciseImagePath(ex))
   const db = useStore((s) => s.db)
   const rec = useMemo(() => recordsFor(priorSets(db, ex.id)), [db, ex.id])
   return (
     <Sheet title={ex.name} onClose={onClose}>
       <div className="stack">
-        {url ? (
-          <div className="thumb lg">
-            <img src={url} alt="" />
-          </div>
-        ) : (
-          <div className="muted small">No photo yet. Add one from the exercise page.</div>
-        )}
+        <HowToBody exercise={ex} />
         {ex.setup && (
           <div className="card">
             <div className="tiny muted">Setup</div>

@@ -1,5 +1,6 @@
 import { Exercise, Tracking, Workout, WorkoutExercise } from './types'
 import { uid, nowIso } from './uid'
+import { NAME_TO_LIB, libPath } from './libraryLinks'
 
 type Ex = [name: string, muscle: string, rest: number, equipment: string, tracking?: Tracking]
 
@@ -114,7 +115,8 @@ export function buildStarterPlan(userId: string, existing: Exercise[], startPosi
       muscle,
       notes: '',
       setup: '',
-      image_path: null,
+      // starter exercises show their library photo
+      image_path: NAME_TO_LIB[name.toLowerCase()] ? libPath(NAME_TO_LIB[name.toLowerCase()]) : null,
       rest_sec: rest,
       created_at: nowIso(),
       equipment,

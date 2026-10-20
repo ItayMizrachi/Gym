@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Trash2, Trophy } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, MUSCLES, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, setLabel, TRACKING_LABEL } from '../lib/tracking'
@@ -9,11 +9,23 @@ import { LineChart } from '../components/Chart'
 import { exerciseHistory, priorSets, recordsFor, sessionDate } from '../lib/pr'
 import { fmtDate, fmtKg, fmtRest, parseRest } from '../lib/format'
 import { removeExercise } from '../lib/actions'
+import { LibPhoto } from '../components/ExerciseImage'
+import { AddToWorkoutSheet } from '../components/Library'
+import { libIdForExercise, linkedLibIds, useLibrary } from '../lib/library'
+import { HowToCard } from '../components/ExerciseHowTo'
+import { ensureLibraryExercise } from '../lib/libraryActions'
+import '../styles/library.css'
 
 const REP_COLS = [1, 3, 5, 6, 8, 10, 12, 15]
 
 export default function ExerciseDetail() {
   const { id } = useParams()
+  // library entries open on the same route, as /exercise/lib:<id>
+  if (id?.startsWith('lib:')) return <LibraryDetail key={id} id={decodeURIComponent(id.slice(4))} />
+  return <MyExerciseDetail key={id} id={id} />
+}
+
+function MyExerciseDetail({ id }: { id: string | undefined }) {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
@@ -60,6 +72,7 @@ export default function ExerciseDetail() {
         </button>
       </div>
     )
+  const libId = libIdForExercise(ex)
   const upd = (p: Partial<typeof ex>, debounce = 400) => save('exercises', { ...ex, ...p }, { debounce })
 
   return (
@@ -78,13 +91,20 @@ export default function ExerciseDetail() {
         </div>
       </div>
 
-      <ImageField
-        path={ex.image_path}
-        folder="exercises"
-        large
-        onChange={(p) => save('exercises', { ...ex, image_path: p })}
-        label="Add a photo of the machine"
-      />
+      {libId ? (
+        <div className="stack" style={{ gap: 'var(--s2)' }}>
+          <LibPhoto id={libId} name={ex.name} />
+          <ImageField path={null} folder="exercises" onChange={(p) => save('exercises', { ...ex, image_path: p })} label="Use my own photo instead" />
+        </div>
+      ) : (
+        <ImageField
+          path={ex.image_path}
+          folder="exercises"
+          large
+          onChange={(p) => save('exercises', { ...ex, image_path: p })}
+          label="Add a photo of the machine"
+        />
+      )}
 
       <div className="card stack">
         <div className="card-head">
@@ -171,6 +191,8 @@ export default function ExerciseDetail() {
           />
         </div>
       )}
+
+      {libId && <HowToCard id={libId} />}
 
       <div className="card stack">
         <h2>Setup &amp; cues</h2>
@@ -296,6 +318,127 @@ export default function ExerciseDetail() {
           onClose={() => setConfirmDel(false)}
         />
       )}
+    </div>
+  )
+}
+
+/** A library exercise that may not be one of "My exercises" yet: photo, what it works, how to do it, add buttons. */
+function LibraryDetail({ id }: { id: string }) {
+  const nav = useNavigate()
+  const exercises = useStore((s) => s.db.exercises)
+  const toast = useStore((s) => s.toast)
+  const { list, error, retry } = useLibrary()
+  const lib = list?.find((e) => e.id === id)
+  const mineId = useMemo(() => linkedLibIds(exercises).get(id), [exercises, id])
+  const [picking, setPicking] = useState(false)
+
+  const head = (title: string, sub?: string) => (
+    <div className="page-head" style={{ marginBottom: 0 }}>
+      <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
+        <ArrowLeft size={22} />
+      </button>
+      <div className="grow" style={{ minWidth: 0 }}>
+        <h1 style={{ fontSize: 26, lineHeight: 1.15 }}>{title}</h1>
+        {sub && (
+          <div className="small muted" style={{ marginTop: 2 }}>
+            {sub}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  if (error)
+    return (
+      <div className="stack" style={{ gap: 'var(--s4)' }}>
+        {head('Exercise library')}
+        <div className="empty">
+          <div style={{ fontWeight: 600 }}>The library could not load</div>
+          <div className="small muted">Check your connection and try again.</div>
+          <button className="btn" onClick={retry}>
+            <RotateCw size={16} /> Try again
+          </button>
+        </div>
+      </div>
+    )
+  if (!list)
+    return (
+      <div className="stack" style={{ gap: 'var(--s4)' }} aria-busy="true">
+        {head('Loading…')}
+        <div className="lib-photo" style={{ background: 'var(--card2)' }} />
+      </div>
+    )
+  if (!lib)
+    return (
+      <div className="stack" style={{ gap: 'var(--s4)' }}>
+        {head('Not found')}
+        <div className="empty">
+          <div style={{ fontWeight: 600 }}>This exercise is not in the library</div>
+          <button className="btn primary" onClick={() => nav('/exercises?tab=library')}>
+            Browse the library
+          </button>
+        </div>
+      </div>
+    )
+
+  const also = lib.secondary.filter((m) => m !== 'Other')
+  return (
+    <div className="stack" style={{ gap: 'var(--s4)' }}>
+      {head(lib.name, `${lib.equipment} · ${TRACKING_LABEL[lib.tracking].toLowerCase()}`)}
+
+      <LibPhoto id={lib.id} name={lib.name} frames={lib.frames} />
+
+      <div className="lib-facts">
+        <div>
+          <div className="v">{lib.muscles.join(', ')}</div>
+          <div className="l">Main muscle</div>
+        </div>
+        <div>
+          <div className="v">{lib.equipment}</div>
+          <div className="l">Equipment</div>
+        </div>
+        <div>
+          <div className="v">{lib.level}</div>
+          <div className="l">Level</div>
+        </div>
+      </div>
+      {also.length > 0 && (
+        <div className="lib-muscle-line">
+          Also works <b>{also.join(', ')}</b>
+        </div>
+      )}
+
+      <div className="lib-actions">
+        {mineId ? (
+          <>
+            <button className="btn primary" onClick={() => setPicking(true)}>
+              <Plus size={18} /> Add to workout
+            </button>
+            <button className="btn" onClick={() => nav(`/exercise/${mineId}`)}>
+              <Check size={18} color="var(--ok)" /> In my exercises · see records
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="btn primary"
+              onClick={() => {
+                ensureLibraryExercise(lib)
+                toast({ kind: 'info', text: 'Added to my exercises', sub: lib.name })
+              }}
+            >
+              <Plus size={18} /> Add to my exercises
+            </button>
+            <button className="btn" onClick={() => setPicking(true)}>
+              Add to workout
+            </button>
+          </>
+        )}
+      </div>
+
+      <HowToCard id={lib.id} />
+
+      {picking && <AddToWorkoutSheet name={lib.name} getExercise={() => ensureLibraryExercise(lib)} onClose={() => setPicking(false)} />}
     </div>
   )
 }

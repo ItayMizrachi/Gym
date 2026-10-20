@@ -24,18 +24,16 @@ import {
 import { addProgram, startProgramWorkout } from '../lib/programStart'
 import { primeAudio } from '../lib/beep'
 import { fmtRest } from '../lib/format'
-import { PageHeader, initials } from '../components/ui'
+import { PageHeader } from '../components/ui'
 import '../styles/programs-nav.css'
+import { ExerciseThumb } from '../components/ExerciseImage'
+import { ThumbButton } from '../components/ExerciseHowTo'
 
 type Kind = Program['kind']
 
-/** Round exercise badge with initials (a photo library can replace it later). */
+/** Round exercise photo from the library (initials when there is none). */
 function Avatar({ name, size = 44 }: { name: string; size?: number }) {
-  return (
-    <span className="pg-av" style={{ width: size, height: size, fontSize: size * 0.36 }} aria-hidden>
-      {initials(name)}
-    </span>
-  )
+  return <ExerciseThumb exercise={{ name, muscle: '', image_path: null }} size={size} />
 }
 
 function Chips({ p }: { p: Program }) {
@@ -129,7 +127,7 @@ function Detail({ p }: { p: Program }) {
             <ul className="pg-ex">
               {w.exercises.map((e, j) => (
                 <li key={j} className={e.superset ? 'ss' : ''}>
-                  <Avatar name={e.name} />
+                  <ThumbButton exercise={{ name: e.name, muscle: e.muscle, equipment: e.equipment, image_path: null }} />
                   <div className="grow" style={{ minWidth: 0 }}>
                     <div className="pg-ex-name">{e.name}</div>
                     <div className="pg-ex-meta">
