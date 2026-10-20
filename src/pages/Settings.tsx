@@ -7,6 +7,14 @@ import { Confirm, Toggle } from '../components/ui'
 import { uid } from '../lib/uid'
 import { primeAudio, beep } from '../lib/beep'
 import { cloudConfigured } from '../lib/supabase'
+import { usePrefs } from '../lib/prefs'
+import { notifyPermission, notifySupported, requestNotify } from '../lib/notify'
+import { fmtKg } from '../lib/format'
+import '../styles/workout-flow.css'
+
+const INCREMENTS = [1, 1.25, 2.5, 5]
+const BARS = [20, 15, 10, 0]
+const ALL_PLATES = [25, 20, 15, 10, 5, 2.5, 2, 1.25, 1, 0.5]
 
 const flag = (k: string) => localStorage.getItem(k) !== 'off'
 const setFlag = (k: string, v: boolean) => localStorage.setItem(k, v ? 'on' : 'off')
@@ -50,6 +58,8 @@ export default function SettingsPage() {
   const [sound, setSound] = useState(flag('gymlog:sound'))
   const [awake, setAwake] = useState(flag('gymlog:awake'))
   const [confirmImport, setConfirmImport] = useState<DB | null>(null)
+  const prefs = usePrefs()
+  const [perm, setPerm] = useState(notifyPermission())
 
   function loadStarter() {
     const plan = buildStarterPlan(user?.id ?? 'local', db.exercises, db.workouts.length)
@@ -143,6 +153,87 @@ export default function SettingsPage() {
             }}
           />
         </div>
+      </div>
+
+      <div className="card stack">
+        <h2>Training</h2>
+        <div>
+          <div>Weight increase</div>
+          <div className="small muted">Added when you hit the top of the rep range on every work set</div>
+          <div className="chips" style={{ marginTop: 8 }}>
+            {INCREMENTS.map((v) => (
+              <button key={v} className={`chip ${prefs.increment === v ? 'active' : ''}`} onClick={() => prefs.setPrefs({ increment: v })}>
+                +{fmtKg(v)} kg
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="row">
+          <div className="grow">
+            <div>Log RPE</div>
+            <div className="small muted">Rate effort (6–10) after each set</div>
+          </div>
+          <Toggle on={prefs.showRpe} onChange={(v) => prefs.setPrefs({ showRpe: v })} />
+        </div>
+        <div className="row">
+          <div className="grow">
+            <div>Rest-over notification</div>
+            <div className="small muted">
+              {!notifySupported()
+                ? 'Not available in this browser. On iPhone, add GymLog to the Home Screen first (iOS 16.4+).'
+                : perm === 'denied'
+                ? 'Blocked. Allow notifications for this site in your browser settings.'
+                : 'Alerts you when rest ends while the app is in the background'}
+            </div>
+          </div>
+          <Toggle
+            on={prefs.restNotify && perm === 'granted'}
+            onChange={async (v) => {
+              if (!v) return prefs.setPrefs({ restNotify: false })
+              const ok = await requestNotify()
+              setPerm(notifyPermission())
+              prefs.setPrefs({ restNotify: ok })
+              if (!ok) toast({ kind: 'info', text: 'Notifications are not allowed', sub: 'The beep and vibration still work while the app is open.' })
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="card stack">
+        <h2>Plate calculator</h2>
+        <div>
+          <div>Bar</div>
+          <div className="chips" style={{ marginTop: 8 }}>
+            {BARS.map((v) => (
+              <button key={v} className={`chip ${prefs.barKg === v ? 'active' : ''}`} onClick={() => prefs.setPrefs({ barKg: v })}>
+                {v ? `${v} kg` : 'No bar'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div>Plates in your gym</div>
+          <div className="small muted">Tap to switch a size on or off</div>
+          <div className="plate-pick" style={{ marginTop: 8 }}>
+            {ALL_PLATES.map((v) => {
+              const on = prefs.plates.includes(v)
+              return (
+                <button
+                  key={v}
+                  className={`chip ${on ? 'active' : ''}`}
+                  aria-pressed={on}
+                  onClick={() => {
+                    const next = on ? prefs.plates.filter((p) => p !== v) : [...prefs.plates, v].sort((a, b) => b - a)
+                    if (next.length) prefs.setPrefs({ plates: next })
+                  }}
+                >
+                  {fmtKg(v)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <div className="tiny muted">In a workout, tap the kg header or hold a weight to see the plates per side.</div>
       </div>
 
       <div className="card stack">

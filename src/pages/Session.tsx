@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronUp, Info, MoreHorizontal, Plus, Flag, Trash2, Timer } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind } from '../lib/types'
-import { addExerciseToSession, discardSession, finishSession, newSet } from '../lib/actions'
+import { addExerciseToSession, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Thumb, useImageUrl } from '../components/ui'
 import { nowIso } from '../lib/uid'
+import { PlateCalc } from '../components/PlateCalc'
+import { usePrefs } from '../lib/prefs'
+import '../styles/workout-flow.css'
 
 const KIND_ORDER: SetKind[] = ['work', 'failure', 'drop', 'warmup']
 // sets that already fired a record / near-record message, so un-ticking and re-ticking does not repeat it
@@ -46,7 +49,82 @@ function useWakeLock() {
 
 function shortSet(s: SessionSet): string {
   const p = s.kind === 'drop' ? 'D ' : s.kind === 'warmup' ? 'W ' : s.kind === 'failure' ? 'F ' : ''
-  return `${p}${fmtKg(s.weight)}×${s.reps}`
+  return `${p}${fmtKg(s.weight)}×${s.reps}${s.rpe != null ? ` @${fmtKg(s.rpe)}` : ''}`
+}
+
+const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10]
+const RPE_HELP: Record<number, string> = { 6: '4+ reps left', 7: '3 reps left', 8: '2 reps left', 9: '1 rep left', 10: 'nothing left' }
+
+function RpeSheet({ value, onPick, onClose }: { value: number | null | undefined; onPick: (v: number | null) => void; onClose: () => void }) {
+  return (
+    <Sheet title="How hard was that set?" onClose={onClose}>
+      <div className="stack">
+        <div className="rpe-grid">
+          {RPE_VALUES.map((v) => (
+            <button
+              key={v}
+              className={`btn ${value === v ? 'active' : ''}`}
+              onClick={() => {
+                onPick(v)
+                onClose()
+              }}
+            >
+              {fmtKg(v)}
+            </button>
+          ))}
+        </div>
+        <div className="tiny muted">RPE {RPE_VALUES.filter((v) => RPE_HELP[v]).map((v) => `${v} = ${RPE_HELP[v]}`).join(' · ')}</div>
+        {value != null && (
+          <button
+            className="btn"
+            onClick={() => {
+              onPick(null)
+              onClose()
+            }}
+          >
+            Clear RPE
+          </button>
+        )}
+      </div>
+    </Sheet>
+  )
+}
+
+/** Press and hold for ~half a second. Text selection / the iOS callout are suppressed on the wrapper via CSS. */
+function useLongPress(onLong: () => void, ms = 500) {
+  const t = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const start = useRef<{ x: number; y: number } | null>(null)
+  const stop = () => {
+    if (t.current) clearTimeout(t.current)
+    t.current = null
+    start.current = null
+  }
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      start.current = { x: e.clientX, y: e.clientY }
+      t.current = setTimeout(() => {
+        stop()
+        ;(document.activeElement as HTMLElement | null)?.blur?.()
+        onLong()
+      }, ms)
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      if (start.current && Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y) > 10) stop()
+    },
+    onPointerUp: stop,
+    onPointerCancel: stop,
+    onPointerLeave: stop,
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault()
+  }
+}
+
+function KgCell({ value, onChange, onLong }: { value: number; onChange: (n: number | null) => void; onLong: () => void }) {
+  const lp = useLongPress(onLong)
+  return (
+    <div className="kg-hold" {...lp}>
+      <NumInput value={value} onChange={onChange} ariaLabel="Weight kg (hold for plates)" />
+    </div>
+  )
 }
 
 function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOpen: () => void }) {
@@ -65,13 +143,13 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
         )}
         {ex.setup && (
           <div className="card">
-            <div className="tiny muted">SETUP</div>
+            <div className="tiny muted">Setup</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{ex.setup}</div>
           </div>
         )}
         {ex.notes && (
           <div className="card">
-            <div className="tiny muted">NOTES</div>
+            <div className="tiny muted">Notes</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{ex.notes}</div>
           </div>
         )}
@@ -98,6 +176,9 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
   const startRest = useStore((s) => s.startRest)
   const ex = db.exercises.find((e) => e.id === se.exercise_id)
   const [info, setInfo] = useState(false)
+  const [plateSet, setPlateSet] = useState<string | null>(null)
+  const [rpeSet, setRpeSet] = useState<string | null>(null)
+  const showRpe = usePrefs((p) => p.showRpe)
 
   const prior = useMemo(() => priorSets(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
   const last = useMemo(() => lastPerformance(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
@@ -201,6 +282,22 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           Last ({fmtDate(last!.date)}): <span style={{ color: 'var(--text)' }}>{lastDesc}</span>
         </div>
       )}
+      {se.progression?.kind === 'increase' && (
+        <div className={`prog ${se.progression.applied === false ? 'off' : ''}`}>
+          <TrendingUp size={14} />
+          <span>
+            {se.progression.applied === false
+              ? `Kept at ${fmtKg(se.progression.from)} kg`
+              : `+${fmtKg(se.progression.delta)} kg: you hit ${se.progression.reps.join('/')} last time`}
+          </span>
+          <button onClick={() => mutate(toggleProgression, true)}>{se.progression.applied === false ? 'Redo' : 'Undo'}</button>
+        </div>
+      )}
+      {se.progression?.kind === 'hold' && (
+        <div className="hold">
+          Hold {fmtKg(se.progression.from)} kg: last time was {se.progression.reps.join('/')}, aim for {se.rep_min}+ on every set.
+        </div>
+      )}
       {rec.heaviest && (
         <div className="row" style={{ marginTop: 6, gap: 6, flexWrap: 'wrap' }}>
           <span className="chip pr">🏆 {fmtKg(rec.heaviest.weight)}×{rec.heaviest.reps}</span>
@@ -212,7 +309,15 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         <div className="set-row">
           <div className="hdr">Set</div>
           <div className="hdr">Prev</div>
-          <div className="hdr">kg</div>
+          <div className="hdr">
+            <button
+              className="hdr-btn"
+              onClick={() => setPlateSet((se.sets.find((x) => !x.done) ?? se.sets[se.sets.length - 1])?.id ?? null)}
+              aria-label="Plate calculator"
+            >
+              kg <Disc size={12} />
+            </button>
+          </div>
           <div className="hdr">Reps</div>
           <div className="hdr">✓</div>
         </div>
@@ -236,7 +341,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
                   {s.kind === 'work' ? workNo(i) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'}
                 </button>
                 <div className="prev">{prev && prev.reps != null ? `${fmtKg(prev.weight)}×${prev.reps}` : '–'}</div>
-                <NumInput value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} ariaLabel="Weight kg" />
+                <KgCell value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} onLong={() => setPlateSet(s.id)} />
                 <NumInput
                   value={s.reps}
                   decimal={false}
@@ -248,6 +353,15 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
                   <Check size={20} />
                 </button>
               </div>
+              {showRpe && s.done && (
+                <div className="set-row" style={{ marginTop: -2 }}>
+                  <div className="rpe-line">
+                    <button className={`rpe-chip ${s.rpe != null ? 'set' : ''}`} onClick={() => setRpeSet(s.id)}>
+                      {s.rpe != null ? `RPE ${fmtKg(s.rpe)}` : '+ RPE'}
+                    </button>
+                  </div>
+                </div>
+              )}
               {hintReps != null && nearTarget && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
@@ -304,6 +418,20 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           <Plus size={14} /> Warm-up
         </button>
       </div>
+      {plateSet && (
+        <PlateCalc
+          weight={se.sets.find((x) => x.id === plateSet)?.weight ?? 0}
+          onClose={() => setPlateSet(null)}
+          onUse={se.sets.find((x) => x.id === plateSet && !x.done) ? (kg) => patchSet(plateSet, { weight: kg }, true) : undefined}
+        />
+      )}
+      {rpeSet && (
+        <RpeSheet
+          value={se.sets.find((x) => x.id === rpeSet)?.rpe}
+          onPick={(v) => patchSet(rpeSet, { rpe: v }, true)}
+          onClose={() => setRpeSet(null)}
+        />
+      )}
       {info && ex && (
         <InfoSheet
           ex={ex}
@@ -316,6 +444,20 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
       )}
     </div>
   )
+}
+
+/** Live workout clock; ticks on its own so the exercise cards do not re-render every second. */
+function ElapsedClock({ start }: { start: string }) {
+  const [, tick] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => tick((n) => n + 1), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const sec = Math.max(0, Math.floor((Date.now() - new Date(start).getTime()) / 1000))
+  const h = Math.floor(sec / 3600)
+  const mm = String(Math.floor((sec % 3600) / 60)).padStart(h ? 2 : 1, '0')
+  const ss = String(sec % 60).padStart(2, '0')
+  return <span className="sp-clock">{h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`}</span>
 }
 
 export default function SessionPage() {
@@ -361,19 +503,30 @@ export default function SessionPage() {
 
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head" style={{ position: 'sticky', top: 'var(--safe-t)', zIndex: 15, background: 'var(--bg)', padding: '8px 0', margin: 0 }}>
-        <div className="grow">
-          <h1 style={{ fontSize: 22 }} className="ellipsis">{session.name}</h1>
-          <div className="sub">
-            {fmtDuration(session.started_at, null)} · {doneSets}/{totalSets} sets
+      <div className="sp-head">
+        <div className="sp-row">
+          <button className="btn icon sm ghost" onClick={() => nav('/')} aria-label="Back to workouts (keeps this workout running)">
+            <ChevronLeft size={22} />
+          </button>
+          <div className="grow" style={{ minWidth: 0 }}>
+            <div className="sp-name ellipsis">{session.name}</div>
+            <div className="sp-meta">
+              <ElapsedClock start={session.started_at} />
+              <span>
+                {doneSets}/{totalSets} sets
+              </span>
+            </div>
           </div>
+          <button
+            className="btn primary"
+            onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
+          >
+            <Flag size={16} /> Finish
+          </button>
         </div>
-        <button
-          className="btn primary"
-          onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
-        >
-          <Flag size={16} /> Finish
-        </button>
+        <div className="sp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={totalSets} aria-valuenow={doneSets}>
+          <div style={{ width: `${totalSets ? (doneSets / totalSets) * 100 : 0}%` }} />
+        </div>
       </div>
 
       {session.data.exercises.map((_, i) => (
