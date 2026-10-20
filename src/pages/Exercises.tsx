@@ -110,7 +110,8 @@ export default function Exercises() {
 
   const showMine = tab !== 'library'
   const showLib = tab !== 'mine'
-  const nothing = (!showMine || !mine.length) && (!showLib || (lib && !libMatches.length))
+  // only while searching or filtering: an empty list without a search has its own empty state above
+  const nothing = (filtering || level !== 'All') && (!showMine || !mine.length) && (!showLib || (lib && !libMatches.length))
 
   return (
     <div className="stack xl-page" style={{ gap: 'var(--s3)' }}>
