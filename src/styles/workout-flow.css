@@ -1,0 +1,167 @@
+/* ================= workout flow: live session, rest player, plates, RPE ================= */
+
+/* the live workout hides the bottom nav, so it only needs room for the rest player */
+.app.in-session { padding-bottom: calc(var(--safe-b) + 28px); }
+.app.in-session.has-rest { padding-bottom: calc(var(--safe-b) + 150px); }
+
+/* ---------- session header ---------- */
+.sp-head {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  margin: calc(-1 * (var(--safe-t) + 12px)) -16px 0;
+  padding: calc(var(--safe-t) + 22px) 16px 10px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.sp-row { display: flex; align-items: center; gap: 10px; }
+.sp-name { font-family: var(--display); font-size: 22px; font-weight: 650; line-height: 1.05; }
+.sp-meta { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.sp-clock {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.sp-progress { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 10px; overflow: hidden; }
+.sp-progress > div { height: 100%; background: var(--ok); border-radius: 2px; transition: width 0.3s ease-out; }
+
+/* ---------- rest player ---------- */
+.rp {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-h) + var(--safe-b) + 10px);
+  z-index: 40;
+  max-width: 696px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: #1d1f24;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.rp.full { bottom: calc(var(--safe-b) + 12px); }
+.rp.done { background: #16261d; border-color: #2b5a41; }
+.rp-ring { position: relative; width: 76px; height: 76px; }
+.rp-ring svg { width: 100%; height: 100%; display: block; }
+.rp-ring circle { fill: none; stroke-width: 6; }
+.rp-ring .track { stroke: var(--card2); }
+.rp-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+.rp.done .rp-ring .fill { stroke: var(--ok); }
+.rp-time {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 27px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.rp.done .rp-time { color: var(--ok); }
+.rp-body { min-width: 0; }
+.rp-title { font-size: 14px; font-weight: 650; }
+.rp-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.rp-ctrl { display: flex; gap: 6px; }
+.rp-ctrl .btn { min-width: 0; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .rp.done { animation: pulse 1s ease-in-out infinite; }
+}
+
+/* ---------- progression chip / hints ---------- */
+.prog {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 5px 6px 5px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #2b2409;
+  border: 1px solid #6e5612;
+  color: var(--accent);
+}
+.prog.off { background: var(--card2); border-color: var(--line); color: var(--muted); }
+.prog button {
+  font-size: 12px;
+  font-weight: 650;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+}
+.hold { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+/* ---------- kg column header opens the plate calculator ---------- */
+.hdr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+}
+.hdr-btn svg { color: var(--accent); }
+.kg-hold { -webkit-touch-callout: none; touch-action: manipulation; }
+
+/* ---------- RPE ---------- */
+.rpe-line { grid-column: 2 / -1; display: flex; gap: 6px; margin-top: -2px; }
+.rpe-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 6px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+.rpe-chip.set { border-style: solid; color: var(--text); background: var(--card2); }
+.rpe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rpe-grid .btn { font-family: var(--display); font-size: 22px; font-weight: 600; padding: 12px 0; }
+.rpe-grid .btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* ---------- plate calculator ---------- */
+.pc-target { display: flex; align-items: center; gap: 8px; }
+.pc-target .num { flex: 1; height: 52px; font-size: 30px; }
+.pc-bar {
+  position: relative;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  margin: 6px 0 2px;
+  overflow: hidden;
+}
+.pc-shaft { flex: none; width: 34px; height: 12px; background: #64676e; border-radius: 3px 0 0 3px; }
+.pc-collar { flex: none; width: 8px; height: 34px; background: #3c3e44; border-radius: 2px; margin-right: 3px; }
+.pc-sleeve { flex: 1; min-width: 24px; height: 26px; background: #64676e; border-radius: 0 4px 4px 0; }
+.pc-plate {
+  position: relative;
+  flex: none;
+  margin-right: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+}
+.pc-plate span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.75);
+}
+.pc-plate.dark span { color: rgba(255, 255, 255, 0.92); }
+.pc-list { font-family: var(--display); font-size: 20px; }
+.plate-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.plate-pick .chip { cursor: pointer; font-size: 14px; padding: 6px 12px; }
+.plate-pick .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

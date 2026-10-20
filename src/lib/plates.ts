@@ -55,5 +55,5 @@ export function plateColor(kg: number): string {
   if (kg >= 15) return '#e8c12f'
   if (kg >= 10) return '#3aa05a'
   if (kg >= 5) return '#eeeeea'
-  return '#8b8d93'
+  return '#a9abb1'
 }
