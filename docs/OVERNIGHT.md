@@ -19,8 +19,14 @@
   program plus two alternatives, added in one tap. It's the main button at the end of the welcome tour and a card at
   the top of the Programs page.
 
+- **Import from Hevy or Strong:** Settings → Data & backup → "Import from Hevy or Strong". Pick the CSV export;
+  workouts, sets (warm-up / drop / failure), notes, RPE and timed sets come over, exercises get matching photos,
+  and importing the same file twice skips what is already there. Strong pounds can be converted.
+- Small fixes: Google button logo no longer overlaps its label; History says "1 set" and hides an empty weekly
+  average.
+
 ## In progress
-- Next from the roadmap: import from Hevy / Strong (CSV).
+- Next from the roadmap: speed (smaller first load, lazy screens).
 
 ## Needs you
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

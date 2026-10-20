@@ -1,7 +1,8 @@
 import { ReactNode, useRef, useState } from 'react'
-import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
+import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Upload, ArrowRightLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
+import ImportOther from '../components/ImportOther'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
@@ -61,6 +62,7 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [sound, setSound] = useState(flag('gymlog:sound'))
   const [awake, setAwake] = useState(flag('gymlog:awake'))
+  const [importOther, setImportOther] = useState(false)
   const [confirmImport, setConfirmImport] = useState<DB | null>(null)
   const prefs = usePrefs()
   const nav = useNavigate()
@@ -305,10 +307,14 @@ export default function SettingsPage() {
           <button className="btn" onClick={() => fileRef.current?.click()}>
             <Upload size={16} aria-hidden /> Import backup
           </button>
+          <button className="btn" onClick={() => setImportOther(true)}>
+            <ArrowRightLeft size={16} aria-hidden /> Import from Hevy or Strong
+          </button>
           <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
         </>
       )}
 
+      {importOther && <ImportOther onClose={() => setImportOther(false)} />}
       {confirmImport && (
         <Confirm
           title="Import backup?"

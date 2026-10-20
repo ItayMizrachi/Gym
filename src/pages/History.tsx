@@ -91,10 +91,12 @@ export default function HistoryPage() {
                 <div className="small muted">Volume this week</div>
                 <div className="trend-v">{fmtVolume(thisWeek)}</div>
               </div>
-              <div className="small muted" style={{ textAlign: 'right' }}>
-                8-week avg
-                <div style={{ color: 'var(--text)', fontWeight: 600 }}>{fmtVolume(avg)}</div>
-              </div>
+              {avg > 0 && (
+                <div className="small muted" style={{ textAlign: 'right' }}>
+                  Weekly average
+                  <div style={{ color: 'var(--text)', fontWeight: 600 }}>{fmtVolume(avg)}</div>
+                </div>
+              )}
             </div>
             <SparkBars values={trend.map((w) => w.volume)} labels={['8 weeks ago', 'This week']} />
           </div>
@@ -141,7 +143,7 @@ export default function HistoryPage() {
                             <Clock size={13} /> {fmtMinutes(m.minutes)}
                           </span>
                           <span>
-                            <Layers size={13} /> {m.sets} sets
+                            <Layers size={13} /> {m.sets} {m.sets === 1 ? 'set' : 'sets'}
                           </span>
                           <span>
                             <Weight size={13} /> {fmtVolume(m.volume)}

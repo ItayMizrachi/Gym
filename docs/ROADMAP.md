@@ -43,7 +43,7 @@ Always keep something in progress. When the "Next" list runs low:
    web push). Real iOS Live Activities need a native app; note this honestly in Help.
 2. ~~**Personalised start.**~~ Shipped 21 Oct ("Find my program"). First-run questions (goal, experience, days per week, equipment) → recommend one of the
    ready-made programs, one tap to add it.
-3. **Import from Hevy / Strong (CSV).** Lets people switch without losing history.
+3. ~~**Import from Hevy / Strong (CSV).**~~ Shipped 21 Oct (Settings → Data & backup). Lets people switch without losing history.
 4. **Speed.** Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
    Measure bundle size before/after.
 5. **Account deletion in the app** (Settings → Delete account and data), required for Google and app-store policy.
@@ -58,6 +58,8 @@ Always keep something in progress. When the "Next" list runs low:
 ## Found in self-review
 - ~~Program cards grey thumbs~~ — checked: photos were still loading, all resolve.
 - ~~Google button overlap~~ — fixed: logo on the left (Google still shows the account's language, e.g. Hebrew).
+
+- ~~History: "1 sets", "8-week avg 0 kg" for new users~~ — fixed.
 
 ## Later / ideas
 - Rest-day suggestions and deload hints from training load.
