@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Sparkles } from 'lucide-react'
+import { LayoutGrid, Plus, Sparkles } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import '../styles/onboarding.css'
@@ -54,7 +54,7 @@ function Art({ step }: { step: number }) {
 }
 
 const CARDS = [
-  { t: 'Pick a workout', d: 'Start from a plan you can edit any time, or start an empty workout.' },
+  { t: 'Pick a program', d: 'Choose a ready-made program, or build your own workouts. You can change everything later.' },
   { t: 'Log as you lift', d: 'Weights fill in from last time. Tick the check to log a set. The rest timer starts by itself.' },
   { t: 'Watch progress', d: 'GymLog remembers your records, keeps your history and tracks your body weight.' }
 ]
@@ -112,9 +112,20 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
         {last ? (
           <>
             {db.workouts.length === 0 && (
-              <button className="btn primary block" onClick={loadStarter}>
-                <Sparkles size={18} /> Load the 4-day starter plan
-              </button>
+              <>
+                <button
+                  className="btn primary block"
+                  onClick={() => {
+                    close()
+                    nav('/programs')
+                  }}
+                >
+                  <LayoutGrid size={18} /> Browse programs
+                </button>
+                <button className="btn block" onClick={loadStarter}>
+                  <Sparkles size={18} /> Load the 4-day starter plan
+                </button>
+              </>
             )}
             <button className={`btn block ${db.workouts.length ? 'primary' : ''}`} onClick={close}>
               {db.workouts.length ? "Let's go" : (<><Plus size={18} /> I'll build my own</>)}

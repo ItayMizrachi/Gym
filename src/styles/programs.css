@@ -1,0 +1,119 @@
+/* ================= programs library + workout folders ================= */
+.pg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+}
+.pg-card:active { background: var(--card2); }
+.pg-card:focus-visible { outline: none; box-shadow: var(--focus); }
+.pg-name { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.1; }
+.pg-blurb {
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pg-foot { display: flex; align-items: center; gap: 8px; }
+.pg-foot > .small.muted { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pg-have { display: inline-flex; align-items: center; gap: 4px; color: var(--ok); font-weight: 600; }
+.pg-arrow { color: var(--muted); flex: none; }
+
+.pg-level { flex: none; }
+.pg-level.beginner { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
+.pg-level.intermediate { background: var(--blue-soft); border-color: var(--blue-line); color: var(--plate-blue); }
+.pg-level.advanced { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger); }
+
+.pg-chips { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+.pg-chips .chip { cursor: default; min-height: 32px; padding: 0 12px; }
+.pg-chips .chip::after { display: none; }
+.pg-chips .chip:active { transform: none; }
+.pg-desc { margin: 0; color: var(--text-2); font-size: var(--fs-md); line-height: 1.45; }
+
+.pg-added { border-color: var(--ok-line); }
+.pg-added .row > svg { color: var(--ok); flex: none; }
+
+.pg-workout { display: flex; flex-direction: column; gap: 8px; }
+.pg-workout h2 { font-size: 22px; margin: 0; }
+.pg-ex { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pg-ex li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.pg-ex li.ss { border-left: 3px solid var(--plate-blue); padding-left: 10px; }
+.pg-ex-name { font-weight: 600; line-height: 1.25; }
+.pg-ex-target { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+.pg-ex-target svg { vertical-align: -1px; }
+
+/* folders on the Train tab */
+.fold { display: flex; flex-direction: column; gap: 8px; }
+.fold-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  width: 100%;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+.fold-head:focus-visible { outline: none; box-shadow: var(--focus); }
+.fold-head h2 { font-size: 20px; margin: 0; }
+.fold-head .fold-caret { color: var(--muted); transition: transform var(--t, 0.15s) var(--ease, ease); flex: none; }
+.fold-head[aria-expanded='false'] .fold-caret { transform: rotate(-90deg); }
+.fold-head .fold-icon { color: var(--muted); flex: none; }
+.fold-pick { display: flex; flex-direction: column; gap: 6px; }
+
+/* home: next-step card, browse link, labelled numbers */
+.next-step { border-color: var(--accent-line); }
+.next-step .hero-label { color: var(--accent); }
+.browse-link { justify-content: space-between; }
+.home-help { align-self: center; }
+.ph-help { min-width: 44px; min-height: 44px; }
+
+/* workout editor helpers */
+.we-help { display: flex; align-items: center; gap: 4px; }
+.info-btn {
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+}
+.info-btn::after { content: ''; position: absolute; inset: -6px; }
+.info-btn:focus-visible { outline: none; box-shadow: var(--focus); }
+.info-pop {
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.we-add-bar { display: flex; gap: 8px; }
+
+/* settings groups */
+.set-group-sub { margin-top: -4px; }

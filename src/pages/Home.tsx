@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy } from 'lucide-react'
+import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -29,6 +29,7 @@ import {
 } from '../lib/stats'
 import { CalendarHeat } from '../components/CalendarHeat'
 import '../styles/insights.css'
+import '../styles/programs.css'
 
 function templateInfo(db: DB, w: Workout) {
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -170,7 +171,10 @@ export default function Home() {
               <b>Watch it add up.</b> Weekly sets, streaks and records appear here.
             </li>
           </ol>
-          <button className="btn primary block" onClick={loadStarter}>
+          <button className="btn primary block" onClick={() => nav('/programs')}>
+            <LayoutGrid size={18} /> Browse programs
+          </button>
+          <button className="btn block" onClick={loadStarter}>
             <Sparkles size={18} /> Load my starter plan (4 days)
           </button>
           <button className="btn block" onClick={newWorkout}>
@@ -361,6 +365,14 @@ export default function Home() {
           <Zap size={18} /> Empty workout
         </button>
       </div>
+      {workouts.length > 0 && (
+        <button className="btn ghost browse-link" onClick={() => nav('/programs')}>
+          <span className="row" style={{ gap: 8 }}>
+            <LayoutGrid size={18} /> Browse programs
+          </span>
+          <ChevronRight size={18} />
+        </button>
+      )}
       {finished.length > 0 && (
         <button className="btn ghost sm" onClick={() => nav('/history')}>
           <Trophy size={16} /> See history and records <ChevronRight size={16} />
