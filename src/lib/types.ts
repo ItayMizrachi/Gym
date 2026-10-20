@@ -1,3 +1,5 @@
+import type { Progression } from './progression'
+
 export type SetKind = 'warmup' | 'work' | 'drop' | 'failure'
 
 export interface Exercise {
@@ -44,6 +46,8 @@ export interface SessionSet {
   reps: number | null
   done: boolean
   done_at: string | null
+  /** optional effort rating, 6–10 in 0.5 steps */
+  rpe?: number | null
 }
 
 export interface SessionExercise {
@@ -55,6 +59,8 @@ export interface SessionExercise {
   rep_min: number
   rep_max: number
   sets: SessionSet[]
+  /** double-progression hint computed when the workout was started */
+  progression?: Progression | null
 }
 
 export interface Session {

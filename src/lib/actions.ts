@@ -3,6 +3,8 @@ import { DB, Exercise, Session, SessionExercise, SessionSet, SetKind, Workout } 
 import { lastPerformance } from './pr'
 import { nowIso, uid } from './uid'
 import { roundTo } from './format'
+import { suggestProgression } from './progression'
+import { getPrefs } from './prefs'
 
 const st = () => useStore.getState()
 const userId = () => st().user?.id ?? 'local'
@@ -11,7 +13,10 @@ export function newSet(kind: SetKind, weight: number): SessionSet {
   return { id: uid(), kind, weight, reps: null, done: false, done_at: null }
 }
 
-/** Build the rows for one exercise, pre-filled from the last time it was done (falls back to the template weight). */
+/**
+ * Build the rows for one exercise, pre-filled from the last time it was done (falls back to the template weight).
+ * When every work set last time reached the top of the rep range, the work weights go up by `increment`.
+ */
 export function buildSessionExercise(
   db: DB,
   exercise: Exercise,
@@ -25,15 +30,18 @@ export function buildSessionExercise(
     drop_last: boolean
     note: string
   },
-  excludeSessionId?: string
+  excludeSessionId?: string,
+  increment = getPrefs().increment
 ): SessionExercise {
   const last = lastPerformance(db, exercise.id, excludeSessionId)
+  const progression = suggestProgression(last, cfg.rep_min, cfg.rep_max, increment)
+  const bump = progression?.kind === 'increase' ? progression.delta : 0
   const lastWork = last?.sets.filter((s) => s.kind === 'work' || s.kind === 'failure') ?? []
   const lastDrop = last?.sets.find((s) => s.kind === 'drop')
   const rows: SessionSet[] = []
   for (let i = 0; i < cfg.sets; i++) {
     const ref = lastWork[i] ?? lastWork[lastWork.length - 1]
-    rows.push(newSet('work', ref ? ref.weight : cfg.weight))
+    rows.push(newSet('work', ref ? roundTo(ref.weight + bump, 0.01) : cfg.weight))
   }
   if (cfg.drop_last && cfg.sets > 0) {
     const base = rows[rows.length - 1].weight
@@ -47,7 +55,20 @@ export function buildSessionExercise(
     note: cfg.note,
     rep_min: cfg.rep_min,
     rep_max: cfg.rep_max,
-    sets: rows
+    sets: rows,
+    progression
+  }
+}
+
+/** Undo (or re-apply) the suggested weight increase on the sets that are not logged yet. */
+export function toggleProgression(se: SessionExercise): SessionExercise {
+  const p = se.progression
+  if (!p || p.kind !== 'increase') return se
+  const sign = p.applied === false ? 1 : -1
+  return {
+    ...se,
+    progression: { ...p, applied: p.applied === false },
+    sets: se.sets.map((s) => (s.kind === 'work' && !s.done ? { ...s, weight: roundTo(s.weight + sign * p.delta, 0.01) } : s))
   }
 }
 
