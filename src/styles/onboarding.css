@@ -12,9 +12,9 @@
   touch-action: pan-y;
 }
 .wl-top { display: flex; align-items: center; justify-content: space-between; min-height: var(--tap); }
-.wl-brand { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--accent); }
+.wl-brand { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--accent); }
 .wl-card { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; animation: wl-in 0.3s var(--ease); }
-.wl-card h1 { font-size: 34px; line-height: 1.05; }
+.wl-card h1 { font-size: 30px; line-height: 1.05; letter-spacing: var(--track-tight); }
 .wl-card p { margin: 0; color: var(--text-2); font-size: var(--fs-md); line-height: 1.45; }
 .wl-art { width: 100%; max-width: 280px; height: auto; margin-bottom: 16px; }
 .wl-dots { display: flex; justify-content: center; gap: 8px; margin: 12px 0 18px; }

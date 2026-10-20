@@ -43,7 +43,7 @@ html {
 .pwa-boot-name {
   font-family: var(--display);
   font-weight: 700;
-  font-size: 26px;
+  font-size: 24px;
   letter-spacing: 0.4px;
   color: var(--text);
 }
@@ -160,7 +160,7 @@ html {
   font-weight: 600;
 }
 .pwa-net.chip {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   padding: 4px 9px 4px 8px;
   border-radius: 999px;

@@ -15,15 +15,16 @@
   border-bottom: 1px solid var(--line);
 }
 .sp-row { display: flex; align-items: center; gap: 10px; }
-.sp-name { font-family: var(--display); font-size: 22px; font-weight: 650; line-height: 1.05; }
+.sp-name { font-family: var(--display); font-size: 20px; font-weight: 650; line-height: 1.05; }
 .sp-meta { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; color: var(--muted); font-size: 13px; }
 .sp-clock {
   font-family: var(--display);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 600;
   line-height: 1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-tight);
 }
 .sp-progress { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 10px; overflow: hidden; }
 .sp-progress > div { height: 100%; background: var(--ok); border-radius: 2px; transition: width 0.3s ease-out; }
@@ -62,9 +63,10 @@
   align-items: center;
   justify-content: center;
   font-family: var(--display);
-  font-size: 27px;
+  font-size: 24px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-tight);
 }
 .rp.done .rp-time { color: var(--ok); }
 .rp-body { min-width: 0; }
@@ -125,7 +127,7 @@
 }
 .rpe-chip.set { border-style: solid; color: var(--text); background: var(--card2); }
 .rpe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.rpe-grid .btn { font-family: var(--display); font-size: 22px; font-weight: 600; padding: 12px 0; }
+.rpe-grid .btn { font-family: var(--display); font-size: 18px; font-weight: 600; padding: 12px 0; }
 .rpe-grid .btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 /* ---------- plate calculator ---------- */
@@ -156,12 +158,12 @@
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--display);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: rgba(0, 0, 0, 0.75);
 }
 .pc-plate.dark span { color: rgba(255, 255, 255, 0.92); }
-.pc-list { font-family: var(--display); font-size: 20px; }
+.pc-list { font-family: var(--display); font-size: 17px; }
 .plate-pick { display: flex; flex-wrap: wrap; gap: 8px; }
 .plate-pick .chip { cursor: pointer; font-size: 14px; padding: 6px 12px; }
 .plate-pick .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

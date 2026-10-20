@@ -42,14 +42,14 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
     ok: token('--ok', '#5fcf8f'),
     danger: token('--danger', '#f0594f')
   }
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
-  const body = `'Barlow', 'Segoe UI', Roboto, Arial, sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
+  const body = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   try {
     await Promise.all([
-      document.fonts.load(`700 120px 'Barlow Condensed'`),
-      document.fonts.load(`600 40px 'Barlow Condensed'`),
-      document.fonts.load(`500 36px 'Barlow'`),
-      document.fonts.load(`600 36px 'Barlow'`)
+      document.fonts.load(`700 120px 'Inter Variable'`),
+      document.fonts.load(`600 40px 'Inter Variable'`),
+      document.fonts.load(`500 36px 'Inter Variable'`),
+      document.fonts.load(`600 36px 'Inter Variable'`)
     ])
   } catch {
     /* fall back to system fonts */
@@ -189,7 +189,7 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
 }
 
 function drawFooter(ctx: CanvasRenderingContext2D, H: number, L: number, C: { accent: string; bg: string; text: string }) {
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   ctx.fillStyle = C.accent
   ctx.beginPath()
   ctx.arc(L + 18, H - 92, 18, 0, Math.PI * 2)
@@ -260,10 +260,10 @@ export async function renderCompareCard(a: ComparePhoto, b: ComparePhoto, captio
     muted: token('--muted', '#9b9a94'),
     accent: token('--accent', '#f0b92a')
   }
-  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
-  const body = `'Barlow', 'Segoe UI', Roboto, Arial, sans-serif`
+  const display = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
+  const body = `'Inter Variable', Inter, 'Segoe UI', Roboto, Arial, sans-serif`
   try {
-    await Promise.all([document.fonts.load(`700 80px 'Barlow Condensed'`), document.fonts.load(`500 36px 'Barlow'`)])
+    await Promise.all([document.fonts.load(`700 80px 'Inter Variable'`), document.fonts.load(`500 36px 'Inter Variable'`)])
   } catch {
     /* system fonts */
   }

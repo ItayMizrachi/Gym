@@ -1,13 +1,15 @@
 /* =====================================================================
    GymLog design system: "logbook + plates"
-   Graphite floor, chalk text, and the standard competition plate colours
-   as the only accents:
+   Near-black floor, graphite cards, chalk text, and the standard
+   competition plate colours as the only accents:
      yellow 15 kg = brand / records    (--accent)
      blue   20 kg = drop sets / supersets (--plate-blue)
      red    25 kg = failure / destructive (--danger)
      green  10 kg = done                (--ok)
-   No gradients, no ALL-CAPS labels. Barlow Condensed for numbers and
-   headings, Barlow for body text.
+   No gradients, no ALL-CAPS labels. One UI font (Inter, variable with
+   optical sizing, so big numbers get the tighter display cut for free).
+   Type scale: 12 caption / 14 secondary / 16 body / 18 card title /
+   22 section / 28 page title / 34+ hero numbers. 8px spacing grid.
    ===================================================================== */
 
 :root {
@@ -63,15 +65,22 @@
   --r-pill: 999px;
 
   /* ---- type scale ---- */
-  --display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  --body: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --fs-xs: 12px;
-  --fs-sm: 13px;
-  --fs-base: 16px;
-  --fs-md: 17px;
+  --font: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --body: var(--font);
+  /* kept for existing rules: headings and numbers now use the same face, heavier and tighter */
+  --display: var(--font);
+  --fs-xs: 12px; /* caption */
+  --fs-sm: 14px; /* secondary */
+  --fs-base: 16px; /* body */
+  --fs-md: 18px; /* card title */
   --fs-lg: 20px;
-  --fs-xl: 24px;
-  --fs-2xl: 34px;
+  --fs-xl: 22px; /* section title */
+  --fs-2xl: 28px; /* page title */
+  --fs-hero: 34px; /* hero numbers */
+  --lh-body: 1.4;
+  --lh-tight: 1.15;
+  --track-tight: -0.02em; /* large headings and big numbers */
+  --track-snug: -0.01em; /* card titles */
 
   /* ---- elevation: borders first, shadows only for floating layers ---- */
   --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -106,7 +115,8 @@ body,
   color: var(--text);
   font-family: var(--body);
   font-size: var(--fs-base);
-  line-height: 1.4;
+  line-height: var(--lh-body);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -137,8 +147,13 @@ h2,
 h3 {
   margin: 0;
   font-family: var(--display);
+  font-weight: 650;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-snug);
+}
+h1 {
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: var(--track-tight);
 }
 ::selection {
   background: var(--accent);
@@ -189,7 +204,7 @@ table.t,
 .page-head h1 {
   font-size: var(--fs-2xl);
   font-weight: 700;
-  line-height: 1;
+  line-height: var(--lh-tight);
   flex: 1;
   min-width: 0;
 }
@@ -267,8 +282,8 @@ table.t,
   box-shadow: none;
 }
 .card h2 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--fs-md);
+  font-weight: 650;
   line-height: 1.1;
 }
 .card-head {
@@ -317,10 +332,10 @@ table.t,
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-ink);
-  font-family: var(--display);
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-family: var(--body);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: 0;
 }
 .btn.primary:active {
   background: #d9a721;
@@ -367,7 +382,7 @@ table.t,
   inset: -4px;
 }
 .btn.primary.sm {
-  font-size: 17px;
+  font-size: 15px;
 }
 .btn.icon {
   width: var(--tap);
@@ -542,7 +557,7 @@ div.field {
   padding: 0 6px;
   border-radius: var(--r-pill);
   background: var(--card3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text-2);
@@ -639,10 +654,11 @@ div.field {
 }
 .rest .time {
   font-family: var(--display);
-  font-size: 40px;
-  font-weight: 600;
+  font-size: 36px;
+  font-weight: 700;
   line-height: 1;
   min-width: 92px;
+  letter-spacing: var(--track-tight);
 }
 @keyframes pulse {
   50% {
@@ -756,8 +772,8 @@ div.field {
   animation: sheet-up 0.34s var(--ease-spring);
 }
 .sheet h2 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--fs-lg);
+  font-weight: 650;
   line-height: 1.1;
 }
 .sheet-handle {
@@ -829,8 +845,8 @@ div.field {
 }
 .wcard .title {
   font-family: var(--display);
-  font-size: var(--fs-xl);
-  font-weight: 700;
+  font-size: var(--fs-lg);
+  font-weight: 650;
   line-height: 1.05;
 }
 .wcard .preview {
@@ -866,12 +882,13 @@ div.field {
 }
 .stat .v {
   font-family: var(--display);
-  font-size: 30px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: var(--track-tight);
 }
 .stat .v .u {
   font-size: 0.55em;
@@ -887,8 +904,9 @@ div.field {
 }
 .kpi {
   font-family: var(--display);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
+  letter-spacing: var(--track-tight);
 }
 .up {
   color: var(--ok);
@@ -915,8 +933,8 @@ div.field {
 }
 .ex-name {
   font-family: var(--display);
-  font-size: var(--fs-lg);
-  font-weight: 700;
+  font-size: var(--fs-md);
+  font-weight: 650;
   line-height: 1.1;
 }
 
@@ -965,9 +983,9 @@ div.field {
 .thumb.tile .ini {
   position: relative;
   font-family: var(--display);
-  font-weight: 700;
-  font-size: 0.36em;
-  letter-spacing: 0.3px;
+  font-weight: 650;
+  font-size: 0.32em;
+  letter-spacing: 0;
   line-height: 1;
 }
 
@@ -1003,8 +1021,8 @@ div.field {
   border: 3px solid var(--chalk-plate);
   color: var(--text);
   font-family: var(--display);
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 650;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1061,9 +1079,9 @@ div.field {
   color: #d6d4cc;
 }
 .prev {
-  font-family: var(--display);
-  font-size: var(--fs-md);
-  letter-spacing: 0.2px;
+  font-family: var(--body);
+  font-size: 15px;
+  letter-spacing: 0;
   color: var(--muted);
   text-align: center;
 }
@@ -1075,8 +1093,8 @@ div.field {
   border: 1px solid var(--line-strong);
   border-radius: var(--r-sm);
   font-family: var(--display);
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 650;
   outline: none;
   transition: border-color var(--t) var(--ease), background var(--t) var(--ease), box-shadow var(--t) var(--ease);
 }
@@ -1155,8 +1173,8 @@ div.field {
 }
 .chart-tip .val {
   font-family: var(--display);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
@@ -1244,7 +1262,7 @@ a.list-row:active {
   flex: none;
 }
 .list-row .trail .kpi {
-  font-size: 20px;
+  font-size: 18px;
 }
 .list-row .chev {
   color: var(--faint);
@@ -1311,7 +1329,7 @@ table.t td {
   margin-bottom: var(--s2);
 }
 .empty h2 {
-  font-size: 22px;
+  font-size: var(--fs-lg);
 }
 .empty .empty-text {
   color: var(--muted);
@@ -1346,7 +1364,7 @@ table.t td {
   top: calc(var(--safe-t) + 6px);
   right: 10px;
   z-index: 20;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   display: flex;
   gap: 5px;
@@ -1391,9 +1409,10 @@ table.t td {
   margin-bottom: var(--s5);
 }
 .login-brand h1 {
-  font-size: 52px;
-  line-height: 0.9;
+  font-size: 44px;
+  line-height: 1;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 .login-brand h1 span {
   color: var(--accent);
@@ -1594,7 +1613,7 @@ table.t td {
 }
 .we-card .we-idx {
   font-family: var(--display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--faint);
   width: 16px;
@@ -1671,8 +1690,8 @@ table.t td {
   border: 1px solid var(--line-strong);
   background: var(--bg2);
   font-family: var(--display);
-  font-weight: 700;
-  font-size: 17px;
+  font-weight: 650;
+  font-size: 15px;
   color: var(--muted);
 }
 .group-pick button::after {
@@ -1730,13 +1749,13 @@ table.t td {
   text-align: center;
 }
 .reps-table .r {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .reps-table .w {
   font-family: var(--display);
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
   line-height: 1.15;
 }
@@ -1751,8 +1770,8 @@ table.t td {
 }
 .set-pill {
   font-family: var(--display);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 550;
   font-variant-numeric: tabular-nums;
   padding: 1px 7px;
   border-radius: var(--r-xs);
@@ -1782,13 +1801,14 @@ table.t td {
 }
 .body-hero .big {
   font-family: var(--display);
-  font-size: 64px;
-  font-weight: 600;
-  line-height: 0.9;
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-tight);
 }
 .body-hero .big .u {
-  font-size: 24px;
+  font-size: 20px;
   color: var(--muted);
   margin-left: 4px;
 }
@@ -1806,10 +1826,10 @@ table.t td {
   border-left: 1px solid var(--line);
 }
 .delta-row .kpi {
-  font-size: 22px;
+  font-size: 20px;
 }
 .delta-row .l {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 4px;
 }
@@ -1940,12 +1960,13 @@ input[type='search']::-webkit-search-decoration {
   outline: none;
   text-align: center;
   font-family: var(--display);
-  font-size: 64px;
-  font-weight: 600;
+  font-size: 52px;
+  font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   padding: 0 0 4px;
   transition: border-color var(--t) var(--ease);
+  letter-spacing: var(--track-tight);
 }
 .weigh-num::placeholder {
   color: var(--faint);
@@ -1955,7 +1976,7 @@ input[type='search']::-webkit-search-decoration {
 }
 .weigh-unit {
   font-family: var(--display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--muted);
 }
