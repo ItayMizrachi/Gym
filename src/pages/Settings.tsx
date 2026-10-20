@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react'
-import { ChevronRight, Download, HelpCircle, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
+import { ReactNode, useRef, useState } from 'react'
+import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogOut, PlayCircle, Sparkles, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
-import { Confirm, Toggle } from '../components/ui'
+import { Confirm, PageHeader, Toggle } from '../components/ui'
 import { uid } from '../lib/uid'
 import { primeAudio, beep } from '../lib/beep'
 import { cloudConfigured } from '../lib/supabase'
@@ -13,6 +13,7 @@ import { usePrefs } from '../lib/prefs'
 import { notifyPermission, notifySupported, requestNotify } from '../lib/notify'
 import { fmtKg } from '../lib/format'
 import '../styles/workout-flow.css'
+import '../styles/programs-nav.css'
 
 const INCREMENTS = [1, 1.25, 2.5, 5]
 const BARS = [20, 15, 10, 0]
@@ -69,7 +70,7 @@ export default function SettingsPage() {
     plan.exercises.forEach((e) => save('exercises', e))
     plan.workouts.forEach((w) => save('workouts', w))
     plan.workout_exercises.forEach((w) => save('workout_exercises', w))
-    toast({ kind: 'info', text: 'Starter plan added', sub: '4 workouts are on the Workouts tab.' })
+    toast({ kind: 'info', text: 'Starter plan added', sub: '4 workouts are on the Train tab.' })
   }
 
   function exportJson() {
@@ -101,179 +102,190 @@ export default function SettingsPage() {
     toast({ kind: 'info', text: 'Import done', sub: 'Photos are not included in backups.' })
   }
 
+  const group = (title: string, sub: string, children: ReactNode) => (
+    <section className="card stack" aria-label={title}>
+      <div>
+        <h2>{title}</h2>
+        <div className="small muted">{sub}</div>
+      </div>
+      {children}
+    </section>
+  )
+  const link = (label: string, sub: string, icon: ReactNode, onClick: () => void, primary = false) => (
+    <button className={`btn set-link ${primary ? 'primary' : ''}`} onClick={onClick}>
+      {icon}
+      <span className="grow set-link-t">
+        {label}
+        {sub && <span className="tiny set-link-sub">{sub}</span>}
+      </span>
+      <ChevronRight size={16} aria-hidden />
+    </button>
+  )
+  const toggleRow = (label: string, sub: ReactNode, on: boolean, onChange: (v: boolean) => void) => (
+    <div className="row">
+      <div className="grow">
+        <div>{label}</div>
+        <div className="small muted">{sub}</div>
+      </div>
+      <Toggle on={on} onChange={onChange} ariaLabel={label} />
+    </div>
+  )
+
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head">
-        <h1>Settings</h1>
-      </div>
+      <PageHeader title="Settings" sub="Your account, workout options, plates and backups." />
 
-      <div className="card stack">
-        <h2>Help</h2>
-        <div className="small muted">New here? Start with these.</div>
-        <button className="btn primary" onClick={() => nav('/help')}>
-          <HelpCircle size={16} /> How GymLog works <ChevronRight size={16} />
-        </button>
-        <button className="btn" onClick={reopenWelcome}>
-          <PlayCircle size={16} /> Show the welcome tour
-        </button>
-      </div>
+      {group(
+        'Help',
+        'New here? Start with these.',
+        <>
+          {link('How GymLog works', '', <HelpCircle size={18} aria-hidden />, () => nav('/help'), true)}
+          {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
+          <div className="tiny muted">
+            <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
+            opens full screen and keeps working with a weak signal.
+          </div>
+        </>
+      )}
 
-      <div className="card stack">
-        <h2>Account</h2>
-        {repo?.mode === 'cloud' ? (
-          <div className="small muted">
-            Signed in as <b style={{ color: 'var(--text)' }}>{user?.email ?? user?.id}</b>. Your data syncs across devices and is only visible to you.
-          </div>
-        ) : (
-          <div className="small muted">
-            Demo mode: your data lives only in this browser.
-            {cloudConfigured ? ' Sign in to sync it across devices.' : ' Cloud sync is not configured for this install (see README).'}
-          </div>
-        )}
-        <button className="btn" onClick={() => signOut()}>
-          <LogOut size={16} /> {repo?.mode === 'cloud' ? 'Sign out' : cloudConfigured ? 'Leave demo / sign in' : 'Reload demo'}
-        </button>
-      </div>
-
-      <div className="card stack">
-        <h2>Workout</h2>
-        <div className="row">
-          <div className="grow">
-            <div>Rest timer sound</div>
-            <div className="small muted">Beeps + vibrates when rest is over</div>
-          </div>
-          <Toggle
-            on={sound}
-            onChange={(v) => {
-              setSound(v)
-              setFlag('gymlog:sound', v)
-              if (v) {
-                primeAudio()
-                beep(1)
-              }
-            }}
-          />
-        </div>
-        <div className="row">
-          <div className="grow">
-            <div>Keep screen awake</div>
-            <div className="small muted">During a workout, where the phone allows it</div>
-          </div>
-          <Toggle
-            on={awake}
-            onChange={(v) => {
-              setAwake(v)
-              setFlag('gymlog:awake', v)
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="card stack">
-        <h2>Training</h2>
-        <div>
-          <div>Weight increase</div>
-          <div className="small muted">Added when you hit the top of the rep range on every work set</div>
-          <div className="chips" style={{ marginTop: 8 }}>
-            {INCREMENTS.map((v) => (
-              <button key={v} className={`chip ${prefs.increment === v ? 'active' : ''}`} onClick={() => prefs.setPrefs({ increment: v })}>
-                +{fmtKg(v)} kg
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="row">
-          <div className="grow">
-            <div>Log RPE</div>
-            <div className="small muted">Rate effort (6–10) after each set</div>
-          </div>
-          <Toggle on={prefs.showRpe} onChange={(v) => prefs.setPrefs({ showRpe: v })} />
-        </div>
-        <div className="row">
-          <div className="grow">
-            <div>Rest-over notification</div>
+      {group(
+        'Account',
+        repo?.mode === 'cloud' ? 'Who you are signed in as.' : 'Where your data is kept.',
+        <>
+          {repo?.mode === 'cloud' ? (
             <div className="small muted">
-              {!notifySupported()
-                ? 'Not available in this browser. On iPhone, add GymLog to the Home Screen first (iOS 16.4+).'
-                : perm === 'denied'
-                ? 'Blocked. Allow notifications for this site in your browser settings.'
-                : 'Alerts you when rest ends while the app is in the background'}
+              Signed in as <b style={{ color: 'var(--text)' }}>{user?.email ?? user?.id}</b>. Your data syncs across devices and is only visible to
+              you.
             </div>
-          </div>
-          <Toggle
-            on={prefs.restNotify && perm === 'granted'}
-            onChange={async (v) => {
+          ) : (
+            <div className="small muted">
+              Demo mode: your data lives only in this browser.
+              {cloudConfigured ? ' Sign in to sync it across devices.' : ' Cloud sync is not configured for this install (see README).'}
+            </div>
+          )}
+          <button className="btn" onClick={() => signOut()}>
+            <LogOut size={16} aria-hidden /> {repo?.mode === 'cloud' ? 'Sign out' : cloudConfigured ? 'Leave demo / sign in' : 'Reload demo'}
+          </button>
+        </>
+      )}
+
+      {group(
+        'Workout',
+        'How a workout behaves while you train.',
+        <>
+          {link('Exercises', 'Your exercise list, photos and setup notes', <BookOpen size={18} aria-hidden />, () => nav('/exercises'))}
+          {toggleRow('Rest timer sound', 'Beeps and vibrates when rest is over', sound, (v) => {
+            setSound(v)
+            setFlag('gymlog:sound', v)
+            if (v) {
+              primeAudio()
+              beep(1)
+            }
+          })}
+          {toggleRow(
+            'Rest-over notification',
+            !notifySupported()
+              ? 'Not available in this browser. On iPhone, add GymLog to the Home Screen first (iOS 16.4+).'
+              : perm === 'denied'
+              ? 'Blocked. Allow notifications for this site in your browser settings.'
+              : 'Alerts you when rest ends while the app is in the background',
+            prefs.restNotify && perm === 'granted',
+            async (v) => {
               if (!v) return prefs.setPrefs({ restNotify: false })
               const ok = await requestNotify()
               setPerm(notifyPermission())
               prefs.setPrefs({ restNotify: ok })
               if (!ok) toast({ kind: 'info', text: 'Notifications are not allowed', sub: 'The beep and vibration still work while the app is open.' })
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="card stack">
-        <h2>Plate calculator</h2>
-        <div>
-          <div>Bar</div>
-          <div className="chips" style={{ marginTop: 8 }}>
-            {BARS.map((v) => (
-              <button key={v} className={`chip ${prefs.barKg === v ? 'active' : ''}`} onClick={() => prefs.setPrefs({ barKg: v })}>
-                {v ? `${v} kg` : 'No bar'}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <div>Plates in your gym</div>
-          <div className="small muted">Tap to switch a size on or off</div>
-          <div className="plate-pick" style={{ marginTop: 8 }}>
-            {ALL_PLATES.map((v) => {
-              const on = prefs.plates.includes(v)
-              return (
+            }
+          )}
+          {toggleRow('Keep screen awake', 'During a workout, where the phone allows it', awake, (v) => {
+            setAwake(v)
+            setFlag('gymlog:awake', v)
+          })}
+          {toggleRow('Log RPE', 'Rate how hard each set felt, from 6 to 10', prefs.showRpe, (v) => prefs.setPrefs({ showRpe: v }))}
+          <div>
+            <div>Weight increase</div>
+            <div className="small muted">Suggested when you reach the top of the rep range on every work set</div>
+            <div className="chips" style={{ marginTop: 8 }} role="group" aria-label="Weight increase">
+              {INCREMENTS.map((v) => (
                 <button
                   key={v}
-                  className={`chip ${on ? 'active' : ''}`}
-                  aria-pressed={on}
-                  onClick={() => {
-                    const next = on ? prefs.plates.filter((p) => p !== v) : [...prefs.plates, v].sort((a, b) => b - a)
-                    if (next.length) prefs.setPrefs({ plates: next })
-                  }}
+                  className={`chip ${prefs.increment === v ? 'active' : ''}`}
+                  aria-pressed={prefs.increment === v}
+                  onClick={() => prefs.setPrefs({ increment: v })}
                 >
-                  {fmtKg(v)}
+                  +{fmtKg(v)} kg
                 </button>
-              )
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="tiny muted">In a workout, tap the kg header or hold a weight to see the plates per side.</div>
-      </div>
+        </>
+      )}
 
-      <div className="card stack">
-        <h2>Data</h2>
-        <button className="btn" onClick={loadStarter}>
-          <Sparkles size={16} /> Add the starter plan (4 workouts)
-        </button>
-        <button className="btn" onClick={exportJson}>
-          <Download size={16} /> Export backup (JSON)
-        </button>
-        <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-        <button className="btn" onClick={() => fileRef.current?.click()}>
-          <Upload size={16} /> Import backup
-        </button>
-        <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
-      </div>
+      {group(
+        'Units & plates',
+        'Weights are in kilograms. Set your bar and plates for the plate calculator.',
+        <>
+          <div>
+            <div>Bar</div>
+            <div className="chips" style={{ marginTop: 8 }} role="group" aria-label="Bar weight">
+              {BARS.map((v) => (
+                <button
+                  key={v}
+                  className={`chip ${prefs.barKg === v ? 'active' : ''}`}
+                  aria-pressed={prefs.barKg === v}
+                  onClick={() => prefs.setPrefs({ barKg: v })}
+                >
+                  {v ? `${v} kg` : 'No bar'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div>Plates in your gym</div>
+            <div className="small muted">Tap to switch a size on or off</div>
+            <div className="plate-pick" style={{ marginTop: 8 }} role="group" aria-label="Plates in your gym">
+              {ALL_PLATES.map((v) => {
+                const on = prefs.plates.includes(v)
+                return (
+                  <button
+                    key={v}
+                    className={`chip ${on ? 'active' : ''}`}
+                    aria-pressed={on}
+                    aria-label={`${fmtKg(v)} kg plate`}
+                    onClick={() => {
+                      const next = on ? prefs.plates.filter((p) => p !== v) : [...prefs.plates, v].sort((a, b) => b - a)
+                      if (next.length) prefs.setPrefs({ plates: next })
+                    }}
+                  >
+                    {fmtKg(v)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div className="tiny muted">In a workout, tap the kg header or hold a weight to see the plates per side.</div>
+        </>
+      )}
 
-      <div className="card stack">
-        <h2>Install on your phone</h2>
-        <div className="small">
-          <b>iPhone (Safari):</b> Share → Add to Home Screen.
-          <br />
-          <b>Android (Chrome):</b> ⋮ menu → Install app / Add to Home screen.
-        </div>
-        <div className="tiny muted">It then opens full screen like a normal app and keeps working with a weak signal at the gym.</div>
-      </div>
+      {group(
+        'Data & backup',
+        'Add ready-made workouts, or save and restore everything.',
+        <>
+          {link('Browse programs', '20 single workouts and 10 weekly plans', <LayoutGrid size={18} aria-hidden />, () => nav('/programs'))}
+          <button className="btn" onClick={loadStarter}>
+            <Sparkles size={16} aria-hidden /> Add the starter plan (4 workouts)
+          </button>
+          <button className="btn" onClick={exportJson}>
+            <Download size={16} aria-hidden /> Export backup (JSON)
+          </button>
+          <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+          <button className="btn" onClick={() => fileRef.current?.click()}>
+            <Upload size={16} aria-hidden /> Import backup
+          </button>
+          <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
+        </>
+      )}
 
       {confirmImport && (
         <Confirm

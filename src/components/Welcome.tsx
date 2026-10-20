@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Sparkles } from 'lucide-react'
+import { LayoutGrid, Plus, Sparkles } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import '../styles/onboarding.css'
+import '../styles/programs-nav.css'
 
 /** Per-user UI flags (localStorage, keyed by user id). */
 const key = (name: string) => `gymlog:${name}:${useStore.getState().user?.id ?? 'local'}`
@@ -54,7 +55,7 @@ function Art({ step }: { step: number }) {
 }
 
 const CARDS = [
-  { t: 'Pick a workout', d: 'Start from a plan you can edit any time, or start an empty workout.' },
+  { t: 'Pick a program', d: 'Choose a ready-made program, or build your own workouts. You can change everything later.' },
   { t: 'Log as you lift', d: 'Weights fill in from last time. Tick the check to log a set. The rest timer starts by itself.' },
   { t: 'Watch progress', d: 'GymLog remembers your records, keeps your history and tracks your body weight.' }
 ]
@@ -66,6 +67,8 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
   const db = useStore((s) => s.db)
   const user = useStore((s) => s.user)
   const last = step === CARDS.length - 1
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => box.current?.focus({ preventScroll: true }), [])
   const close = () => {
     markSeen('welcome')
     onDone()
@@ -81,6 +84,8 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
   let x0 = 0
   return (
     <div
+      ref={box}
+      tabIndex={-1}
       className="wl"
       role="dialog"
       aria-modal="true"
@@ -94,7 +99,7 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
     >
       <div className="wl-top">
         <span className="wl-brand">GymLog</span>
-        <button className="btn sm ghost" onClick={close}>
+        <button className="btn sm ghost" onClick={close} aria-label="Skip the tour">
           Skip
         </button>
       </div>
@@ -105,16 +110,33 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
       </div>
       <div className="wl-dots">
         {CARDS.map((_, i) => (
-          <button key={i} className={i === step ? 'on' : ''} onClick={() => setStep(i)} aria-label={`Card ${i + 1}`} />
+          <button
+            key={i}
+            className={i === step ? 'on' : ''}
+            onClick={() => setStep(i)}
+            aria-label={`Card ${i + 1} of ${CARDS.length}`}
+            aria-current={i === step ? 'step' : undefined}
+          />
         ))}
       </div>
       <div className="wl-actions">
         {last ? (
           <>
             {db.workouts.length === 0 && (
-              <button className="btn primary block" onClick={loadStarter}>
-                <Sparkles size={18} /> Load the 4-day starter plan
-              </button>
+              <>
+                <button
+                  className="btn primary block"
+                  onClick={() => {
+                    close()
+                    nav('/programs')
+                  }}
+                >
+                  <LayoutGrid size={18} /> Browse programs
+                </button>
+                <button className="btn block" onClick={loadStarter}>
+                  <Sparkles size={18} /> Load the 4-day starter plan
+                </button>
+              </>
             )}
             <button className={`btn block ${db.workouts.length ? 'primary' : ''}`} onClick={close}>
               {db.workouts.length ? "Let's go" : (<><Plus size={18} /> I'll build my own</>)}

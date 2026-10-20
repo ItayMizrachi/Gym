@@ -165,9 +165,13 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
     window.addEventListener('keydown', onKey)
+    // screen readers and keyboards start inside the sheet, and return to where they were after
+    const opener = document.activeElement as HTMLElement | null
+    if (!ref.current?.contains(document.activeElement)) ref.current?.focus({ preventScroll: true })
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
+      opener?.focus?.({ preventScroll: true })
     }
   }, [])
 
@@ -208,6 +212,7 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
       <div
         ref={ref}
         className="sheet"
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -317,10 +322,13 @@ export function Toggle({
   on,
   onChange,
   label,
+  ariaLabel,
   blue
 }: {
   on: boolean
   onChange: (v: boolean) => void
+  /** accessible name when the visible label lives elsewhere */
+  ariaLabel?: string
   /** accessible name; also rendered beside the switch when given */
   label?: string
   /** use the blue plate colour (drop sets / supersets) instead of brand yellow */
@@ -333,7 +341,7 @@ export function Toggle({
       onClick={() => onChange(!on)}
       role="switch"
       aria-checked={on}
-      aria-label={label}
+      aria-label={label ?? ariaLabel}
     />
   )
   if (!label) return sw

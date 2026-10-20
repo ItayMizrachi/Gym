@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, Disc, TrendingUp } from 'lucide-react'
+import { Check, Disc, FolderInput, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
+import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
 
 function Sec({ title, children }: { title: string; children: React.ReactNode }) {
@@ -12,15 +12,52 @@ function Sec({ title, children }: { title: string; children: React.ReactNode }) 
 }
 
 export default function Help() {
-  const nav = useNavigate()
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head">
-        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
-          <ArrowLeft size={22} />
-        </button>
-        <h1>How it works</h1>
-      </div>
+      <PageHeader title="How it works" sub="Short answers about every part of GymLog." back={true} />
+
+      <Sec title="Getting started">
+        <p>
+          On <b>Train</b>, tap <b>Browse programs</b>. Pick a single workout and tap <b>Start now</b>, or add a weekly program. Its workouts
+          appear on Train: tap <Play size={13} aria-label="Start" /> to begin, and log each set as you go.
+        </p>
+      </Sec>
+
+      <Sec title="Programs">
+        <p>
+          <b>Single workouts</b> are one session you can start right away, or save to your workouts. <b>Weekly programs</b> are plans for 2 to 6
+          days a week. Tap <b>Add program</b> and their workouts appear on Train in their own folder. Filter by level, equipment and length. You
+          can change anything afterwards.
+        </p>
+      </Sec>
+
+      <Sec title="Folders">
+        <p>
+          Folders group your workouts on Train. A program goes into its own folder. Tap a folder name to fold it away. Use{' '}
+          <FolderInput size={13} aria-label="Move to folder" /> or the Folder field in a workout to move it. Tap{' '}
+          <MoreHorizontal size={13} aria-label="Folder options" /> next to a folder to rename it.
+        </p>
+      </Sec>
+
+      <Sec title="Timed exercises">
+        <p>
+          Some exercises, like a plank, are done for time instead of reps. Their sets show seconds and a stopwatch. They do not count for weight
+          records.
+        </p>
+      </Sec>
+
+      <Sec title="Editing a finished workout">
+        <p>
+          Forgot a set or typed the wrong weight? Open the workout in <b>History</b> and tap <b>Edit workout</b>. Records update to match.
+        </p>
+      </Sec>
+
+      <Sec title="Progress">
+        <p>
+          The <b>Progress</b> tab shows how you are doing over time: your records, charts and how often you train. Your exercise list is there
+          too.
+        </p>
+      </Sec>
 
       <Sec title="Set types">
         <div className="help-legend">

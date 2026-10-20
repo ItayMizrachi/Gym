@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Dumbbell, BookOpen, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
@@ -8,6 +8,17 @@ import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
+
+const starts = (path: string, ...prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(p + '/'))
+
+/** Bottom tabs. Each one stays lit on the screens you reach from it. */
+const TABS = [
+  { to: '/', label: 'Train', icon: Dumbbell, match: (p: string) => p === '/' || starts(p, '/workout', '/session', '/programs') },
+  { to: '/profile', label: 'Progress', icon: TrendingUp, match: (p: string) => starts(p, '/profile', '/exercises', '/exercise') },
+  { to: '/history', label: 'History', icon: History, match: (p: string) => starts(p, '/history') },
+  { to: '/body', label: 'Body', icon: Scale, match: (p: string) => starts(p, '/body') },
+  { to: '/settings', label: 'Settings', icon: Settings, match: (p: string) => starts(p, '/settings', '/help') }
+]
 
 const RING_R = 30
 const RING_C = 2 * Math.PI * RING_R
@@ -78,10 +89,10 @@ function RestBar({ inSession }: { inSession: boolean }) {
             </button>
           ) : (
             <>
-              <button className="btn sm" onClick={() => adjust(-15)} aria-label="Minus 15 seconds">
+              <button className="btn sm" onClick={() => adjust(-15)} aria-label="15 seconds less rest">
                 −15s
               </button>
-              <button className="btn sm" onClick={() => adjust(15)} aria-label="Plus 15 seconds">
+              <button className="btn sm" onClick={() => adjust(15)} aria-label="15 seconds more rest">
                 +15s
               </button>
               <button className="btn sm grow" onClick={clear}>
@@ -99,9 +110,9 @@ function Toasts() {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
   return (
-    <div className="toasts">
+    <div className="toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)}>
+        <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)} title="Tap to dismiss">
           <div className="t">{t.text}</div>
           {t.sub && <div className="small muted">{t.sub}</div>}
         </div>
@@ -117,8 +128,8 @@ function SyncDot() {
   const queued = useStore((s) => s.queued)
   if (!repo) return null
   return (
-    <div className="sync">
-      <span className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />
+    <div className="sync" role="status">
+      <span aria-hidden className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />
       {queued
         ? `${queued} change${queued === 1 ? '' : 's'} waiting to sync`
         : err
@@ -145,7 +156,7 @@ function ResumeBar() {
   if (!active) return null
   const secs = Math.max(0, Math.floor((Date.now() - new Date(active.started_at).getTime()) / 1000))
   return (
-    <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Resume ${active.name}`}>
+    <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Workout in progress: ${active.name}. Resume`}>
       <span className="resume-dot" aria-hidden />
       <span className="grow ellipsis">
         <b>{active.name}</b> <span className="muted">· {fmtClock(secs)}</span>
@@ -173,32 +184,25 @@ export default function Layout() {
       </div>
       <RestBar inSession={inSession} />
       <Toasts />
-      {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && !rest && <ResumeBar />}
-      {!inSession && <nav className="nav" aria-label="Main">
-        <div className="nav-inner">
-          <NavLink to="/" end className={({ isActive }) => (isActive || inSession ? 'active' : '')}>
-            <Dumbbell size={22} aria-hidden />
-            Train
-          </NavLink>
-          <NavLink to="/exercises">
-            <BookOpen size={22} aria-hidden />
-            Exercises
-          </NavLink>
-          <NavLink to="/history">
-            <History size={22} aria-hidden />
-            History
-          </NavLink>
-          <NavLink to="/body">
-            <Scale size={22} aria-hidden />
-            Body
-          </NavLink>
-          <NavLink to="/settings">
-            <Settings size={22} aria-hidden />
-            Settings
-          </NavLink>
-        </div>
-      </nav>}
+      {/* the live workout gets the whole screen; the nav comes back when you leave it */}
+      {!inSession && (
+        <nav className="nav" aria-label="Main">
+          <div className="nav-inner">
+            {TABS.map((t) => {
+              const on = t.match(loc.pathname)
+              return (
+                <Link key={t.to} to={t.to} className={on ? 'active' : ''} aria-current={on ? 'page' : undefined}>
+                  <span className="nav-ico" aria-hidden>
+                    <t.icon size={22} />
+                  </span>
+                  {t.label}
+                </Link>
+              )
+            })}
+          </div>
+        </nav>
+      )}
     </>
   )
 }

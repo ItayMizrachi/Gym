@@ -44,3 +44,34 @@
   min-width: 44px;
   min-height: 44px;
 }
+/* bottom nav: a filled pill behind the active icon so the current tab is obvious */
+.nav a {
+  min-height: 48px;
+  gap: 2px;
+  font-size: 12px;
+}
+.nav .nav-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  transition: background var(--t) var(--ease);
+}
+.nav a.active .nav-ico {
+  background: var(--accent-soft);
+}
+.nav a.active {
+  color: var(--accent);
+  font-weight: 700;
+}
+.nav a.active::before {
+  display: none;
+}
+.nav a:focus-visible {
+  outline: none;
+}
+.nav a:focus-visible .nav-ico {
+  box-shadow: var(--focus);
+}

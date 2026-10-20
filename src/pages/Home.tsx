@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy } from 'lucide-react'
+import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -28,7 +28,10 @@ import {
   weeklyStreak
 } from '../lib/stats'
 import { CalendarHeat } from '../components/CalendarHeat'
+import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
+import { groupByFolder } from '../lib/folders'
 import '../styles/insights.css'
+import '../styles/programs-nav.css'
 
 function templateInfo(db: DB, w: Workout) {
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -53,13 +56,24 @@ function splitName(name: string): [string, string] {
 
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
-  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
+  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last week</div>
   return (
     <div className={`delta ${d > 0 ? 'up' : 'down'}`}>
       {d > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-      {fmt(Math.abs(d))} vs last wk
+      {fmt(Math.abs(d))} vs last week
     </div>
   )
+}
+
+/** collapsed folder headers on the Train tab (this device only) */
+const FOLDS_KEY = 'gymlog:folds'
+function loadFolds(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(FOLDS_KEY) ?? '[]')
+    return Array.isArray(v) ? v : []
+  } catch {
+    return []
+  }
 }
 
 export default function Home() {
@@ -69,9 +83,22 @@ export default function Home() {
   const user = useStore((s) => s.user)
   const repoMode = useStore((s) => s.repo?.mode)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
+  const [moving, setMoving] = useState<string | null>(null)
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [folded, setFolded] = useState<string[]>(loadFolds)
+  function toggleFold(label: string) {
+    const next = folded.includes(label) ? folded.filter((f) => f !== label) : [...folded, label]
+    setFolded(next)
+    try {
+      localStorage.setItem(FOLDS_KEY, JSON.stringify(next))
+    } catch {
+      /* ignore */
+    }
+  }
 
   const now = useMemo(() => new Date(), [db])
   const workouts = useMemo(() => [...db.workouts].sort((a, b) => a.position - b.position), [db.workouts])
+  const groups = useMemo(() => groupByFolder(db.workouts), [db.workouts])
   const active = db.sessions.find((s) => !s.finished_at)
   const finished = useMemo(() => finishedSessions(db), [db])
   const next = useMemo(() => suggestNextWorkout(db), [db])
@@ -118,12 +145,19 @@ export default function Home() {
           <div className="sub">{now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         {streak.current > 0 && (
-          <div className={`streak-pill${streak.thisWeekDone ? '' : ' pending'}`} title={`Best streak: ${streak.best} weeks`}>
-            <Flame size={16} />
+          <div
+            className={`streak-pill${streak.thisWeekDone ? '' : ' pending'}`}
+            title={`Best streak: ${streak.best} weeks`}
+            aria-label={`${streak.current}-week training streak`}
+          >
+            <Flame size={16} aria-hidden />
             <span>{streak.current}</span>
-            <span className="u">wk</span>
+            <span className="u">wk streak</span>
           </div>
         )}
+        <button className="btn icon ghost ph-help" onClick={() => nav('/help')} aria-label="How it works">
+          <HelpCircle size={22} />
+        </button>
       </div>
 
       {repoMode === 'local' && (
@@ -157,11 +191,11 @@ export default function Home() {
           <div className="welcome-mark">
             <Dumbbell size={26} />
           </div>
-          <h2>Welcome to GymLog</h2>
-          <div className="muted">Log every set, see what you lifted last time, and get a nudge when a record is close.</div>
+          <h2>Pick a program to begin</h2>
+          <div className="muted">Choose a ready-made program, or build your own workouts. Then start one and log each set as you go.</div>
           <ol className="welcome-steps">
             <li>
-              <b>Pick a plan.</b> Load the 4-day upper/lower starter plan or build your own.
+              <b>Pick a program.</b> Start a ready-made workout right now, or add a plan for the whole week.
             </li>
             <li>
               <b>Train.</b> Weights fill in from last time; tick each set to start the rest timer.
@@ -170,7 +204,10 @@ export default function Home() {
               <b>Watch it add up.</b> Weekly sets, streaks and records appear here.
             </li>
           </ol>
-          <button className="btn primary block" onClick={loadStarter}>
+          <button className="btn primary block" onClick={() => nav('/programs')}>
+            <LayoutGrid size={18} /> Browse programs
+          </button>
+          <button className="btn block" onClick={loadStarter}>
             <Sparkles size={18} /> Load my starter plan (4 days)
           </button>
           <button className="btn block" onClick={newWorkout}>
@@ -182,7 +219,7 @@ export default function Home() {
         next && (
           <div className="card hero">
             <div className="hero-label">
-              {next.reason === 'first' ? 'Start here' : 'Up next'}
+              Start your next workout
               {next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>}
             </div>
             <div className="hero-name">
@@ -198,7 +235,7 @@ export default function Home() {
               </span>
               {hero.usual != null && (
                 <span>
-                  ~<b>{fmtMinutes(hero.usual)}</b>
+                  about <b>{fmtMinutes(hero.usual)}</b>
                 </span>
               )}
             </div>
@@ -308,41 +345,72 @@ export default function Home() {
       )}
 
       {workouts.length > 0 && (
-        <section className="stack" style={{ gap: 8 }}>
+        <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
           <div className="sec-head">
             <h2>Your workouts</h2>
-            <span className="small muted">{workouts.length}</span>
+            <span className="small muted">
+              {workouts.length} workout{workouts.length === 1 ? '' : 's'}
+            </span>
           </div>
-          <div className="tlist">
-            {workouts.map((w) => {
-              const info = templateInfo(db, w)
-              const isNext = next?.workout.id === w.id
-              return (
-                <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
-                  <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                    <div className="trow-name ellipsis">{w.name}</div>
-                    <div className="small muted ellipsis">
-                      {info.wes.length} exercises · {info.sets} sets
-                      {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
-                    </div>
-                  </button>
-                  <button className="btn icon sm ghost" onClick={() => nav(`/workout/${w.id}`)} aria-label="Edit workout">
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    className="btn icon sm"
-                    disabled={!!active || info.wes.length === 0}
-                    onClick={() => start(w)}
-                    aria-label={`Start ${w.name}`}
-                  >
-                    <Play size={16} />
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+          {groups.map((g) => {
+            const shut = folded.includes(g.label)
+            return (
+              <div key={g.label} className="fold">
+                {groups.length > 1 && (
+                  <div className="row" style={{ gap: 4 }}>
+                    <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
+                      <ChevronDown size={18} className="fold-caret" aria-hidden />
+                      {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
+                      <h2 className="ellipsis">{g.label}</h2>
+                      <span className="small muted">{g.workouts.length}</span>
+                    </button>
+                    {g.folder && (
+                      <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
+                        <MoreHorizontal size={18} />
+                      </button>
+                    )}
+                  </div>
+                )}
+                {!shut && (
+                  <div className="tlist">
+                    {g.workouts.map((w) => {
+                      const info = templateInfo(db, w)
+                      const isNext = next?.workout.id === w.id
+                      return (
+                        <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
+                          <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                            <div className="trow-name ellipsis">{w.name}</div>
+                            <div className="small muted ellipsis">
+                              {info.wes.length} exercises · {info.sets} sets
+                              {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
+                            </div>
+                          </button>
+                          <button className="btn icon sm ghost" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
+                            <FolderInput size={16} />
+                          </button>
+                          <button className="btn icon sm ghost" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className="btn icon sm"
+                            disabled={!!active || info.wes.length === 0}
+                            onClick={() => start(w)}
+                            aria-label={`Start ${w.name}`}
+                          >
+                            <Play size={16} />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </section>
       )}
+      {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
+      {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
 
       <div className="row ins-actions">
         {workouts.length > 0 && (
@@ -359,6 +427,34 @@ export default function Home() {
           }}
         >
           <Zap size={18} /> Empty workout
+        </button>
+      </div>
+      <div className="list-group home-links">
+        {workouts.length > 0 && (
+          <button className="list-row" onClick={() => nav('/programs')}>
+            <LayoutGrid size={20} aria-hidden />
+            <span className="grow">
+              <span className="home-link-t">Browse programs</span>
+              <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
+            </span>
+            <ChevronRight size={18} aria-hidden />
+          </button>
+        )}
+        <button className="list-row" onClick={() => nav('/exercises')}>
+          <BookOpen size={20} aria-hidden />
+          <span className="grow">
+            <span className="home-link-t">Exercises</span>
+            <span className="tiny muted">Your exercise list, photos, setup notes and records</span>
+          </span>
+          <ChevronRight size={18} aria-hidden />
+        </button>
+        <button className="list-row" onClick={() => nav('/help')}>
+          <HelpCircle size={20} aria-hidden />
+          <span className="grow">
+            <span className="home-link-t">How it works</span>
+            <span className="tiny muted">Short answers about every part of GymLog</span>
+          </span>
+          <ChevronRight size={18} aria-hidden />
         </button>
       </div>
       {finished.length > 0 && (
