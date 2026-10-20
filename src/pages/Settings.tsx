@@ -139,7 +139,7 @@ export default function SettingsPage() {
         'Help',
         'New here? Start with these.',
         <>
-          {link('How GymLog works', '', <HelpCircle size={18} aria-hidden />, () => nav('/help'), true)}
+          {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
           {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
           <div className="tiny muted">
             <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then

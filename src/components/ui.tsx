@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
-import { X, Camera, Trash2, ArrowLeft } from 'lucide-react'
+import { X, Camera, Trash2, ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
@@ -435,7 +435,7 @@ export function PageHeader({
           aria-label="Back"
           onClick={() => (back === true ? nav(-1) : nav(back))}
         >
-          <ArrowLeft size={22} />
+          <ChevronLeft size={26} />
         </button>
       )}
       <div className="grow" style={{ minWidth: 0 }}>

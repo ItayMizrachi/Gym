@@ -306,3 +306,8 @@
   .wl-addrow .btn.sm { padding: 0 10px; }
   .wl-addrow .btn.sm svg { display: none; }
 }
+@media (max-width: 360px) {
+  .ls-strip { gap: 8px; }
+  .ls-stat .v, .ls-stat .sp-clock { font-size: 18px; }
+  .ls-stat .u { font-size: 12px; }
+}

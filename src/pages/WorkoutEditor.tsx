@@ -123,10 +123,9 @@ export default function WorkoutEditor() {
       <div key={we.id} className={`we-card ${we.superset ? 'ss' : ''} ${open === we.id ? 'open' : ''}`}>
         <div className="we-head">
           <button className="we-toggle" onClick={() => setOpen(open === we.id ? null : we.id)} aria-expanded={open === we.id}>
-            <span className="we-idx">{i + 1}</span>
-            <Thumb path={ex?.image_path} name={ex?.name} size={44} />
-            <div className="grow">
-              <div style={{ fontWeight: 600, lineHeight: 1.25 }} className="ellipsis">
+            <Thumb path={ex?.image_path} name={ex?.name} size={44} className="round" />
+            <div className="grow" style={{ minWidth: 0 }}>
+              <div className="we-name">
                 {ex?.name ?? 'Deleted exercise'}
               </div>
               <div className="we-sum">

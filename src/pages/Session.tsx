@@ -244,7 +244,7 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
         {rec.heaviest && (
           <div className="small muted">
             Heaviest: <b style={{ color: 'var(--text)' }}>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
-            {rec.bestE1rm && <> · best est. 1RM <b style={{ color: 'var(--text)' }}>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}</b></>}
+            {rec.bestE1rm && <> · best est. 1-rep max <b style={{ color: 'var(--text)' }}>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}</b></>}
           </div>
         )}
         <button className="btn" onClick={onOpen}>
@@ -331,11 +331,11 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       celebrated.add(celebrateKey)
       const res = evaluateSet(runningPrior(s.id), s.weight, s.reps)
       if (res.types.length) {
-        const label = res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Estimated 1RM record' : 'Rep record'
+        const label = res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Best estimated 1-rep max' : 'Rep record'
         toast({
           kind: 'pr',
           text: `🏆 New PR! ${ex?.name ?? se.name}`,
-          sub: `${setLabel(s, tracking, false)} · ${label} · est. 1RM ${fmtKg(Math.round(res.e1rm * 10) / 10)}`
+          sub: `${setLabel(s, tracking, false)} · ${label} · est. 1-rep max ${fmtKg(Math.round(res.e1rm * 10) / 10)}`
         })
         try {
           navigator.vibrate?.([80, 60, 80, 60, 160])

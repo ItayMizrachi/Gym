@@ -618,3 +618,14 @@
 .ins-actions { gap: var(--s2); }
 .ins-actions .btn { min-height: var(--btn-h); }
 .stat .delta { white-space: normal; line-height: 1.25; }
+.ins-home > .page-head { align-items: center; }
+.ins-home > .page-head h1 { white-space: nowrap; }
+@media (max-width: 360px) {
+  .ins-home > .page-head h1 { font-size: 24px; }
+}
+@media (max-width: 360px) {
+  .trow .trow-more { display: none; }
+  .trow { padding-left: var(--s3); }
+  .ins-actions .btn { font-size: 15px; padding: 0 8px; }
+  .ins-actions .btn svg { display: none; }
+}

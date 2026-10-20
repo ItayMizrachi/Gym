@@ -151,12 +151,9 @@ export default function Home() {
           >
             <Flame size={16} aria-hidden />
             <span>{streak.current}</span>
-            <span className="u">wk streak</span>
+            <span className="u">wk</span>
           </div>
         )}
-        <button className="btn icon ghost ph-help" onClick={() => nav('/help')} aria-label="How it works">
-          <HelpCircle size={22} />
-        </button>
       </div>
 
       {active && (

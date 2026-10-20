@@ -2116,3 +2116,22 @@ input[type='search']::-webkit-search-decoration {
 .acct-email {
   font-weight: 600;
 }
+
+/* body entries: the number leads, the date is the quieter label */
+.list-row .title.entry-date {
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+/* workout editor rows: names get two lines instead of being cut */
+.we-name {
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.we-card .we-head {
+  padding-left: var(--s3);
+}
