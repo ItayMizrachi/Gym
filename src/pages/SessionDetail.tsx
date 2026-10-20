@@ -4,7 +4,8 @@ import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronDown, Pencil, Share2, Tras
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
-import { Confirm, ImageField, Thumb } from '../components/ui'
+import { Confirm, ImageField } from '../components/ui'
+import { ExerciseThumb } from '../components/ExerciseImage'
 import { SessionEditor } from '../components/SessionEditor'
 import {
   estimateCalories,
@@ -298,7 +299,7 @@ export default function SessionDetail() {
         return (
           <div key={i} className="card">
             <div className="row" style={{ marginBottom: 8 }}>
-              <Thumb path={exOf?.image_path} name={nameOf(e.exercise_id, e.name)} muscle={exOf?.muscle} size={44} className="round" />
+              <ExerciseThumb exercise={exOf} name={nameOf(e.exercise_id, e.name)} size={44} />
               <div className="grow hv-exname">{nameOf(e.exercise_id, e.name)}</div>
               {hasPr && (
                 <span className="chip pr">
