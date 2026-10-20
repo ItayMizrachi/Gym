@@ -32,7 +32,7 @@ function fit(ctx: CanvasRenderingContext2D, text: string, maxW: number): string 
 
 export async function renderShareCard(d: ShareCardData): Promise<Blob> {
   const C = {
-    bg: token('--bg', '#141518'),
+    bg: token('--bg', '#0f1013'),
     card: token('--card', '#1f2126'),
     card2: token('--card2', '#292c32'),
     line: token('--line', '#34383f'),
@@ -253,7 +253,7 @@ function drawCover(ctx: CanvasRenderingContext2D, img: ImageBitmap, x: number, y
 /** Two progress photos side by side with date and weight, as a PNG. */
 export async function renderCompareCard(a: ComparePhoto, b: ComparePhoto, caption: string | null): Promise<Blob> {
   const C = {
-    bg: token('--bg', '#141518'),
+    bg: token('--bg', '#0f1013'),
     card: token('--card', '#1f2126'),
     line: token('--line', '#34383f'),
     text: token('--text', '#eceae4'),

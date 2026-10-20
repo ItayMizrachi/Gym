@@ -14,19 +14,20 @@
 
 :root {
   /* ---- surfaces (lowest to highest) ---- */
-  --bg: #121316;
-  --bg2: #17191c;
-  --card: #1c1e22;
+  /* near-black floor so graphite cards and chalk text pop (Hevy-level contrast) */
+  --bg: #0f1013;
+  --bg2: #16181b;
+  --card: #1b1d21;
   --card2: #25282d;
-  --card3: #2e3238;
-  --line: #2f333a;
-  --line-strong: #40454d;
+  --card3: #2f3238;
+  --line: #2a2d33;
+  --line-strong: #3d4148;
 
   /* ---- text ---- */
   --text: #eceae4;
   --text-2: #c9c7c0;
   --muted: #9b9a94;
-  --faint: #6f6e69;
+  --faint: #8f8e88; /* 4.8:1 on cards: still readable text */
 
   /* ---- plate accents ---- */
   --accent: #f0b92a;
@@ -58,10 +59,10 @@
 
   /* ---- radius scale ---- */
   --r-xs: 6px;
-  --r-sm: 8px;
-  --radius: 12px;
+  --r-sm: 10px;
+  --radius: 14px;
   --r-lg: 16px;
-  --r-xl: 22px;
+  --r-xl: 24px;
   --r-pill: 999px;
 
   /* ---- type scale ---- */
@@ -95,7 +96,8 @@
 
   /* ---- layout ---- */
   --tap: 44px;
-  --nav-h: 62px;
+  --nav-h: 64px;
+  --btn-h: 52px; /* full-width primary and secondary buttons */
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   color-scheme: dark;
@@ -189,16 +191,16 @@ table.t,
   max-width: 720px;
   margin: 0 auto;
   min-height: 100vh;
-  padding: calc(var(--safe-t) + var(--s3)) var(--s4) calc(var(--nav-h) + var(--safe-b) + 28px);
+  padding: calc(var(--safe-t) + var(--s3)) var(--s4) calc(var(--nav-h) + var(--safe-b) + var(--s6));
 }
 .app.has-rest {
   padding-bottom: calc(var(--nav-h) + var(--safe-b) + 104px);
 }
 .page-head {
   display: flex;
-  align-items: center;
-  gap: var(--s2);
-  margin: 20px 0 var(--s4);
+  align-items: flex-start;
+  gap: var(--s3);
+  margin: var(--s4) 0 var(--s5);
   min-height: var(--tap);
 }
 .page-head h1 {
@@ -210,7 +212,9 @@ table.t,
 }
 .page-head .sub {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15px;
+  margin-top: var(--s1);
+  line-height: 1.35;
 }
 .page-head > .btn.icon.ghost:first-child {
   margin-left: -10px;
@@ -259,10 +263,10 @@ table.t,
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s2);
-  margin: var(--s2) 2px var(--s2);
-  font-size: var(--fs-sm);
+  margin: var(--s5) 2px var(--s2);
+  font-size: 15px;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--text-2);
 }
 .section-label .count {
   color: var(--faint);
@@ -273,9 +277,9 @@ table.t,
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--r-lg);
   padding: var(--s4);
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
 }
 .card.flat {
   background: transparent;
@@ -290,7 +294,8 @@ table.t,
   display: flex;
   align-items: center;
   gap: var(--s2);
-  min-height: 36px;
+  min-height: 40px;
+  margin-bottom: var(--s1);
 }
 .card-head h2 {
   flex: 1;
@@ -305,12 +310,12 @@ table.t,
   gap: var(--s2);
   min-height: var(--tap);
   padding: 0 var(--s4);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--card2);
   border: 1px solid var(--line-strong);
   font-weight: 600;
-  font-size: 15px;
-  line-height: 1.1;
+  font-size: 16px;
+  line-height: 1.15;
   white-space: nowrap;
   user-select: none;
   -webkit-user-select: none;
@@ -359,7 +364,7 @@ table.t,
 .btn.ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--muted);
+  color: var(--text-2);
 }
 .btn.ghost:active {
   background: var(--card2);
@@ -367,13 +372,26 @@ table.t,
 }
 .btn.block {
   width: 100%;
+  min-height: var(--btn-h);
+}
+/* outlined: the calm second choice next to a primary */
+.btn.secondary {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+/* tonal: an important action that must not compete with the one primary */
+.btn.tonal {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
 }
 /* .sm keeps the visual size compact but still a 44px tap area (via ::after) */
 .btn.sm {
-  min-height: 36px;
+  min-height: 38px;
   padding: 0 var(--s3);
-  font-size: 14px;
-  border-radius: var(--r-sm);
+  font-size: 15px;
+  border-radius: 10px;
   position: relative;
 }
 .btn.sm::after {
@@ -402,11 +420,11 @@ table.t,
 .select,
 .textarea {
   width: 100%;
-  min-height: var(--tap);
-  padding: 10px var(--s3);
+  min-height: 48px;
+  padding: 12px 14px;
   background: var(--bg2);
   border: 1px solid var(--line-strong);
-  border-radius: var(--r-sm);
+  border-radius: 12px;
   outline: none;
   font-size: 16px; /* 16px stops iOS zooming on focus */
   transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
@@ -441,10 +459,10 @@ label.field,
 div.field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: var(--fs-sm);
+  gap: var(--s2);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text-2);
 }
 .search {
   position: relative;
@@ -476,12 +494,12 @@ div.field {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: var(--r-xs);
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
   background: var(--card2);
   border: 1px solid var(--line);
   font-size: var(--fs-xs);
-  font-weight: 500;
+  font-weight: 550;
   color: var(--muted);
   white-space: nowrap;
   line-height: 1.3;
@@ -519,10 +537,10 @@ div.field {
   display: none;
 }
 .chips .chip {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 40px;
+  padding: 0 16px;
   border-radius: var(--r-pill);
   cursor: pointer;
   color: var(--text-2);
@@ -570,7 +588,7 @@ div.field {
   right: 0;
   bottom: 0;
   z-index: 30;
-  background: rgba(18, 19, 22, 0.9);
+  background: rgba(12, 13, 15, 0.94);
   backdrop-filter: saturate(160%) blur(16px);
   -webkit-backdrop-filter: saturate(160%) blur(16px);
   border-top: 1px solid var(--line);
@@ -626,10 +644,10 @@ div.field {
   z-index: 40;
   max-width: 696px;
   margin: 0 auto;
-  background: #1d1f24;
+  background: var(--card2);
   border: 1px solid var(--line-strong);
   border-top: 3px solid var(--accent);
-  border-radius: var(--radius);
+  border-radius: var(--r-lg);
   padding: 10px var(--s3) 12px;
   box-shadow: var(--shadow-float);
   overflow: hidden;
@@ -692,12 +710,13 @@ div.field {
   background: var(--card2);
   border: 1px solid var(--line-strong);
   border-left: 4px solid var(--line-strong);
-  border-radius: var(--radius);
-  padding: var(--s3) 14px;
+  border-radius: var(--r-lg);
+  padding: 14px var(--s4);
   box-shadow: var(--shadow-float);
   cursor: pointer;
   /* enter, then fade out just before the store removes it (4.5 s; PR toasts 7 s) */
   animation: toast-in 0.32s var(--ease-spring), toast-out 0.3s ease-in 4.2s forwards;
+  line-height: 1.35;
 }
 .toast.pr {
   background: #2b2409;
@@ -750,7 +769,7 @@ div.field {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.62);
+  background: rgba(0, 0, 0, 0.66);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -782,7 +801,7 @@ div.field {
   z-index: 2;
   display: flex;
   justify-content: center;
-  padding: var(--s2) 0 var(--s1);
+  padding: 10px 0 var(--s2);
   margin: 0 calc(-1 * var(--s4));
   background: var(--bg2);
   touch-action: none;
@@ -790,17 +809,18 @@ div.field {
 }
 .sheet-handle::before {
   content: '';
-  width: 36px;
+  width: 40px;
   height: 5px;
   border-radius: var(--r-pill);
-  background: var(--line-strong);
+  background: var(--faint);
+  opacity: 0.6;
 }
 .sheet-head {
   display: flex;
   align-items: center;
   gap: var(--s2);
   min-height: var(--tap);
-  margin-bottom: var(--s3);
+  margin-bottom: var(--s4);
 }
 .sheet-head h2 {
   flex: 1;
@@ -876,9 +896,9 @@ div.field {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: var(--s3);
+  padding: 14px var(--s3);
   min-width: 0;
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
 }
 .stat .v {
   font-family: var(--display);
@@ -897,8 +917,8 @@ div.field {
   font-weight: 600;
 }
 .stat .l {
-  margin-top: 6px;
-  font-size: var(--fs-xs);
+  margin-top: var(--s1);
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.3;
 }
@@ -921,7 +941,7 @@ div.field {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: var(--s3);
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
 }
 .ex.ss {
   border-left: 4px solid var(--plate-blue);
@@ -1201,11 +1221,11 @@ div.field {
   display: flex;
   align-items: center;
   gap: var(--s3);
-  min-height: 60px;
-  padding: 10px 14px;
+  min-height: 64px;
+  padding: 12px var(--s4);
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--r-lg);
   transition: background var(--t) var(--ease), transform var(--t-fast) var(--ease);
 }
 button.list-item:active,
@@ -1220,17 +1240,17 @@ a.list-item:active {
 .list-group {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-1);
+  box-shadow: none;
 }
 .list-row {
   display: flex;
   align-items: center;
   gap: var(--s3);
   width: 100%;
-  min-height: 60px;
-  padding: 10px 14px;
+  min-height: 64px;
+  padding: 12px var(--s4);
   text-align: left;
   position: relative;
   transition: background var(--t) var(--ease);
@@ -1251,11 +1271,13 @@ a.list-row:active {
 .list-row .title {
   font-weight: 600;
   line-height: 1.25;
+  font-size: 16px;
 }
 .list-row .meta {
   font-size: var(--fs-sm);
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 3px;
+  line-height: 1.3;
 }
 .list-row .trail {
   text-align: right;
@@ -1314,19 +1336,20 @@ table.t td {
   gap: var(--s2);
   padding: var(--s6) var(--s5);
   background: var(--card);
-  border: 1px dashed var(--line-strong);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
 }
 .empty .empty-icon {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  border: 3px solid var(--line-strong);
+  border: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--muted);
+  color: var(--accent);
   margin-bottom: var(--s2);
+  background: var(--card2);
 }
 .empty h2 {
   font-size: var(--fs-lg);
@@ -1335,6 +1358,7 @@ table.t td {
   color: var(--muted);
   max-width: 300px;
   line-height: 1.45;
+  font-size: 15px;
 }
 .empty .empty-actions {
   margin-top: var(--s3);
@@ -1342,7 +1366,7 @@ table.t td {
   flex-direction: column;
   gap: var(--s2);
   width: 100%;
-  max-width: 280px;
+  max-width: 320px;
 }
 
 /* =============================================================== skeleton */
@@ -1360,7 +1384,7 @@ table.t td {
 
 /* =============================================================== sync dot */
 .sync {
-  position: fixed;
+  position: absolute;
   top: calc(var(--safe-t) + 6px);
   right: 10px;
   z-index: 20;
@@ -1495,24 +1519,24 @@ table.t td {
   display: inline-flex;
   background: var(--bg2);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 3px;
   flex: none;
 }
 .seg button {
   position: relative;
-  min-height: 30px;
-  padding: 0 12px;
-  border-radius: 7px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 9px;
   color: var(--muted);
-  font-size: var(--fs-sm);
+  font-size: 14px;
   font-weight: 600;
   transition: background var(--t) var(--ease), color var(--t) var(--ease);
 }
 .seg button::after {
   content: '';
   position: absolute;
-  inset: -7px 0;
+  inset: -4px 0;
 }
 .seg button.on {
   background: var(--card3);
@@ -1573,7 +1597,7 @@ table.t td {
   display: flex;
   align-items: center;
   gap: var(--s3);
-  min-height: var(--tap);
+  min-height: 48px;
 }
 
 .fab-row {
@@ -1592,8 +1616,8 @@ table.t td {
   position: relative;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-1);
+  border-radius: var(--r-lg);
+  box-shadow: none;
   overflow: hidden;
 }
 .we-card.ss {

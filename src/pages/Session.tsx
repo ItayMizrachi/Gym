@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
@@ -389,7 +389,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
           {tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.'}
         </div>
       )}
-      {lastDesc && (
+      {lastDesc && se.sets.length === 0 && (
         <div className="small muted" style={{ marginTop: 6 }}>
           Last ({fmtDate(last!.date)}): <span style={{ color: 'var(--text)' }}>{lastDesc}</span>
         </div>
@@ -411,13 +411,20 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
         </div>
       )}
       {rec.heaviest && tracking !== 'time' && (
-        <div className="row" style={{ marginTop: 6, gap: 6, flexWrap: 'wrap' }}>
+        <div className="wl-best">
+          <Trophy size={14} color="var(--accent)" aria-hidden />
           {tracking === 'reps' && !(rec.heaviest.weight > 0) ? (
-            <span className="chip pr">🏆 {Math.max(...prior.map((p) => p.reps))} reps</span>
+            <span>
+              Best <b>{Math.max(...prior.map((p) => p.reps))} reps</b>
+            </span>
           ) : (
-            <span className="chip pr">🏆 {fmtKg(rec.heaviest.weight)}×{rec.heaviest.reps}</span>
+            <span>
+              Best <b>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
+              {tracking === 'weight_reps' && rec.bestE1rm && (
+                <> · est. 1-rep max <b>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)} kg</b></>
+              )}
+            </span>
           )}
-          {tracking === 'weight_reps' && rec.bestE1rm && <span className="chip pr">1RM ~{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}</span>}
         </div>
       )}
 
@@ -694,11 +701,8 @@ export default function SessionPage() {
           <div className="grow" style={{ minWidth: 0 }}>
             <div className="sp-name ellipsis">{session.name}</div>
           </div>
-          <button className="btn icon sm ghost" onClick={() => nav('/help')} aria-label="How it works">
-            <HelpCircle size={20} />
-          </button>
           <button
-            className="btn primary"
+            className="btn primary sp-finish"
             onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
           >
             <Flag size={16} /> Finish
@@ -752,6 +756,9 @@ export default function SessionPage() {
 
       <button className="btn danger" onClick={() => setConfirmDiscard(true)}>
         <Trash2 size={16} /> Discard workout
+      </button>
+      <button className="btn ghost" onClick={() => nav('/help')}>
+        <HelpCircle size={18} aria-hidden /> How the workout screen works
       </button>
 
       {picking && (

@@ -598,3 +598,23 @@
   padding: 0 10px;
   white-space: nowrap;
 }
+
+/* ---------- design pass: workout rows with one clear Start ---------- */
+.tlist { border-radius: var(--r-lg); }
+.trow { gap: var(--s1); padding: 10px 12px 10px var(--s4); min-height: 68px; }
+.trow-name { font-size: 17px; }
+.trow .trow-more { color: var(--muted); }
+.trow .btn.trow-start {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent);
+  font-weight: 650;
+  gap: 6px;
+}
+.trow.next .btn.trow-start { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ins-actions { gap: var(--s2); }
+.ins-actions .btn { min-height: var(--btn-h); }
+.stat .delta { white-space: normal; line-height: 1.25; }

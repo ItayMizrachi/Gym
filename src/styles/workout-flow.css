@@ -14,7 +14,8 @@
   background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
-.sp-row { display: flex; align-items: center; gap: 10px; }
+.sp-row { display: flex; align-items: center; gap: var(--s2); }
+.btn.sp-finish { padding: 0 14px; font-size: 16px; }
 .sp-name { font-family: var(--display); font-size: 20px; font-weight: 650; line-height: 1.05; }
 .sp-meta { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; color: var(--muted); font-size: 13px; }
 .sp-clock {
@@ -43,7 +44,7 @@
   gap: 12px;
   align-items: center;
   padding: 12px;
-  background: #1d1f24;
+  background: var(--card2);
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);

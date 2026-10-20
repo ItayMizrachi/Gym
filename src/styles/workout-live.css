@@ -286,3 +286,23 @@
 .xl-page .list-row .meta,
 .xp-list .list-row .meta { font-size: 14px; color: var(--muted); }
 .xp-foot .btn { min-height: 52px; font-size: 17px; }
+
+/* ================= design pass: set table that fits every phone ================= */
+.ex .sets .set-row { grid-template-columns: 40px minmax(0, 1fr) 72px 60px 48px; gap: 6px; }
+.ex .prev { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.ex .sets .set-row .check { height: 44px; border-radius: 10px; }
+.ex .sets .set-row .num { height: 44px; border-radius: 10px; }
+.ex .sets .set-row.done .check { box-shadow: none; }
+.wl-best { display: flex; align-items: center; gap: 6px; margin-top: var(--s2); font-size: 14px; color: var(--muted); }
+.wl-best b { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.wl-addrow .wl-addset { min-width: 0; }
+.wl-addrow .btn.sm { flex: none; }
+@media (max-width: 360px) {
+  .ex { padding: var(--s3); }
+  .ex .sets .set-row { grid-template-columns: 34px minmax(0, 1fr) 60px 50px 44px; gap: 4px; }
+  .ex .sets .set-row { margin: 0 -4px; padding: 3px 4px; }
+  .ex .prev { font-size: 14px; }
+  .wl-addrow { gap: 6px; }
+  .wl-addrow .btn.sm { padding: 0 10px; }
+  .wl-addrow .btn.sm svg { display: none; }
+}
