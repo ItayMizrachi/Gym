@@ -970,9 +970,6 @@ div.field {
   letter-spacing: 0.3px;
   line-height: 1;
 }
-.thumb.tile.plain::before {
-  display: none;
-}
 
 /* ================================================================ set rows */
 .sets {
