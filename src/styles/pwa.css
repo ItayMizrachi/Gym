@@ -1,0 +1,212 @@
+/* Installed-app polish: boot screen, update + offline banners, touch behaviour. Owned by the PWA layer;
+   all classes are prefixed pwa- so they never collide with styles.css. */
+
+/* No double-tap zoom on controls (iOS ignores user-scalable=no); taps also fire without the 300 ms wait. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role='button'] {
+  touch-action: manipulation;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Boot screen: mark centred exactly like the iOS launch screen; name and progress sit below it. */
+.pwa-boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  z-index: 200;
+}
+.pwa-boot > svg {
+  display: block;
+}
+.pwa-boot-below {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 66px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  animation: pwa-fade 300ms ease-out 450ms forwards; /* only shows if loading takes a moment */
+}
+.pwa-boot-name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.4px;
+  color: var(--text);
+}
+.pwa-boot-bar {
+  width: 96px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--card2);
+  overflow: hidden;
+}
+.pwa-boot-bar span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  animation: pwa-slide 1.1s ease-in-out infinite;
+}
+
+/* Screens fade in from the boot screen instead of popping (opacity only, so fixed children keep working). */
+.pwa-enter {
+  animation: pwa-fade 220ms ease-out;
+}
+
+/* Update banner: a card above the tab bar. */
+.pwa-update {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+  max-width: 560px;
+  margin: 0 auto;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px 10px 16px;
+  background: var(--card2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  animation: pwa-rise 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pwa-update.above-rest {
+  bottom: calc(var(--nav-h) + var(--safe-b) + 84px);
+}
+.pwa-update-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+.pwa-update-text b {
+  font-weight: 600;
+}
+.pwa-update-text span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.pwa-update .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.pwa-update-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border-radius: 10px;
+  flex: none;
+}
+.pwa-spin {
+  animation: pwa-rotate 0.9s linear infinite;
+}
+
+/* Network status: a short explanation, then a small chip in the top centre (sync status is top right). */
+.pwa-net {
+  position: fixed;
+  top: calc(var(--safe-t) + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  white-space: nowrap;
+  cursor: default;
+  animation: pwa-drop 220ms ease-out;
+}
+.pwa-net.full {
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  white-space: normal;
+  font-size: 14px;
+  line-height: 1.3;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.pwa-net.full svg {
+  flex: none;
+  color: var(--muted);
+}
+.pwa-net.full b {
+  font-weight: 600;
+}
+.pwa-net.chip {
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 9px 4px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+}
+.pwa-net.back {
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 11px;
+  border-radius: 999px;
+}
+.pwa-net-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+@keyframes pwa-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pwa-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pwa-drop {
+  from { opacity: 0; margin-top: -8px; }
+  to { opacity: 1; margin-top: 0; }
+}
+@keyframes pwa-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@keyframes pwa-rotate {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-enter,
+  .pwa-update,
+  .pwa-net,
+  .pwa-boot-bar span,
+  .pwa-spin {
+    animation: none;
+  }
+  .pwa-boot-below {
+    animation-duration: 1ms;
+  }
+}
