@@ -13,6 +13,7 @@ import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
 import { BodyMap } from '../components/BodyMap'
 import { KeypadProvider, KpField, useKeypadMode } from '../components/Keypad'
+import { CoachMarks, CoachStep } from '../components/CoachMarks'
 import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/muscles'
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
@@ -252,7 +253,17 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
   )
 }
 
-function ExerciseCard({ session, index, onMore }: { session: Session; index: number; onMore: () => void }) {
+const WORKOUT_TIPS: CoachStep[] = [
+  { target: '.ex .set-row .kind', title: 'Set type', text: 'Tap the set number to switch between work, warm-up (W), drop (D) and failure (F).' },
+  {
+    target: '.ex [data-kp$=":reps"], .ex [data-kp$=":time"], .ex input[aria-label="Reps"], .ex input[aria-label^="Time"]',
+    title: 'Enter what you did',
+    text: 'Type your reps here. The weight is filled in from last time; tap it to change.'
+  },
+  { target: '.ex .check', title: 'Log the set', text: 'Tick to log the set. The rest timer starts on its own.' }
+]
+
+function ExerciseCard({ session, index, onMore, showLegend }: { session: Session; index: number; onMore: () => void; showLegend?: boolean }) {
   const nav = useNavigate()
   const se = session.data.exercises[index]
   const db = useStore((s) => s.db)
@@ -371,6 +382,11 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>
           {se.note && <div>📝 {se.note}</div>}
           {ex?.setup && <div style={{ color: 'var(--muted)' }}>⚙ {ex.setup}</div>}
+        </div>
+      )}
+      {!last && prior.length === 0 && tracking !== 'time' && (
+        <div className="first-hint">
+          {tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.'}
         </div>
       )}
       {lastDesc && (
@@ -526,6 +542,12 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         })}
       </div>
 
+      {showLegend && (
+        <div className="set-legend">
+          <span className="lg-dot">1</span> work <span className="lg-dot warmup">W</span> warm-up <span className="lg-dot drop">D</span> drop{' '}
+          <span className="lg-dot failure">F</span> failure
+        </div>
+      )}
       <div className="row" style={{ marginTop: 10, flexWrap: 'wrap' }}>
         <button
           className="btn sm"
@@ -626,6 +648,7 @@ export default function SessionPage() {
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [showMuscles, setShowMuscles] = useState(false)
+  const userId = useStore((s) => s.user?.id ?? 'local')
   useWakeLock()
 
   useEffect(() => {
@@ -640,6 +663,8 @@ export default function SessionPage() {
   if (!session) return <div className="card">Workout not found. <button className="btn sm" onClick={() => nav('/')}>Home</button></div>
 
   const muscles = muscleSets(session, db.exercises)
+  // the set-type legend stays until the user has logged a handful of sets in total
+  const loggedEver = db.sessions.reduce((a, x) => a + x.data.exercises.reduce((b, e) => b + e.sets.filter((st) => st.done).length, 0), 0)
   const volume = Math.round(sessionVolume(session))
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
@@ -708,7 +733,7 @@ export default function SessionPage() {
       </div>
 
       {session.data.exercises.map((_, i) => (
-        <ExerciseCard key={i + session.data.exercises[i].exercise_id} session={session} index={i} onMore={() => setMoreIdx(i)} />
+        <ExerciseCard key={i + session.data.exercises[i].exercise_id} session={session} index={i} onMore={() => setMoreIdx(i)} showLegend={i === 0 && loggedEver < 5} />
       ))}
 
       <button className="btn" onClick={() => setPicking(true)}>
@@ -762,6 +787,7 @@ export default function SessionPage() {
         />
       )}
 
+      <CoachMarks id="workout" userId={userId} steps={WORKOUT_TIPS} enabled={session.data.exercises.some((e) => e.sets.length > 0)} />
       {showMuscles && <MusclesSheet rows={muscles} onClose={() => setShowMuscles(false)} />}
 
       {confirmFinish && (
