@@ -1,7 +1,7 @@
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Info, Link2, Plus, Trash2 } from 'lucide-react'
-import '../styles/programs.css'
+import '../styles/programs-nav.css'
 import { MoveToFolderSheet } from '../components/FolderSheet'
 import { folderOf, NO_FOLDER } from '../lib/folders'
 import { useStore } from '../lib/store'

@@ -31,7 +31,7 @@ import { CalendarHeat } from '../components/CalendarHeat'
 import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
 import '../styles/insights.css'
-import '../styles/programs.css'
+import '../styles/programs-nav.css'
 
 function templateInfo(db: DB, w: Workout) {
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)

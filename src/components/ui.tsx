@@ -165,9 +165,13 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
     window.addEventListener('keydown', onKey)
+    // screen readers and keyboards start inside the sheet, and return to where they were after
+    const opener = document.activeElement as HTMLElement | null
+    if (!ref.current?.contains(document.activeElement)) ref.current?.focus({ preventScroll: true })
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
+      opener?.focus?.({ preventScroll: true })
     }
   }, [])
 
@@ -208,6 +212,7 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
       <div
         ref={ref}
         className="sheet"
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}

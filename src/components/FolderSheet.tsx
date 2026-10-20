@@ -3,7 +3,7 @@ import { Check, Folder, FolderPlus, Inbox } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { folderOf, listFolders, NO_FOLDER } from '../lib/folders'
 import { Sheet } from './ui'
-import '../styles/programs.css'
+import '../styles/programs-nav.css'
 
 /** Put one workout into a folder (existing, new, or none). */
 export function MoveToFolderSheet({ workoutId, onClose }: { workoutId: string; onClose: () => void }) {

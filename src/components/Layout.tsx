@@ -89,10 +89,10 @@ function RestBar({ inSession }: { inSession: boolean }) {
             </button>
           ) : (
             <>
-              <button className="btn sm" onClick={() => adjust(-15)} aria-label="Minus 15 seconds">
+              <button className="btn sm" onClick={() => adjust(-15)} aria-label="15 seconds less rest">
                 −15s
               </button>
-              <button className="btn sm" onClick={() => adjust(15)} aria-label="Plus 15 seconds">
+              <button className="btn sm" onClick={() => adjust(15)} aria-label="15 seconds more rest">
                 +15s
               </button>
               <button className="btn sm grow" onClick={clear}>
@@ -110,9 +110,9 @@ function Toasts() {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
   return (
-    <div className="toasts">
+    <div className="toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)}>
+        <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)} title="Tap to dismiss">
           <div className="t">{t.text}</div>
           {t.sub && <div className="small muted">{t.sub}</div>}
         </div>
@@ -128,8 +128,8 @@ function SyncDot() {
   const queued = useStore((s) => s.queued)
   if (!repo) return null
   return (
-    <div className="sync">
-      <span className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />
+    <div className="sync" role="status">
+      <span aria-hidden className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />
       {queued
         ? `${queued} change${queued === 1 ? '' : 's'} waiting to sync`
         : err
@@ -156,7 +156,7 @@ function ResumeBar() {
   if (!active) return null
   const secs = Math.max(0, Math.floor((Date.now() - new Date(active.started_at).getTime()) / 1000))
   return (
-    <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Resume ${active.name}`}>
+    <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Workout in progress: ${active.name}. Resume`}>
       <span className="resume-dot" aria-hidden />
       <span className="grow ellipsis">
         <b>{active.name}</b> <span className="muted">· {fmtClock(secs)}</span>

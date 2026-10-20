@@ -13,7 +13,7 @@ import { usePrefs } from '../lib/prefs'
 import { notifyPermission, notifySupported, requestNotify } from '../lib/notify'
 import { fmtKg } from '../lib/format'
 import '../styles/workout-flow.css'
-import '../styles/programs.css'
+import '../styles/programs-nav.css'
 
 const INCREMENTS = [1, 1.25, 2.5, 5]
 const BARS = [20, 15, 10, 0]

@@ -5,7 +5,7 @@ import { useStore } from '../lib/store'
 import { PROGRAMS, Program, buildProgram, fmtTarget, programById, programMeta } from '../lib/programs'
 import { fmtRest } from '../lib/format'
 import { PageHeader } from '../components/ui'
-import '../styles/programs.css'
+import '../styles/programs-nav.css'
 
 /** Save a program's exercises, workouts and links (parents first, so the cloud sync keeps them in order). */
 export function addProgram(p: Program) {

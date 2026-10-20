@@ -1,4 +1,4 @@
-/* ================= programs library + workout folders ================= */
+/* ================= programs-nav session: programs library, folders, home links, editor help, settings, a11y ================= */
 .pg-card {
   display: flex;
   flex-direction: column;
@@ -129,3 +129,15 @@
 .set-link-t { display: flex; flex-direction: column; gap: 1px; text-align: left; }
 .set-link-sub { color: var(--muted); font-weight: 500; }
 .set-link.primary .set-link-sub { color: inherit; opacity: 0.75; }
+
+/* accessibility: 44px touch targets on the dense rows of screens this file styles */
+.trow .btn.icon.sm,
+.fold .btn.icon.sm { min-width: 44px; min-height: 44px; }
+.we-card .reorder .btn { min-width: 44px; min-height: 40px; }
+.plate-pick .chip { position: relative; }
+.plate-pick .chip::after { content: ''; position: absolute; inset: -6px -2px; }
+.trow { gap: 2px; }
+/* welcome tour dots: small to look at, 44px to tap */
+.wl-dots button { position: relative; }
+.wl-dots button::after { content: ''; position: absolute; inset: -18px -8px; }
+.sheet:focus, .wl:focus { outline: none; }
