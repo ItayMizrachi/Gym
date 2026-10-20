@@ -317,10 +317,13 @@ export function Toggle({
   on,
   onChange,
   label,
+  ariaLabel,
   blue
 }: {
   on: boolean
   onChange: (v: boolean) => void
+  /** accessible name when the visible label lives elsewhere */
+  ariaLabel?: string
   /** accessible name; also rendered beside the switch when given */
   label?: string
   /** use the blue plate colour (drop sets / supersets) instead of brand yellow */
@@ -333,7 +336,7 @@ export function Toggle({
       onClick={() => onChange(!on)}
       role="switch"
       aria-checked={on}
-      aria-label={label}
+      aria-label={label ?? ariaLabel}
     />
   )
   if (!label) return sw

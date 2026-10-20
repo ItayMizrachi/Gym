@@ -125,3 +125,7 @@
 .we-gloss { margin: 0 0 4px; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
 .we-gloss dt { font-weight: 650; color: var(--text); }
 .we-gloss dd { margin: 0; }
+.set-link { justify-content: flex-start; text-align: left; min-height: 48px; }
+.set-link-t { display: flex; flex-direction: column; gap: 1px; text-align: left; }
+.set-link-sub { color: var(--muted); font-weight: 500; }
+.set-link.primary .set-link-sub { color: inherit; opacity: 0.75; }
