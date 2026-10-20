@@ -144,9 +144,10 @@
   margin-right: 14px;
   padding: 0 12px;
   border-radius: var(--r-pill);
-  border: 1px solid var(--accent-line);
-  background: var(--accent-soft);
-  color: var(--accent);
+  /* neutral: yellow stays for the one primary action on the screen */
+  border: 1px solid var(--line-strong);
+  background: var(--card2);
+  color: var(--text);
   font-weight: 600;
   font-size: var(--fs-sm);
   display: inline-flex;
