@@ -22,6 +22,15 @@ Make GymLog the best workout app there is: the one people see and immediately fe
 6. The coordinator merges, re-verifies on a production build, and deploys to main (owner approved automatic deploys
    after all checks pass).
 
+## Never idle (owner's rule)
+Always keep something in progress. When the "Next" list runs low:
+1. Self-review the live app: walk every screen at 375x812 as a new user and as a heavy user, run
+   `design:design-critique`, `mobile-app-design:ios-review`, `a11y-enforcer:a11y-check` and `/code-review` on recent
+   changes, and check bundle size and startup time.
+2. Turn every real finding into a task and add it to "Next" (fixes first, then upgrades to existing features, then
+   new features), with a one-line reason.
+3. Re-check shipped work: anything that looks unfinished or inconsistent goes back on the list.
+
 ## Now (in progress)
 - Design pass: Inter font, type scale, structure of every screen, accessibility, no demo wording, Google-only login.
 - Exercise library: free-exercise-db (876 exercises with photos and instructions), search/filters, photos on
