@@ -1,3 +1,6 @@
+# Builds the app and publishes it to GitHub Pages on every push to main (or by hand: Actions -> Run workflow).
+# One-time setup: Settings -> Pages -> Source: "GitHub Actions", and the two repository secrets below.
+# See README "Deploy to GitHub Pages".
 name: Deploy to GitHub Pages
 on:
   push:
@@ -14,18 +17,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
+      - name: Check Supabase secrets
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::warning::VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY secrets are not set: this build runs in demo mode (no sign-in, data stays on each device)."
+          fi
       - run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
   deploy:
