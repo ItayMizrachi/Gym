@@ -1997,3 +1997,11 @@ input[type='search']::-webkit-search-decoration {
 .we-card .we-head {
   padding-right: 4px;
 }
+
+/* Google's own sign-in button (rendered by Google in an iframe) */
+.gsi-btn {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+}
