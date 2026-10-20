@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
 import { useStore } from '../lib/store'
+import { Skeleton, SkeletonList } from './ui'
 import { fmtClock } from '../lib/format'
 import { beep } from '../lib/beep'
 import { usePrefs } from '../lib/prefs'
@@ -224,7 +225,16 @@ export default function Layout() {
     <>
       <SyncDot />
       <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="stack" style={{ gap: 16, paddingTop: 8 }} aria-label="Loading">
+              <Skeleton w="45%" h={30} />
+              <SkeletonList rows={4} />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <RestBar inSession={inSession} />
       <LockScreenSync />

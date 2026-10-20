@@ -44,7 +44,7 @@ Always keep something in progress. When the "Next" list runs low:
 2. ~~**Personalised start.**~~ Shipped 21 Oct ("Find my program"). First-run questions (goal, experience, days per week, equipment) → recommend one of the
    ready-made programs, one tap to add it.
 3. ~~**Import from Hevy / Strong (CSV).**~~ Shipped 21 Oct (Settings → Data & backup). Lets people switch without losing history.
-4. **Speed.** Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
+4. ~~**Speed.**~~ First pass shipped 21 Oct (secondary screens lazy-loaded: main bundle 306 → 200 KB, 86 → 64 KB gzip). Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
    Measure bundle size before/after.
 5. **Account deletion in the app** (Settings → Delete account and data), required for Google and app-store policy.
 6. **Weekly goal and plan.** Set a weekly target (e.g. 4 workouts), see the planned days, gentle progress ring.

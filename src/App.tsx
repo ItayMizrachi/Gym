@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from './lib/store'
 import { startNextWorkout } from './lib/shortcuts'
@@ -8,18 +8,20 @@ import UpdateBanner from './components/UpdateBanner'
 import OfflineBanner from './components/OfflineBanner'
 import Login from './pages/Login'
 import Home from './pages/Home'
-import WorkoutEditor from './pages/WorkoutEditor'
 import SessionPage from './pages/Session'
-import Exercises from './pages/Exercises'
-import ExerciseDetail from './pages/ExerciseDetail'
-import HistoryPage from './pages/History'
-import SessionDetail from './pages/SessionDetail'
-import Body from './pages/Body'
-import SettingsPage from './pages/Settings'
-import Help from './pages/Help'
-import Profile from './pages/Profile'
-import Programs from './pages/Programs'
 import Welcome, { seen } from './components/Welcome'
+
+// Secondary screens load on first visit (the service worker still caches them for offline use).
+const WorkoutEditor = lazy(() => import('./pages/WorkoutEditor'))
+const Exercises = lazy(() => import('./pages/Exercises'))
+const ExerciseDetail = lazy(() => import('./pages/ExerciseDetail'))
+const HistoryPage = lazy(() => import('./pages/History'))
+const SessionDetail = lazy(() => import('./pages/SessionDetail'))
+const Body = lazy(() => import('./pages/Body'))
+const SettingsPage = lazy(() => import('./pages/Settings'))
+const Help = lazy(() => import('./pages/Help'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Programs = lazy(() => import('./pages/Programs'))
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
 function useLaunchShortcut(ready: boolean) {

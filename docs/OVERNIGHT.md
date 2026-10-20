@@ -25,8 +25,11 @@
 - Small fixes: Google button logo no longer overlaps its label; History says "1 set" and hides an empty weekly
   average.
 
+- **Faster start:** the first download is about a quarter smaller (secondary screens load when first opened and
+  are still cached for offline use).
+
 ## In progress
-- Next from the roadmap: speed (smaller first load, lazy screens).
+- Next from the roadmap: delete account and data from inside the app.
 
 ## Needs you
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
