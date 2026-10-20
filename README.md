@@ -7,9 +7,9 @@ A mobile-first workout tracker you install on your phone (iPhone and Android) st
 - A PR alert when you break a record, and a hint when you are 1-2 reps away from one
 - Exercise library with a photo, setup notes (seat / pad / pin positions) and cues for each exercise
 - History, per-exercise charts, body-weight log with a 7-day average, trend per week and progress photos
-- Sign in with Google (or email). Every user only sees their own data.
+- Sign in with Google. Every user only sees their own data.
 - Works offline at the gym; changes sync when the connection is back
-- Works without any setup in **demo mode** (data stays in the browser on that device)
+- For development it also runs without any setup in **local mode** (data stays in the browser on that device)
 
 Stack: React + TypeScript + Vite, installable PWA, Supabase (Postgres, Auth, Storage).
 
@@ -17,14 +17,16 @@ The live app: **https://itaymizrachi.github.io/Gym/** (once the steps below are 
 
 ---
 
-## 1. Try it locally (demo mode, no accounts needed)
+## 1. Try it locally (local mode, no accounts needed)
 
 ```bash
 npm install     # downloads the libraries listed in package.json into node_modules
 npm run dev     # starts a local dev server (usually http://localhost:5173) with live reload
 ```
 
-Without a `.env` file the app runs in demo mode: everything is stored in your browser on this device.
+Without a `.env` file the app runs in local mode: everything is stored in your browser on this device.
+With a `.env`, the dev server shows the Google sign-in screen plus a small "Continue offline (dev only)" link;
+production builds offer Google sign-in only.
 
 > Windows: if PowerShell says "running scripts is disabled", run the commands in `cmd`, or once run
 > `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (lets PowerShell run local scripts such as npm's).
@@ -131,7 +133,7 @@ push to `main`.
    - `VITE_SUPABASE_ANON_KEY` = your publishable/anon key
 4. Push to `main` (or Actions → *Deploy to GitHub Pages* → **Run workflow**). When the run is green the app is at
    https://itaymizrachi.github.io/Gym/. If the secrets are missing the run shows a warning and the site runs in
-   demo mode.
+   local mode (data only on that device).
 
 The app uses `#` routes and relative paths, so it works under `/Gym/` without any server rules.
 
@@ -172,7 +174,7 @@ node scripts/pwa-assets.cjs    # redraws everything in public/ and prints the <l
 
 | Path | What it is |
 | --- | --- |
-| `src/lib/db.ts` | Storage: `LocalRepo` (demo, IndexedDB) and `SupabaseRepo` (cloud, offline-first outbox) behind one interface |
+| `src/lib/db.ts` | Storage: `LocalRepo` (local mode, IndexedDB) and `SupabaseRepo` (cloud, offline-first outbox) behind one interface |
 | `src/lib/supabase.ts` | Supabase client (PKCE sign-in that works with the `#` router), redirect URL |
 | `src/lib/store.ts` | App state, debounced saving, ordered writes, rest timer |
 | `src/lib/pr.ts` | Record logic: heaviest weight, estimated 1RM (Epley, reps capped at 12), rep records, near-record hints |

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Info, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -81,7 +81,6 @@ export default function Home() {
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
   const user = useStore((s) => s.user)
-  const repoMode = useStore((s) => s.repo?.mode)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
   const [moving, setMoving] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -159,16 +158,6 @@ export default function Home() {
           <HelpCircle size={22} />
         </button>
       </div>
-
-      {repoMode === 'local' && (
-        <button className="demo-note" onClick={() => nav('/settings')}>
-          <Info size={18} aria-hidden />
-          <span className="grow">
-            Demo mode: your data stays on this phone. <b>Sign in to sync</b>
-          </span>
-          <ChevronRight size={18} aria-hidden />
-        </button>
-      )}
 
       {active && (
         <div className="banner stack" style={{ gap: 8 }}>

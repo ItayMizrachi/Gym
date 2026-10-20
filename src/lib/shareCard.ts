@@ -230,7 +230,7 @@ export async function shareOrDownload(blob: Blob, filename: string, text: string
 /* ---------- progress photo comparison ---------- */
 
 export interface ComparePhoto {
-  /** any URL the browser can fetch (object URL in demo mode, signed URL in the cloud) */
+  /** any URL the browser can fetch (object URL in local mode, signed URL in the cloud) */
   url: string
   date: string // already formatted
   weight: string | null // e.g. "81.2 kg"

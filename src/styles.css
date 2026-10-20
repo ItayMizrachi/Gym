@@ -2052,3 +2052,67 @@ input[type='search']::-webkit-search-decoration {
   /* the page is color-scheme: dark; without this the browser paints Google's iframe with a white box */
   color-scheme: light;
 }
+
+/* ================================================== login (Google only) */
+.login {
+  justify-content: space-between;
+}
+.login-brand {
+  flex: 1;
+  justify-content: center;
+  margin-bottom: var(--s5);
+}
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+.login-lead {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 16px;
+  line-height: 1.45;
+}
+.login .btn.google {
+  min-height: var(--btn-h);
+  font-size: 16px;
+}
+.login-privacy {
+  display: flex;
+  gap: var(--s2);
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.login-privacy svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--ok);
+}
+.login-dev {
+  align-self: center;
+}
+
+/* settings: signed-in account */
+.acct-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+.acct-avatar {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 18px;
+}
+.acct-email {
+  font-weight: 600;
+}
