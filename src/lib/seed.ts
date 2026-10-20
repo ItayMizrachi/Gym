@@ -1,31 +1,34 @@
-import { Exercise, Workout, WorkoutExercise } from './types'
+import { Exercise, Tracking, Workout, WorkoutExercise } from './types'
 import { uid, nowIso } from './uid'
 
-type Ex = [name: string, muscle: string, rest: number]
+type Ex = [name: string, muscle: string, rest: number, equipment: string, tracking?: Tracking]
 
 const EXERCISES: Ex[] = [
-  ['Hack Squat (Machine)', 'Quads', 180],
-  ['Romanian Deadlift (Barbell)', 'Hamstrings', 180],
-  ['Lying Leg Curl (Machine)', 'Hamstrings', 105],
-  ['Leg Extension (Machine)', 'Quads', 90],
-  ['Standing Calf Raise (Smith)', 'Calves', 90],
-  ['Knee Raise (Parallel Bars)', 'Abs', 60],
-  ['Bench Press (Barbell)', 'Chest', 90],
-  ['Pull Up (Weighted)', 'Back', 90],
-  ['Shoulder Press (Machine Plates)', 'Shoulders', 120],
-  ['Iso-Lateral Row (Machine)', 'Back', 120],
-  ['Single Arm Lateral Raise (Cable)', 'Shoulders', 60],
-  ['Reverse Fly Single Arm (Cable)', 'Shoulders', 60],
-  ['Overhead Triceps Extension (Cable)', 'Triceps', 15],
-  ['Bicep Curl (Cable)', 'Biceps', 90],
-  ['Hip Thrust (Barbell)', 'Glutes', 165],
-  ['Cable Crunch', 'Abs', 75],
-  ['Incline Chest Press (Machine)', 'Chest', 15],
-  ['Chest Supported T Bar Row', 'Back', 120],
-  ['Chest Dip (Weighted)', 'Chest', 135],
-  ['Chest Fly (Machine)', 'Chest', 15],
-  ['Triceps Pushdown', 'Triceps', 15],
-  ['Hammer Curl (Dumbbell)', 'Biceps', 90]
+  ['Hack Squat (Machine)', 'Quads', 180, 'Machine'],
+  ['Romanian Deadlift (Barbell)', 'Hamstrings', 180, 'Barbell'],
+  ['Lying Leg Curl (Machine)', 'Hamstrings', 105, 'Machine'],
+  ['Leg Extension (Machine)', 'Quads', 90, 'Machine'],
+  ['Standing Calf Raise (Smith)', 'Calves', 90, 'Smith'],
+  ['Knee Raise (Parallel Bars)', 'Abs', 60, 'Bodyweight', 'reps'],
+  ['Bench Press (Barbell)', 'Chest', 90, 'Barbell'],
+  ['Pull Up (Weighted)', 'Back', 90, 'Bodyweight'],
+  ['Shoulder Press (Machine Plates)', 'Shoulders', 120, 'Machine'],
+  ['Iso-Lateral Row (Machine)', 'Back', 120, 'Machine'],
+  ['Single Arm Lateral Raise (Cable)', 'Shoulders', 60, 'Cable'],
+  ['Reverse Fly Single Arm (Cable)', 'Shoulders', 60, 'Cable'],
+  ['Overhead Triceps Extension (Cable)', 'Triceps', 15, 'Cable'],
+  ['Bicep Curl (Cable)', 'Biceps', 90, 'Cable'],
+  ['Hip Thrust (Barbell)', 'Glutes', 165, 'Barbell'],
+  ['Cable Crunch', 'Abs', 75, 'Cable'],
+  ['Incline Chest Press (Machine)', 'Chest', 15, 'Machine'],
+  ['Chest Supported T Bar Row', 'Back', 120, 'Machine'],
+  ['Chest Dip (Weighted)', 'Chest', 135, 'Bodyweight'],
+  ['Chest Fly (Machine)', 'Chest', 15, 'Machine'],
+  ['Triceps Pushdown', 'Triceps', 15, 'Cable'],
+  ['Hammer Curl (Dumbbell)', 'Biceps', 90, 'Dumbbell'],
+  // not in a plan: ready to add to any workout
+  ['Warm Up', 'Other', 30, 'Other', 'time'],
+  ['Plank', 'Abs', 60, 'Bodyweight', 'time']
 ]
 
 /** [exercise, sets, repMin, repMax, weight, rest, superset, dropLast] */
@@ -98,7 +101,7 @@ export function buildStarterPlan(userId: string, existing: Exercise[], startPosi
   const byName = new Map(existing.map((e) => [e.name.toLowerCase(), e]))
   const exercises: Exercise[] = []
   const idFor = new Map<string, string>()
-  for (const [name, muscle, rest] of EXERCISES) {
+  for (const [name, muscle, rest, equipment, tracking] of EXERCISES) {
     const found = byName.get(name.toLowerCase())
     if (found) {
       idFor.set(name, found.id)
@@ -113,7 +116,9 @@ export function buildStarterPlan(userId: string, existing: Exercise[], startPosi
       setup: '',
       image_path: null,
       rest_sec: rest,
-      created_at: nowIso()
+      created_at: nowIso(),
+      equipment,
+      tracking: tracking ?? 'weight_reps'
     }
     exercises.push(e)
     idFor.set(name, e.id)

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { Session, SessionExercise, SessionSet, SetKind } from '../lib/types'
+import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
+import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
 import { addExerciseToSession, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
@@ -12,6 +13,7 @@ import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
+import '../styles/workout-live.css'
 
 const KIND_ORDER: SetKind[] = ['work', 'failure', 'drop', 'warmup']
 // sets that already fired a record / near-record message, so un-ticking and re-ticking does not repeat it
@@ -45,11 +47,6 @@ function useWakeLock() {
       }
     }
   }, [])
-}
-
-function shortSet(s: SessionSet): string {
-  const p = s.kind === 'drop' ? 'D ' : s.kind === 'warmup' ? 'W ' : s.kind === 'failure' ? 'F ' : ''
-  return `${p}${fmtKg(s.weight)}×${s.reps}${s.rpe != null ? ` @${fmtKg(s.rpe)}` : ''}`
 }
 
 const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10]
@@ -127,6 +124,78 @@ function KgCell({ value, onChange, onLong }: { value: number; onChange: (n: numb
   )
 }
 
+/** Running stopwatches by set id (start time in ms, already shifted back by any time logged before). Module level so they survive re-renders and leaving the screen. */
+const watches = new Map<string, number>()
+const watchSec = (id: string) => Math.max(0, Math.round((Date.now() - (watches.get(id) ?? Date.now())) / 1000))
+
+function useTick(on: boolean, ms = 500) {
+  const [, tick] = useState(0)
+  useEffect(() => {
+    if (!on) return
+    const t = setInterval(() => tick((n) => n + 1), ms)
+    return () => clearInterval(t)
+  }, [on, ms])
+}
+
+/** m:ss text field. Plain numbers are read as seconds. */
+function TimeInput({ value, onChange, placeholder, running }: { value: number | null | undefined; onChange: (sec: number | null) => void; placeholder?: string; running: boolean }) {
+  const [text, setText] = useState(fmtTime(value))
+  const focused = useRef(false)
+  useEffect(() => {
+    if (!focused.current) setText(fmtTime(value))
+  }, [value])
+  return (
+    <input
+      className={`num time ${running ? 'running' : ''}`}
+      inputMode="numeric"
+      aria-label="Time (minutes:seconds)"
+      placeholder={placeholder || '0:00'}
+      value={text}
+      readOnly={running}
+      onFocus={(e) => {
+        focused.current = true
+        e.target.select()
+      }}
+      onBlur={() => {
+        focused.current = false
+        setText(fmtTime(value))
+      }}
+      onChange={(e) => {
+        const raw = e.target.value
+        if (!/^[\d:.,]*$/.test(raw)) return
+        setText(raw)
+        onChange(parseTime(raw))
+      }}
+    />
+  )
+}
+
+/** Start / stop button for a time set. While running, the time column shows the live count. */
+function StopwatchBtn({ set, onStop }: { set: SessionSet; onStop: (sec: number) => void }) {
+  const running = watches.has(set.id)
+  useTick(running)
+  return (
+    <button
+      className={`sw ${running ? 'on' : ''}`}
+      disabled={set.done}
+      onClick={() => {
+        if (running) {
+          const sec = watchSec(set.id)
+          watches.delete(set.id)
+          onStop(sec)
+        } else {
+          // continue from what is already filled in
+          watches.set(set.id, Date.now() - (set.time_sec ?? 0) * 1000)
+          onStop(set.time_sec ?? 0)
+        }
+      }}
+      aria-label={running ? 'Stop timer' : 'Start timer'}
+    >
+      {running ? <Square size={16} /> : <Play size={16} />}
+    </button>
+  )
+}
+
 function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOpen: () => void }) {
   const url = useImageUrl(ex.image_path)
   const db = useStore((s) => s.db)
@@ -179,6 +248,9 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
   const [plateSet, setPlateSet] = useState<string | null>(null)
   const [rpeSet, setRpeSet] = useState<string | null>(null)
   const showRpe = usePrefs((p) => p.showRpe)
+  const tracking: Tracking = trackingOf(ex)
+  const hasRunning = se.sets.some((x) => watches.has(x.id))
+  useTick(hasRunning)
 
   const prior = useMemo(() => priorSets(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
   const last = useMemo(() => lastPerformance(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
@@ -213,12 +285,20 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
       patchSet(s.id, { done: false, done_at: null }, true)
       return
     }
-    if (s.reps == null || s.reps <= 0) {
-      toast({ kind: 'info', text: 'Enter the reps first', sub: 'Then tap the check to log the set.' })
+    if (watches.has(s.id)) {
+      // ticking a running timer stops it and logs what it shows
+      const sec = watchSec(s.id)
+      watches.delete(s.id)
+      s = { ...s, time_sec: sec }
+    }
+    const missing = missingForLog(s, tracking)
+    if (missing) {
+      toast({ kind: 'info', text: missing === 'time' ? 'Enter the time first' : 'Enter the reps first', sub: missing === 'time' ? 'Or start the timer. Then tap the check to log the set.' : 'Then tap the check to log the set.' })
+      if (s.time_sec != null) patchSet(s.id, { time_sec: s.time_sec }, true)
       return
     }
     const celebrateKey = `${s.id}:${s.weight}:${s.reps}`
-    if (ELIGIBLE.has(s.kind) && !celebrated.has(celebrateKey)) {
+    if (tracking !== 'time' && s.reps != null && ELIGIBLE.has(s.kind) && !celebrated.has(celebrateKey)) {
       celebrated.add(celebrateKey)
       const res = evaluateSet(runningPrior(s.id), s.weight, s.reps)
       if (res.types.length) {
@@ -226,7 +306,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         toast({
           kind: 'pr',
           text: `🏆 New PR! ${ex?.name ?? se.name}`,
-          sub: `${fmtKg(s.weight)} kg × ${s.reps} · ${label} · est. 1RM ${fmtKg(Math.round(res.e1rm * 10) / 10)}`
+          sub: `${setLabel(s, tracking, false)} · ${label} · est. 1RM ${fmtKg(Math.round(res.e1rm * 10) / 10)}`
         })
         try {
           navigator.vibrate?.([80, 60, 80, 60, 160])
@@ -237,16 +317,16 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         toast({
           kind: 'near',
           text: `So close! ${res.nearPct}% of your best`,
-          sub: `${fmtKg(s.weight)} kg × ${s.reps} on ${ex?.name ?? se.name}`
+          sub: `${setLabel(s, tracking, false)} on ${ex?.name ?? se.name}`
         })
       }
     }
-    patchSet(s.id, { done: true, done_at: nowIso() }, true)
+    patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : {}) }, true)
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, ex?.name ?? se.name)
   }
 
   const workNo = (i: number) => se.sets.slice(0, i + 1).filter((x) => x.kind === 'work').length
-  const lastDesc = last ? last.sets.map(shortSet).join(' · ') : null
+  const lastDesc = last ? last.sets.map((x) => setLabel(x, tracking)).join(' · ') : null
 
   return (
     <div className={`ex ${se.superset ? 'ss' : ''}`}>
@@ -259,7 +339,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           <div className="row small muted" style={{ gap: 6, flexWrap: 'wrap' }}>
             {se.superset && <span className="chip blue">Superset {se.superset}</span>}
             <span>
-              {se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest {fmtRest(se.rest_sec)}
+              {tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest {fmtRest(se.rest_sec)}
             </span>
           </div>
         </div>
@@ -298,17 +378,27 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           Hold {fmtKg(se.progression.from)} kg: last time was {se.progression.reps.join('/')}, aim for {se.rep_min}+ on every set.
         </div>
       )}
-      {rec.heaviest && (
+      {rec.heaviest && tracking !== 'time' && (
         <div className="row" style={{ marginTop: 6, gap: 6, flexWrap: 'wrap' }}>
-          <span className="chip pr">🏆 {fmtKg(rec.heaviest.weight)}×{rec.heaviest.reps}</span>
-          {rec.bestE1rm && <span className="chip pr">1RM ~{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}</span>}
+          {tracking === 'reps' && !(rec.heaviest.weight > 0) ? (
+            <span className="chip pr">🏆 {Math.max(...prior.map((p) => p.reps))} reps</span>
+          ) : (
+            <span className="chip pr">🏆 {fmtKg(rec.heaviest.weight)}×{rec.heaviest.reps}</span>
+          )}
+          {tracking === 'weight_reps' && rec.bestE1rm && <span className="chip pr">1RM ~{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}</span>}
         </div>
       )}
 
-      <div className="sets">
+      <div className={`sets t-${tracking}`}>
         <div className="set-row">
           <div className="hdr">Set</div>
           <div className="hdr">Prev</div>
+          {tracking === 'time' ? (
+            <div className="hdr span2">Time</div>
+          ) : tracking === 'reps' ? (
+            <div className="hdr span2">Reps</div>
+          ) : (
+          <>
           <div className="hdr">
             <button
               className="hdr-btn"
@@ -319,6 +409,8 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
             </button>
           </div>
           <div className="hdr">Reps</div>
+          </>
+          )}
           <div className="hdr">✓</div>
         </div>
         {se.sets.map((s, i) => {
@@ -327,7 +419,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
           const prev = last?.sets.filter((x) => x.kind === s.kind)[kindIdx]
           // one PR hint per exercise: on the next set still to do
           const nextUndone = se.sets.findIndex((x) => !x.done && ELIGIBLE.has(x.kind))
-          const need = i === nextUndone ? repsForPR(runningPrior(s.id), s.weight) : null
+          const need = i === nextUndone && tracking !== 'time' ? repsForPR(runningPrior(s.id), s.weight) : null
           const hintReps = need != null && need <= 20 ? need : null
           const nearTarget = hintReps != null && se.rep_max ? hintReps <= se.rep_max + 2 : false
           return (
@@ -340,15 +432,32 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
                 >
                   {s.kind === 'work' ? workNo(i) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'}
                 </button>
-                <div className="prev">{prev && prev.reps != null ? `${fmtKg(prev.weight)}×${prev.reps}` : '–'}</div>
-                <KgCell value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} onLong={() => setPlateSet(s.id)} />
+                <div className="prev">{prevLabel(prev, tracking)}</div>
+                {tracking === 'time' ? (
+                  <>
+                    <TimeInput
+                      value={watches.has(s.id) ? watchSec(s.id) : s.time_sec}
+                      running={watches.has(s.id)}
+                      placeholder={prev?.time_sec ? fmtTime(prev.time_sec) : ''}
+                      onChange={(sec) => patchSet(s.id, { time_sec: sec })}
+                    />
+                    <StopwatchBtn set={s} onStop={(sec) => patchSet(s.id, { time_sec: sec || null }, true)} />
+                  </>
+                ) : (
+                <>
+                {tracking === 'weight_reps' && (
+                  <KgCell value={s.weight} onChange={(n) => patchSet(s.id, { weight: n ?? 0 })} onLong={() => setPlateSet(s.id)} />
+                )}
                 <NumInput
                   value={s.reps}
                   decimal={false}
                   placeholder={prev?.reps != null ? String(prev.reps) : se.rep_min ? String(se.rep_min) : ''}
                   onChange={(n) => patchSet(s.id, { reps: n == null ? null : Math.round(n) })}
                   ariaLabel="Reps"
+                  className={tracking === 'reps' ? 'num span2' : 'num'}
                 />
+                </>
+                )}
                 <button className="check" onClick={() => toggleDone(s)} aria-label={s.done ? 'Undo set' : 'Log set'}>
                   <Check size={20} />
                 </button>
@@ -365,7 +474,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
               {hintReps != null && nearTarget && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
-                    🏆 {hintReps} {hintReps === 1 ? 'rep' : 'reps'} at {fmtKg(s.weight)} kg = new PR
+                    🏆 {hintReps} {hintReps === 1 ? 'rep' : 'reps'}{tracking === 'weight_reps' || s.weight > 0 ? ` at ${fmtKg(s.weight)} kg` : ''} = new PR
                   </div>
                 </div>
               )}
@@ -389,6 +498,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         >
           <Plus size={14} /> Set
         </button>
+        {tracking === 'weight_reps' && (
         <button
           className="btn sm"
           onClick={() =>
@@ -403,6 +513,7 @@ function ExerciseCard({ session, index, onMore }: { session: Session; index: num
         >
           <Plus size={14} /> Drop
         </button>
+        )}
         <button
           className="btn sm"
           onClick={() =>

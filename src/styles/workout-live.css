@@ -1,0 +1,20 @@
+/* ================= workout live: timed sets, summary header, picker, keypad, tips ================= */
+
+/* ---------- timed / reps-only set rows ---------- */
+.set-row .span2 { grid-column: span 2; }
+.num.time { font-variant-numeric: tabular-nums; }
+.num.time.running { border-color: var(--accent); color: var(--accent); }
+.sw {
+  height: var(--tap);
+  border-radius: var(--r-sm);
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--t-fast) var(--ease);
+}
+.sw:active { transform: scale(0.92); }
+.sw.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sw:disabled { opacity: 0.35; }

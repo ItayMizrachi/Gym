@@ -3,6 +3,12 @@ import { DB, Session, SessionSet } from './types'
 /** Only these set kinds count towards records. Warm-ups and drop sets never do. */
 const ELIGIBLE = new Set(['work', 'failure'])
 
+/** A set logged by duration (plank, warm-up). These never count towards weight or rep records. */
+export const isTimeSet = (s: Pick<SessionSet, 'time_sec'>) => s.time_sec != null && s.time_sec > 0
+
+/** Done, record-eligible and logged with reps. */
+const countsForRecords = (s: SessionSet) => s.done && s.reps != null && s.reps > 0 && ELIGIBLE.has(s.kind) && !isTimeSet(s)
+
 export interface SetRec {
   exercise_id: string
   weight: number
@@ -27,11 +33,11 @@ export function priorSets(db: DB, exerciseId: string, excludeSessionId?: string)
     for (const ex of s.data.exercises) {
       if (ex.exercise_id !== exerciseId) continue
       for (const st of ex.sets) {
-        if (!st.done || st.reps == null || st.reps <= 0 || !ELIGIBLE.has(st.kind)) continue
+        if (!countsForRecords(st)) continue
         out.push({
           exercise_id: exerciseId,
           weight: st.weight,
-          reps: st.reps,
+          reps: st.reps!,
           kind: st.kind,
           session_id: s.id,
           date: sessionDate(s),
@@ -130,7 +136,8 @@ export function lastPerformance(db: DB, exerciseId: string, excludeSessionId?: s
   for (const s of sessions) {
     const ex = s.data.exercises.find((e) => e.exercise_id === exerciseId)
     if (!ex) continue
-    const done = ex.sets.filter((x) => x.done && x.reps != null)
+    // time sets have no reps but still count as "last time"
+    const done = ex.sets.filter((x) => x.done && (x.reps != null || isTimeSet(x)))
     if (done.length) return { date: sessionDate(s), sets: done }
   }
   return null
@@ -151,7 +158,7 @@ export function sessionPRs(db: DB, session: Session): PREvent[] {
     const prior = priorSets(db, ex.exercise_id, session.id).filter((p) => p.date < sessionDate(session))
     const running = [...prior]
     const done = ex.sets
-      .filter((s) => s.done && s.reps != null && s.reps > 0 && ELIGIBLE.has(s.kind))
+      .filter(countsForRecords)
       .sort((a, b) => (a.done_at ?? '').localeCompare(b.done_at ?? ''))
     for (const s of done) {
       const res = evaluateSet(running, s.weight, s.reps!)
@@ -183,7 +190,7 @@ export function exerciseHistory(db: DB, exerciseId: string): HistoryPoint[] {
   for (const s of db.sessions) {
     const ex = s.data.exercises.find((e) => e.exercise_id === exerciseId)
     if (!ex) continue
-    const done = ex.sets.filter((x) => x.done && x.reps != null && x.reps > 0 && x.kind !== 'warmup')
+    const done = ex.sets.filter((x) => x.done && x.reps != null && x.reps > 0 && x.kind !== 'warmup' && !isTimeSet(x))
     if (!done.length) continue
     const elig = done.filter((x) => ELIGIBLE.has(x.kind))
     pts.push({
