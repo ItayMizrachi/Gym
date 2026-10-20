@@ -1,0 +1,34 @@
+/* Settings -> Account -> Delete account */
+.del-acct-row {
+  justify-content: flex-start;
+  min-height: var(--tap);
+  background: transparent;
+  border-color: transparent;
+  color: var(--danger-text);
+  font-weight: 500;
+}
+.del-acct-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.del-acct-error {
+  margin: 0;
+  padding: var(--s2) var(--s3);
+  border: 1px solid var(--danger-line);
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+.btn.del-acct-go {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--danger-ink);
+}
+.btn.del-acct-go:disabled {
+  background: var(--danger-soft);
+  border-color: var(--danger-line);
+  color: var(--danger-text);
+  opacity: 0.6;
+}
