@@ -169,3 +169,83 @@ export function exerciseFromLibrary(lib: LibraryExercise, userId: string): Exerc
 
 /** "Chest · Barbell" */
 export const libMeta = (e: LibraryExercise) => [e.muscle, e.equipment].filter(Boolean).join(' · ')
+
+/* ------------------------------------------------------------- matching */
+
+const STOP = new Set(['the', 'a', 'with', 'on', 'to', 'and', 'of', 'in', 'grip', 'medium', 'version', 'exercise', 'single', 'one', 'two'])
+// "curls" → "curl", "raises" → "raise", "flyes" → "fly", "pullups" → "pull up"
+const WORD: Record<string, string> = { pullups: 'pull up', pullup: 'pull up', pushups: 'push up', pushup: 'push up', chinup: 'chin up', flyes: 'fly', flies: 'fly' }
+function stem(w: string) {
+  if (WORD[w]) return WORD[w]
+  if (/(ch|sh|x)es$/.test(w)) return w.slice(0, -2)
+  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1)
+  return w
+}
+// gym slang → the library's words
+const PHRASES: [RegExp, string][] = [
+  [/pec deck/g, 'butterfly'],
+  [/skull crusher/g, 'skullcrusher'],
+  [/flye/g, 'fly'],
+  [/ohp/g, 'overhead press'],
+  [/rdl/g, 'romanian deadlift']
+]
+const tokens = (s: string) =>
+  PHRASES.reduce((t, [re, to]) => t.replace(re, to), norm(s))
+    .split(' ')
+    .map(stem)
+    .join(' ')
+    .split(' ')
+    .filter((w) => w && !STOP.has(w))
+
+export interface LibraryMatch {
+  lib: LibraryExercise
+  /** true when the name matched; false when it is only the most common exercise for that muscle (and equipment) */
+  byName: boolean
+}
+
+/**
+ * The library entry that best fits a name the user typed, using muscle and equipment to break ties.
+ * With `fallback`, an exercise with no name match still gets the best-known exercise for its muscle (and equipment),
+ * so every exercise has a picture.
+ */
+export function bestLibraryMatch(
+  list: LibraryExercise[],
+  ex: { name: string; muscle?: string; equipment?: string },
+  opts: { fallback?: boolean } = {}
+): LibraryMatch | null {
+  const want = new Set(tokens(ex.name))
+  // the equipment word in "(Barbell)" is a strong hint even when it is not in the library name
+  const eq = ex.equipment || EQUIP_WORDS.find((w) => want.has(w.toLowerCase())) || ''
+  let best: { lib: LibraryExercise; score: number } | null = null
+  if (want.size) {
+    for (const e of list) {
+      const have = tokens(e.name)
+      // short words ("up" in "warm up") alone never make a match
+      const hit = have.filter((w) => want.has(w) && w.length > 2).length
+      if (!hit) continue
+      const coverage = [...want].filter((w) => have.includes(w) || w.toLowerCase() === e.equipment.toLowerCase()).length / want.size
+      const score =
+        coverage * 2 +
+        hit / have.length -
+        // extra words in the library name ("…to a Bench", "…with Chains") make it a variation
+        Math.max(0, have.length - hit) * 0.1 -
+        have.filter((w) => VARIANT.has(w) && !want.has(w)).length * 0.5 +
+        (ex.muscle && e.muscles.includes(ex.muscle) ? 0.3 : 0) +
+        (eq ? (e.equipment === eq ? 0.3 : -0.4) : 0) +
+        (POPULAR.has(e.id) ? 0.25 : 0)
+      if (coverage >= 0.5 && (!best || score > best.score)) best = { lib: e, score }
+    }
+  }
+  if (best) return { lib: best.lib, byName: true }
+  if (!opts.fallback || !ex.muscle || ex.muscle === 'Other') return null
+  const pool = list.filter((e) => e.muscle === ex.muscle)
+  const pick =
+    pool.find((e) => POPULAR.has(e.id) && (!eq || e.equipment === eq)) ??
+    pool.find((e) => !eq || e.equipment === eq) ??
+    pool.find((e) => POPULAR.has(e.id)) ??
+    pool[0]
+  return pick ? { lib: pick, byName: false } : null
+}
+/** words that make a different exercise, not just a different name */
+const VARIANT = new Set(['reverse', 'decline', 'incline', 'isometric', 'weighted', 'close', 'wide', 'behind', 'jump', 'side', 'rear', 'pronation', 'supination'])
+const EQUIP_WORDS = ['Barbell', 'Dumbbell', 'Machine', 'Cable', 'Smith', 'Bodyweight', 'Kettlebell', 'Band']

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import raw from '../data/library.json'
 import { EQUIPMENT, Exercise, MUSCLES } from './types'
-import { NAME_TO_LIB, exerciseFromLibrary, fromRaw, libIdForExercise, libIdOf, libImageUrl, libPath, linkedLibIds, searchLibrary } from './library'
+import { NAME_TO_LIB, bestLibraryMatch, exerciseFromLibrary, fromRaw, libIdForExercise, libIdOf, libImageUrl, libPath, linkedLibIds, searchLibrary } from './library'
 import { buildStarterPlan } from './seed'
 import { PROGRAMS, uniqueExercises } from './programs'
 import { X } from './programCatalog'
@@ -114,5 +114,39 @@ describe('searchLibrary', () => {
     expect(r.length).toBeGreaterThan(0)
     expect(r.every((e) => e.muscles.includes('Chest') && e.equipment === 'Machine' && e.level === 'Beginner')).toBe(true)
     expect(searchLibrary(LIB, { muscle: 'All', equipment: '', level: 'All' }).length).toBe(LIB.length)
+  })
+})
+
+describe('bestLibraryMatch', () => {
+  const m = (name: string, muscle?: string, equipment?: string, fallback = false) => bestLibraryMatch(LIB, { name, muscle, equipment }, { fallback })
+  it('finds the library entry for common names', () => {
+    expect(m('Incline Dumbbell Press', 'Chest', 'Dumbbell')?.lib.id).toBe('Incline_Dumbbell_Press')
+    expect(m('Leg Press', 'Quads', 'Machine')?.lib.id).toBe('Leg_Press')
+    expect(m('Seated Cable Row', 'Back', 'Cable')?.lib.id).toBe('Seated_Cable_Rows')
+    expect(m('Lat Pulldown', 'Back', 'Cable')?.lib.name).toMatch(/pulldown/i)
+    expect(m('Hammer Curls', 'Biceps')?.lib.id).toBe('Hammer_Curls')
+    expect(m('pullups', 'Back')?.lib.name).toMatch(/pull/i)
+    expect(m('Romanian Deadlift (Dumbbell)', 'Hamstrings')?.lib.equipment).toBe('Dumbbell')
+  })
+  it('names the match as a name match', () => {
+    expect(m('Leg Press', 'Quads')?.byName).toBe(true)
+  })
+  it('gives no match for nonsense unless asked to fall back on the muscle', () => {
+    expect(m('Zorbleflex', 'Chest')).toBeNull()
+    const f = m('Zorbleflex', 'Chest', 'Machine', true)
+    expect(f?.byName).toBe(false)
+    expect(f?.lib.muscle).toBe('Chest')
+    expect(f?.lib.equipment).toBe('Machine')
+    expect(m('Zorbleflex', 'Other', '', true)).toBeNull()
+  })
+})
+
+describe('bestLibraryMatch with gym words', () => {
+  const m = (name: string) => bestLibraryMatch(LIB, { name })?.lib
+  it('keeps leg/arm words and understands slang', () => {
+    expect(m('Leg Curl')?.name).toMatch(/leg curl/i)
+    expect(m('Pec Deck')?.id).toBe('Butterfly')
+    expect(m('Crunches')?.name).toMatch(/crunch/i)
+    expect(m('Warm Up')).toBeUndefined()
   })
 })
