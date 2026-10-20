@@ -226,3 +226,101 @@ export async function shareOrDownload(blob: Blob, filename: string, text: string
   setTimeout(() => URL.revokeObjectURL(url), 10_000)
   return 'downloaded'
 }
+
+/* ---------- progress photo comparison ---------- */
+
+export interface ComparePhoto {
+  /** any URL the browser can fetch (object URL in demo mode, signed URL in the cloud) */
+  url: string
+  date: string // already formatted
+  weight: string | null // e.g. "81.2 kg"
+}
+
+async function loadBitmap(url: string): Promise<ImageBitmap> {
+  // fetch → blob keeps the canvas untainted for cross-origin (storage) URLs
+  const blob = await (await fetch(url)).blob()
+  return createImageBitmap(blob)
+}
+
+/** Draw `img` into the box like CSS object-fit: cover. */
+function drawCover(ctx: CanvasRenderingContext2D, img: ImageBitmap, x: number, y: number, w: number, h: number) {
+  const s = Math.max(w / img.width, h / img.height)
+  const sw = w / s
+  const sh = h / s
+  ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h)
+}
+
+/** Two progress photos side by side with date and weight, as a PNG. */
+export async function renderCompareCard(a: ComparePhoto, b: ComparePhoto, caption: string | null): Promise<Blob> {
+  const C = {
+    bg: token('--bg', '#141518'),
+    card: token('--card', '#1f2126'),
+    line: token('--line', '#34383f'),
+    text: token('--text', '#eceae4'),
+    muted: token('--muted', '#9b9a94'),
+    accent: token('--accent', '#f0b92a')
+  }
+  const display = `'Barlow Condensed', 'Arial Narrow', sans-serif`
+  const body = `'Barlow', 'Segoe UI', Roboto, Arial, sans-serif`
+  try {
+    await Promise.all([document.fonts.load(`700 80px 'Barlow Condensed'`), document.fonts.load(`500 36px 'Barlow'`)])
+  } catch {
+    /* system fonts */
+  }
+  const [ia, ib] = await Promise.all([loadBitmap(a.url), loadBitmap(b.url)])
+
+  const L = 60
+  const gap = 24
+  const pw = (W - L * 2 - gap) / 2
+  const ph = Math.round((pw * 4) / 3)
+  const top = 200
+  const outH = top + ph + 210 + 140
+  const cv = document.createElement('canvas')
+  cv.width = W
+  cv.height = outH
+  const ctx = cv.getContext('2d')!
+  ctx.fillStyle = C.bg
+  ctx.fillRect(0, 0, W, outH)
+
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = C.text
+  ctx.font = `700 92px ${display}`
+  ctx.fillText('Progress', L, 130)
+  if (caption) {
+    ctx.fillStyle = C.accent
+    ctx.font = `600 40px ${display}`
+    const cw = ctx.measureText(caption).width
+    ctx.fillText(caption, W - L - cw, 130)
+  }
+
+  ;[
+    [a, ia],
+    [b, ib]
+  ].forEach(([p, img], i) => {
+    const photo = p as ComparePhoto
+    const x = L + i * (pw + gap)
+    ctx.save()
+    ctx.beginPath()
+    ctx.roundRect(x, top, pw, ph, 24)
+    ctx.clip()
+    drawCover(ctx, img as ImageBitmap, x, top, pw, ph)
+    ctx.restore()
+    ctx.strokeStyle = C.line
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(x, top, pw, ph, 24)
+    ctx.stroke()
+    ctx.fillStyle = C.text
+    ctx.font = `600 44px ${display}`
+    ctx.fillText(fit(ctx, photo.date, pw), x, top + ph + 70)
+    if (photo.weight) {
+      ctx.fillStyle = C.muted
+      ctx.font = `500 36px ${body}`
+      ctx.fillText(photo.weight, x, top + ph + 122)
+    }
+  })
+  ia.close?.()
+  ib.close?.()
+  drawFooter(ctx, outH, L, C)
+  return new Promise((res, rej) => cv.toBlob((bl) => (bl ? res(bl) : rej(new Error('Could not draw the image'))), 'image/png'))
+}
