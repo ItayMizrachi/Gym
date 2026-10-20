@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useRef, useState } from 'react'
-import { X, Camera, Trash2, ImageIcon } from 'lucide-react'
+import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
+import { X, Camera, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
 
@@ -20,11 +20,46 @@ export function useImageUrl(path: string | null | undefined): string | null {
   return url
 }
 
-export function Thumb({ path, size, className = '' }: { path: string | null | undefined; size?: number; className?: string }) {
+/** "Bench Press (Barbell)" -> "BP", "Squat" -> "SQ" */
+export function initials(name: string | null | undefined): string {
+  const words = (name ?? '')
+    .replace(/\(.*?\)/g, ' ')
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+  if (!words.length) return ''
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
+  return (words[0][0] + words[1][0]).toUpperCase()
+}
+
+/**
+ * Photo thumbnail. Without a photo it shows a plate-shaped tile stamped with the
+ * exercise initials (pass `name`), or the muscle group's initials (`muscle`).
+ */
+export function Thumb({
+  path,
+  size,
+  className = '',
+  name,
+  muscle
+}: {
+  path: string | null | undefined
+  size?: number
+  className?: string
+  name?: string | null
+  muscle?: string | null
+}) {
   const url = useImageUrl(path)
+  const style: CSSProperties | undefined = size ? { width: size, height: size, fontSize: size } : undefined
+  if (url)
+    return (
+      <div className={`thumb ${className}`} style={style}>
+        <img src={url} alt="" loading="lazy" />
+      </div>
+    )
+  const ini = initials(name) || initials(muscle)
   return (
-    <div className={`thumb ${className}`} style={size ? { width: size, height: size } : undefined}>
-      {url ? <img src={url} alt="" loading="lazy" /> : <ImageIcon size={20} />}
+    <div className={`thumb tile ${ini ? '' : 'plain'} ${className}`} style={style ?? { fontSize: 52 }} aria-hidden>
+      {ini && <span className="ini">{ini}</span>}
     </div>
   )
 }
@@ -100,19 +135,69 @@ export function ImageField({
 
 /* ---------- modal ---------- */
 
+/** Bottom sheet with a drag handle: drag it down (or tap the backdrop) to close. */
 export function Sheet({ title, onClose, children }: { title?: string; onClose: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ y0: number; dy: number; t0: number } | null>(null)
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
+    window.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
     }
   }, [])
+
+  function start(e: React.PointerEvent) {
+    const el = ref.current
+    if (!el) return
+    ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    drag.current = { y0: e.clientY, dy: 0, t0: Date.now() }
+    el.classList.add('dragging')
+    el.classList.remove('settling')
+  }
+  function move(e: React.PointerEvent) {
+    const d = drag.current
+    const el = ref.current
+    if (!d || !el) return
+    d.dy = Math.max(0, e.clientY - d.y0)
+    el.style.transform = `translateY(${d.dy}px)`
+  }
+  function end() {
+    const d = drag.current
+    const el = ref.current
+    drag.current = null
+    if (!d || !el) return
+    el.classList.remove('dragging')
+    const fast = d.dy / Math.max(1, Date.now() - d.t0) > 0.6
+    if (d.dy > el.offsetHeight * 0.3 || (fast && d.dy > 40)) {
+      el.classList.add('settling')
+      el.style.transform = 'translateY(100%)'
+      setTimeout(() => closeRef.current(), 200)
+    } else {
+      el.classList.add('settling')
+      el.style.transform = ''
+    }
+  }
+
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="row" style={{ marginBottom: 12 }}>
-          <h2 className="grow">{title}</h2>
+      <div
+        ref={ref}
+        className="sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sheet-handle" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />
+        <div className="sheet-head">
+          <h2>{title}</h2>
           <button className="btn icon sm ghost" onClick={onClose} aria-label="Close">
             <X size={20} />
           </button>
@@ -140,8 +225,8 @@ export function Confirm({
 }) {
   return (
     <Sheet title={title} onClose={onClose}>
-      {text && <p className="muted" style={{ marginTop: 0 }}>{text}</p>}
-      <div className="row">
+      {text && <p className="confirm-text">{text}</p>}
+      <div className="row" style={{ gap: 'var(--s2)' }}>
         <button className="btn grow" onClick={onClose}>
           Cancel
         </button>
@@ -210,16 +295,91 @@ export function NumInput({
   )
 }
 
-export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
-  return <button className={`toggle ${on ? 'on' : ''}`} onClick={() => onChange(!on)} role="switch" aria-checked={on} />
+export function Toggle({
+  on,
+  onChange,
+  label,
+  blue
+}: {
+  on: boolean
+  onChange: (v: boolean) => void
+  /** accessible name; also rendered beside the switch when given */
+  label?: string
+  /** use the blue plate colour (drop sets / supersets) instead of brand yellow */
+  blue?: boolean
+}) {
+  const sw = (
+    <button
+      type="button"
+      className={`toggle ${blue ? 'blue' : ''} ${on ? 'on' : ''}`}
+      onClick={() => onChange(!on)}
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+    />
+  )
+  if (!label) return sw
+  return (
+    <div className="toggle-row">
+      <span className="grow" onClick={() => onChange(!on)}>
+        {label}
+      </span>
+      {sw}
+    </div>
+  )
 }
 
-export function Empty({ title, text, children }: { title: string; text?: string; children?: ReactNode }) {
+export function Empty({
+  title,
+  text,
+  icon,
+  children
+}: {
+  title: string
+  text?: string
+  icon?: ReactNode
+  children?: ReactNode
+}) {
   return (
-    <div className="card center stack" style={{ padding: 28 }}>
+    <div className="empty">
+      {icon && <div className="empty-icon">{icon}</div>}
       <h2>{title}</h2>
-      {text && <div className="muted">{text}</div>}
-      {children}
+      {text && <div className="empty-text">{text}</div>}
+      {children && <div className="empty-actions">{children}</div>}
+    </div>
+  )
+}
+
+/** Placeholder block while something loads. */
+export function Skeleton({
+  w = '100%',
+  h = 16,
+  r,
+  className = '',
+  style
+}: {
+  w?: number | string
+  h?: number | string
+  r?: number | string
+  className?: string
+  style?: CSSProperties
+}) {
+  return <span className={`skeleton ${className}`} style={{ width: w, height: h, borderRadius: r, ...style }} aria-hidden />
+}
+
+/** A few list-row skeletons. */
+export function SkeletonList({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="list-group" aria-busy="true">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="list-row">
+          <Skeleton w={44} h={44} r={12} />
+          <div className="grow stack" style={{ gap: 6 }}>
+            <Skeleton w="60%" h={14} />
+            <Skeleton w="35%" h={12} />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
