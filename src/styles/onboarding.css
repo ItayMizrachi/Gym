@@ -1,0 +1,32 @@
+/* ================= onboarding: welcome tour + help page ================= */
+.wl {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-t) + 12px) 20px calc(var(--safe-b) + 20px);
+  max-width: 720px;
+  margin: 0 auto;
+  touch-action: pan-y;
+}
+.wl-top { display: flex; align-items: center; justify-content: space-between; min-height: var(--tap); }
+.wl-brand { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--accent); }
+.wl-card { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; animation: wl-in 0.3s var(--ease); }
+.wl-card h1 { font-size: 34px; line-height: 1.05; }
+.wl-card p { margin: 0; color: var(--text-2); font-size: var(--fs-md); line-height: 1.45; }
+.wl-art { width: 100%; max-width: 280px; height: auto; margin-bottom: 16px; }
+.wl-dots { display: flex; justify-content: center; gap: 8px; margin: 12px 0 18px; }
+.wl-dots button { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); }
+.wl-dots button.on { width: 22px; border-radius: 4px; background: var(--accent); }
+.wl-actions { display: flex; flex-direction: column; gap: 10px; }
+@keyframes wl-in { from { opacity: 0; transform: translateX(16px); } }
+
+/* help page */
+.help-sec h2 { font-size: 20px; margin-bottom: 8px; }
+.help-sec p { margin: 0; color: var(--text-2); font-size: 15px; }
+.help-legend { display: grid; grid-template-columns: 44px 1fr; gap: 10px 8px; align-items: center; }
+.help-legend .kind { pointer-events: none; }
+.help-ex { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.help-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-2); margin-right: 12px; }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, Info, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind } from '../lib/types'
 import { addExerciseToSession, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
@@ -517,6 +517,9 @@ export default function SessionPage() {
               </span>
             </div>
           </div>
+          <button className="btn icon sm ghost" onClick={() => nav('/help')} aria-label="How it works">
+            <HelpCircle size={20} />
+          </button>
           <button
             className="btn primary"
             onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
