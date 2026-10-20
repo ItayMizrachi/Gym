@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Link2, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Info, Link2, Plus, Trash2 } from 'lucide-react'
+import '../styles/programs.css'
 import { MoveToFolderSheet } from '../components/FolderSheet'
 import { folderOf, NO_FOLDER } from '../lib/folders'
 import { useStore } from '../lib/store'
@@ -9,7 +10,7 @@ import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, Empty, NumInput, PageHeader, Thumb, Toggle } from '../components/ui'
 import { fmtKg, fmtRest, parseRest } from '../lib/format'
 import { uid } from '../lib/uid'
-import { WorkoutExercise } from '../lib/types'
+import { Exercise, WorkoutExercise, trackingOf } from '../lib/types'
 
 const GROUPS = ['', 'A', 'B', 'C', 'D']
 
@@ -46,6 +47,7 @@ export default function WorkoutEditor() {
   const [confirmDel, setConfirmDel] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
   const [movingFolder, setMovingFolder] = useState(false)
+  const [help, setHelp] = useState(false)
 
   const w = db.workouts.find((x) => x.id === id)
   if (!w)
@@ -71,6 +73,40 @@ export default function WorkoutEditor() {
 
   const totalSets = wes.reduce((a, x) => a + x.sets, 0)
 
+  /** add picked exercises at the end, with sensible starting values */
+  function addExercises(list: Exercise[]) {
+    let pos = wes.length ? Math.max(...wes.map((x) => x.position)) + 1 : 0
+    let last = ''
+    for (const ex of list) {
+      last = uid()
+      const timed = trackingOf(ex) === 'time'
+      save('workout_exercises', {
+        id: last,
+        user_id: user?.id ?? 'local',
+        workout_id: w!.id,
+        exercise_id: ex.id,
+        position: pos++,
+        sets: 3,
+        rep_min: timed ? 30 : 8,
+        rep_max: timed ? 60 : 12,
+        weight: 0,
+        rest_sec: ex.rest_sec,
+        superset: '',
+        drop_last: false,
+        note: ''
+      })
+    }
+    // one exercise: open it so the sets and reps can be set straight away
+    setOpen(list.length === 1 ? last : null)
+    setPicking(false)
+  }
+  // onPickMany (several at once) is used when the picker offers it; onPick is the fallback
+  const pickerProps = {
+    onClose: () => setPicking(false),
+    onPick: (ex: Exercise) => addExercises([ex]),
+    onPickMany: (list: Exercise[]) => addExercises(list)
+  }
+
   // consecutive exercises sharing a superset label are drawn as one group on a blue rail
   const blocks: { label: string; items: { we: WorkoutExercise; i: number }[] }[] = []
   wes.forEach((we, i) => {
@@ -81,7 +117,8 @@ export default function WorkoutEditor() {
 
   const row = (we: WorkoutExercise, i: number) => {
     const ex = db.exercises.find((e) => e.id === we.exercise_id)
-    const reps = we.rep_min === we.rep_max ? `${we.rep_min}` : `${we.rep_min}–${we.rep_max}`
+    const timed = trackingOf(ex) === 'time'
+    const reps = (we.rep_min === we.rep_max ? `${we.rep_min}` : `${we.rep_min}–${we.rep_max}`) + (timed ? ' s' : '')
     return (
       <div key={we.id} className={`we-card ${we.superset ? 'ss' : ''} ${open === we.id ? 'open' : ''}`}>
         <div className="we-head">
@@ -116,17 +153,34 @@ export default function WorkoutEditor() {
         </div>
         {open === we.id && (
           <div className="we-body">
+            <button className="btn ghost sm we-help" onClick={() => setHelp(!help)} aria-expanded={help}>
+              <Info size={16} aria-hidden /> What do these mean?
+            </button>
+            {help && (
+              <dl className="info-pop we-gloss">
+                <dt>Sets</dt>
+                <dd>How many times you do the exercise, with rest in between.</dd>
+                <dt>{timed ? 'Secs from / to' : 'Reps from / to'}</dt>
+                <dd>{timed ? 'Seconds to hold or keep going, for example 30 to 60.' : 'Aim for this many reps. When you reach the top on every set, GymLog suggests more weight.'}</dd>
+                <dt>Rest</dt>
+                <dd>The timer that starts after you log a set, in minutes:seconds.</dd>
+                <dt>Drop set</dt>
+                <dd>One extra set right after the last one, with lighter weight and no rest.</dd>
+                <dt>Superset</dt>
+                <dd>Exercises with the same letter are done in turns: one set of each, then rest.</dd>
+              </dl>
+            )}
             <div className="we-grid">
               <label className="field">
                 Sets
                 <NumInput decimal={false} value={we.sets} onChange={(n) => patch(we, { sets: Math.max(0, Math.round(n ?? 0)) })} />
               </label>
               <label className="field">
-                Min reps
+                {timed ? 'Secs from' : 'Reps from'}
                 <NumInput decimal={false} value={we.rep_min} onChange={(n) => patch(we, { rep_min: Math.round(n ?? 0) })} />
               </label>
               <label className="field">
-                Max reps
+                {timed ? 'Secs to' : 'Reps to'}
                 <NumInput decimal={false} value={we.rep_max} onChange={(n) => patch(we, { rep_max: Math.round(n ?? 0) })} />
               </label>
               <label className="field">
@@ -221,7 +275,7 @@ export default function WorkoutEditor() {
       {wes.length > 0 && (
         <div className="section-label" style={{ marginBottom: 0 }}>
           <span>Exercises</span>
-          <span className="count">Tap to edit · arrows to reorder</span>
+          <span className="count">Tap one to change or remove it · arrows move it</span>
         </div>
       )}
 
@@ -248,8 +302,8 @@ export default function WorkoutEditor() {
         />
       )}
 
-      <button className="btn primary" onClick={() => setPicking(true)}>
-        <Plus size={18} /> Add exercise
+      <button className="btn primary block" onClick={() => setPicking(true)}>
+        <Plus size={18} /> Add exercises
       </button>
 
       <div className="row" style={{ gap: 'var(--s2)', marginTop: 'var(--s3)' }}>
@@ -267,31 +321,7 @@ export default function WorkoutEditor() {
         </button>
       </div>
 
-      {picking && (
-        <ExercisePicker
-          onClose={() => setPicking(false)}
-          onPick={(ex) => {
-            const newId = uid()
-            setOpen(newId)
-            save('workout_exercises', {
-              id: newId,
-              user_id: user?.id ?? 'local',
-              workout_id: w.id,
-              exercise_id: ex.id,
-              position: wes.length ? Math.max(...wes.map((x) => x.position)) + 1 : 0,
-              sets: 3,
-              rep_min: 8,
-              rep_max: 12,
-              weight: 0,
-              rest_sec: ex.rest_sec,
-              superset: '',
-              drop_last: false,
-              note: ''
-            })
-            setPicking(false)
-          }}
-        />
-      )}
+      {picking && <ExercisePicker {...(pickerProps as ComponentProps<typeof ExercisePicker>)} />}
       {movingFolder && <MoveToFolderSheet workoutId={w.id} onClose={() => setMovingFolder(false)} />}
       {confirmDel && (
         <Confirm

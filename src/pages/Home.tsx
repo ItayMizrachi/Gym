@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal } from 'lucide-react'
+import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -56,11 +56,11 @@ function splitName(name: string): [string, string] {
 
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
-  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
+  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last week</div>
   return (
     <div className={`delta ${d > 0 ? 'up' : 'down'}`}>
       {d > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-      {fmt(Math.abs(d))} vs last wk
+      {fmt(Math.abs(d))} vs last week
     </div>
   )
 }
@@ -145,12 +145,19 @@ export default function Home() {
           <div className="sub">{now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         {streak.current > 0 && (
-          <div className={`streak-pill${streak.thisWeekDone ? '' : ' pending'}`} title={`Best streak: ${streak.best} weeks`}>
-            <Flame size={16} />
+          <div
+            className={`streak-pill${streak.thisWeekDone ? '' : ' pending'}`}
+            title={`Best streak: ${streak.best} weeks`}
+            aria-label={`${streak.current}-week training streak`}
+          >
+            <Flame size={16} aria-hidden />
             <span>{streak.current}</span>
-            <span className="u">wk</span>
+            <span className="u">wk streak</span>
           </div>
         )}
+        <button className="btn icon ghost ph-help" onClick={() => nav('/help')} aria-label="How it works">
+          <HelpCircle size={22} />
+        </button>
       </div>
 
       {repoMode === 'local' && (
@@ -184,11 +191,11 @@ export default function Home() {
           <div className="welcome-mark">
             <Dumbbell size={26} />
           </div>
-          <h2>Welcome to GymLog</h2>
-          <div className="muted">Log every set, see what you lifted last time, and get a nudge when a record is close.</div>
+          <h2>Pick a program to begin</h2>
+          <div className="muted">Choose a ready-made program, or build your own workouts. Then start one and log each set as you go.</div>
           <ol className="welcome-steps">
             <li>
-              <b>Pick a plan.</b> Load the 4-day upper/lower starter plan or build your own.
+              <b>Pick a program.</b> Ready-made plans for 3 to 6 days a week, at the gym or at home.
             </li>
             <li>
               <b>Train.</b> Weights fill in from last time; tick each set to start the rest timer.
@@ -212,7 +219,7 @@ export default function Home() {
         next && (
           <div className="card hero">
             <div className="hero-label">
-              {next.reason === 'first' ? 'Start here' : 'Up next'}
+              Start your next workout
               {next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>}
             </div>
             <div className="hero-name">
@@ -228,7 +235,7 @@ export default function Home() {
               </span>
               {hero.usual != null && (
                 <span>
-                  ~<b>{fmtMinutes(hero.usual)}</b>
+                  about <b>{fmtMinutes(hero.usual)}</b>
                 </span>
               )}
             </div>
@@ -422,14 +429,34 @@ export default function Home() {
           <Zap size={18} /> Empty workout
         </button>
       </div>
-      {workouts.length > 0 && (
-        <button className="btn ghost browse-link" onClick={() => nav('/programs')}>
-          <span className="row" style={{ gap: 8 }}>
-            <LayoutGrid size={18} /> Browse programs
+      <div className="list-group home-links">
+        {workouts.length > 0 && (
+          <button className="list-row" onClick={() => nav('/programs')}>
+            <LayoutGrid size={20} aria-hidden />
+            <span className="grow">
+              <span className="home-link-t">Browse programs</span>
+              <span className="tiny muted">Add a ready-made plan to your workouts</span>
+            </span>
+            <ChevronRight size={18} aria-hidden />
+          </button>
+        )}
+        <button className="list-row" onClick={() => nav('/exercises')}>
+          <BookOpen size={20} aria-hidden />
+          <span className="grow">
+            <span className="home-link-t">Exercises</span>
+            <span className="tiny muted">Your exercise list, photos, setup notes and records</span>
           </span>
-          <ChevronRight size={18} />
+          <ChevronRight size={18} aria-hidden />
         </button>
-      )}
+        <button className="list-row" onClick={() => nav('/help')}>
+          <HelpCircle size={20} aria-hidden />
+          <span className="grow">
+            <span className="home-link-t">How it works</span>
+            <span className="tiny muted">Short answers about every part of GymLog</span>
+          </span>
+          <ChevronRight size={18} aria-hidden />
+        </button>
+      </div>
       {finished.length > 0 && (
         <button className="btn ghost sm" onClick={() => nav('/history')}>
           <Trophy size={16} /> See history and records <ChevronRight size={16} />

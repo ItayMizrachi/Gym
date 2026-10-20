@@ -117,3 +117,11 @@
 
 /* settings groups */
 .set-group-sub { margin-top: -4px; }
+.home-links .list-row { text-align: left; width: 100%; }
+.home-links .list-row > svg { color: var(--muted); flex: none; }
+.home-links .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-link-t { font-weight: 600; }
+.we-help { align-self: flex-start; margin-left: -8px; color: var(--muted); }
+.we-gloss { margin: 0 0 4px; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
+.we-gloss dt { font-weight: 650; color: var(--text); }
+.we-gloss dd { margin: 0; }
