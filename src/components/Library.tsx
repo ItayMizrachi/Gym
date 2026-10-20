@@ -3,18 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, ChevronRight, Dumbbell, Play, Plus } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Exercise } from '../lib/types'
-import { LibraryExercise, libMeta } from '../lib/library'
+import { LibraryExercise, libMeta, libPath } from '../lib/library'
 import { activeSession, addExerciseToSession, appendToWorkout } from '../lib/libraryActions'
 import { Sheet } from './ui'
-import { LibThumb } from './ExerciseImage'
+import { ThumbButton } from './ExerciseHowTo'
 import '../styles/library.css'
 
 /** Library row: tap opens the detail page, the pill on the right adds it to "My exercises". */
 export function LibRow({ e, added, onOpen, onAdd }: { e: LibraryExercise; added: boolean; onOpen: () => void; onAdd: () => void }) {
   return (
     <div className="lib-row">
+      <ThumbButton exercise={{ name: e.name, muscle: e.muscle, equipment: e.equipment, image_path: libPath(e.id) }} size={48} />
       <button className="list-row" onClick={onOpen}>
-        <LibThumb id={e.id} name={e.name} muscle={e.muscle} size={48} />
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="title ellipsis">{e.name}</div>
           <div className="meta ellipsis">{libMeta(e)}</div>

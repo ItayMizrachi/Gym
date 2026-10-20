@@ -27,6 +27,7 @@ import { fmtRest } from '../lib/format'
 import { PageHeader } from '../components/ui'
 import '../styles/programs-nav.css'
 import { ExerciseThumb } from '../components/ExerciseImage'
+import { ThumbButton } from '../components/ExerciseHowTo'
 
 type Kind = Program['kind']
 
@@ -126,7 +127,7 @@ function Detail({ p }: { p: Program }) {
             <ul className="pg-ex">
               {w.exercises.map((e, j) => (
                 <li key={j} className={e.superset ? 'ss' : ''}>
-                  <Avatar name={e.name} />
+                  <ThumbButton exercise={{ name: e.name, muscle: e.muscle, equipment: e.equipment, image_path: null }} />
                   <div className="grow" style={{ minWidth: 0 }}>
                     <div className="pg-ex-name">{e.name}</div>
                     <div className="pg-ex-meta">

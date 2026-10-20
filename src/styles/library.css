@@ -315,3 +315,68 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* tappable exercise thumb: opens "How to do it" */
+.thumb-btn {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 50%;
+  display: inline-flex;
+  position: relative;
+  cursor: pointer;
+}
+.thumb-btn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+}
+.thumb-btn:active .thumb {
+  transform: scale(0.94);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .thumb-btn .thumb {
+    transition: transform var(--t-fast) var(--ease);
+  }
+}
+.lib-howto-h {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  margin: var(--s1) 0 0;
+}
+
+/* rows with a tappable thumb: the thumb is its own button, the rest of the row is another */
+.lib-row {
+  padding-left: 14px;
+}
+.lib-row > .list-row {
+  padding-left: 12px;
+}
+.lib-row.xp-on {
+  background: var(--card2);
+}
+
+/* "Use this picture?" in the new-exercise form */
+.lib-match {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3);
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-weight: 400;
+}
+.lib-match.on {
+  border-color: var(--line-strong);
+}
+.lib-match .title {
+  font-weight: 600;
+  color: var(--text);
+}
+.lib-match .meta {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}

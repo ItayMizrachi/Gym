@@ -11,7 +11,8 @@ import { fmtDate, fmtKg, fmtRest, parseRest } from '../lib/format'
 import { removeExercise } from '../lib/actions'
 import { LibPhoto } from '../components/ExerciseImage'
 import { AddToWorkoutSheet } from '../components/Library'
-import { libIdForExercise, linkedLibIds, loadInstructions, useLibrary } from '../lib/library'
+import { libIdForExercise, linkedLibIds, useLibrary } from '../lib/library'
+import { HowToCard } from '../components/ExerciseHowTo'
 import { ensureLibraryExercise } from '../lib/libraryActions'
 import '../styles/library.css'
 
@@ -191,7 +192,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
         </div>
       )}
 
-      {libId && <HowTo id={libId} />}
+      {libId && <HowToCard id={libId} />}
 
       <div className="card stack">
         <h2>Setup &amp; cues</h2>
@@ -321,51 +322,6 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
   )
 }
 
-/** Numbered steps from the library. Loaded on demand (its own chunk). */
-function useSteps(id: string) {
-  const [steps, setSteps] = useState<string[] | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [attempt, setAttempt] = useState(0)
-  useEffect(() => {
-    let alive = true
-    setFailed(false)
-    loadInstructions(id).then(
-      (s) => alive && setSteps(s),
-      () => alive && setFailed(true)
-    )
-    return () => {
-      alive = false
-    }
-  }, [id, attempt])
-  return { steps, failed, retry: () => setAttempt((a) => a + 1) }
-}
-
-function HowTo({ id }: { id: string }) {
-  const { steps, failed, retry } = useSteps(id)
-  if (steps && !steps.length) return null
-  return (
-    <div className="card stack">
-      <h2>How to do it</h2>
-      {failed ? (
-        <div className="row small muted" style={{ justifyContent: 'space-between' }}>
-          Instructions could not load.
-          <button className="btn sm" onClick={retry}>
-            <RotateCw size={14} /> Try again
-          </button>
-        </div>
-      ) : !steps ? (
-        <div className="small muted">Loading…</div>
-      ) : (
-        <ol className="lib-steps">
-          {steps.map((s, i) => (
-            <li key={i}>{s}</li>
-          ))}
-        </ol>
-      )}
-    </div>
-  )
-}
-
 /** A library exercise that may not be one of "My exercises" yet: photo, what it works, how to do it, add buttons. */
 function LibraryDetail({ id }: { id: string }) {
   const nav = useNavigate()
@@ -480,7 +436,7 @@ function LibraryDetail({ id }: { id: string }) {
         )}
       </div>
 
-      <HowTo id={lib.id} />
+      <HowToCard id={lib.id} />
 
       {picking && <AddToWorkoutSheet name={lib.name} getExercise={() => ensureLibraryExercise(lib)} onClose={() => setPicking(false)} />}
     </div>

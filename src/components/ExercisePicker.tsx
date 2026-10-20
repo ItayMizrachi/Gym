@@ -5,9 +5,10 @@ import { EQUIPMENT, Exercise, MUSCLES, Tracking } from '../lib/types'
 import { nowIso, uid } from '../lib/uid'
 import { exerciseMeta, facets, filterExercises, recentExerciseIds } from '../lib/exerciseFilters'
 import { TRACKING_LABEL } from '../lib/tracking'
-import { ImageField, Sheet } from './ui'
-import { ExerciseThumb, LibThumb } from './ExerciseImage'
-import { LibraryExercise, libMeta, linkedLibIds, searchLibrary, useLibrary } from '../lib/library'
+import { ImageField, Sheet, Toggle } from './ui'
+import { ThumbButton } from './ExerciseHowTo'
+import { LibraryExercise, bestLibraryMatch, libMeta, libPath, linkedLibIds, searchLibrary, useLibrary } from '../lib/library'
+import { declineLibraryPhoto } from '../lib/autoMatch'
 import { ensureLibraryExercise } from '../lib/libraryActions'
 import { LibSkeleton } from './Library'
 import '../styles/library.css'
@@ -39,12 +40,24 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
   const [tracking, setTracking] = useState<Tracking>('weight_reps')
   const [trackingTouched, setTrackingTouched] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
+  // every exercise should have a picture: offer the closest library photo for what is typed
+  const { list: lib } = useLibrary()
+  const match = useMemo(
+    () => (lib && name.trim().length >= 3 ? bestLibraryMatch(lib, { name, muscle, equipment }, { fallback: true }) : null),
+    [lib, name, muscle, equipment]
+  )
+  const [usePic, setUsePic] = useState(true)
   return (
     <form
       className="stack"
       onSubmit={(ev) => {
         ev.preventDefault()
-        if (name.trim()) onCreated(createExercise(name, muscle, { equipment, tracking, image_path: photo }))
+        if (!name.trim()) return
+        const libPic = !photo && usePic && match ? libPath(match.lib.id) : null
+        const e = createExercise(name, muscle, { equipment, tracking, image_path: photo ?? libPic })
+        // said no to the picture: do not add one later in the background either
+        if (!photo && !libPic) declineLibraryPhoto(e.id)
+        onCreated(e)
       }}
     >
       <label className="field">
@@ -102,8 +115,18 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
         </div>
       </div>
       <div className="field">
-        Photo <span className="muted" style={{ fontWeight: 400 }}>(optional)</span>
-        <ImageField path={photo} folder="exercises" onChange={setPhoto} label="Add a photo of the machine" />
+        Picture
+        {match && !photo && (
+          <div className={`lib-match ${usePic ? 'on' : ''}`}>
+            <ThumbButton exercise={{ name: match.lib.name, muscle: match.lib.muscle, equipment: match.lib.equipment, image_path: libPath(match.lib.id) }} size={56} />
+            <div className="grow" style={{ minWidth: 0 }}>
+              <div className="title">{match.byName ? 'Use this picture?' : 'Closest picture we have'}</div>
+              <div className="meta ellipsis">{match.lib.name}</div>
+            </div>
+            <Toggle on={usePic} onChange={setUsePic} ariaLabel={`Use the picture of ${match.lib.name}`} />
+          </div>
+        )}
+        <ImageField path={photo} folder="exercises" onChange={setPhoto} label={match ? 'Or use my own photo' : 'Add a photo of the machine'} />
       </div>
       <button className="btn primary" type="submit" disabled={!name.trim()}>
         <Plus size={18} /> Create exercise
@@ -227,14 +250,16 @@ export function ExercisePicker({
   const row = (e: Exercise) => {
     const on = picked.includes(e.id)
     return (
-      <button key={e.id} className={`list-row ${on ? 'xp-on' : ''}`} onClick={() => (multi ? toggle(e.id) : onPick(e))} aria-pressed={multi ? on : undefined}>
-        <ExerciseThumb exercise={e} size={48} />
+      <div key={e.id} className={`lib-row ${on ? 'xp-on' : ''}`}>
+        <ThumbButton exercise={e} size={48} />
+        <button className="list-row" onClick={() => (multi ? toggle(e.id) : onPick(e))} aria-pressed={multi ? on : undefined}>
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="title ellipsis">{e.name}</div>
           <div className="meta ellipsis">{exerciseMeta(e)}</div>
         </div>
         {check(e.id)}
-      </button>
+        </button>
+      </div>
     )
   }
 
@@ -242,19 +267,20 @@ export function ExercisePicker({
     const key = libKey(l.id)
     const on = picked.includes(key)
     return (
+      <div key={key} className={`lib-row ${on ? 'xp-on' : ''}`}>
+        <ThumbButton exercise={{ name: l.name, muscle: l.muscle, equipment: l.equipment, image_path: libPath(l.id) }} size={48} />
       <button
-        key={key}
-        className={`list-row ${on ? 'xp-on' : ''}`}
+        className="list-row"
         onClick={() => (multi ? toggle(key) : onPick(ensureLibraryExercise(l)))}
         aria-pressed={multi ? on : undefined}
       >
-        <LibThumb id={l.id} name={l.name} muscle={l.muscle} size={48} />
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="title ellipsis">{l.name}</div>
           <div className="meta ellipsis">{libMeta(l)}</div>
         </div>
         {check(key)}
       </button>
+      </div>
     )
   }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Exercise } from '../lib/types'
 import { libIdForExercise, libIdOf, libImageUrl } from '../lib/libraryLinks'
+import { scheduleAutoMatch } from '../lib/autoMatch'
 import { Thumb, useImageUrl } from './ui'
 import '../styles/workout-live.css'
 import '../styles/library.css'
@@ -28,6 +29,11 @@ export function useExerciseImageUrl(ex: ExLike, frame: 0 | 1 = 0): string | null
 /** Round exercise thumbnail used in lists, the picker, the workout screen and summaries. */
 export function ExerciseThumb({ exercise, name, size = 44 }: { exercise: ExLike; name?: string; size?: number }) {
   const libId = libIdForExercise(exercise)
+  // a saved exercise with no picture at all: find it one from the library in the background
+  const needsPhoto = !!exercise && 'id' in exercise && !exercise.image_path
+  useEffect(() => {
+    if (needsPhoto) scheduleAutoMatch()
+  }, [needsPhoto])
   if (libId) return <LibThumb id={libId} name={exercise?.name ?? name} muscle={exercise?.muscle} size={size} />
   return <Thumb path={exerciseImagePath(exercise)} name={exercise?.name ?? name} muscle={exercise?.muscle} size={size} className="round" />
 }

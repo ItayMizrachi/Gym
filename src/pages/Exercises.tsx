@@ -6,7 +6,7 @@ import { EQUIPMENT, Exercise, MUSCLES, trackingOf } from '../lib/types'
 import { NewExerciseForm } from '../components/ExercisePicker'
 import { filterExercises, recentExerciseIds } from '../lib/exerciseFilters'
 import { Sheet } from '../components/ui'
-import { ExerciseThumb } from '../components/ExerciseImage'
+import { ThumbButton } from '../components/ExerciseHowTo'
 import { FilterPill, LibRow, LibSkeleton } from '../components/Library'
 import { LIB_LEVELS, linkedLibIds, searchLibrary, useLibrary } from '../lib/library'
 import { ensureLibraryExercise } from '../lib/libraryActions'
@@ -84,8 +84,9 @@ export default function Exercises() {
       : ''
     const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
     return (
-      <button key={e.id} className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
-        <ExerciseThumb exercise={e} size={48} />
+      <div key={e.id} className="lib-row">
+        <ThumbButton exercise={e} size={48} />
+        <button className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="title ellipsis">{e.name}</div>
           <div className="meta ellipsis">{meta || 'Not logged yet'}</div>
@@ -102,7 +103,8 @@ export default function Exercises() {
           </div>
         )}
         <ChevronRight size={18} className="chev" />
-      </button>
+        </button>
+      </div>
     )
   }
 
