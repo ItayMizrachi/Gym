@@ -54,7 +54,8 @@ export async function renderGoogleButton(el: HTMLElement, onError: (msg: string)
     client_id: googleClientId,
     nonce: hashed,
     ux_mode: 'popup',
-    use_fedcm_for_button: true,
+    // FedCM is not available everywhere (Safari, some embedded browsers); the classic popup works on all of them
+    use_fedcm_for_button: false,
     callback: async (res: { credential?: string }) => {
       if (!res.credential) return onError('Google sign-in was cancelled.')
       const { error } = await supabase!.auth.signInWithIdToken({ provider: 'google', token: res.credential, nonce })

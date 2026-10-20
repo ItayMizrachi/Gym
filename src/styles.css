@@ -2004,4 +2004,6 @@ input[type='search']::-webkit-search-decoration {
   justify-content: center;
   width: 100%;
   min-height: 44px;
+  /* the page is color-scheme: dark; without this the browser paints Google's iframe with a white box */
+  color-scheme: light;
 }
