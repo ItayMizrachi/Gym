@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronDown, ChevronUp, Copy, Dumbbell, Link2, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Link2, Plus, Trash2 } from 'lucide-react'
+import { MoveToFolderSheet } from '../components/FolderSheet'
+import { folderOf, NO_FOLDER } from '../lib/folders'
 import { useStore } from '../lib/store'
 import { duplicateWorkout, removeWorkout } from '../lib/actions'
 import { ExercisePicker } from '../components/ExercisePicker'
@@ -43,6 +45,7 @@ export default function WorkoutEditor() {
   const [picking, setPicking] = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
+  const [movingFolder, setMovingFolder] = useState(false)
 
   const w = db.workouts.find((x) => x.id === id)
   if (!w)
@@ -204,6 +207,16 @@ export default function WorkoutEditor() {
           Name
           <input className="input" value={w.name} onChange={(e) => save('workouts', { ...w, name: e.target.value }, { debounce: 400 })} />
         </label>
+        <div className="field">
+          Folder
+          <button className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => setMovingFolder(true)} aria-label={`Folder: ${folderOf(w) || NO_FOLDER}. Move to folder`}>
+            <Folder size={16} aria-hidden />
+            <span className="grow ellipsis" style={{ textAlign: 'left' }}>
+              {folderOf(w) || `${NO_FOLDER} (no folder)`}
+            </span>
+            <span className="small muted">Move</span>
+          </button>
+        </div>
         <label className="field">
           Notes
           <textarea
@@ -290,6 +303,7 @@ export default function WorkoutEditor() {
           }}
         />
       )}
+      {movingFolder && <MoveToFolderSheet workoutId={w.id} onClose={() => setMovingFolder(false)} />}
       {confirmDel && (
         <Confirm
           title="Delete this workout?"

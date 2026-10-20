@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid } from 'lucide-react'
+import { Play, Pencil, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -28,6 +28,8 @@ import {
   weeklyStreak
 } from '../lib/stats'
 import { CalendarHeat } from '../components/CalendarHeat'
+import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
+import { groupByFolder } from '../lib/folders'
 import '../styles/insights.css'
 import '../styles/programs.css'
 
@@ -63,6 +65,17 @@ function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: num
   )
 }
 
+/** collapsed folder headers on the Train tab (this device only) */
+const FOLDS_KEY = 'gymlog:folds'
+function loadFolds(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(FOLDS_KEY) ?? '[]')
+    return Array.isArray(v) ? v : []
+  } catch {
+    return []
+  }
+}
+
 export default function Home() {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
@@ -70,9 +83,22 @@ export default function Home() {
   const user = useStore((s) => s.user)
   const repoMode = useStore((s) => s.repo?.mode)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
+  const [moving, setMoving] = useState<string | null>(null)
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [folded, setFolded] = useState<string[]>(loadFolds)
+  function toggleFold(label: string) {
+    const next = folded.includes(label) ? folded.filter((f) => f !== label) : [...folded, label]
+    setFolded(next)
+    try {
+      localStorage.setItem(FOLDS_KEY, JSON.stringify(next))
+    } catch {
+      /* ignore */
+    }
+  }
 
   const now = useMemo(() => new Date(), [db])
   const workouts = useMemo(() => [...db.workouts].sort((a, b) => a.position - b.position), [db.workouts])
+  const groups = useMemo(() => groupByFolder(db.workouts), [db.workouts])
   const active = db.sessions.find((s) => !s.finished_at)
   const finished = useMemo(() => finishedSessions(db), [db])
   const next = useMemo(() => suggestNextWorkout(db), [db])
@@ -312,41 +338,72 @@ export default function Home() {
       )}
 
       {workouts.length > 0 && (
-        <section className="stack" style={{ gap: 8 }}>
+        <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
           <div className="sec-head">
             <h2>Your workouts</h2>
-            <span className="small muted">{workouts.length}</span>
+            <span className="small muted">
+              {workouts.length} workout{workouts.length === 1 ? '' : 's'}
+            </span>
           </div>
-          <div className="tlist">
-            {workouts.map((w) => {
-              const info = templateInfo(db, w)
-              const isNext = next?.workout.id === w.id
-              return (
-                <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
-                  <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                    <div className="trow-name ellipsis">{w.name}</div>
-                    <div className="small muted ellipsis">
-                      {info.wes.length} exercises · {info.sets} sets
-                      {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
-                    </div>
-                  </button>
-                  <button className="btn icon sm ghost" onClick={() => nav(`/workout/${w.id}`)} aria-label="Edit workout">
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    className="btn icon sm"
-                    disabled={!!active || info.wes.length === 0}
-                    onClick={() => start(w)}
-                    aria-label={`Start ${w.name}`}
-                  >
-                    <Play size={16} />
-                  </button>
-                </div>
-              )
-            })}
-          </div>
+          {groups.map((g) => {
+            const shut = folded.includes(g.label)
+            return (
+              <div key={g.label} className="fold">
+                {groups.length > 1 && (
+                  <div className="row" style={{ gap: 4 }}>
+                    <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
+                      <ChevronDown size={18} className="fold-caret" aria-hidden />
+                      {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
+                      <h2 className="ellipsis">{g.label}</h2>
+                      <span className="small muted">{g.workouts.length}</span>
+                    </button>
+                    {g.folder && (
+                      <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
+                        <MoreHorizontal size={18} />
+                      </button>
+                    )}
+                  </div>
+                )}
+                {!shut && (
+                  <div className="tlist">
+                    {g.workouts.map((w) => {
+                      const info = templateInfo(db, w)
+                      const isNext = next?.workout.id === w.id
+                      return (
+                        <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
+                          <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                            <div className="trow-name ellipsis">{w.name}</div>
+                            <div className="small muted ellipsis">
+                              {info.wes.length} exercises · {info.sets} sets
+                              {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
+                            </div>
+                          </button>
+                          <button className="btn icon sm ghost" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
+                            <FolderInput size={16} />
+                          </button>
+                          <button className="btn icon sm ghost" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            className="btn icon sm"
+                            disabled={!!active || info.wes.length === 0}
+                            onClick={() => start(w)}
+                            aria-label={`Start ${w.name}`}
+                          >
+                            <Play size={16} />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </section>
       )}
+      {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
+      {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
 
       <div className="row ins-actions">
         {workouts.length > 0 && (
