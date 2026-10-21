@@ -67,6 +67,8 @@ Always keep something in progress. When the "Next" list runs low:
 - ~~Exercises list long names cut at 320px~~ — fixed: names wrap to two lines.
 - ~~Achievement toast listing everything after an import~~ — fixed: "You've earned N achievements".
 
+- Toasts (records, achievements) sit over the workout header and can cover Finish for a few seconds — consider showing them lower on the workout screen.
+
 ## Later / ideas
 - Rest-day suggestions and deload hints from training load.
 - Exercise animations (two-frame from the library images).

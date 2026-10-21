@@ -311,3 +311,4 @@
   .ls-stat .v, .ls-stat .sp-clock { font-size: 18px; }
   .ls-stat .u { font-size: 12px; }
 }
+.ls-stat .l.beat { color: var(--ok); font-weight: 600; }

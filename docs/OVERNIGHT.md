@@ -60,6 +60,9 @@
 - **New: muscle recovery on Train.** A body figure shows which muscles you worked in the last days (brighter =
   harder) and lists what is recovering and what is ready, so picking today's workout is easier. Explained in Help.
 
+- **A number to beat:** during a workout the volume label shows last time's total for the same workout
+  ("Last 9.8 t") and turns green with "Beat last time" once you pass it.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

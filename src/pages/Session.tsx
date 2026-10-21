@@ -1,3 +1,4 @@
+import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator } from 'lucide-react'
@@ -677,6 +678,11 @@ export default function SessionPage() {
   // the set-type legend stays until the user has logged a handful of sets in total
   const loggedEver = db.sessions.reduce((a, x) => a + x.data.exercises.reduce((b, e) => b + e.sets.filter((st) => st.done).length, 0), 0)
   const volume = Math.round(sessionVolume(session))
+  // the same workout last time: a number to beat
+  // (plain computation: hooks cannot run after the early return above, and this is cheap)
+  const prevSession = previousOfTemplate(db, session)
+  const lastVolume = prevSession ? Math.round(summarizeSession(prevSession).volume) : null
+  const beatLast = lastVolume != null && lastVolume > 0 && volume > lastVolume
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
 
@@ -725,7 +731,9 @@ export default function SessionPage() {
               {volume.toLocaleString('en-US')}
               <span className="u">kg</span>
             </div>
-            <div className="l">Volume</div>
+            <div className={`l${beatLast ? ' beat' : ''}`}>
+              {beatLast ? 'Beat last time' : lastVolume ? `Last ${fmtVolume(lastVolume)}` : 'Volume'}
+            </div>
           </div>
           <div className="ls-stat">
             <div className="v">
