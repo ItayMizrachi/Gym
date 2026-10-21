@@ -135,6 +135,13 @@ export default function Help() {
         <p>Starts when you log a set. Use −15 / +15 to adjust it. It beeps and vibrates when rest is over.</p>
       </Sec>
 
+      <Sec title="Supersets">
+        <p>
+          Exercises with the same superset letter (blue rail) are done back to back. Log a set and GymLog skips the rest and
+          scrolls to the paired exercise; the rest timer starts once every exercise in the round has its set logged.
+        </p>
+      </Sec>
+
       <Sec title="Swapping an exercise">
         <p>
           Machine taken? In a workout, tap ⋯ on the exercise → <b>Replace exercise</b>. Sets you already logged stay with the

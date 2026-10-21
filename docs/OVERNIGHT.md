@@ -19,6 +19,8 @@ build and a phone-size browser check before it went up.
 - **One-tap sets:** tapping ✓ on an empty reps box logs the grey suggested number.
 - **A number to beat:** the volume label shows last time's total and turns green with "Beat last time".
 - **Replace an exercise** (machine taken): ⋯ → Replace exercise. Logged sets stay; the rest move over.
+- **Supersets that flow:** log a set and GymLog skips the rest and scrolls to the paired exercise; the rest timer
+  starts at the end of the round.
 - **Smart warm-ups:** "+ Warm-up" can add ramped warm-up sets rounded to your plates.
 - **Tools:** 1-rep-max calculator, percent table and plate calculator (calculator icon in the header).
 - **Lock screen:** Settings → "Show workout on lock screen" shows the exercise, set and rest countdown on the lock

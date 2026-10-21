@@ -5,6 +5,7 @@ import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus,
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
+import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
@@ -354,6 +355,15 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       }
     }
     patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : { reps: s.reps }) }, true)
+    if (s.kind !== 'warmup' && se.superset) {
+      const next = nextInSuperset(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index)
+      if (next != null) {
+        // superset: go straight to the paired exercise; rest only at the end of the round
+        useStore.getState().clearRest()
+        setTimeout(() => document.getElementById(`ex-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)
+        return
+      }
+    }
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, ex?.name ?? se.name)
   }
 
@@ -361,7 +371,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
   const lastDesc = last ? last.sets.map((x) => setLabel(x, tracking)).join(' · ') : null
 
   return (
-    <div className={`ex ${se.superset ? 'ss' : ''}`}>
+    <div id={`ex-${index}`} className={`ex ${se.superset ? 'ss' : ''}`} style={{ scrollMarginTop: 140 }}>
       <div className="ex-head">
         <button onClick={() => setInfo(true)} aria-label="Exercise info">
           <ExerciseThumb exercise={ex} name={se.name} size={48} />
