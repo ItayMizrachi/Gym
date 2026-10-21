@@ -1,4 +1,4 @@
-import { Check, Disc, FolderInput, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
+import { Calculator, Check, Disc, FolderInput, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
 import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
 
@@ -106,6 +106,22 @@ export default function Help() {
         <p>
           Tap <b>kg <Disc size={12} /></b> above the sets, or hold a weight, to see which plates go on each side. Set your bar and plates in
           Settings.
+        </p>
+      </Sec>
+
+      <Sec title="Warm-up sets">
+        <p>
+          Tap <b>+ Warm-up</b> under an exercise, then <b>Add warm-up sets</b>. GymLog builds 2 to 4 lighter sets from your first work
+          weight, like the empty bar × 10, then 50%, 70% and 85%, rounded to plates you have. Machines and dumbbells get fewer sets, very light
+          weights none. Warm-ups never count for records.
+        </p>
+      </Sec>
+
+      <Sec title="Tools">
+        <p>
+          Tap <Calculator size={13} aria-label="Tools" /> at the top of a workout. <b>1-rep max</b> guesses the most you could lift once from
+          a set, and shows what you could lift for 1 to 12 reps at the same effort. <b>Percent</b> turns “80% of max” into a weight you can
+          load. <b>Plates</b> opens the plate calculator.
         </p>
       </Sec>
 

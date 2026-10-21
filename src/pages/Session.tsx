@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
-import { addExerciseToSession, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
+import { addExerciseToSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
@@ -12,6 +12,8 @@ import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
 import { exerciseMeta } from '../lib/exerciseFilters'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
+import { WarmupSheet } from '../components/WarmupSheet'
+import { ToolsSheet } from '../components/ToolsSheet'
 import { BodyMap } from '../components/BodyMap'
 import { ExerciseThumb } from '../components/ExerciseImage'
 import { HowToBody } from '../components/ExerciseHowTo'
@@ -270,6 +272,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
   const [info, setInfo] = useState(false)
   const [plateSet, setPlateSet] = useState<string | null>(null)
   const [rpeSet, setRpeSet] = useState<string | null>(null)
+  const [warmup, setWarmup] = useState(false)
   const showRpe = usePrefs((p) => p.showRpe)
   const tracking: Tracking = trackingOf(ex)
   const hasRunning = se.sets.some((x) => watches.has(x.id))
@@ -580,9 +583,17 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
           <Plus size={14} /> Drop
         </button>
         )}
-        <button
-          className="btn sm"
-          onClick={() =>
+        <button className="btn sm" onClick={() => setWarmup(true)}>
+          <Plus size={14} /> Warm-up
+        </button>
+      </div>
+      {warmup && (
+        <WarmupSheet
+          se={se}
+          exercise={ex}
+          onClose={() => setWarmup(false)}
+          onApply={() => mutate((e) => addWarmupSets(e, ex) ?? e, true)}
+          onAddOne={() =>
             mutate(
               (e) => {
                 const firstWork = e.sets.find((x) => x.kind === 'work')
@@ -591,10 +602,8 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
               true
             )
           }
-        >
-          <Plus size={14} /> Warm-up
-        </button>
-      </div>
+        />
+      )}
       {plateSet && (
         <PlateCalc
           weight={se.sets.find((x) => x.id === plateSet)?.weight ?? 0}
@@ -649,6 +658,7 @@ export default function SessionPage() {
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [showMuscles, setShowMuscles] = useState(false)
+  const [tools, setTools] = useState(false)
   const userId = useStore((s) => s.user?.id ?? 'local')
   useWakeLock()
 
@@ -695,6 +705,9 @@ export default function SessionPage() {
           <div className="grow" style={{ minWidth: 0 }}>
             <h1 className="sp-name ellipsis">{session.name}</h1>
           </div>
+          <button className="btn icon sm ghost" onClick={() => setTools(true)} aria-label="Tools: 1-rep max, percent of max, plates">
+            <Calculator size={20} />
+          </button>
           <button
             className="btn primary sp-finish"
             onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
@@ -789,6 +802,7 @@ export default function SessionPage() {
       )}
 
       <CoachMarks id="workout" userId={userId} steps={WORKOUT_TIPS} enabled={session.data.exercises.some((e) => e.sets.length > 0)} />
+      {tools && <ToolsSheet onClose={() => setTools(false)} weight={session.data.exercises.flatMap((e) => e.sets).find((x) => !x.done && x.kind === 'work')?.weight ?? 0} />}
       {showMuscles && <MusclesSheet rows={muscles} onClose={() => setShowMuscles(false)} />}
 
       {confirmFinish && (

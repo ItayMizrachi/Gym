@@ -5,6 +5,7 @@ import { nowIso, uid } from './uid'
 import { roundTo } from './format'
 import { suggestProgression } from './progression'
 import { getPrefs } from './prefs'
+import { insertWarmups, warmupSets, warmupStyle } from './warmup'
 
 const st = () => useStore.getState()
 const userId = () => st().user?.id ?? 'local'
@@ -175,4 +176,15 @@ export function duplicateWorkout(id: string) {
   for (const we of db.workout_exercises.filter((x) => x.workout_id === id)) {
     save('workout_exercises', { ...we, id: uid(), workout_id: copy.id })
   }
+}
+
+/**
+ * Smart warm-up rows for one exercise, from its first work weight and the gym's bar and plates.
+ * Returns the updated exercise, or null when there is nothing to add (see insertWarmups).
+ */
+export function addWarmupSets(se: SessionExercise, exercise: Exercise | undefined, prefs = getPrefs()): SessionExercise | null {
+  const work = se.sets.find((s) => s.kind === 'work' || s.kind === 'failure')?.weight ?? 0
+  const plan = warmupSets(work, { style: warmupStyle(exercise?.equipment, exercise?.name ?? se.name), barKg: prefs.barKg, plates: prefs.plates })
+  const sets = insertWarmups(se.sets, plan, (w) => ({ ...newSet('warmup', w.weight), reps: w.reps }))
+  return sets ? { ...se, sets } : null
 }
