@@ -270,7 +270,8 @@ export default function Body() {
     const i = entries.findIndex((e) => e.id === m.id)
     return i > 0 ? entries[i - 1] : null
   }
-  const rateClass = rate == null || Math.abs(rate) < 0.05 ? '' : rate > 0 ? 'up' : 'down'
+  // gaining or losing weight is not good or bad by itself (it depends on the goal): keep the rate neutral, not green/red
+  const rateClass = ''
 
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>

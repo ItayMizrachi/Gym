@@ -703,7 +703,7 @@ export default function SessionPage() {
             <ChevronLeft size={22} />
           </button>
           <div className="grow" style={{ minWidth: 0 }}>
-            <h1 className="sp-name ellipsis">{session.name}</h1>
+            <h1 className="sp-name">{session.name}</h1>
           </div>
           <button className="btn icon sm ghost" onClick={() => setTools(true)} aria-label="Tools: 1-rep max, percent of max, plates">
             <Calculator size={20} />

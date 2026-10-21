@@ -61,6 +61,12 @@ Always keep something in progress. When the "Next" list runs low:
 
 - ~~History: "1 sets", "8-week avg 0 kg" for new users~~ — fixed.
 
+- ~~Body: weight change shown in red when going down~~ — fixed: neutral (losing can be the goal).
+- ~~Workout title cut to "Lower ..." on 320px phones~~ — fixed: wraps to two lines.
+- ~~Search placeholder cut off~~ — fixed: "Search exercises".
+- Exercises list at 320px: long names cut by the "best 1RM" column — let names wrap to two lines or move the number under the name.
+- First open after importing history shows one toast listing every achievement at once — consider a calmer "You've earned 10 achievements" with a link to Progress.
+
 ## Later / ideas
 - Rest-day suggestions and deload hints from training load.
 - Exercise animations (two-frame from the library images).

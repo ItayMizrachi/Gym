@@ -313,7 +313,7 @@ export function ExercisePicker({
               className="input"
               type="search"
               enterKeyHint="search"
-              placeholder="Search by name, muscle or equipment"
+              placeholder="Search exercises"
               aria-label="Search exercises"
               value={q}
               onChange={(e) => setQ(e.target.value)}

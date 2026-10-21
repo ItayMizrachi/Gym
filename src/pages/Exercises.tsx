@@ -133,7 +133,7 @@ export default function Exercises() {
           className="input"
           type="search"
           enterKeyHint="search"
-          placeholder="Search by name, muscle or equipment"
+          placeholder="Search exercises"
           aria-label="Search exercises"
           value={q}
           onChange={(e) => set('q', e.target.value, '')}
