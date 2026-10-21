@@ -39,6 +39,9 @@
 - **Smart warm-ups and tools:** "+ Warm-up" can add ramped warm-up sets rounded to your plates; a Tools sheet in
   the workout has a 1-rep-max calculator, a percent table and the plate calculator.
 
+- **Self-review fixes:** weight trend no longer red when you lose weight; workout title wraps on small phones;
+  exercise names wrap instead of cutting; shorter search hint; a calmer toast when many achievements arrive at once.
+
 ## In progress (parallel sessions, each opens a PR that the coordinator merges)
 - Next: self-review pass of the whole app (design critique, accessibility, code review) and the fixes it finds.
 

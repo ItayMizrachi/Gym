@@ -88,7 +88,7 @@ export default function Exercises() {
         <ThumbButton exercise={e} size={48} />
         <button className="list-row" onClick={() => nav(`/exercise/${e.id}`)}>
         <div className="grow" style={{ minWidth: 0 }}>
-          <div className="title ellipsis">{e.name}</div>
+          <div className="title clamp2">{e.name}</div>
           <div className="meta ellipsis">{meta || 'Not logged yet'}</div>
         </div>
         {best != null && (
