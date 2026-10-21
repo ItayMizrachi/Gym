@@ -108,7 +108,7 @@
   -webkit-user-select: none;
   user-select: none;
 }
-.kp-field.empty { color: var(--faint); }
+.kp-field.kp-empty { color: var(--faint); }
 .kp-field.active { border-color: var(--accent); box-shadow: var(--focus); background: var(--card); }
 .kp-field:disabled { opacity: 1; }
 .kp-spacer { height: 300px; }

@@ -349,7 +349,7 @@ export function KpField({
   return (
     <button
       type="button"
-      className={`${className} kp-field ${active ? 'active' : ''} ${shown ? '' : 'empty'}`}
+      className={`${className} kp-field ${active ? 'active' : ''} ${shown ? '' : 'kp-empty'}`}
       data-kp={spec.id}
       disabled={disabled}
       aria-label={`${spec.label}: ${shown || 'empty'}`}
