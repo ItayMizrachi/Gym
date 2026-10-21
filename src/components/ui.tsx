@@ -3,6 +3,7 @@ import { X, Camera, Trash2, ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
+import { DUR, exitDelay } from '../lib/motion'
 
 /* ---------- image helpers ---------- */
 
@@ -159,11 +160,22 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
   const drag = useRef<{ y0: number; dy: number; t0: number } | null>(null)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
+  const [closing, setClosing] = useState(false)
+  const closingRef = useRef(false)
+  // backdrop, X and Escape: let the sheet slide down and the backdrop fade before the parent unmounts it
+  const requestClose = useRef(() => {
+    if (closingRef.current) return
+    closingRef.current = true
+    const wait = exitDelay(DUR.base)
+    if (!wait) return closeRef.current()
+    setClosing(true)
+    setTimeout(() => closeRef.current(), wait)
+  }).current
 
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && requestClose()
     window.addEventListener('keydown', onKey)
     // screen readers and keyboards start inside the sheet, and return to where they were after
     const opener = document.activeElement as HTMLElement | null
@@ -208,7 +220,7 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
   }
 
   return (
-    <div className="overlay" onClick={onClose}>
+    <div className={`overlay${closing ? ' closing' : ''}`} onClick={requestClose}>
       <div
         ref={ref}
         className="sheet"
@@ -221,7 +233,7 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
         <div className="sheet-handle" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />
         <div className="sheet-head">
           <h2>{title}</h2>
-          <button className="btn icon sm ghost" onClick={onClose} aria-label="Close">
+          <button className="btn icon sm ghost" onClick={requestClose} aria-label="Close">
             <X size={20} />
           </button>
         </div>
