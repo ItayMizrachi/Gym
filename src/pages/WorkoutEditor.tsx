@@ -217,6 +217,7 @@ export default function WorkoutEditor() {
             <input
               className="input"
               placeholder="Note shown during the workout"
+              aria-label={`Note for ${ex?.name ?? 'this exercise'}, shown during the workout`}
               value={we.note}
               onChange={(e) => patch(we, { note: e.target.value })}
             />
