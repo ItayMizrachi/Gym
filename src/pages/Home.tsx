@@ -186,7 +186,10 @@ export default function Home() {
       {active && (
         <div className="card hm-hero">
           <div className="hm-label">Workout in progress</div>
-          <div className="hm-name">{active.name}</div>
+          <div className="hm-name">
+            {splitName(active.name)[0]}
+            {splitName(active.name)[1] && <span className="hm-when">{splitName(active.name)[1]}</span>}
+          </div>
           <div className="hm-meta">Started {fmtDate(active.started_at)}</div>
           <button
             className="btn primary block hm-go"

@@ -21,5 +21,23 @@ scrolls past five full-size cards before reaching their workout list; a heavy us
 **Accessibility:** contrast fine; trow "Move" icon 44px ok; checklist rows 48px ok.
 **Works well:** plate-coloured Start, "last done 7 days ago", workout rows with one Start each, folders.
 
-## After (ios-review pass)
-See the bottom of this file once the after-screens are in.
+## After
+
+First screen now: greeting → one hero (workout, one Start, then "2 of 3 this week" row and a recovery row) → workouts list.
+Heavy user page height 2,930px → ~2,000px; program user sees their workouts on the first screen.
+
+Checked at 320, 375 and 440 wide for the three users, plus "workout in progress" and the three sheets
+(`home-after-*.png`).
+
+### ios-review findings
+| Finding | Level | Status |
+|---|---|---|
+| In-progress card showed "Lower B (Wednesday)" on two huge lines | Should fix | Fixed: same name/day split as the hero |
+| 320px: starter-plan button label clipped; "Empty workout" text button overflowed at 375 | Should fix | Fixed: icons drop at ≤360px, text actions without icons |
+| Hero label wrapped behind the plate decoration | Should fix | Fixed: label no longer padded for the plate |
+| Getting started still shown to a 40-workout user who never dismissed it | Should fix | Fixed: hidden after 5 finished workouts |
+| Font sizes are px, so they ignore iOS text size settings | Should fix | App-wide (styles.css), not changed here |
+| Mini body map in the recovery row is a hint, not readable at 42px | Nice to have | Kept: the text says it, tap opens the full map |
+| Main Start sits in the upper half of the screen | Nice to have | Kept: it is the first thing on the page; each workout row has its own Start lower down |
+| Touch targets: + New 38px + 4px hit slop, rows 60px, Move/Start 44px | OK | |
+| Colour alone: recovery dots always have "Ready"/"Recovering" text; trained days are filled circles and listed in the row's label | OK | |
