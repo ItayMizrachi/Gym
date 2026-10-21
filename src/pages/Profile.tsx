@@ -138,9 +138,7 @@ export default function Profile() {
             {inRow > 0 ? `${inRow} week${inRow === 1 ? '' : 's'} in a row` : 'Weekly goal'}
           </div>
           <div className="small muted">
-            {inRow > 0
-              ? `You reached your goal of ${week.goal} workout${week.goal === 1 ? '' : 's'} a week.`
-              : `Aim: ${week.goal} workout${week.goal === 1 ? '' : 's'} a week. ${week.done} done this week.`}
+            Goal: {week.goal} a week · {week.done} done this week
           </div>
         </div>
         <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label="Change weekly goal">

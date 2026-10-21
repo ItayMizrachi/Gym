@@ -147,6 +147,8 @@ export function useAchievementToasts() {
     const seen = achievementsSeen(userId)
     const fresh = freshAchievements(list, seen)
     if (seen == null || fresh.length) markAchievementsSeen(userId, [...(seen ?? []), ...list.filter((a) => a.earned).map((a) => a.id)])
-    for (const a of fresh.slice(0, 3)) toast({ kind: 'pr', text: `Achievement: ${a.title}`, sub: 'See all your achievements on the Progress tab.' })
+    // several at once (e.g. after an import) become one toast, so it never floods the screen
+    if (fresh.length === 1) toast({ kind: 'pr', text: `Achievement: ${fresh[0].title}`, sub: 'See all your achievements on the Progress tab.' })
+    else if (fresh.length > 1) toast({ kind: 'pr', text: `${fresh.length} achievements earned`, sub: fresh.map((a) => a.title).join(', ') })
   }, [db, userId, phase, goal, toast])
 }
