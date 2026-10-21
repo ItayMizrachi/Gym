@@ -33,8 +33,14 @@
 - **Body measurements:** log waist, chest, arms, thighs, body fat and more with your weight; a chart per measure,
   change vs 30 days ago, and a "where to measure" body guide.
 
+- **Records, achievements and a weekly goal:** a Records page with every exercise's best set, estimated 1-rep max
+  and rep records; ~15 achievements on Progress (earned in colour, next ones with progress bars); a weekly goal
+  ring on Train ("0 of 3 workouts this week").
+- **Smart warm-ups and tools:** "+ Warm-up" can add ramped warm-up sets rounded to your plates; a Tools sheet in
+  the workout has a 1-rep-max calculator, a percent table and the plate calculator.
+
 ## In progress (parallel sessions, each opens a PR that the coordinator merges)
-- Records + achievements + weekly goal; smart warm-ups + 1RM tools.
+- Next: self-review pass of the whole app (design critique, accessibility, code review) and the fixes it finds.
 
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
