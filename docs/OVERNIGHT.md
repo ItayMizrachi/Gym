@@ -63,6 +63,9 @@
 - **A number to beat:** during a workout the volume label shows last time's total for the same workout
   ("Last 9.8 t") and turns green with "Beat last time" once you pass it.
 
+- **Stalled lifts (coaching):** Progress lists exercises with no new best for 4 sessions, with a plain suggestion
+  (an easier week at ~90%, or a different rep range). Explained in Help.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

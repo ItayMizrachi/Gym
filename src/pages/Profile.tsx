@@ -1,3 +1,4 @@
+import { plateaus } from '../lib/plateau'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, CalendarDays, ChevronRight, Flame, History, Moon, Scale, Trophy } from 'lucide-react'
@@ -50,6 +51,7 @@ function hours(min: number): string {
 export default function Profile() {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
+  const stalled = useMemo(() => plateaus(db), [db])
   const [metric, setMetric] = useState<WeekMetric>('duration')
   const [range, setRange] = useState<WeekRange>('3m')
   const calRef = useRef<HTMLDivElement>(null)
@@ -130,6 +132,30 @@ export default function Profile() {
         </span>
         <ChevronRight size={18} aria-hidden className="muted" />
       </button>
+
+      {stalled.length > 0 && (
+        <section className="card stack" aria-label="Stalled lifts" style={{ gap: 10 }}>
+          <div>
+            <h2 style={{ fontSize: 'var(--fs-md)' }}>Stalled lifts</h2>
+            <div className="small muted">No new best for a few sessions. That's normal; a change usually gets it moving again.</div>
+          </div>
+          {stalled.slice(0, 3).map((p) => (
+            <button key={p.exerciseId} className="stall-row" onClick={() => nav(`/exercise/${p.exerciseId}`)}>
+              <span className="grow">
+                <span className="stall-name">{p.name}</span>
+                <span className="small muted" style={{ display: 'block' }}>
+                  {p.sessions} sessions since your best (est. 1-rep max {Math.round(p.best)} kg)
+                </span>
+              </span>
+              <ChevronRight size={18} aria-hidden className="muted" />
+            </button>
+          ))}
+          <div className="small" style={{ color: 'var(--text-2)' }}>
+            Try one easier week at about 90% of your usual weights, or switch the rep range (for example 5–8 instead of 8–12)
+            for a few weeks.
+          </div>
+        </section>
+      )}
 
       <section className="card goal-streak" aria-label="Weekly goal">
         <GoalRing done={week.done} goal={week.goal} size={56} />

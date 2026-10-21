@@ -133,6 +133,13 @@ export default function Help() {
         <p>Starts when you log a set. Use −15 / +15 to adjust it. It beeps and vibrates when rest is over.</p>
       </Sec>
 
+      <Sec title="Stalled lifts">
+        <p>
+          On Progress, an exercise you train regularly shows up here when your best estimated 1-rep max has not improved for 4
+          sessions. Plateaus are normal: an easier week or a different rep range usually gets it moving again.
+        </p>
+      </Sec>
+
       <Sec title="Muscle recovery">
         <p>
           The Train tab shows which muscles you worked in the last days (brighter = worked harder) and which are rested and

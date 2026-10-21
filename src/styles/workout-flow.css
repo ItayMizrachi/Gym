@@ -198,3 +198,7 @@
 
 /* on the workout screen, messages sit under the header so they never cover Finish or the live numbers */
 .toasts.in-session { top: calc(var(--safe-t) + 132px); }
+
+/* stalled lifts on Progress */
+.stall-row { display: flex; align-items: center; gap: var(--s3); text-align: left; width: 100%; min-height: 52px; padding: var(--s2) 0; border-top: 1px solid var(--line); color: var(--text); }
+.stall-name { font-weight: 600; }
