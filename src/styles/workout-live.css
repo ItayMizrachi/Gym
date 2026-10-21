@@ -250,8 +250,6 @@
 .ex .ex-head { gap: var(--s3); align-items: flex-start; }
 .ex .ex-head > button:first-child { flex: none; border-radius: 50%; }
 .ex .ex-name { font-family: var(--body); font-size: 18px; font-weight: 600; line-height: 1.2; }
-.wl-meta { font-size: 14px; color: var(--text-2); margin-top: 2px; }
-.wl-plan { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; font-size: 13px; color: var(--muted); }
 
 /* set table: Set / Previous / kg / Reps / ✓ ; completed rows tinted green */
 .ex .sets { gap: 4px; margin-top: var(--s3); }
@@ -312,3 +310,88 @@
   .ls-stat .u { font-size: 12px; }
 }
 .ls-stat .l.beat { color: var(--ok); font-weight: 600; }
+
+/* ================= workout focus: calm cards, one summary line, folding, gentle motion ================= */
+
+.ex { scroll-margin-top: 142px; transition: border-color var(--t) var(--ease), padding var(--t) var(--ease); }
+/* the exercise you are on gets a quiet yellow edge; superset cards keep their blue spine */
+.ex.current { border-color: var(--accent-line); }
+.ex.current.ss { border-left-color: var(--plate-blue); }
+.ex.shut { padding-top: var(--s3); padding-bottom: var(--s3); }
+
+.ex .ex-head { align-items: center; }
+.ex-thumb { position: relative; flex: none; border-radius: 50%; }
+.ex-tick {
+  position: absolute; right: -2px; bottom: -2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--ok); color: var(--ok-ink);
+  border: 2px solid var(--card);
+}
+.ex-title {
+  flex: 1; min-width: 0; min-height: 48px;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  text-align: left; color: var(--text);
+}
+.ex .ex-title .ex-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.ex-sum { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; color: var(--muted); line-height: 1.3; }
+.ex-sum-t { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ex-sum-t.done { color: var(--text-2); }
+.ex-sum-i { flex: none; color: var(--warn); }
+.ex-ss { flex: none; display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; font-size: 12px; font-weight: 600; }
+.ex-chev { flex: none; color: var(--faint); transition: transform var(--t) var(--ease); }
+.ex-chev.up { transform: rotate(180deg); }
+.ex.finished .ex-name { color: var(--text-2); }
+
+/* folding: grid rows 0fr <-> 1fr animates to the content's real height */
+.ex-fold { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.22s var(--ease), opacity 0.22s var(--ease); }
+.ex-fold.closed { grid-template-rows: 0fr; opacity: 0; }
+/* side/top padding keeps focus rings and the full-bleed done-row tint from being clipped */
+.ex-fold > div { min-height: 0; overflow: hidden; margin: -4px -10px 0; padding: 4px 10px 0; }
+.ex-fold.closed > div { visibility: hidden; transition: visibility 0s 0.22s; }
+
+.ex-more { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: var(--s3) 0 var(--s1); font-size: 14px; color: var(--text-2); line-height: 1.4; }
+.ex-more > * { max-width: 100%; }
+.ex-more .first-hint, .ex-more .wl-best { margin-top: 0; }
+.ex-more-meta { color: var(--text-2); }
+.ex-more-note { color: var(--warn); white-space: pre-wrap; }
+.ex-more-setup { color: var(--muted); white-space: pre-wrap; }
+.ex-more .ex-howto { margin-top: 2px; min-height: 40px; }
+
+/* progression / hold: one short chip, the reason lives in the details */
+.ex .prog { margin-top: var(--s3); }
+.prog.hold-chip { padding: 5px 10px; background: var(--card2); border-color: var(--line); color: var(--text-2); }
+
+/* PR hint under the next set: a compact line, not a second row of chrome */
+.ex .set-hint.pr { font-size: 13px; font-weight: 500; }
+
+/* ---------- motion (this screen only; global reduced-motion rule also applies) ---------- */
+.ex .sets .set-row .check { transition: background 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease), transform var(--t-fast) var(--ease); }
+.ex .sets .set-row { transition: background 0.18s var(--ease); }
+@media (prefers-reduced-motion: no-preference) {
+  .ex .set-row.pop .check { animation: chk-pop 0.2s var(--ease); }
+  .ex .set-row.pr-pop { animation: pr-glow 0.9s ease-out; }
+  .ex .set-row.pr-pop .kind { animation: chk-pop 0.25s var(--ease); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ex-fold, .ex-chev, .ex { transition: none; }
+}
+@keyframes chk-pop {
+  0% { transform: scale(0.86); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes pr-glow {
+  0% { box-shadow: inset 0 0 0 2px var(--accent); }
+  40% { box-shadow: inset 0 0 0 2px var(--accent-line); }
+  100% { box-shadow: inset 0 0 0 2px transparent; }
+}
+
+@media (max-width: 360px) {
+  .ex-sum { font-size: 13px; }
+  .ex .prog { font-size: 12px; }
+}
+
+/* compact live header: name, Finish, then one row of numbers */
+.ls-strip { margin-top: 6px; }
+.ls-map { min-height: 42px; }

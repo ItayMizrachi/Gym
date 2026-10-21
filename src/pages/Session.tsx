@@ -1,7 +1,7 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
@@ -263,7 +263,21 @@ const WORKOUT_TIPS: CoachStep[] = [
   { target: '.ex .check', title: 'Log the set', text: 'Tick to log the set. The rest timer starts on its own.' }
 ]
 
-function ExerciseCard({ session, index, onMore, showLegend }: { session: Session; index: number; onMore: () => void; showLegend?: boolean }) {
+const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/** After a set is logged, keep the next set to do above the rest player instead of hidden under it. */
+function revealNextSet() {
+  const row = document.querySelector<HTMLElement>('.ex:not(.shut) .set-row.todo')
+  if (!row) return
+  const r = row.getBoundingClientRect()
+  const limit = window.innerHeight - 170
+  if (r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: reducedMotion() ? 'auto' : 'smooth' })
+}
+
+/** Inert + aria-hidden while folded, so hidden controls are not tabbable or read out. */
+const folded = (shut: boolean) => (shut ? ({ inert: '', 'aria-hidden': true } as any) : {})
+
+function ExerciseCard({ session, index, onMore, showLegend, current }: { session: Session; index: number; onMore: () => void; showLegend?: boolean; current?: boolean }) {
   const nav = useNavigate()
   const se = session.data.exercises[index]
   const db = useStore((s) => s.db)
@@ -275,6 +289,34 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
   const [plateSet, setPlateSet] = useState<string | null>(null)
   const [rpeSet, setRpeSet] = useState<string | null>(null)
   const [warmup, setWarmup] = useState(false)
+  const [details, setDetails] = useState(false)
+  // the set that was just logged: its check pops, a new record also gets a light glow
+  const [pop, setPop] = useState<{ id: string; pr: boolean } | null>(null)
+  // a finished exercise folds down to one line; tapping its name opens it again
+  const finished = se.sets.length > 0 && se.sets.every((x) => x.done)
+  const [shut, setShut] = useState(finished)
+  const wasFinished = useRef(finished)
+  useEffect(() => {
+    const was = wasFinished.current
+    wasFinished.current = finished
+    if (!finished) {
+      setShut(false)
+      return
+    }
+    if (was) return
+    // let the green tick land before folding the card away
+    const t = setTimeout(() => {
+      setShut(true)
+      setDetails(false)
+      setTimeout(revealNextSet, 260)
+    }, 700)
+    return () => clearTimeout(t)
+  }, [finished])
+  useEffect(() => {
+    if (!pop) return
+    const t = setTimeout(() => setPop(null), 900)
+    return () => clearTimeout(t)
+  }, [pop])
   const showRpe = usePrefs((p) => p.showRpe)
   const tracking: Tracking = trackingOf(ex)
   const hasRunning = se.sets.some((x) => watches.has(x.id))
@@ -340,11 +382,13 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       if (s.time_sec != null) patchSet(s.id, { time_sec: s.time_sec }, true)
       return
     }
+    let isPR = false
     const celebrateKey = `${s.id}:${s.weight}:${s.reps}`
     if (tracking !== 'time' && s.reps != null && ELIGIBLE.has(s.kind) && !celebrated.has(celebrateKey)) {
       celebrated.add(celebrateKey)
       const res = evaluateSet(runningPrior(s.id), s.weight, s.reps)
       if (res.types.length) {
+        isPR = true
         const label = res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Best estimated 1-rep max' : 'Rep record'
         toast({
           kind: 'pr',
@@ -365,6 +409,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       }
     }
     patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : { reps: s.reps }) }, true)
+    setPop({ id: s.id, pr: isPR })
     if (s.kind !== 'warmup' && se.superset) {
       const next = nextInSuperset(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index)
       if (next != null) {
@@ -375,82 +420,130 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       }
     }
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, ex?.name ?? se.name)
+    setTimeout(revealNextSet, 300)
   }
 
   const workNo = (i: number) => se.sets.slice(0, i + 1).filter((x) => x.kind === 'work').length
   const lastDesc = last ? last.sets.map((x) => setLabel(x, tracking)).join(' · ') : null
 
+  const name = ex?.name ?? se.name
+  const firstTime = !last && prior.length === 0 && tracking !== 'time'
+  const plan = `${tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest ${fmtRest(se.rest_sec)}`
+  const hasNotes = !!(se.note || lastNote || ex?.setup)
+  const prog = se.progression
+  const doneLine = `${se.sets.length} ${se.sets.length === 1 ? 'set' : 'sets'} · ${se.sets.map((x) => setLabel(x, tracking)).join(' · ')}`
+
   return (
-    <div id={`ex-${index}`} className={`ex ${se.superset ? 'ss' : ''}`} style={{ scrollMarginTop: 140 }}>
+    <div
+      id={`ex-${index}`}
+      className={`ex ${se.superset ? 'ss' : ''} ${current ? 'current' : ''} ${finished ? 'finished' : ''} ${shut ? 'shut' : ''}`}
+    >
       <div className="ex-head">
-        <button onClick={() => setInfo(true)} aria-label="Exercise info">
+        <button className="ex-thumb" onClick={() => setInfo(true)} aria-label={`How to do ${name}`}>
           <ExerciseThumb exercise={ex} name={se.name} size={48} />
-        </button>
-        <div className="grow" onClick={() => setInfo(true)}>
-          <div className="ex-name">{ex?.name ?? se.name}</div>
-          {ex && <div className="wl-meta ellipsis">{exerciseMeta(ex)}</div>}
-          <div className="wl-plan">
-            {se.superset && <span className="chip blue">Superset {se.superset}</span>}
-            <span>
-              {tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest {fmtRest(se.rest_sec)}
+          {finished && (
+            <span className="ex-tick" aria-hidden>
+              <Check size={12} strokeWidth={3} />
             </span>
-          </div>
-        </div>
-        <button className="btn icon ghost" onClick={onMore} aria-label={`More options for ${ex?.name ?? se.name}`}>
+          )}
+        </button>
+        <button
+          className="ex-title"
+          onClick={() => (finished ? setShut((v) => !v) : setDetails((v) => !v))}
+          aria-expanded={finished ? !shut : details}
+          aria-label={finished ? `${name}, done. ${shut ? 'Show sets' : 'Hide sets'}` : `${name}. ${details ? 'Hide' : 'Show'} details`}
+        >
+          <span className="ex-name">{name}</span>
+          <span className="ex-sum">
+            {se.superset && (
+              <span className="chip blue ex-ss" aria-label={`Superset ${se.superset}`}>
+                <Link2 size={13} aria-hidden /> {se.superset}
+              </span>
+            )}
+            {finished && shut ? (
+              <span className="ex-sum-t done">{doneLine}</span>
+            ) : (
+              <span className="ex-sum-t">
+                {firstTime ? 'First time · ' : ''}
+                {plan}
+              </span>
+            )}
+            {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label="Has notes" />}
+            <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
+          </span>
+        </button>
+        <button className="btn icon ghost" onClick={onMore} aria-label={`More options for ${name}`}>
           <MoreHorizontal size={20} />
         </button>
       </div>
 
-      {(se.note || ex?.setup || lastNote) && (
-        <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>
-          {se.note && <div>📝 {se.note}</div>}
-          {lastNote && <div style={{ color: 'var(--text-2)' }}>💬 Last time: {lastNote}</div>}
-          {ex?.setup && <div style={{ color: 'var(--muted)' }}>⚙ {ex.setup}</div>}
+      <div className={`ex-fold ${details && !finished ? '' : 'closed'}`} {...folded(!details || finished)}>
+        <div>
+          <div className="ex-more">
+            {ex && <div className="ex-more-meta">{exerciseMeta(ex)}</div>}
+            <div className="ex-more-meta">
+              {plan}
+              {se.superset ? ` · superset ${se.superset}: go straight to the paired exercise, rest after the round` : ''}
+            </div>
+            {se.note && <div className="ex-more-note">📝 {se.note}</div>}
+            {lastNote && <div className="ex-more-last">💬 Last time: {lastNote}</div>}
+            {ex?.setup && <div className="ex-more-setup">⚙ {ex.setup}</div>}
+            {firstTime && (
+              <div className="first-hint">
+                {tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.'}
+              </div>
+            )}
+            {lastDesc && se.sets.length === 0 && (
+              <div className="small muted">
+                Last ({fmtDate(last!.date)}): <span style={{ color: 'var(--text)' }}>{lastDesc}</span>
+              </div>
+            )}
+            {prog?.kind === 'increase' && (
+              <div className="small muted">
+                You hit {prog.reps.join('/')} last time, so the weight goes up {fmtKg(prog.delta)} kg (from {fmtKg(prog.from)} kg).
+              </div>
+            )}
+            {prog?.kind === 'hold' && (
+              <div className="small muted">
+                Last time was {prog.reps.join('/')}. Stay at {fmtKg(prog.from)} kg and aim for {se.rep_min}+ reps on every set.
+              </div>
+            )}
+            {rec.heaviest && tracking !== 'time' && (
+              <div className="wl-best">
+                <Trophy size={14} color="var(--accent)" aria-hidden />
+                {tracking === 'reps' && !(rec.heaviest.weight > 0) ? (
+                  <span>
+                    Best <b>{Math.max(...prior.map((p) => p.reps))} reps</b>
+                  </span>
+                ) : (
+                  <span>
+                    Best <b>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
+                    {tracking === 'weight_reps' && rec.bestE1rm && (
+                      <> · best estimated 1-rep max <b>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)} kg</b></>
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+            {ex && (
+              <button className="btn sm ex-howto" onClick={() => setInfo(true)}>
+                <Info size={16} /> How to do it
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={`ex-fold ${shut ? 'closed' : ''}`} {...folded(shut)}>
+      <div>
+      {prog?.kind === 'increase' && (
+        <div className={`prog ${prog.applied === false ? 'off' : ''}`}>
+          <TrendingUp size={14} aria-hidden />
+          <span>{prog.applied === false ? `Kept at ${fmtKg(prog.from)} kg` : `+${fmtKg(prog.delta)} kg today`}</span>
+          <button onClick={() => mutate(toggleProgression, true)}>{prog.applied === false ? 'Redo' : 'Undo'}</button>
         </div>
       )}
-      {!last && prior.length === 0 && tracking !== 'time' && (
-        <div className="first-hint">
-          {tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.'}
-        </div>
-      )}
-      {lastDesc && se.sets.length === 0 && (
-        <div className="small muted" style={{ marginTop: 6 }}>
-          Last ({fmtDate(last!.date)}): <span style={{ color: 'var(--text)' }}>{lastDesc}</span>
-        </div>
-      )}
-      {se.progression?.kind === 'increase' && (
-        <div className={`prog ${se.progression.applied === false ? 'off' : ''}`}>
-          <TrendingUp size={14} />
-          <span>
-            {se.progression.applied === false
-              ? `Kept at ${fmtKg(se.progression.from)} kg`
-              : `+${fmtKg(se.progression.delta)} kg: you hit ${se.progression.reps.join('/')} last time`}
-          </span>
-          <button onClick={() => mutate(toggleProgression, true)}>{se.progression.applied === false ? 'Redo' : 'Undo'}</button>
-        </div>
-      )}
-      {se.progression?.kind === 'hold' && (
-        <div className="hold">
-          Hold {fmtKg(se.progression.from)} kg: last time was {se.progression.reps.join('/')}, aim for {se.rep_min}+ on every set.
-        </div>
-      )}
-      {rec.heaviest && tracking !== 'time' && (
-        <div className="wl-best">
-          <Trophy size={14} color="var(--accent)" aria-hidden />
-          {tracking === 'reps' && !(rec.heaviest.weight > 0) ? (
-            <span>
-              Best <b>{Math.max(...prior.map((p) => p.reps))} reps</b>
-            </span>
-          ) : (
-            <span>
-              Best <b>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
-              {tracking === 'weight_reps' && rec.bestE1rm && (
-                <> · est. 1-rep max <b>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)} kg</b></>
-              )}
-            </span>
-          )}
-        </div>
-      )}
+      {prog?.kind === 'hold' && <div className="prog hold-chip">Hold {fmtKg(prog.from)} kg · aim for {se.rep_min}+ reps</div>}
 
       <div className={`sets t-${tracking}`}>
         <div className="set-row">
@@ -488,7 +581,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
           const nearTarget = hintReps != null && se.rep_max ? hintReps <= se.rep_max + 2 : false
           return (
             <div key={s.id} style={{ display: 'contents' }}>
-              <div className={`set-row ${s.done ? 'done' : ''}`}>
+              <div className={`set-row ${s.done ? 'done' : 'todo'}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}`}>
                 <button
                   className={`kind ${s.kind}`}
                   onClick={() => patchSet(s.id, { kind: KIND_ORDER[(KIND_ORDER.indexOf(s.kind) + 1) % KIND_ORDER.length] }, true)}
@@ -614,6 +707,8 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
           <Plus size={14} /> Warm-up
         </button>
       </div>
+      </div>
+      </div>
       {warmup && (
         <WarmupSheet
           se={se}
@@ -712,6 +807,8 @@ export default function SessionPage() {
   const beatLast = lastVolume != null && lastVolume > 0 && volume > lastVolume
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
+  // the exercise you are on: the first one with a set still to do
+  const currentIdx = session.data.exercises.findIndex((e) => e.sets.some((s) => !s.done))
 
   function mutateEx(i: number, fn: (e: SessionExercise) => SessionExercise) {
     const cur = useStore.getState().db.sessions.find((x) => x.id === session!.id)!
@@ -770,7 +867,7 @@ export default function SessionPage() {
             <div className="l">Sets</div>
           </div>
           <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label="Sets per muscle">
-            <BodyMap intensity={liveIntensity(muscles)} height={46} />
+            <BodyMap intensity={liveIntensity(muscles)} height={40} />
           </button>
         </div>
         <div className="sp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={totalSets} aria-valuenow={doneSets}>
@@ -779,7 +876,14 @@ export default function SessionPage() {
       </div>
 
       {session.data.exercises.map((_, i) => (
-        <ExerciseCard key={i + session.data.exercises[i].exercise_id} session={session} index={i} onMore={() => setMoreIdx(i)} showLegend={i === 0 && loggedEver < 5} />
+        <ExerciseCard
+          key={i + session.data.exercises[i].exercise_id}
+          session={session}
+          index={i}
+          onMore={() => setMoreIdx(i)}
+          showLegend={i === 0 && loggedEver < 5}
+          current={i === currentIdx}
+        />
       ))}
 
       <button className="btn wl-addex" onClick={() => setPicking(true)}>

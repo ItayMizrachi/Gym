@@ -10,14 +10,14 @@
   top: 0;
   z-index: 15;
   margin: calc(-1 * (var(--safe-t) + 12px)) -16px 0;
-  padding: calc(var(--safe-t) + 22px) 16px 10px;
+  padding: calc(var(--safe-t) + 18px) 16px 8px;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 .sp-row { display: flex; align-items: center; gap: var(--s2); }
-.btn.sp-finish { padding: 0 14px; font-size: 16px; }
+.btn.sp-finish { padding: 0 14px; font-size: 16px; min-height: 44px; }
 .sp-name {
-  font-family: var(--display); font-size: 20px; font-weight: 650; line-height: 1.15;
+  font-family: var(--display); font-size: 19px; font-weight: 650; line-height: 1.15;
   /* two lines before cutting, so "Lower A (Sunday)" stays readable next to Tools and Finish on small phones */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
 }
@@ -32,7 +32,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-tight);
 }
-.sp-progress { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 10px; overflow: hidden; }
+.sp-progress { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 8px; overflow: hidden; }
 .sp-progress > div { height: 100%; background: var(--ok); border-radius: 2px; transition: width 0.3s ease-out; }
 
 /* ---------- rest player ---------- */
@@ -45,10 +45,10 @@
   max-width: 696px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 76px 1fr;
+  grid-template-columns: 64px 1fr;
   gap: 12px;
   align-items: center;
-  padding: 12px;
+  padding: 10px 12px;
   background: var(--card2);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -56,10 +56,10 @@
 }
 .rp.full { bottom: calc(var(--safe-b) + 12px); }
 .rp.done { background: #16261d; border-color: #2b5a41; }
-.rp-ring { position: relative; width: 76px; height: 76px; }
+.rp-ring { position: relative; width: 64px; height: 64px; }
 .rp-ring svg { width: 100%; height: 100%; display: block; }
 .rp-ring circle { fill: none; stroke-width: 6; }
-.rp-ring .track { stroke: var(--card2); }
+.rp-ring .track { stroke: var(--line-strong); }
 .rp-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
 .rp.done .rp-ring .fill { stroke: var(--ok); }
 .rp-time {
@@ -69,7 +69,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track-tight);
@@ -77,7 +77,7 @@
 .rp.done .rp-time { color: var(--ok); }
 .rp-body { min-width: 0; }
 .rp-title { font-size: 14px; font-weight: 650; }
-.rp-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.rp-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .rp-ctrl { display: flex; gap: 6px; }
 .rp-ctrl .btn { min-width: 0; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: no-preference) {
