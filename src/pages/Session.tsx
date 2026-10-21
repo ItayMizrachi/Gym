@@ -282,6 +282,16 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
 
   const prior = useMemo(() => priorSets(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
   const last = useMemo(() => lastPerformance(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
+  // the note you left on this exercise last time ("raise the seat"), if it differs from today's
+  const lastNote = useMemo(() => {
+    const prev = db.sessions
+      .filter((x) => x.finished_at && x.id !== session.id)
+      .sort((a, b) => (b.finished_at! > a.finished_at! ? 1 : -1))
+      .map((x) => x.data.exercises.find((e) => e.exercise_id === se.exercise_id))
+      .find(Boolean)
+    const n = prev?.note?.trim()
+    return n && n !== se.note.trim() ? n : null
+  }, [db.sessions, se.exercise_id, session.id, se.note])
   const rec = useMemo(() => recordsFor(prior), [prior])
 
   function mutate(fn: (e: SessionExercise) => SessionExercise, immediate = false) {
@@ -391,9 +401,10 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
         </button>
       </div>
 
-      {(se.note || ex?.setup) && (
+      {(se.note || ex?.setup || lastNote) && (
         <div className="small" style={{ marginTop: 8, color: 'var(--warn)' }}>
           {se.note && <div>📝 {se.note}</div>}
+          {lastNote && <div style={{ color: 'var(--text-2)' }}>💬 Last time: {lastNote}</div>}
           {ex?.setup && <div style={{ color: 'var(--muted)' }}>⚙ {ex.setup}</div>}
         </div>
       )}
