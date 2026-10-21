@@ -75,7 +75,9 @@ export default function Help() {
 
       <Sec title="Logging a set">
         <p>
-          Type the reps, then tap <Check size={14} /> to log it. The check turns green and the rest timer starts by itself.
+          Type the reps, then tap <Check size={14} /> to log it. If you did exactly the grey number shown in the box (last time,
+          or the bottom of the rep range), just tap <Check size={14} />: it logs that number. The check turns green and the rest
+          timer starts by itself.
         </p>
         <p>
           <b>Prev</b> shows what you did on the same set last time. Weights fill in from last time too.

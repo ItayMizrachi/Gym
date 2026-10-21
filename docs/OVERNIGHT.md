@@ -66,6 +66,11 @@
 - **Stalled lifts (coaching):** Progress lists exercises with no new best for 4 sessions, with a plain suggestion
   (an easier week at ~90%, or a different rep range). Explained in Help.
 
+- **Faster logging:** tapping ✓ on an empty reps box logs the grey suggested number (last time, or the bottom of
+  the rep range), like Hevy and Strong, so a set that went to plan is one tap.
+- **End-to-end check:** start workout → log sets → rest timer → finish → summary → edit all verified after tonight's
+  merges.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

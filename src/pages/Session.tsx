@@ -307,7 +307,8 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
     return [...prior, ...own]
   }
 
-  function toggleDone(s: SessionSet) {
+  /** `suggestedReps` is the grey number in the reps box (last time, or the bottom of the rep range). */
+  function toggleDone(s: SessionSet, suggestedReps: number | null = null) {
     if (s.done) {
       patchSet(s.id, { done: false, done_at: null }, true)
       return
@@ -317,6 +318,10 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
       const sec = watchSec(s.id)
       watches.delete(s.id)
       s = { ...s, time_sec: sec }
+    }
+    // like Hevy / Strong: ticking an empty reps box logs the suggested number shown in it
+    if (tracking !== 'time' && (s.reps == null || s.reps <= 0) && suggestedReps != null && suggestedReps > 0) {
+      s = { ...s, reps: suggestedReps }
     }
     const missing = missingForLog(s, tracking)
     if (missing) {
@@ -348,7 +353,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
         })
       }
     }
-    patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : {}) }, true)
+    patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : { reps: s.reps }) }, true)
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, ex?.name ?? se.name)
   }
 
@@ -522,7 +527,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
                 />
                 </>
                 )}
-                <button className="check" onClick={() => toggleDone(s)} aria-label={s.done ? 'Undo set' : 'Log set'}>
+                <button className="check" onClick={() => toggleDone(s, prev?.reps ?? (se.rep_min || null))} aria-label={s.done ? 'Undo set' : 'Log set'}>
                   <Check size={20} />
                 </button>
               </div>
