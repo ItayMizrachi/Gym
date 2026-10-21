@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronRight, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { markSeen, seen } from './Welcome'
 
@@ -8,12 +8,14 @@ const installed = () =>
   typeof window !== 'undefined' &&
   (window.matchMedia?.('(display-mode: standalone)').matches || (navigator as any).standalone === true)
 
-/** Four first steps on Train for new users; ticks itself off and disappears when done or dismissed. */
+/** Four first steps on Train for new users: one line with progress, opens on tap; gone when done or hidden. */
 export function StartChecklist() {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
   const [hidden, setHidden] = useState(() => seen('start-checklist'))
-  if (hidden) return null
+  const [open, setOpen] = useState(false)
+  // only for new users: after a handful of workouts it is no longer news
+  if (hidden || db.sessions.filter((s) => s.finished_at).length >= 5) return null
 
   const steps = [
     { done: db.workouts.length > 0, t: 'Pick a program', d: 'Or build your own workout', go: () => nav('/programs') },
@@ -28,35 +30,46 @@ export function StartChecklist() {
     setHidden(true)
   }
 
+  const next = steps.find((s) => !s.done)!
+  const doneN = steps.length - left
+
   return (
-    <section className="card start-list" aria-label="Getting started">
-      <div className="start-head">
-        <div className="grow">
-          <div className="start-title">Getting started</div>
-          <div className="small muted">
-            {steps.length - left} of {steps.length} done
-          </div>
+    <section className="card hm-start" aria-label="Getting started">
+      <button className="hm-start-head" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span className="hm-start-n" aria-hidden>
+          {doneN}/{steps.length}
+        </span>
+        <span className="grow" style={{ minWidth: 0 }}>
+          <span className="hm-row-t">Getting started</span>
+          <span className="small muted ellipsis" style={{ display: 'block' }}>
+            {open ? `${doneN} of ${steps.length} done` : `Next: ${next.t.toLowerCase()}`}
+          </span>
+        </span>
+        <ChevronDown size={18} className="hm-start-caret" aria-hidden />
+      </button>
+      <div className="hm-start-bar" aria-hidden>
+        <i style={{ width: `${(doneN / steps.length) * 100}%` }} />
+      </div>
+      {open && (
+        <div className="hm-start-list">
+          {steps.map((s) => (
+            <button key={s.t} className={`hm-start-row${s.done ? ' done' : ''}`} onClick={s.go} disabled={s.done}>
+              <span className="hm-start-tick" aria-hidden>
+                {s.done && <Check size={14} />}
+              </span>
+              <span className="grow">
+                <span className="hm-start-t">{s.t}</span>
+                {!s.done && <span className="small muted" style={{ display: 'block' }}>{s.d}</span>}
+              </span>
+              {!s.done && <ChevronRight size={18} aria-hidden className="muted" />}
+              <span className="sr-only">{s.done ? 'done' : 'to do'}</span>
+            </button>
+          ))}
+          <button className="btn ghost sm hm-start-hide" onClick={close}>
+            Hide this list
+          </button>
         </div>
-        <button className="btn icon ghost sm" onClick={close} aria-label="Hide getting started">
-          <X size={18} />
-        </button>
-      </div>
-      <div className="start-bar" aria-hidden>
-        <i style={{ width: `${((steps.length - left) / steps.length) * 100}%` }} />
-      </div>
-      {steps.map((s) => (
-        <button key={s.t} className={`start-row${s.done ? ' done' : ''}`} onClick={s.go} disabled={s.done}>
-          <span className="start-tick" aria-hidden>
-            {s.done && <Check size={14} />}
-          </span>
-          <span className="grow">
-            <span className="start-t">{s.t}</span>
-            {!s.done && <span className="small muted" style={{ display: 'block' }}>{s.d}</span>}
-          </span>
-          {!s.done && <ChevronRight size={18} aria-hidden className="muted" />}
-          <span className="sr-only">{s.done ? 'done' : 'to do'}</span>
-        </button>
-      ))}
+      )}
     </section>
   )
 }

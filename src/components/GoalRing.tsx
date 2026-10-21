@@ -10,8 +10,8 @@ const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 /** Progress ring: yellow while on the way, green once the goal is reached. */
-export function GoalRing({ done, goal, size = 64 }: { done: number; goal: number; size?: number }) {
-  const stroke = 7
+export function GoalRing({ done, goal, size = 64, count = true }: { done: number; goal: number; size?: number; count?: boolean }) {
+  const stroke = size < 48 ? 5 : 7
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
   const frac = Math.min(1, done / goal)
@@ -32,10 +32,12 @@ export function GoalRing({ done, goal, size = 64 }: { done: number; goal: number
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </svg>
-      <span className="goal-ring-n">
-        {done}
-        <span className="goal-ring-of">/{goal}</span>
-      </span>
+      {count && (
+        <span className="goal-ring-n">
+          {done}
+          <span className="goal-ring-of">/{goal}</span>
+        </span>
+      )}
     </div>
   )
 }
@@ -72,44 +74,41 @@ export function GoalSheet({ onClose }: { onClose: () => void }) {
   )
 }
 
-/** Home: "2 of 3 workouts this week", with the days trained. */
-export function GoalCard() {
+/** Train hero: one tappable line, "2 of 3 workouts this week" with the days trained. Tap to change the goal. */
+export function WeekLine() {
   const db = useStore((s) => s.db)
   const goal = usePrefs((s) => s.weeklyGoal)
   const [editing, setEditing] = useState(false)
   const g = useMemo(() => weekGoal(db, goal), [db, goal])
   const inRow = useMemo(() => goalWeeksInRow(db, goal), [db, goal])
-  const left = g.goal - g.done
-  const sub = g.hit
-    ? inRow > 1
-      ? `Goal reached, ${inRow} weeks in a row.`
-      : 'Goal reached. Nice work.'
-    : `${left} more to reach your goal${inRow > 0 ? ` (${inRow} week${inRow === 1 ? '' : 's'} in a row so far)` : ''}.`
-
+  const trained = g.days.flatMap((on, i) => (on ? [DAY_NAMES[(g.weekStart.getDay() + i) % 7]] : []))
+  const note = g.hit ? (inRow > 1 ? `Goal reached, ${inRow} weeks in a row` : 'Goal reached') : `Goal ${g.goal} a week`
   return (
-    <section className="card goal-card" aria-label="Weekly goal">
-      <GoalRing done={g.done} goal={g.goal} />
-      <div className="grow" style={{ minWidth: 0 }}>
-        <div className="goal-title">
-          {g.done} of {g.goal} workout{g.goal === 1 ? '' : 's'} this week
-        </div>
-        <div className="small muted">{sub}</div>
-        <ol className="goal-days" aria-label="Days trained this week">
-          {g.days.map((on, i) => (
-            <li
-              key={i}
-              className={`${on ? 'on' : ''}${i === g.today ? ' today' : ''}`}
-              aria-label={`${DAY_NAMES[(g.weekStart.getDay() + i) % 7]}: ${on ? 'trained' : 'no workout'}${i === g.today ? ' (today)' : ''}`}
-            >
-              {DAY_LETTERS[(g.weekStart.getDay() + i) % 7]}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <button className="btn icon ghost goal-edit" onClick={() => setEditing(true)} aria-label="Change weekly goal">
-        <Pencil size={18} />
+    <>
+      <button
+        className="hm-row"
+        onClick={() => setEditing(true)}
+        aria-label={`${g.done} of ${g.goal} workouts this week${trained.length ? ` (${trained.join(', ')})` : ''}. ${note}. Change weekly goal`}
+      >
+        <GoalRing done={g.done} goal={g.goal} size={40} count={false} />
+        <span className="hm-row-body">
+          <span className="hm-row-t">
+            <b>
+              {g.done} of {g.goal}
+            </b>{' '}
+            this week
+          </span>
+          <span className="hm-days" aria-hidden>
+            {g.days.map((on, i) => (
+              <i key={i} className={`${on ? 'on' : ''}${i === g.today ? ' today' : ''}`}>
+                {DAY_LETTERS[(g.weekStart.getDay() + i) % 7]}
+              </i>
+            ))}
+          </span>
+        </span>
+        <Pencil size={16} className="hm-row-end" aria-hidden />
       </button>
       {editing && <GoalSheet onClose={() => setEditing(false)} />}
-    </section>
+    </>
   )
 }

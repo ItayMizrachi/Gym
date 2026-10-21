@@ -1,7 +1,7 @@
 import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen, PencilLine } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -25,18 +25,18 @@ import {
   relativeDay,
   suggestNextWorkout,
   summarizeSession,
-  trainingDays,
   weeklyStreak
 } from '../lib/stats'
-import { CalendarHeat } from '../components/CalendarHeat'
 import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
-import { GoalCard } from '../components/GoalRing'
-import { RecoveryCard } from '../components/RecoveryCard'
+import { WeekLine } from '../components/GoalRing'
+import { RecoveryLine } from '../components/RecoveryCard'
+import { Sheet } from '../components/ui'
 import { StartChecklist } from '../components/StartChecklist'
 import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
 import '../styles/programs-nav.css'
+import '../styles/home.css'
 
 function templateInfo(db: DB, w: Workout) {
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -89,6 +89,7 @@ export default function Home() {
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
   const [moving, setMoving] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
   const [folded, setFolded] = useState<string[]>(loadFolds)
   useAchievementToasts()
   function toggleFold(label: string) {
@@ -116,7 +117,6 @@ export default function Home() {
   }, [db, planned])
   const weeks = useMemo(() => compareWeeks(db, now), [db, now])
   const streak = useMemo(() => weeklyStreak(db, now), [db, now])
-  const days = useMemo(() => trainingDays(db), [db])
   const muscles = useMemo(() => {
     const from = muscleWeek === 'this' ? weeks.weekStart : addDays(weeks.weekStart, -7)
     return muscleSets(db, from, addDays(from, 7), plannedMuscles(db))
@@ -135,6 +135,11 @@ export default function Home() {
     nav(`/workout/${id}`)
   }
 
+  function emptyWorkout() {
+    primeAudio()
+    nav(`/session/${startEmptySession()}`)
+  }
+
   function start(w: Workout) {
     primeAudio()
     const id = startSessionFromWorkout(w)
@@ -149,8 +154,17 @@ export default function Home() {
   const scaleMax = Math.max(MUSCLE_SETS_MAX + 4, ...muscles.map((m) => m.sets + 1))
   const pct = (n: number) => `${(n / scaleMax) * 100}%`
 
+  const [heroName, heroWhen] = next ? splitName(next.workout.name) : ['', '']
+  // this week + recovery: inside the hero, or inside the "in progress" card while a workout is open
+  const weekRows = workouts.length > 0 && (
+    <div className="hm-foot">
+      <WeekLine />
+      <RecoveryLine />
+    </div>
+  )
+
   return (
-    <div className="stack ins-home" style={{ gap: 16 }}>
+    <div className="stack ins-home hm" style={{ gap: 16 }}>
       <div className="page-head">
         <div className="grow">
           <h1>{greeting}</h1>
@@ -170,66 +184,58 @@ export default function Home() {
       </div>
 
       {active && (
-        <div className="banner stack" style={{ gap: 8 }}>
-          <div className="row">
-            <div className="grow">
-              <div style={{ fontWeight: 750, fontSize: 17 }}>{active.name}</div>
-              <div className="small muted">Workout in progress · started {fmtDate(active.started_at)}</div>
-            </div>
-          </div>
+        <div className="card hm-hero">
+          <div className="hm-label">Workout in progress</div>
+          <div className="hm-name">{active.name}</div>
+          <div className="hm-meta">Started {fmtDate(active.started_at)}</div>
           <button
-            className="btn primary block"
+            className="btn primary block hm-go"
             onClick={() => {
               primeAudio()
               nav(`/session/${active.id}`)
             }}
           >
-            <Play size={18} /> Resume workout
+            <Play size={18} aria-hidden /> Resume workout
           </button>
+          {weekRows}
         </div>
       )}
 
       {workouts.length === 0 ? (
-        <div className="card welcome stack">
-          <div className="welcome-mark">
+        <div className="card hm-welcome">
+          <div className="welcome-mark" aria-hidden>
             <Dumbbell size={26} />
           </div>
           <h2>Pick a program to begin</h2>
-          <div className="muted">Choose a ready-made program, or build your own workouts. Then start one and log each set as you go.</div>
-          <ol className="welcome-steps">
-            <li>
-              <b>Pick a program.</b> Start a ready-made workout right now, or add a plan for the whole week.
-            </li>
-            <li>
-              <b>Train.</b> Weights fill in from last time; tick each set to start the rest timer.
-            </li>
-            <li>
-              <b>Watch it add up.</b> Weekly sets, streaks and records appear here.
-            </li>
-          </ol>
+          <p className="muted">Choose a ready-made plan, start it, and tick each set as you go. Weights fill in from last time.</p>
           <button className="btn primary block" onClick={() => nav('/programs')}>
-            <LayoutGrid size={18} /> Browse programs
+            <LayoutGrid size={18} aria-hidden /> Browse programs
           </button>
-          <button className="btn block" onClick={loadStarter}>
-            <Sparkles size={18} /> Load my starter plan (4 days)
+          <button className="btn secondary block" onClick={loadStarter}>
+            <Sparkles size={18} aria-hidden /> Load my starter plan (4 days)
           </button>
-          <button className="btn block" onClick={newWorkout}>
-            <Plus size={18} /> Create a workout
-          </button>
+          <div className="hm-welcome-more">
+            <button className="btn ghost" onClick={newWorkout}>
+              Build your own
+            </button>
+            <button className="btn ghost" disabled={!!active} onClick={emptyWorkout}>
+              Empty workout
+            </button>
+          </div>
         </div>
       ) : (
         hero &&
         next && (
-          <div className="card hero">
-            <div className="hero-label">
-              {planned ? "Today's workout" : 'Start your next workout'}
+          <div className="card hm-hero">
+            <div className="hm-label">
+              {planned ? "Today's workout" : 'Up next'}
               {next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>}
             </div>
-            <div className="hero-name">
-              {splitName(next.workout.name)[0]}
-              {splitName(next.workout.name)[1] && <span className="hero-when">{splitName(next.workout.name)[1]}</span>}
+            <div className="hm-name">
+              {heroName}
+              {heroWhen && <span className="hm-when">{heroWhen}</span>}
             </div>
-            <div className="hero-meta">
+            <div className="hm-meta">
               <span>
                 <b>{hero.wes.length}</b> exercises
               </span>
@@ -242,52 +248,24 @@ export default function Home() {
                 </span>
               )}
             </div>
-            <div className="hero-preview">{hero.names.join(' · ')}</div>
-            <button className="btn primary block" onClick={() => start(next.workout)}>
-              <Play size={18} /> Start {splitName(next.workout.name)[0]}
+            {hero.names.length > 0 && <div className="hm-preview">{hero.names.join(' · ')}</div>}
+            <button className="btn primary block hm-go" onClick={() => start(next.workout)} disabled={hero.wes.length === 0}>
+              <Play size={18} aria-hidden /> Start {heroName}
             </button>
+            {weekRows}
           </div>
         )
       )}
 
       {workouts.length > 0 && <StartChecklist />}
-      {workouts.length > 0 && <GoalCard />}
-      <RecoveryCard />
 
-      {workouts.length > 0 && finished.length === 0 && (
-        <div className="card first-week">
-          <CalendarDays size={22} />
-          <div className="grow">
-            <div style={{ fontWeight: 650 }}>Your first week starts here</div>
-            <div className="small muted">Finish a workout and your weekly sets, streak and training calendar show up on this page.</div>
-          </div>
-        </div>
-      )}
-
-      <div className="row ins-actions">
-        {workouts.length > 0 && (
-          <button className="btn secondary grow" onClick={newWorkout}>
-            <Plus size={18} /> New workout
-          </button>
-        )}
-        <button
-          className="btn secondary grow"
-          disabled={!!active}
-          onClick={() => {
-            primeAudio()
-            nav(`/session/${startEmptySession()}`)
-          }}
-        >
-          <Zap size={18} /> Empty workout
-        </button>
-      </div>
       {workouts.length > 0 && (
         <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
-          <div className="sec-head">
+          <div className="sec-head hm-sec">
             <h2>Your workouts</h2>
-            <span className="small muted">
-              {workouts.length} workout{workouts.length === 1 ? '' : 's'}
-            </span>
+            <button className="btn sm secondary hm-new" onClick={() => setAdding(true)} aria-haspopup="dialog">
+              <Plus size={16} aria-hidden /> New
+            </button>
           </div>
           {groups.map((g) => {
             const shut = folded.includes(g.label)
@@ -298,7 +276,7 @@ export default function Home() {
                     <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
                       <ChevronDown size={18} className="fold-caret" aria-hidden />
                       {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
-                      <h2 className="ellipsis">{g.label}</h2>
+                      <h3 className="ellipsis">{g.label}</h3>
                       <span className="small muted">{g.workouts.length}</span>
                     </button>
                     {g.folder && (
@@ -319,8 +297,8 @@ export default function Home() {
                             <div className="trow-name ellipsis">{w.name}</div>
                             <div className="small muted ellipsis">
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
-                              {info.wes.length} exercises · {info.sets} sets
-                              {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
+                              {info.wes.length} exercises
+                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
                             </div>
                           </button>
                           <button className="btn icon ghost trow-more" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
@@ -346,15 +324,51 @@ export default function Home() {
       )}
       {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
       {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
+      {adding && (
+        <Sheet title="Add a workout" onClose={() => setAdding(false)}>
+          <div className="list-group home-links">
+            <button
+              className="list-row"
+              disabled={!!active}
+              onClick={() => {
+                setAdding(false)
+                emptyWorkout()
+              }}
+            >
+              <Zap size={20} aria-hidden />
+              <span className="grow">
+                <span className="home-link-t">Start an empty workout</span>
+                <span className="tiny muted">{active ? 'Finish the workout in progress first' : 'Add exercises as you go'}</span>
+              </span>
+              <ChevronRight size={18} aria-hidden />
+            </button>
+            <button className="list-row" onClick={newWorkout}>
+              <PencilLine size={20} aria-hidden />
+              <span className="grow">
+                <span className="home-link-t">Build a new workout</span>
+                <span className="tiny muted">Pick exercises, sets and rest, then save it</span>
+              </span>
+              <ChevronRight size={18} aria-hidden />
+            </button>
+            <button className="list-row" onClick={() => nav('/programs')}>
+              <LayoutGrid size={20} aria-hidden />
+              <span className="grow">
+                <span className="home-link-t">Browse programs</span>
+                <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
+              </span>
+              <ChevronRight size={18} aria-hidden />
+            </button>
+          </div>
+        </Sheet>
+      )}
 
       {finished.length > 0 && (
         <>
-          <section className="stack" style={{ gap: 10 }}>
+          <section className="stack" style={{ gap: 10 }} aria-label="This week">
             <div className="sec-head">
               <h2>This week</h2>
               <span className="small muted">
                 {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())}
-                {streak.best > streak.current && ` · best streak ${streak.best} wk`}
               </span>
             </div>
             <div className="stat-grid">
@@ -386,11 +400,11 @@ export default function Home() {
               <div className="row">
                 <div className="ins-title grow">Sets per muscle</div>
                 <div className="seg">
-                <button className={muscleWeek === 'this' ? 'on' : ''} onClick={() => setMuscleWeek('this')}>
-                  This wk
-                </button>
-                <button className={muscleWeek === 'last' ? 'on' : ''} onClick={() => setMuscleWeek('last')}>
-                  Last wk
+                  <button className={muscleWeek === 'this' ? 'on' : ''} onClick={() => setMuscleWeek('this')}>
+                    This wk
+                  </button>
+                  <button className={muscleWeek === 'last' ? 'on' : ''} onClick={() => setMuscleWeek('last')}>
+                    Last wk
                   </button>
                 </div>
               </div>
@@ -423,14 +437,6 @@ export default function Home() {
               </div>
             )}
           </section>
-
-          <section className="card">
-            <CalendarHeat
-              days={days}
-              now={now}
-              onDay={(_, d) => nav(d.sessionIds.length === 1 ? `/history/${d.sessionIds[0]}` : '/history')}
-            />
-          </section>
         </>
       )}
 
@@ -441,6 +447,16 @@ export default function Home() {
             <span className="grow">
               <span className="home-link-t">Browse programs</span>
               <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
+            </span>
+            <ChevronRight size={18} aria-hidden />
+          </button>
+        )}
+        {finished.length > 0 && (
+          <button className="list-row" onClick={() => nav('/history')}>
+            <Trophy size={20} aria-hidden />
+            <span className="grow">
+              <span className="home-link-t">History and records</span>
+              <span className="tiny muted">Every finished workout and your best lifts</span>
             </span>
             <ChevronRight size={18} aria-hidden />
           </button>
@@ -462,11 +478,6 @@ export default function Home() {
           <ChevronRight size={18} aria-hidden />
         </button>
       </div>
-      {finished.length > 0 && (
-        <button className="btn ghost sm" onClick={() => nav('/history')}>
-          <Trophy size={16} /> See history and records <ChevronRight size={16} />
-        </button>
-      )}
     </div>
   )
 }
