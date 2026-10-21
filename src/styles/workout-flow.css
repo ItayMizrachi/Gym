@@ -184,3 +184,4 @@
   background: var(--card2); color: var(--text-2); font-weight: 600; font-variant-numeric: tabular-nums;
 }
 .day-chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.trow-days { color: var(--text-2); font-weight: 600; }

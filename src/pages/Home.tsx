@@ -1,4 +1,4 @@
-import { todaysWorkout } from '../lib/plan'
+import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
@@ -314,6 +314,7 @@ export default function Home() {
                           <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
                             <div className="trow-name ellipsis">{w.name}</div>
                             <div className="small muted ellipsis">
+                              {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
                               {info.wes.length} exercises · {info.sets} sets
                               {info.last ? ` · last done ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
                             </div>

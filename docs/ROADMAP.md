@@ -53,7 +53,7 @@ Always keep something in progress. When the "Next" list runs low:
 8. ~~**Body measurements**~~ Shipped 21 Oct (PR #2). beyond weight (waist, chest, arms, thighs) with charts.
 9. ~~**Smart warm-ups.**~~ Shipped 21 Oct (PR #3). One tap generates warm-up sets ramping to the first work weight.
 10. ~~**Tools.**~~ Shipped 21 Oct (PR #3). 1RM calculator and plate calculator reachable from anywhere.
-11. **Google verification readiness** so the "unverified app" notice disappears (privacy/terms pages exist).
+11. **Google verification readiness** — checked 21 Oct: GymLog only asks for name and email (non-sensitive scopes), so a published app shows the normal Google sign-in with no "unverified" warning; verification is only needed to show a logo on that screen. Needs the owner: verify itaymizrachi.github.io in Google Search Console, then submit branding for review. Original note: so the "unverified app" notice disappears (privacy/terms pages exist).
 
 ## Found in self-review
 - ~~Program cards grey thumbs~~ — checked: photos were still loading, all resolve.
