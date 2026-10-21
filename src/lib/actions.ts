@@ -128,7 +128,7 @@ export function addExerciseToSession(sessionId: string, exercise: Exercise) {
     drop_last: false,
     note: ''
   }, sessionId)
-  st().save('sessions', { ...s, data: { exercises: [...s.data.exercises, se] } })
+  st().save('sessions', { ...s, data: { ...s.data, exercises: [...s.data.exercises, se] } })
 }
 
 export function finishSession(sessionId: string) {
@@ -138,7 +138,7 @@ export function finishSession(sessionId: string) {
   const exercises = s.data.exercises
     .map((e) => ({ ...e, sets: e.sets.filter((x) => x.done) }))
     .filter((e) => e.sets.length > 0)
-  st().save('sessions', { ...s, finished_at: nowIso(), data: { exercises } })
+  st().save('sessions', { ...s, finished_at: nowIso(), data: { ...s.data, exercises } })
   st().clearRest()
 }
 
@@ -187,4 +187,28 @@ export function addWarmupSets(se: SessionExercise, exercise: Exercise | undefine
   const plan = warmupSets(work, { style: warmupStyle(exercise?.equipment, exercise?.name ?? se.name), barKg: prefs.barKg, plates: prefs.plates })
   const sets = insertWarmups(se.sets, plan, (w) => ({ ...newSet('warmup', w.weight), reps: w.reps }))
   return sets ? { ...se, sets } : null
+}
+
+/**
+ * Swap the exercise at `index` for another one (machine taken, injury, preference).
+ * Sets already logged stay with the original exercise; the sets still to do move to the new one,
+ * pre-filled from the last time you did it. Nothing logged yet → a straight swap.
+ */
+export function replaceExerciseInSession(sessionId: string, index: number, exercise: Exercise) {
+  const { db } = st()
+  const s = db.sessions.find((x) => x.id === sessionId)
+  const old = s?.data.exercises[index]
+  if (!s || !old) return
+  const done = old.sets.filter((x) => x.done)
+  const todo = Math.max(1, old.sets.filter((x) => !x.done && x.kind !== 'warmup').length)
+  const next = buildSessionExercise(
+    db,
+    exercise,
+    { sets: todo, rep_min: old.rep_min, rep_max: old.rep_max, weight: 0, rest_sec: exercise.rest_sec || old.rest_sec, superset: old.superset, drop_last: false, note: old.note },
+    sessionId
+  )
+  const list = [...s.data.exercises]
+  if (done.length) list.splice(index, 1, { ...old, sets: done }, next)
+  else list.splice(index, 1, next)
+  st().save('sessions', { ...s, data: { ...s.data, exercises: list } })
 }

@@ -188,11 +188,14 @@ const libKey = (id: string) => 'lib:' + id
 export function ExercisePicker({
   onPick,
   onPickMany,
-  onClose
+  onClose,
+  title = 'Add exercises'
 }: {
   onPick: (e: Exercise) => void
   onPickMany?: (list: Exercise[]) => void
   onClose: () => void
+  /** sheet title, e.g. "Replace exercise" */
+  title?: string
 }) {
   const exercises = useStore((s) => s.db.exercises)
   const sessions = useStore((s) => s.db.sessions)
@@ -286,7 +289,7 @@ export function ExercisePicker({
 
   const searching = !!needle || filtered
   return (
-    <Sheet title={creating ? 'New exercise' : 'Add exercises'} onClose={onClose}>
+    <Sheet title={creating ? 'New exercise' : title} onClose={onClose}>
       {creating ? (
         <div className="stack">
           <button className="btn ghost sm" style={{ alignSelf: 'flex-start', marginLeft: -8 }} onClick={() => setCreating(false)}>

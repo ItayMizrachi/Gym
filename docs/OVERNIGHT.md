@@ -71,6 +71,10 @@
 - **End-to-end check:** start workout → log sets → rest timer → finish → summary → edit all verified after tonight's
   merges.
 
+- **Replace an exercise mid-workout:** ⋯ → Replace exercise (machine taken). Logged sets stay; the remaining sets
+  move to the new exercise with its last-time weights. Also fixed: editing exercises during a workout could drop the
+  workout photo field.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

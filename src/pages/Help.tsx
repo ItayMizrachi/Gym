@@ -135,6 +135,13 @@ export default function Help() {
         <p>Starts when you log a set. Use −15 / +15 to adjust it. It beeps and vibrates when rest is over.</p>
       </Sec>
 
+      <Sec title="Swapping an exercise">
+        <p>
+          Machine taken? In a workout, tap ⋯ on the exercise → <b>Replace exercise</b>. Sets you already logged stay with the
+          original; the sets still to do move to the new exercise, with weights from the last time you did it.
+        </p>
+      </Sec>
+
       <Sec title="Stalled lifts">
         <p>
           On Progress, an exercise you train regularly shows up here when your best estimated 1-rep max has not improved for 4

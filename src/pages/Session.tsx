@@ -1,11 +1,11 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
-import { addExerciseToSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
+import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
@@ -287,7 +287,7 @@ function ExerciseCard({ session, index, onMore, showLegend }: { session: Session
     const cur = useStore.getState().db.sessions.find((x) => x.id === session.id)
     if (!cur) return
     const exs = cur.data.exercises.map((e, i) => (i === index ? fn(e) : e))
-    save('sessions', { ...cur, data: { exercises: exs } }, immediate ? undefined : { debounce: 350 })
+    save('sessions', { ...cur, data: { ...cur.data, exercises: exs } }, immediate ? undefined : { debounce: 350 })
   }
   const patchSet = (setId: string, p: Partial<SessionSet>, immediate = false) =>
     mutate((e) => ({ ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, ...p } : s)) }), immediate)
@@ -665,6 +665,7 @@ export default function SessionPage() {
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [showMuscles, setShowMuscles] = useState(false)
   const [tools, setTools] = useState(false)
+  const [replaceIdx, setReplaceIdx] = useState<number | null>(null)
   const userId = useStore((s) => s.user?.id ?? 'local')
   useWakeLock()
 
@@ -693,7 +694,7 @@ export default function SessionPage() {
 
   function mutateEx(i: number, fn: (e: SessionExercise) => SessionExercise) {
     const cur = useStore.getState().db.sessions.find((x) => x.id === session!.id)!
-    save('sessions', { ...cur, data: { exercises: cur.data.exercises.map((e, k) => (k === i ? fn(e) : e)) } })
+    save('sessions', { ...cur, data: { ...cur.data, exercises: cur.data.exercises.map((e, k) => (k === i ? fn(e) : e)) } })
   }
 
   function move(i: number, dir: -1 | 1) {
@@ -702,7 +703,7 @@ export default function SessionPage() {
     const j = i + dir
     if (j < 0 || j >= arr.length) return
     ;[arr[i], arr[j]] = [arr[j], arr[i]]
-    save('sessions', { ...cur, data: { exercises: arr } })
+    save('sessions', { ...cur, data: { ...cur.data, exercises: arr } })
   }
 
   return (
@@ -806,10 +807,25 @@ export default function SessionPage() {
             move(moreIdx, d)
             setMoreIdx(moreIdx + d)
           }}
+          onReplace={() => {
+            setReplaceIdx(moreIdx)
+            setMoreIdx(null)
+          }}
           onRemove={() => {
             const cur = useStore.getState().db.sessions.find((x) => x.id === session.id)!
-            save('sessions', { ...cur, data: { exercises: cur.data.exercises.filter((_, k) => k !== moreIdx) } })
+            save('sessions', { ...cur, data: { ...cur.data, exercises: cur.data.exercises.filter((_, k) => k !== moreIdx) } })
             setMoreIdx(null)
+          }}
+        />
+      )}
+
+      {replaceIdx != null && (
+        <ExercisePicker
+          title="Replace exercise"
+          onClose={() => setReplaceIdx(null)}
+          onPick={(ex) => {
+            replaceExerciseInSession(session.id, replaceIdx, ex)
+            setReplaceIdx(null)
           }}
         />
       )}
@@ -886,7 +902,8 @@ function MoreSheet({
   onClose,
   onChange,
   onMove,
-  onRemove
+  onRemove,
+  onReplace
 }: {
   se: SessionExercise
   index: number
@@ -895,6 +912,7 @@ function MoreSheet({
   onChange: (fn: (e: SessionExercise) => SessionExercise) => void
   onMove: (d: -1 | 1) => void
   onRemove: () => void
+  onReplace: () => void
 }) {
   const [rest, setRest] = useState(fmtRest(se.rest_sec))
   const [kpMode, setKpMode] = useKeypadMode()
@@ -930,6 +948,12 @@ function MoreSheet({
           Remove last set row
         </button>
         <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
+        <button className="btn" onClick={onReplace}>
+          <Repeat size={16} /> Replace exercise
+        </button>
+        <div className="small muted" style={{ marginTop: -4 }}>
+          Machine taken? Swap it for another one. Sets you already logged stay as they are.
+        </div>
         <button className="btn danger" onClick={onRemove}>
           <Trash2 size={16} /> Remove exercise from workout
         </button>
