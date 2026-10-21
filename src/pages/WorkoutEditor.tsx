@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Info, Link2, Plus, Tras
 import '../styles/programs-nav.css'
 import { MoveToFolderSheet } from '../components/FolderSheet'
 import { folderOf, NO_FOLDER } from '../lib/folders'
+import { DAY_NAME, DAY_SHORT, plannedDays } from '../lib/plan'
 import { useStore } from '../lib/store'
 import { duplicateWorkout, removeWorkout } from '../lib/actions'
 import { ExercisePicker } from '../components/ExercisePicker'
@@ -259,6 +260,26 @@ export default function WorkoutEditor() {
             </span>
             <span className="small muted">Move</span>
           </button>
+        </div>
+        <div className="field">
+          Planned days
+          <div className="day-pick" role="group" aria-label="Planned days">
+            {DAY_SHORT.map((l, d) => {
+              const on = plannedDays(w).includes(d)
+              return (
+                <button
+                  key={d}
+                  className={`day-chip ${on ? 'on' : ''}`}
+                  aria-pressed={on}
+                  aria-label={DAY_NAME[d]}
+                  onClick={() => save('workouts', { ...w, days: on ? plannedDays(w).filter((x) => x !== d) : [...plannedDays(w), d].sort((a, b) => a - b) })}
+                >
+                  {l}
+                </button>
+              )
+            })}
+          </div>
+          <span className="small muted">On these days the Train tab shows it as today's workout.</span>
         </div>
         <label className="field">
           Notes

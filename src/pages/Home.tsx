@@ -1,3 +1,4 @@
+import { todaysWorkout } from '../lib/plan'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, CalendarDays, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen } from 'lucide-react'
@@ -103,7 +104,14 @@ export default function Home() {
   const groups = useMemo(() => groupByFolder(db.workouts), [db.workouts])
   const active = db.sessions.find((s) => !s.finished_at)
   const finished = useMemo(() => finishedSessions(db), [db])
-  const next = useMemo(() => suggestNextWorkout(db), [db])
+  // a workout planned for today wins over the rotation suggestion
+  const planned = useMemo(() => todaysWorkout(db), [db])
+  const next = useMemo(() => {
+    const s = suggestNextWorkout(db)
+    if (!planned) return s
+    const lastDone = s && s.workout.id === planned.id ? s.lastDone : null
+    return { workout: planned, lastDone, reason: 'rotation' as const }
+  }, [db, planned])
   const weeks = useMemo(() => compareWeeks(db, now), [db, now])
   const streak = useMemo(() => weeklyStreak(db, now), [db, now])
   const days = useMemo(() => trainingDays(db), [db])
@@ -212,7 +220,7 @@ export default function Home() {
         next && (
           <div className="card hero">
             <div className="hero-label">
-              Start your next workout
+              {planned ? "Today's workout" : 'Start your next workout'}
               {next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>}
             </div>
             <div className="hero-name">

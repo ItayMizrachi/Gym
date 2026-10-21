@@ -47,7 +47,7 @@ Always keep something in progress. When the "Next" list runs low:
 4. ~~**Speed.**~~ First pass shipped 21 Oct (secondary screens lazy-loaded: main bundle 306 → 200 KB, 86 → 64 KB gzip). Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
    Measure bundle size before/after.
 5. ~~**Account deletion in the app**~~ Shipped 21 Oct (PR #1). (Settings → Delete account and data), required for Google and app-store policy.
-6. ~~**Weekly goal and plan.**~~ Goal shipped 21 Oct (PR #4); planned days still open. Set a weekly target (e.g. 4 workouts), see the planned days, gentle progress ring.
+6. ~~**Weekly goal and plan.**~~ Goal shipped 21 Oct (PR #4); planned days shipped 21 Oct. Set a weekly target (e.g. 4 workouts), see the planned days, gentle progress ring.
 7. ~~**Records & achievements.**~~ Shipped 21 Oct (PR #4). A records page per exercise and badges (first 100 kg bench, 10-week streak…),
    tasteful, never noisy.
 8. ~~**Body measurements**~~ Shipped 21 Oct (PR #2). beyond weight (waist, chest, arms, thighs) with charts.

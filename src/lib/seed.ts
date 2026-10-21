@@ -1,3 +1,4 @@
+import { daysFromName } from './plan'
 import { Exercise, Tracking, Workout, WorkoutExercise } from './types'
 import { uid, nowIso } from './uid'
 import { NAME_TO_LIB, libPath } from './libraryLinks'
@@ -134,7 +135,8 @@ export function buildStarterPlan(userId: string, existing: Exercise[], startPosi
       name: p.name,
       notes: p.notes,
       position: startPosition + i,
-      created_at: nowIso()
+      created_at: nowIso(),
+      days: daysFromName(p.name)
     }
     workouts.push(w)
     p.rows.forEach((r, j) => {

@@ -127,6 +127,7 @@ alter table public.exercises add column if not exists equipment text not null de
 alter table public.exercises add column if not exists tracking text not null default 'weight_reps';
 alter table public.workouts add column if not exists folder text not null default '';
 alter table public.metrics add column if not exists measures jsonb;
+alter table public.workouts add column if not exists days smallint[] not null default '{}';
 
 -- Ask the API to reload its schema cache right away, so new columns work without waiting.
 notify pgrst, 'reload schema';

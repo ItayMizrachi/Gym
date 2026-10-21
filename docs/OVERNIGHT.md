@@ -42,6 +42,9 @@
 - **Self-review fixes:** weight trend no longer red when you lose weight; workout title wraps on small phones;
   exercise names wrap instead of cutting; shorter search hint; a calmer toast when many achievements arrive at once.
 
+- **Weekly plan:** each workout can have planned days (workout editor → "Planned days"). On those days the Train
+  tab says "Today's workout". The starter plan and the weekly programs come with their days filled in.
+
 ## In progress (parallel sessions, each opens a PR that the coordinator merges)
 - Next: self-review pass of the whole app (design critique, accessibility, code review) and the fixes it finds.
 

@@ -176,3 +176,11 @@
 
 /* two lines, then an ellipsis: long exercise names stay readable next to a number column */
 .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+
+/* planned days picker in the workout editor */
+.day-pick { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-chip {
+  min-height: 44px; border-radius: var(--r-sm); border: 1px solid var(--line-strong);
+  background: var(--card2); color: var(--text-2); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.day-chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

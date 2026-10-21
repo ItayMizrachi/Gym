@@ -1,6 +1,7 @@
 import { Exercise, Tracking, Workout, WorkoutExercise } from './types'
 import { uid, nowIso } from './uid'
 import { SINGLE_WORKOUTS, WEEKLY_PROGRAMS } from './programData'
+import { programDays } from './plan'
 
 /** One exercise slot inside a ready-made workout. For 'time' exercises rep_min / rep_max are seconds. */
 export interface ProgramExercise {
@@ -182,8 +183,9 @@ export function buildProgram(p: Program, userId: string, existingExercises: Exer
   const workouts: Workout[] = []
   const workout_exercises: WorkoutExercise[] = []
 
+  const plan = p.kind === 'weekly' ? programDays(p.workouts.length, p.days) : []
   p.workouts.forEach((pw, i) => {
-    const w: Workout = { id: uid(), user_id: userId, name: pw.name, notes: pw.notes, position: start + i, created_at: nowIso(), folder }
+    const w: Workout = { id: uid(), user_id: userId, name: pw.name, notes: pw.notes, position: start + i, created_at: nowIso(), folder, ...(plan[i]?.length ? { days: plan[i] } : {}) }
     workouts.push(w)
     pw.exercises.forEach((pe, j) =>
       workout_exercises.push({

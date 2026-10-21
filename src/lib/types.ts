@@ -30,6 +30,8 @@ export interface Workout {
   created_at: string
   /** folder name for grouping on the Train tab; '' or missing = no folder */
   folder?: string
+  /** planned days of the week, 0 = Sunday … 6 = Saturday; missing = not planned */
+  days?: number[]
 }
 
 export interface WorkoutExercise {
