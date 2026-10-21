@@ -22,6 +22,7 @@ const SettingsPage = lazy(() => import('./pages/Settings'))
 const Help = lazy(() => import('./pages/Help'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Programs = lazy(() => import('./pages/Programs'))
+const Records = lazy(() => import('./pages/Records'))
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
 function useLaunchShortcut(ready: boolean) {
@@ -77,6 +78,7 @@ export default function App() {
               <Route path="/help" element={<Help />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/programs" element={<Programs />} />
+              <Route path="/records" element={<Records />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
