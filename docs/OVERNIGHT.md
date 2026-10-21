@@ -1,80 +1,54 @@
 # Overnight log (20–21 Oct 2026)
 
-## Shipped to https://itaymizrachi.github.io/Gym/
-- **Design pass:** Inter font everywhere with a clear type scale; near-black floor with graphite cards; 52px
-  buttons; roomier lists, sheets and nav; iOS-style back chevron; fixes for small (320px) phones; better contrast
-  (4.5:1) on coloured chips; pinch-zoom allowed. Before/after screenshots: `docs/design/`.
-- **Google-only sign-in, no "demo" anywhere.** The login screen is one Google button with a short privacy line.
-  (Email sign-in is also switched off in Supabase.)
-- **Exercise library:** 876 exercises with photos and step-by-step instructions (free-exercise-db), search and
-  filters, add any of them to your exercises or a workout.
-- **A picture for every exercise:** starter plan and all 30 ready-made programs show real photos; your own
-  exercises get a matching picture automatically; tapping any picture opens "How to do it".
+Everything below is live at https://itaymizrachi.github.io/Gym/ and passed type-check, 1,150+ tests, a production
+build and a phone-size browser check before it went up.
 
-- **Workout on the lock screen:** Settings → "Show workout on lock screen". While you train, the lock screen shows
-  the exercise, which set you are on and the rest countdown with a progress bar; ⏭ skips rest, ⏮ adds 15 s.
-  It uses the music card, so it replaces Spotify while on (that's why it's off by default). Explained in Help.
+## The big ones
+- **New look:** Inter font with a clear type scale, near-black background with graphite cards, big 52px buttons,
+  roomier lists, iOS-style back arrows, fixes for small phones, better contrast. Your colours are unchanged.
+  Before/after screenshots: `docs/design/`.
+- **Exercise library:** 876 exercises, each with photos and step-by-step instructions, search and filters. Every
+  exercise in the starter plan and all 30 ready-made programs has a real photo; your own exercises get a matching one
+  automatically; tap any photo for "How to do it".
+- **Sign-in is Google only,** with no "demo" anywhere. (Email sign-in is also off in Supabase.)
+- **Find my program:** 4 questions (goal, experience, days a week, equipment) → the best-fitting ready-made program,
+  added in one tap.
 
-- **Find my program:** 4 quick questions (goal, experience, days a week, equipment) → the best-fitting ready-made
-  program plus two alternatives, added in one tap. It's the main button at the end of the welcome tour and a card at
-  the top of the Programs page.
+## During a workout
+- **One-tap sets:** tapping ✓ on an empty reps box logs the grey suggested number.
+- **A number to beat:** the volume label shows last time's total and turns green with "Beat last time".
+- **Replace an exercise** (machine taken): ⋯ → Replace exercise. Logged sets stay; the rest move over.
+- **Smart warm-ups:** "+ Warm-up" can add ramped warm-up sets rounded to your plates.
+- **Tools:** 1-rep-max calculator, percent table and plate calculator (calculator icon in the header).
+- **Lock screen:** Settings → "Show workout on lock screen" shows the exercise, set and rest countdown on the lock
+  screen (⏭ skips rest, ⏮ adds 15 s). It uses the music card, so it's off by default.
+- Messages (records, achievements) no longer cover the Finish button.
 
-- **Import from Hevy or Strong:** Settings → Data & backup → "Import from Hevy or Strong". Pick the CSV export;
-  workouts, sets (warm-up / drop / failure), notes, RPE and timed sets come over, exercises get matching photos,
-  and importing the same file twice skips what is already there. Strong pounds can be converted.
-- Small fixes: Google button logo no longer overlaps its label; History says "1 set" and hides an empty weekly
-  average.
+## Progress and planning
+- **Weekly plan:** give workouts planned days (workout editor → Planned days); the Train tab then says
+  "Today's workout". The starter plan and weekly programs come with days filled in.
+- **Weekly goal** ring on Train ("2 of 3 workouts this week").
+- **Muscle recovery** on Train: a body figure of what you worked recently, plus what's ready to train.
+- **Records page** (best set and estimated 1-rep max for every exercise) and **~15 achievements** on Progress.
+- **Stalled lifts** on Progress: exercises with no new best for 4 sessions, with a plain suggestion.
+- **Body measurements:** waist, chest, arms, thighs, body fat and more, with a chart per measure and a
+  "where to measure" guide.
 
-- **Faster start:** the first download is about a quarter smaller (secondary screens load when first opened and
-  are still cached for offline use).
+## Data and account
+- **Import from Hevy or Strong** (Settings → Data & backup): bring your whole history over.
+- **Delete account and data** (Settings → Account), as Google requires.
 
-- **Delete account and data:** Settings → Account → Delete account. Explains what goes, offers a backup first,
-  needs DELETE typed. The database function is installed in Supabase and only works for the signed-in user.
-- **Body measurements:** log waist, chest, arms, thighs, body fat and more with your weight; a chart per measure,
-  change vs 30 days ago, and a "where to measure" body guide.
+## Speed and reliability
+- First download about 25% smaller; the first install ~0.4 MB lighter.
+- Exercise photos stay available offline at the gym.
+- After an update, a screen that can't load reloads itself; offline it shows a calm "Try again" card.
+- Fixed: editing exercises during a workout could drop the workout photo field.
 
-- **Records, achievements and a weekly goal:** a Records page with every exercise's best set, estimated 1-rep max
-  and rep records; ~15 achievements on Progress (earned in colour, next ones with progress bars); a weekly goal
-  ring on Train ("0 of 3 workouts this week").
-- **Smart warm-ups and tools:** "+ Warm-up" can add ramped warm-up sets rounded to your plates; a Tools sheet in
-  the workout has a 1-rep-max calculator, a percent table and the plate calculator.
-
-- **Self-review fixes:** weight trend no longer red when you lose weight; workout title wraps on small phones;
-  exercise names wrap instead of cutting; shorter search hint; a calmer toast when many achievements arrive at once.
-
-- **Weekly plan:** each workout can have planned days (workout editor → "Planned days"). On those days the Train
-  tab says "Today's workout". The starter plan and the weekly programs come with their days filled in.
-
-## In progress (parallel sessions, each opens a PR that the coordinator merges)
-- Next: self-review pass of the whole app (design critique, accessibility, code review) and the fixes it finds.
-
-- The Train tab shows each workout's planned days (e.g. "Mon · 5 exercises").
-- Correction from yesterday: because GymLog only asks Google for name and email, new users get Google's normal
-  sign-in screen with no "unverified app" warning. Verification is only needed if you want the GymLog logo on that
-  screen (it needs you to verify the site in Google Search Console).
-
-- **Reliability:** exercise photos are now kept for offline use (they show at the gym without signal); the first
-  install is ~0.4 MB lighter; a screen that can't load after an update reloads itself, and offline shows a calm
-  "Try again" card instead of a blank page.
-
-- **New: muscle recovery on Train.** A body figure shows which muscles you worked in the last days (brighter =
-  harder) and lists what is recovering and what is ready, so picking today's workout is easier. Explained in Help.
-
-- **A number to beat:** during a workout the volume label shows last time's total for the same workout
-  ("Last 9.8 t") and turns green with "Beat last time" once you pass it.
-
-- **Stalled lifts (coaching):** Progress lists exercises with no new best for 4 sessions, with a plain suggestion
-  (an easier week at ~90%, or a different rep range). Explained in Help.
-
-- **Faster logging:** tapping ✓ on an empty reps box logs the grey suggested number (last time, or the bottom of
-  the rep range), like Hevy and Strong, so a set that went to plan is one tap.
-- **End-to-end check:** start workout → log sets → rest timer → finish → summary → edit all verified after tonight's
-  merges.
-
-- **Replace an exercise mid-workout:** ⋯ → Replace exercise (machine taken). Logged sets stay; the remaining sets
-  move to the new exercise with its last-time weights. Also fixed: editing exercises during a workout could drop the
-  workout photo field.
+## Good to know
+- Because GymLog only asks Google for name and email, new users see Google's normal sign-in, with no
+  "unverified app" warning. (Showing the GymLog logo there would need you to verify the site in Google Search Console.)
+- Database changes made tonight in Supabase: `metrics.measures`, `workouts.days`, and the `delete_my_account` function.
 
 ## Needs you
-- Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
-- Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
+- Open the app on your phone, sign in with Google and do one short workout: that's the one thing I can't test.
+- Optional: try Delete account once with a spare Google account to confirm it end to end.
