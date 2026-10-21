@@ -92,6 +92,8 @@ export interface Metric {
   weight_kg: number | null
   note: string
   photo_path: string | null
+  /** body measurements in cm (body_fat_pct in %), keyed by MeasureKey; old rows have none */
+  measures?: Record<string, number> | null
   created_at: string
 }
 
