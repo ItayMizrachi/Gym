@@ -1,0 +1,181 @@
+/* Body measurements: log-sheet section, Body tab card, "where to measure" guide */
+
+.ms-section {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 0 var(--s3);
+  background: var(--bg2);
+}
+.ms-section > .stack {
+  padding-bottom: var(--s3);
+}
+.ms-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+}
+.ms-toggle > svg:first-child {
+  color: var(--muted);
+}
+.ms-chev {
+  color: var(--muted);
+  transition: transform var(--t) var(--ease);
+}
+.ms-chev.open {
+  transform: rotate(180deg);
+}
+
+.ms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s3);
+}
+.ms-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  min-width: 0;
+}
+.ms-input {
+  position: relative;
+  display: block;
+}
+.ms-input .num {
+  padding-right: 34px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-unit {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* Body tab card */
+.ms-empty {
+  display: flex;
+  gap: var(--s3);
+  align-items: flex-start;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.ms-empty > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--accent);
+}
+.ms-seg-wrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--s4));
+  padding: 0 var(--s4) 4px;
+  scrollbar-width: none;
+}
+.ms-seg-wrap::-webkit-scrollbar {
+  display: none;
+}
+.ms-seg button {
+  white-space: nowrap;
+}
+.body-hero .big.ms-big {
+  font-size: 40px;
+}
+.delta-row.ms-deltas {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Guide */
+.ms-guide {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--s4);
+  align-items: start;
+}
+.ms-body {
+  width: 112px;
+  height: auto;
+  position: sticky;
+  top: 0;
+}
+.ms-shape > * {
+  fill: var(--card3);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.ms-line {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2.5;
+  stroke-linecap: round;
+  transition: stroke var(--t) var(--ease);
+}
+.ms-line.on {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+.ms-side {
+  fill: var(--muted);
+  font-size: 8px;
+  font-weight: 600;
+}
+.ms-howlist {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ms-how {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 6px var(--s3);
+  border-radius: var(--r-sm);
+  text-align: left;
+  color: var(--text-2);
+  font-size: 15px;
+}
+.ms-how.on {
+  background: var(--accent-soft);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.ms-how-name {
+  font-weight: 600;
+}
+.ms-how-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-chev,
+  .ms-line {
+    transition: none;
+  }
+}
+
+.ms-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s2);
+  margin: 0 calc(-1 * var(--s2));
+}
+.ms-actions .btn {
+  padding-left: var(--s2);
+  padding-right: var(--s2);
+}

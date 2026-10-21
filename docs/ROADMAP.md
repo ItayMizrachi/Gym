@@ -46,11 +46,11 @@ Always keep something in progress. When the "Next" list runs low:
 3. ~~**Import from Hevy / Strong (CSV).**~~ Shipped 21 Oct (Settings → Data & backup). Lets people switch without losing history.
 4. ~~**Speed.**~~ First pass shipped 21 Oct (secondary screens lazy-loaded: main bundle 306 → 200 KB, 86 → 64 KB gzip). Lazy-load routes, keep the first screen tiny, render from the local cache immediately, lazy images.
    Measure bundle size before/after.
-5. **Account deletion in the app** (Settings → Delete account and data), required for Google and app-store policy.
+5. ~~**Account deletion in the app**~~ Shipped 21 Oct (PR #1). (Settings → Delete account and data), required for Google and app-store policy.
 6. **Weekly goal and plan.** Set a weekly target (e.g. 4 workouts), see the planned days, gentle progress ring.
 7. **Records & achievements.** A records page per exercise and badges (first 100 kg bench, 10-week streak…),
    tasteful, never noisy.
-8. **Body measurements** beyond weight (waist, chest, arms, thighs) with charts.
+8. ~~**Body measurements**~~ Shipped 21 Oct (PR #2). beyond weight (waist, chest, arms, thighs) with charts.
 9. **Smart warm-ups.** One tap generates warm-up sets ramping to the first work weight.
 10. **Tools.** 1RM calculator and plate calculator reachable from anywhere.
 11. **Google verification readiness** so the "unverified app" notice disappears (privacy/terms pages exist).

@@ -28,8 +28,14 @@
 - **Faster start:** the first download is about a quarter smaller (secondary screens load when first opened and
   are still cached for offline use).
 
-## In progress
-- Next from the roadmap: delete account and data from inside the app.
+- **Delete account and data:** Settings → Account → Delete account. Explains what goes, offers a backup first,
+  needs DELETE typed. The database function is installed in Supabase and only works for the signed-in user.
+- **Body measurements:** log waist, chest, arms, thighs, body fat and more with your weight; a chart per measure,
+  change vs 30 days ago, and a "where to measure" body guide.
+
+## In progress (parallel sessions, each opens a PR that the coordinator merges)
+- Records + achievements + weekly goal; smart warm-ups + 1RM tools.
 
 ## Needs you
+- Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
