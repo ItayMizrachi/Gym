@@ -65,9 +65,30 @@ export default defineConfig({
         // OS installer, so precaching them would only cost download on every update.
         globPatterns: ['**/*.{js,css,html,woff2}', 'icon.svg', 'icon-192.png', 'apple-touch-icon.png'],
         // Inter: precache only the Latin files (English UI); other scripts still load on demand when online.
-        globIgnores: ['splash/**', '**/*vietnamese*', '**/*cyrillic*', '**/*greek*', '**/*-italic*'],
+        globIgnores: [
+          'splash/**', '**/*vietnamese*', '**/*cyrillic*', '**/*greek*', '**/*-italic*',
+          // ~0.5 MB of exercise how-to text: fetched the first time someone opens "How to do it", then cached
+          '**/library-instructions-*.js'
+        ],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            // Exercise library photos (free-exercise-db). Each file never changes, so cache-first: a picture
+            // seen once keeps showing at the gym without signal.
+            urlPattern: ({ url }) => url.hostname === 'raw.githubusercontent.com' && url.pathname.includes('/free-exercise-db/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gymlog-exercise-photos',
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 120 },
+              cacheableResponse: { statuses: [0, 200] }
+            }
+          },
+          {
+            // the how-to text chunk left out of the precache above
+            urlPattern: ({ url }) => /\/assets\/library-instructions-[^/]+\.js$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'gymlog-library-text', expiration: { maxEntries: 4 }, cacheableResponse: { statuses: [200] } }
+          },
           {
             // Photos from the private Supabase bucket. Signed URLs carry a ?token=… that changes, so the
             // cache key drops the query: a photo you have seen once still shows offline at the gym.

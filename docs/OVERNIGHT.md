@@ -53,6 +53,10 @@
   sign-in screen with no "unverified app" warning. Verification is only needed if you want the GymLog logo on that
   screen (it needs you to verify the site in Google Search Console).
 
+- **Reliability:** exercise photos are now kept for offline use (they show at the gym without signal); the first
+  install is ~0.4 MB lighter; a screen that can't load after an update reloads itself, and offline shows a calm
+  "Try again" card instead of a blank page.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
