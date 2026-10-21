@@ -1,0 +1,164 @@
+/* ================= Train (home): one hero that answers "what do I do now?", then the workouts list =================
+   Shared tokens only. Owned by Home.tsx, GoalRing.tsx (WeekLine), RecoveryCard.tsx (RecoveryLine), StartChecklist.tsx. */
+
+/* ---------- hero: today's / next workout ---------- */
+.card.hm-hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s4);
+  border-top: 3px solid var(--accent);
+}
+.hm-hero::after {
+  /* a 20 kg plate seen edge-on, purely decorative */
+  content: '';
+  position: absolute;
+  right: -46px;
+  top: -46px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 16px solid var(--card2);
+  box-shadow: inset 0 0 0 22px var(--card), inset 0 0 0 30px var(--card2);
+  pointer-events: none;
+}
+.hm-hero > * { position: relative; z-index: 1; }
+.hm-label { font-size: var(--fs-sm); font-weight: 600; color: var(--accent); }
+.hm-label .muted { font-weight: 500; }
+.hm-name {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-tight);
+  padding-right: 72px;
+  overflow-wrap: anywhere;
+}
+.hm-when { display: block; margin-top: 2px; font-size: var(--fs-base); font-weight: 500; letter-spacing: 0; color: var(--muted); }
+.hm-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: var(--fs-sm); color: var(--muted); }
+.hm-meta b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hm-preview { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-hero .btn.hm-go { margin-top: var(--s1); }
+
+/* ---------- the hero's footer: this week + recovery, one tappable row each ---------- */
+.hm-foot { margin: var(--s2) calc(-1 * var(--s4)) calc(-1 * var(--s4)); border-top: 1px solid var(--line); }
+.hm-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 60px;
+  padding: 10px var(--s4);
+  text-align: left;
+  color: var(--text);
+  background: none;
+  transition: background var(--t) var(--ease);
+}
+.hm-row + .hm-row { border-top: 1px solid var(--line); }
+.hm-row:active { background: var(--card2); }
+.hm-row:focus-visible { outline: none; box-shadow: inset var(--focus); }
+.hm-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.hm-row-t { display: block; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.3; }
+.hm-row-t b { color: var(--text); font-weight: 600; }
+.hm-row-end { flex: none; color: var(--muted); }
+.hm-row .goal-ring { margin: 0 2px; }
+.hm-map { flex: none; width: 44px; }
+.hm-map-lg { display: block; margin: 0 auto; }
+
+.hm-days { display: flex; gap: 4px; }
+.hm-days i {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+}
+.hm-days i.on { background: var(--ok); color: var(--ok-ink); }
+.hm-days i.today { box-shadow: 0 0 0 1.5px var(--text-2); }
+
+.hm-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: var(--ok); vertical-align: 1px; }
+.hm-dot.work { background: var(--accent); }
+.hm-rec-line { font-size: var(--fs-sm); color: var(--muted); line-height: 1.4; }
+.hm-rec-line b { color: var(--text); font-weight: 600; }
+
+/* ---------- getting started: one line, opens on tap ---------- */
+.card.hm-start { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.hm-start-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  min-height: 60px;
+  padding: 10px var(--s4) 8px;
+  text-align: left;
+  color: var(--text);
+}
+.hm-start-head:focus-visible { outline: none; box-shadow: inset var(--focus); }
+.hm-start-head .hm-row-t { color: var(--text); font-size: var(--fs-base); font-weight: 600; }
+.hm-start-n {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-line);
+  color: var(--ok);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.hm-start-caret { flex: none; color: var(--muted); transition: transform var(--t) var(--ease); }
+.hm-start-head[aria-expanded='true'] .hm-start-caret { transform: rotate(180deg); }
+.hm-start-bar { height: 3px; margin: 0 var(--s4) var(--s3); border-radius: var(--r-pill); background: var(--line-strong); overflow: hidden; }
+.hm-start-bar i { display: block; height: 100%; background: var(--ok); }
+.hm-start-list { display: flex; flex-direction: column; padding: 0 var(--s4) var(--s2); }
+.hm-start-row { display: flex; align-items: center; gap: var(--s3); min-height: 52px; width: 100%; text-align: left; color: var(--text); }
+.hm-start-row + .hm-start-row { border-top: 1px solid var(--line); }
+.hm-start-row.done { opacity: 0.6; }
+.hm-start-row.done .hm-start-t { text-decoration: line-through; }
+.hm-start-t { font-weight: 600; }
+.hm-start-tick {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  display: grid;
+  place-items: center;
+  color: var(--ok-ink);
+}
+.hm-start-row.done .hm-start-tick { background: var(--ok); border-color: var(--ok); }
+.btn.hm-start-hide { align-self: flex-start; margin: var(--s1) 0 0 calc(-1 * var(--s2)); color: var(--muted); }
+
+/* ---------- brand-new user: one card, one primary ---------- */
+.card.hm-welcome { display: flex; flex-direction: column; gap: var(--s3); padding: var(--s5) var(--s4) var(--s4); }
+.card.hm-welcome h2 { font-size: 26px; font-weight: 700; line-height: var(--lh-tight); letter-spacing: var(--track-tight); margin: var(--s1) 0 0; }
+.hm-welcome p { margin: 0 0 var(--s1); color: var(--text-2); font-size: var(--fs-base); line-height: 1.45; }
+.hm-welcome .btn.block { min-height: var(--btn-h); font-size: 17px; border-radius: 12px; }
+.hm-welcome-more { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.hm-welcome-more .btn { min-height: var(--tap); padding: 0 var(--s2); color: var(--text-2); font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+/* ---------- workouts list header ---------- */
+.sec-head.hm-sec { align-items: center; }
+.hm-sec .btn.hm-new { min-height: 36px; padding: 0 14px; border-radius: var(--r-pill); gap: 4px; font-weight: 600; }
+.hm .fold-head h3 { margin: 0; font-size: 17px; font-weight: 600; }
+
+@media (max-width: 360px) {
+  .hm-name { font-size: 24px; }
+  .hm-days { gap: 3px; }
+  .hm-days i { width: 18px; height: 18px; }
+  .hm-welcome-more { grid-template-columns: 1fr; }
+  .hm-welcome .btn.block { font-size: 16px; padding: 0 var(--s3); }
+  .hm-welcome .btn.block svg { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hm-row, .hm-start-caret { transition: none; }
+}
