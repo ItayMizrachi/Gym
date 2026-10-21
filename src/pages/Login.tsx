@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, Zap, Images, Trophy } from 'lucide-react'
+import '../styles/workout-flow.css'
 import { useStore } from '../lib/store'
 import { redirectUrl, supabase } from '../lib/supabase'
 import { googleClientId, renderGoogleButton } from '../lib/googleSignIn'
@@ -44,6 +45,20 @@ export default function Login() {
           Gym<span>Log</span>
         </h1>
         <div className="tag">Every set, every record, every weigh-in. Your training logbook, always with you.</div>
+        <ul className="login-perks">
+          <li>
+            <span className="perk-ico" aria-hidden><Zap size={18} /></span>
+            <span><b>Log a set in one tap.</b> Weights fill in from last time and the rest timer starts by itself.</span>
+          </li>
+          <li>
+            <span className="perk-ico" aria-hidden><Images size={18} /></span>
+            <span><b>876 exercises with photos.</b> Plus 30 ready-made plans, so you never start from a blank page.</span>
+          </li>
+          <li>
+            <span className="perk-ico" aria-hidden><Trophy size={18} /></span>
+            <span><b>See yourself get stronger.</b> Records, streaks and a nudge when a new best is one rep away.</span>
+          </li>
+        </ul>
       </div>
 
       <div className="login-actions">

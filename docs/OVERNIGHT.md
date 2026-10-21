@@ -10,7 +10,8 @@ build and a phone-size browser check before it went up.
 - **Exercise library:** 876 exercises, each with photos and step-by-step instructions, search and filters. Every
   exercise in the starter plan and all 30 ready-made programs has a real photo; your own exercises get a matching one
   automatically; tap any photo for "How to do it".
-- **Sign-in is Google only,** with no "demo" anywhere. (Email sign-in is also off in Supabase.)
+- **Sign-in is Google only,** with no "demo" anywhere. (Email sign-in is also off in Supabase.) The sign-in screen
+  now shows three short reasons to join (one-tap logging, 876 exercises with photos, records and streaks).
 - **Find my program:** 4 questions (goal, experience, days a week, equipment) → the best-fitting ready-made program,
   added in one tap.
 
