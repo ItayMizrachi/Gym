@@ -195,3 +195,6 @@
 .rec-line b { color: var(--text); font-weight: 600; }
 .rec-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--line-strong); vertical-align: 1px; }
 .rec-dot.work { background: var(--accent); }
+
+/* on the workout screen, messages sit under the header so they never cover Finish or the live numbers */
+.toasts.in-session { top: calc(var(--safe-t) + 132px); }

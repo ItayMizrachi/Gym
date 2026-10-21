@@ -172,11 +172,11 @@ class ScreenBoundary extends Component<{ children: ReactNode; resetKey: string }
   }
 }
 
-function Toasts() {
+function Toasts({ inSession }: { inSession: boolean }) {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
   return (
-    <div className="toasts" role="status" aria-live="polite">
+    <div className={`toasts${inSession ? ' in-session' : ''}`} role="status" aria-live="polite">
       {toasts.map((t) => (
         <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)} title="Tap to dismiss">
           <div className="t">{t.text}</div>
@@ -263,7 +263,7 @@ export default function Layout() {
       </main>
       <RestBar inSession={inSession} />
       <LockScreenSync />
-      <Toasts />
+      <Toasts inSession={inSession} />
       {!inSession && !rest && <ResumeBar />}
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && (
