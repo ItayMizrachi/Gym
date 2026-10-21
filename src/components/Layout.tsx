@@ -282,8 +282,9 @@ export default function Layout() {
       firstScreen.current = false // the very first screen already fades in from the boot screen
       return
     }
-    if (reducedMotion()) return
-    screen.current?.animate?.(
+    if (reducedMotion() || !screen.current?.animate) return
+    screen.current.getAnimations().forEach((a) => a.cancel()) // quick taps: restart, never stack
+    screen.current.animate(
       [
         { opacity: 0, top: '6px' },
         { opacity: 1, top: '0px' }
