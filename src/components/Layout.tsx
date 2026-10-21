@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Component, ReactNode, Suspense, useEffect, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -149,6 +149,29 @@ function LockScreenSync() {
   return null
 }
 
+/** A screen that fails to load (offline, or a missing file after an update) shows a calm message, not a blank page. */
+class ScreenBoundary extends Component<{ children: ReactNode; resetKey: string }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  componentDidUpdate(prev: { resetKey: string }) {
+    if (prev.resetKey !== this.props.resetKey && this.state.failed) this.setState({ failed: false })
+  }
+  render() {
+    if (!this.state.failed) return this.props.children
+    return (
+      <div className="card stack" role="alert" style={{ marginTop: 16 }}>
+        <h2>This screen didn't load</h2>
+        <div className="small muted">Check your connection and try again. Your workouts are safe on this device.</div>
+        <button className="btn primary block" onClick={() => location.reload()}>
+          Try again
+        </button>
+      </div>
+    )
+  }
+}
+
 function Toasts() {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
@@ -225,6 +248,7 @@ export default function Layout() {
     <>
       <SyncDot />
       <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
+        <ScreenBoundary resetKey={loc.pathname}>
         <Suspense
           fallback={
             <div className="stack" style={{ gap: 16, paddingTop: 8 }} aria-label="Loading">
@@ -235,6 +259,7 @@ export default function Layout() {
         >
           <Outlet />
         </Suspense>
+        </ScreenBoundary>
       </main>
       <RestBar inSession={inSession} />
       <LockScreenSync />

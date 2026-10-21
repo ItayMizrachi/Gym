@@ -12,17 +12,48 @@ import SessionPage from './pages/Session'
 import Welcome, { seen } from './components/Welcome'
 
 // Secondary screens load on first visit (the service worker still caches them for offline use).
-const WorkoutEditor = lazy(() => import('./pages/WorkoutEditor'))
-const Exercises = lazy(() => import('./pages/Exercises'))
-const ExerciseDetail = lazy(() => import('./pages/ExerciseDetail'))
-const HistoryPage = lazy(() => import('./pages/History'))
-const SessionDetail = lazy(() => import('./pages/SessionDetail'))
-const Body = lazy(() => import('./pages/Body'))
-const SettingsPage = lazy(() => import('./pages/Settings'))
-const Help = lazy(() => import('./pages/Help'))
-const Profile = lazy(() => import('./pages/Profile'))
-const Programs = lazy(() => import('./pages/Programs'))
-const Records = lazy(() => import('./pages/Records'))
+// After a deploy, an app opened earlier may ask for a chunk name that no longer exists on the server; reload once
+// to pick up the new build instead of showing a broken screen.
+const RELOADED = 'gymlog:chunk-reload'
+function lazyPage<T extends { default: React.ComponentType<any> }>(load: () => Promise<T>) {
+  return lazy(() =>
+    load().then(
+      (m) => {
+        try {
+          sessionStorage.removeItem(RELOADED)
+        } catch {
+          /* ignore */
+        }
+        return m
+      },
+      (err) => {
+        let again = false
+        try {
+          again = sessionStorage.getItem(RELOADED) === '1'
+          sessionStorage.setItem(RELOADED, '1')
+        } catch {
+          /* ignore */
+        }
+        if (!again && navigator.onLine !== false) {
+          location.reload()
+          return new Promise<T>(() => {}) // keep the loading skeleton until the reload happens
+        }
+        throw err
+      }
+    )
+  )
+}
+const WorkoutEditor = lazyPage(() => import('./pages/WorkoutEditor'))
+const Exercises = lazyPage(() => import('./pages/Exercises'))
+const ExerciseDetail = lazyPage(() => import('./pages/ExerciseDetail'))
+const HistoryPage = lazyPage(() => import('./pages/History'))
+const SessionDetail = lazyPage(() => import('./pages/SessionDetail'))
+const Body = lazyPage(() => import('./pages/Body'))
+const SettingsPage = lazyPage(() => import('./pages/Settings'))
+const Help = lazyPage(() => import('./pages/Help'))
+const Profile = lazyPage(() => import('./pages/Profile'))
+const Programs = lazyPage(() => import('./pages/Programs'))
+const Records = lazyPage(() => import('./pages/Records'))
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
 function useLaunchShortcut(ready: boolean) {
