@@ -48,6 +48,11 @@
 ## In progress (parallel sessions, each opens a PR that the coordinator merges)
 - Next: self-review pass of the whole app (design critique, accessibility, code review) and the fixes it finds.
 
+- The Train tab shows each workout's planned days (e.g. "Mon · 5 exercises").
+- Correction from yesterday: because GymLog only asks Google for name and email, new users get Google's normal
+  sign-in screen with no "unverified app" warning. Verification is only needed if you want the GymLog logo on that
+  screen (it needs you to verify the site in Google Search Console).
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.
