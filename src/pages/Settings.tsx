@@ -1,8 +1,9 @@
 import { ReactNode, useRef, useState } from 'react'
-import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Upload, ArrowRightLeft } from 'lucide-react'
+import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Trash2, Upload, ArrowRightLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
 import ImportOther from '../components/ImportOther'
+import DeleteAccountSheet from '../components/DeleteAccount'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
@@ -63,6 +64,7 @@ export default function SettingsPage() {
   const [sound, setSound] = useState(flag('gymlog:sound'))
   const [awake, setAwake] = useState(flag('gymlog:awake'))
   const [importOther, setImportOther] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [confirmImport, setConfirmImport] = useState<DB | null>(null)
   const prefs = usePrefs()
   const nav = useNavigate()
@@ -168,6 +170,9 @@ export default function SettingsPage() {
               </div>
               <button className="btn secondary block" onClick={() => signOut()}>
                 <LogOut size={16} aria-hidden /> Sign out
+              </button>
+              <button className="btn block del-acct-row" onClick={() => setDeleting(true)}>
+                <Trash2 size={16} aria-hidden /> Delete account
               </button>
             </>
           ) : (
@@ -315,6 +320,7 @@ export default function SettingsPage() {
       )}
 
       {importOther && <ImportOther onClose={() => setImportOther(false)} />}
+      {deleting && <DeleteAccountSheet email={user?.email ?? 'your account'} onExport={exportJson} onClose={() => setDeleting(false)} />}
       {confirmImport && (
         <Confirm
           title="Import backup?"

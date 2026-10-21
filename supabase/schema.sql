@@ -126,6 +126,45 @@ create policy "gymlog own files delete" on storage.objects for delete to authent
 alter table public.exercises add column if not exists equipment text not null default '';
 alter table public.exercises add column if not exists tracking text not null default 'weight_reps';
 alter table public.workouts add column if not exists folder text not null default '';
+alter table public.metrics add column if not exists measures jsonb;
 
 -- Ask the API to reload its schema cache right away, so new columns work without waiting.
+notify pgrst, 'reload schema';
+
+-- Delete account ------------------------------------------------------------
+-- Settings -> Account -> Delete account calls this. It removes everything the signed-in user owns: their rows in
+-- every GymLog table, their photos in the 'gymlog' bucket (folder = their user id) and finally the sign-in itself.
+-- The app removes the photo files through the Storage API first; deleting the storage rows here is the backstop.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := auth.uid();
+begin
+  if me is null then
+    raise exception 'Not signed in' using errcode = '42501';
+  end if;
+
+  -- children first, then parents
+  delete from public.workout_exercises where user_id = me;
+  delete from public.sessions where user_id = me;
+  delete from public.metrics where user_id = me;
+  delete from public.workouts where user_id = me;
+  delete from public.exercises where user_id = me;
+
+  -- newer projects block plain SQL deletes on storage.objects unless this is set for the transaction
+  perform set_config('storage.allow_delete_query', 'true', true);
+  delete from storage.objects where bucket_id = 'gymlog' and (storage.foldername(name))[1] = me::text;
+
+  delete from auth.users where id = me;
+end;
+$$;
+
+revoke all on function public.delete_my_account() from public;
+revoke all on function public.delete_my_account() from anon;
+grant execute on function public.delete_my_account() to authenticated;
+
 notify pgrst, 'reload schema';
