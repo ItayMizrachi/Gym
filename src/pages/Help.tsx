@@ -133,6 +133,13 @@ export default function Help() {
         <p>Starts when you log a set. Use −15 / +15 to adjust it. It beeps and vibrates when rest is over.</p>
       </Sec>
 
+      <Sec title="Muscle recovery">
+        <p>
+          The Train tab shows which muscles you worked in the last days (brighter = worked harder) and which are rested and
+          ready. Big muscles show as recovering for about 3 days, smaller ones for about 2. Use it to pick today's workout.
+        </p>
+      </Sec>
+
       <Sec title="Workout on the lock screen">
         <p>
           Turn on <b>Show workout on lock screen</b> in Settings. While you train, the lock screen shows the current exercise,

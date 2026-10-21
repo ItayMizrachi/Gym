@@ -185,3 +185,13 @@
 }
 .day-chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .trow-days { color: var(--text-2); font-weight: 600; }
+
+/* muscle recovery card on Train */
+.card.rec-card { display: flex; flex-direction: row; align-items: center; gap: var(--s4); }
+.rec-card .bodymap { flex: none; }
+.rec-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+.rec-title { font-weight: 600; font-size: var(--fs-base); }
+.rec-line { font-size: var(--fs-sm); color: var(--muted); margin-top: 4px; line-height: 1.35; }
+.rec-line b { color: var(--text); font-weight: 600; }
+.rec-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--line-strong); vertical-align: 1px; }
+.rec-dot.work { background: var(--accent); }

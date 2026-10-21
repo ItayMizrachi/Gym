@@ -57,6 +57,9 @@
   install is ~0.4 MB lighter; a screen that can't load after an update reloads itself, and offline shows a calm
   "Try again" card instead of a blank page.
 
+- **New: muscle recovery on Train.** A body figure shows which muscles you worked in the last days (brighter =
+  harder) and lists what is recovering and what is ready, so picking today's workout is easier. Explained in Help.
+
 ## Needs you
 - Optional: try Delete account once with a spare Google account to confirm it end to end (I can't sign in).
 - Nothing blocking. When you wake up: open the app on the phone, sign in with Google, try one workout.

@@ -32,6 +32,7 @@ import { CalendarHeat } from '../components/CalendarHeat'
 import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
 import { GoalCard } from '../components/GoalRing'
+import { RecoveryCard } from '../components/RecoveryCard'
 import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
 import '../styles/programs-nav.css'
@@ -249,6 +250,7 @@ export default function Home() {
       )}
 
       {workouts.length > 0 && <GoalCard />}
+      <RecoveryCard />
 
       {workouts.length > 0 && finished.length === 0 && (
         <div className="card first-week">
