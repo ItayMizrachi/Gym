@@ -1,6 +1,6 @@
-import { Component, ReactNode, Suspense, useEffect, useState } from 'react'
+import { Component, ReactNode, Suspense, useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play } from 'lucide-react'
+import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Skeleton, SkeletonList } from './ui'
 import { fmtClock } from '../lib/format'
@@ -9,6 +9,7 @@ import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
 import { lockInfo, lockScreenActive, lockScreenSupported, setLockScreenActions, startLockScreen, stopLockScreen, updateLockScreen } from '../lib/lockscreen'
 import { libIdForExercise, libImageUrl } from '../lib/libraryLinks'
+import { DUR, EASE, exitDelay, reducedMotion } from '../lib/motion'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
 
@@ -175,14 +176,45 @@ class ScreenBoundary extends Component<{ children: ReactNode; resetKey: string }
 function Toasts({ inSession }: { inSession: boolean }) {
   const toasts = useStore((s) => s.toasts)
   const dismiss = useStore((s) => s.dismissToast)
+  const [leaving, setLeaving] = useState<string[]>([])
+  function tap(id: string) {
+    const wait = exitDelay(DUR.fast)
+    if (!wait) return dismiss(id)
+    setLeaving((l) => [...l, id])
+    setTimeout(() => {
+      dismiss(id)
+      setLeaving((l) => l.filter((x) => x !== id))
+    }, wait)
+  }
   return (
     <div className={`toasts${inSession ? ' in-session' : ''}`} role="status" aria-live="polite">
-      {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.kind}`} onClick={() => dismiss(t.id)} title="Tap to dismiss">
-          <div className="t">{t.text}</div>
-          {t.sub && <div className="small muted">{t.sub}</div>}
-        </div>
-      ))}
+      {toasts.map((t) => {
+        const body = (
+          <>
+            <div className="t">{t.text}</div>
+            {t.sub && <div className="small muted">{t.sub}</div>}
+          </>
+        )
+        return (
+          <div
+            key={t.id}
+            className={`toast ${t.kind}${t.kind === 'pr' ? ' has-ico' : ''}${leaving.includes(t.id) ? ' leaving' : ''}`}
+            onClick={() => tap(t.id)}
+            title="Tap to dismiss"
+          >
+            {t.kind === 'pr' ? (
+              <>
+                <span className="toast-ico" aria-hidden>
+                  <Trophy size={18} />
+                </span>
+                <div className="grow">{body}</div>
+              </>
+            ) : (
+              body
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -240,14 +272,31 @@ export default function Layout() {
   const rest = useStore((s) => s.rest)
   const loc = useLocation()
   const inSession = loc.pathname.startsWith('/session')
-  // a new screen starts at the top, not wherever the last one was scrolled to
+  const screen = useRef<HTMLDivElement>(null)
+  const firstScreen = useRef(true)
+  // a new screen starts at the top, not wherever the last one was scrolled to, and arrives with a short
+  // fade and 6 px rise. 'top' rather than transform so fixed children (sheets, keypad) keep the viewport.
   useEffect(() => {
     window.scrollTo(0, 0)
+    if (firstScreen.current) {
+      firstScreen.current = false // the very first screen already fades in from the boot screen
+      return
+    }
+    if (reducedMotion() || !screen.current?.animate) return
+    screen.current.getAnimations().forEach((a) => a.cancel()) // quick taps: restart, never stack
+    screen.current.animate(
+      [
+        { opacity: 0, top: '6px' },
+        { opacity: 1, top: '0px' }
+      ],
+      { duration: DUR.base, easing: EASE }
+    )
   }, [loc.pathname])
   return (
     <>
       <SyncDot />
       <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
+        <div className="screen" ref={screen}>
         <ScreenBoundary resetKey={loc.pathname}>
         <Suspense
           fallback={
@@ -260,6 +309,7 @@ export default function Layout() {
           <Outlet />
         </Suspense>
         </ScreenBoundary>
+        </div>
       </main>
       <RestBar inSession={inSession} />
       <LockScreenSync />

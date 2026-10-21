@@ -16,43 +16,33 @@ html {
   text-size-adjust: 100%;
 }
 
-/* Boot screen: mark centred exactly like the iOS launch screen; name and progress sit below it. */
+/* Boot screen: the launch lockup at the same spot as the iOS launch screen and index.html's placeholder
+   (mark centred, wordmark under it). A thin progress line fades in under it only if loading takes a moment. */
 .pwa-boot {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
   background: var(--bg);
   z-index: 200;
 }
-.pwa-boot > svg {
+.pwa-boot-lockup {
+  position: absolute;
+  left: calc(50% - 100px);
+  top: calc(50% - 72px);
+  width: 200px;
+  height: 180px;
   display: block;
 }
-.pwa-boot-below {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(50% + 66px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  opacity: 0;
-  animation: pwa-fade 300ms ease-out 450ms forwards; /* only shows if loading takes a moment */
-}
-.pwa-boot-name {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 24px;
-  letter-spacing: 0.4px;
-  color: var(--text);
-}
 .pwa-boot-bar {
-  width: 96px;
+  position: absolute;
+  left: calc(50% - 40px);
+  top: calc(50% + 132px);
+  width: 80px;
   height: 3px;
   border-radius: 3px;
   background: var(--card2);
   overflow: hidden;
+  opacity: 0;
+  animation: pwa-fade var(--dur-slow, 280ms) ease-out 600ms forwards;
 }
 .pwa-boot-bar span {
   display: block;
@@ -60,7 +50,7 @@ html {
   height: 100%;
   border-radius: 3px;
   background: var(--accent);
-  animation: pwa-slide 1.1s ease-in-out infinite;
+  animation: pwa-slide 1.2s ease-in-out infinite;
 }
 
 /* Screens fade in from the boot screen instead of popping (opacity only, so fixed children keep working). */
@@ -206,7 +196,7 @@ html {
   .pwa-spin {
     animation: none;
   }
-  .pwa-boot-below {
+  .pwa-boot-bar {
     animation-duration: 1ms;
   }
 }
