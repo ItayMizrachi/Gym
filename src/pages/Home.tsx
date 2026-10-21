@@ -30,6 +30,8 @@ import {
 import { CalendarHeat } from '../components/CalendarHeat'
 import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
+import { GoalCard } from '../components/GoalRing'
+import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
 import '../styles/programs-nav.css'
 
@@ -85,6 +87,7 @@ export default function Home() {
   const [moving, setMoving] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [folded, setFolded] = useState<string[]>(loadFolds)
+  useAchievementToasts()
   function toggleFold(label: string) {
     const next = folded.includes(label) ? folded.filter((f) => f !== label) : [...folded, label]
     setFolded(next)
@@ -236,6 +239,8 @@ export default function Home() {
           </div>
         )
       )}
+
+      {workouts.length > 0 && <GoalCard />}
 
       {workouts.length > 0 && finished.length === 0 && (
         <div className="card first-week">

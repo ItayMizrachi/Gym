@@ -11,6 +11,8 @@ export interface Prefs {
   restNotify: boolean
   /** show the running workout on the lock screen ("now playing" card) */
   lockScreen: boolean
+  /** workouts a week the user aims for (1–7), shown as a ring on Home */
+  weeklyGoal: number
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -19,7 +21,8 @@ export const DEFAULT_PREFS: Prefs = {
   plates: [25, 20, 15, 10, 5, 2.5, 1.25],
   showRpe: false,
   restNotify: false,
-  lockScreen: false
+  lockScreen: false,
+  weeklyGoal: 3
 }
 
 const KEY = 'gymlog:prefs'

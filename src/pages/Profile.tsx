@@ -1,10 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, CalendarDays, Flame, History, Moon, Scale } from 'lucide-react'
+import { BookOpen, CalendarDays, ChevronRight, Flame, History, Moon, Scale, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Empty, PageHeader } from '../components/ui'
 import { CalendarHeat } from '../components/CalendarHeat'
 import { WeekBars } from '../components/WeekBars'
+import { GoalRing, GoalSheet } from '../components/GoalRing'
+import { AchievementsSection, useAchievementToasts } from '../components/Achievements'
+import { usePrefs } from '../lib/prefs'
+import { goalWeeksInRow, weekGoal } from '../lib/achievements'
 import {
   dayNames,
   fmtMinutes,
@@ -19,6 +23,7 @@ import {
 } from '../lib/stats'
 import '../styles/insights.css'
 import '../styles/progress.css'
+import '../styles/records.css'
 
 const METRICS: { id: WeekMetric; label: string }[] = [
   { id: 'duration', label: 'Duration' },
@@ -55,6 +60,11 @@ export default function Profile() {
   const names = useMemo(() => dayNames(db), [db])
   const streak = useMemo(() => weeklyStreak(db), [db])
   const rest = useMemo(() => restDaysThisWeek(db), [db])
+  const goal = usePrefs((s) => s.weeklyGoal)
+  const week = useMemo(() => weekGoal(db, goal), [db, goal])
+  const inRow = useMemo(() => goalWeeksInRow(db, goal), [db, goal])
+  const [editGoal, setEditGoal] = useState(false)
+  useAchievementToasts()
 
   const links = [
     { label: 'Exercises', icon: <BookOpen size={18} />, go: () => nav('/exercises') },
@@ -109,6 +119,37 @@ export default function Profile() {
           </div>
         </>
       )}
+
+      <button className="list-group list-row rec-link" onClick={() => nav('/records')}>
+        <Trophy size={22} aria-hidden className="accent-ico" />
+        <span className="grow">
+          <span className="title">Records</span>
+          <span className="meta" style={{ display: 'block' }}>
+            Best lifts for every exercise
+          </span>
+        </span>
+        <ChevronRight size={18} aria-hidden className="muted" />
+      </button>
+
+      <section className="card goal-streak" aria-label="Weekly goal">
+        <GoalRing done={week.done} goal={week.goal} size={56} />
+        <div className="grow" style={{ minWidth: 0 }}>
+          <div className="goal-title">
+            {inRow > 0 ? `${inRow} week${inRow === 1 ? '' : 's'} in a row` : 'Weekly goal'}
+          </div>
+          <div className="small muted">
+            {inRow > 0
+              ? `You reached your goal of ${week.goal} workout${week.goal === 1 ? '' : 's'} a week.`
+              : `Aim: ${week.goal} workout${week.goal === 1 ? '' : 's'} a week. ${week.done} done this week.`}
+          </div>
+        </div>
+        <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label="Change weekly goal">
+          Change
+        </button>
+      </section>
+      {editGoal && <GoalSheet onClose={() => setEditGoal(false)} />}
+
+      <AchievementsSection />
 
       <div className="prof-links">
         {links.map((l) => (
