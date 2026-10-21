@@ -70,6 +70,7 @@ Always keep something in progress. When the "Next" list runs low:
 - ~~Toasts covering Finish on the workout screen~~ — fixed: shown under the header there.
 
 ## Later / ideas
+- Pounds as a unit (Settings → Units): store kg, show and type lb everywhere. Touches every weight display and input, so plan it as one careful pass with tests.
 - Rest-day suggestions and deload hints from training load.
 - Exercise animations (two-frame from the library images).
 - Light theme option (only if it reaches the same polish).
