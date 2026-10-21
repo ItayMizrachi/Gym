@@ -57,10 +57,18 @@ export function LibThumb({ id, name, muscle, size = 44 }: { id: string; name?: s
 export function LibPhoto({ id, name, frames = 2 }: { id: string; name: string; frames?: number }) {
   const [frame, setFrame] = useState<0 | 1>(0)
   const [failed, setFailed] = useState(false)
+  // start and end positions alternate like a short animation; tap to pause. Off when the phone asks for less motion.
+  const calm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const [playing, setPlaying] = useState(!calm)
   useEffect(() => {
     setFrame(0)
     setFailed(false)
   }, [id])
+  useEffect(() => {
+    if (!playing || frames < 2 || failed) return
+    const t = setInterval(() => setFrame((f) => (f ? 0 : 1)), 1100)
+    return () => clearInterval(t)
+  }, [playing, frames, failed, id])
   // warm the second frame so the first tap flips instantly
   useEffect(() => {
     if (frames < 2) return
@@ -80,15 +88,17 @@ export function LibPhoto({ id, name, frames = 2 }: { id: string; name: string; f
     <button
       type="button"
       className="lib-photo"
-      onClick={() => two && setFrame((f) => (f ? 0 : 1))}
+      onClick={() => two && setPlaying((p) => !p)}
       disabled={!two}
-      aria-label={two ? `${name}: ${frame ? 'end' : 'start'} position. Tap to show the ${frame ? 'start' : 'end'} position.` : name}
+      aria-pressed={two ? !playing : undefined}
+      aria-label={two ? `${name}: start and end positions. ${playing ? 'Playing, tap to pause.' : 'Paused, tap to play.'}` : name}
     >
       <img src={libImageUrl(id, frame)} alt="" onError={() => setFailed(true)} />
       {two && (
         <span className="lib-frames" aria-hidden>
           <span className={frame === 0 ? 'on' : ''}>Start</span>
           <span className={frame === 1 ? 'on' : ''}>End</span>
+          {!playing && <span className="lib-paused">Paused</span>}
         </span>
       )}
     </button>
