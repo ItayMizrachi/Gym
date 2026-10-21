@@ -33,6 +33,7 @@ import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
 import { GoalCard } from '../components/GoalRing'
 import { RecoveryCard } from '../components/RecoveryCard'
+import { StartChecklist } from '../components/StartChecklist'
 import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
 import '../styles/programs-nav.css'
@@ -249,6 +250,7 @@ export default function Home() {
         )
       )}
 
+      {workouts.length > 0 && <StartChecklist />}
       {workouts.length > 0 && <GoalCard />}
       <RecoveryCard />
 

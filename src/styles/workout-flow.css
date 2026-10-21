@@ -208,3 +208,17 @@
 .login-perks li { display: flex; gap: var(--s3); align-items: flex-start; font-size: var(--fs-sm); color: var(--text-2); line-height: 1.4; text-align: left; }
 .login-perks b { color: var(--text); font-weight: 600; }
 .perk-ico { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+
+/* getting started checklist on Train */
+.card.start-list { display: flex; flex-direction: column; gap: 6px; }
+.start-head { display: flex; align-items: center; gap: var(--s2); }
+.start-title { font-weight: 600; font-size: var(--fs-base); }
+.start-bar { height: 4px; border-radius: var(--r-pill); background: var(--line-strong); overflow: hidden; margin: 4px 0 6px; }
+.start-bar i { display: block; height: 100%; background: var(--ok); }
+.start-row { display: flex; align-items: center; gap: var(--s3); min-height: 48px; text-align: left; width: 100%; color: var(--text); }
+.start-row.done { opacity: 0.6; }
+.start-row.done .start-t { text-decoration: line-through; }
+.start-tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; color: var(--ok-ink); }
+.start-row.done .start-tick { background: var(--ok); border-color: var(--ok); }
+.start-t { font-weight: 600; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

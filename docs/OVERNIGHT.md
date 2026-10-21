@@ -13,6 +13,8 @@ build and a phone-size browser check before it went up.
   (tap to pause).
 - **Sign-in is Google only,** with no "demo" anywhere. (Email sign-in is also off in Supabase.) The sign-in screen
   now shows three short reasons to join (one-tap logging, 876 exercises with photos, records and streaks).
+- **Getting started list** on Train for new users: pick a program, finish a first workout, log body weight, add
+  to the home screen. It ticks itself off and disappears when done (or when dismissed).
 - **Find my program:** 4 questions (goal, experience, days a week, equipment) → the best-fitting ready-made program,
   added in one tap.
 
