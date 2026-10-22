@@ -44,24 +44,25 @@ describe('currentSet', () => {
 describe('lockInfo', () => {
   it('shows the exercise, set and workout time without rest', () => {
     const info = lockInfo(session([[true, false]]), null, T0 + 65_000)
-    expect(info.title).toBe('Bench Press · Set 2 of 2')
-    expect(info.artist).toBe('Workout 1:05')
-    expect(info.album).toBe('Upper A')
+    expect(info.title).toBe('Bench Press')
+    expect(info.artist).toBe('Set 2 of 2 · 1:05')
+    expect(info.album).toBe('GymLog')
     expect(info.duration).toBeNull()
     expect(info.exerciseId).toBe('e0')
   })
   it('shows the rest countdown with a progress bar', () => {
     const rest = { endsAt: T0 + 60_000, total: 90, label: 'Bench Press', finished: false }
     const info = lockInfo(session([[true, false]]), rest, T0)
-    expect(info.artist).toBe('Rest 1:00 left')
+    expect(info.title).toBe('Rest 1:00')
+    expect(info.artist).toBe('Next: Bench Press · Set 2 of 2')
     expect(info.duration).toBe(90)
     expect(info.position).toBe(30)
   })
   it('says when rest is over', () => {
     const rest = { endsAt: T0, total: 90, label: '', finished: true }
-    expect(lockInfo(session([[false]]), rest, T0 + 1000).artist).toBe('Rest over · time for the next set')
+    expect(lockInfo(session([[false]]), rest, T0 + 1000).title).toBe('Rest over')
   })
   it('handles a finished set list', () => {
-    expect(lockInfo(session([[true]]), null, T0).title).toBe('All sets done · tap Finish')
+    expect(lockInfo(session([[true]]), null, T0).title).toBe('All sets logged')
   })
 })

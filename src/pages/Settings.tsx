@@ -220,7 +220,7 @@ export default function SettingsPage() {
           {lockScreenSupported() &&
             toggleRow(
               'Show workout on lock screen',
-              'Current exercise and rest countdown on the lock screen, with skip and +15 s buttons. While on, it replaces the music card (Spotify and others).',
+              "Rest countdown and your next set on the lock screen. It uses Apple's music card, so while it is on it replaces Spotify and other audio.",
               prefs.lockScreen,
               (v) => {
                 prefs.setPrefs({ lockScreen: v })

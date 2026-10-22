@@ -166,7 +166,7 @@ export default function Help() {
       <Sec title="Workout on the lock screen">
         <p>
           Turn on <b>Show workout on lock screen</b> in Settings. While you train, the lock screen shows the current exercise,
-          the set you are on and the rest countdown. Its buttons skip the rest (⏭) or add 15 seconds (⏮).
+          the set you are on and the rest countdown.
         </p>
         <p className="muted">
           It uses the same card as music, so it replaces Spotify or other audio while it is on. A true iPhone Live Activity

@@ -34,21 +34,26 @@ export function currentSet(session: Session) {
 export function lockInfo(session: Session, rest: RestTimer | null, now: number): LockInfo {
   const cur = currentSet(session)
   const elapsed = Math.max(0, Math.floor((now - new Date(session.started_at).getTime()) / 1000))
-  const title = cur ? `${cur.ex.name} · Set ${cur.index + 1} of ${cur.count}` : 'All sets done · tap Finish'
+  const setLine = cur ? `${cur.ex.name} · Set ${cur.index + 1} of ${cur.count}` : 'All sets logged'
+  let title: string
   let artist: string
   let duration: number | null = null
   let position: number | null = null
   if (rest && !rest.finished) {
+    // short titles do not scroll like a song name; the countdown is what matters on the lock screen
     const left = Math.max(0, Math.ceil((rest.endsAt - now) / 1000))
-    artist = `Rest ${fmtClock(left)} left`
+    title = `Rest ${fmtClock(left)}`
+    artist = cur ? `Next: ${setLine}` : setLine
     duration = Math.max(1, rest.total)
     position = Math.min(duration, Math.max(0, rest.total - left))
   } else if (rest && rest.finished) {
-    artist = 'Rest over · time for the next set'
+    title = 'Rest over'
+    artist = cur ? `Next: ${setLine}` : setLine
   } else {
-    artist = `Workout ${fmtClock(elapsed)}`
+    title = cur ? cur.ex.name : 'All sets logged'
+    artist = cur ? `Set ${cur.index + 1} of ${cur.count} · ${fmtClock(elapsed)}` : `Workout ${fmtClock(elapsed)} · tap Finish`
   }
-  return { title, artist, album: session.name, duration, position, exerciseId: cur?.ex.exercise_id ?? null }
+  return { title, artist, album: 'GymLog', duration, position, exerciseId: cur?.ex.exercise_id ?? null }
 }
 
 /* ---------------------------------------------------------------- browser side */
@@ -133,7 +138,6 @@ export function updateLockScreen(info: LockInfo, artworkUrl: string | null) {
         artist: info.artist,
         album: info.album,
         artwork: [
-          ...(artworkUrl ? [{ src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }] : []),
           { src: new URL('icon-512.png', document.baseURI).href, sizes: '512x512', type: 'image/png' }
         ]
       })
@@ -151,7 +155,11 @@ export function updateLockScreen(info: LockInfo, artworkUrl: string | null) {
   }
 }
 
-export function setLockScreenActions(h: { skip: () => void; more: () => void }) {
+/**
+ * Lock-screen controls. Only play/pause exists on Apple's card; it keeps the card alive instead of stopping it.
+ * Track and seek buttons are cleared on purpose: skipping "songs" has no meaning in a workout.
+ */
+export function setLockScreenActions() {
   if (!lockScreenSupported()) return
   const ms = navigator.mediaSession
   const set = (a: MediaSessionAction, fn: (() => void) | null) => {
@@ -161,9 +169,7 @@ export function setLockScreenActions(h: { skip: () => void; more: () => void }) 
       /* action not supported here */
     }
   }
-  set('nexttrack', h.skip) // ⏭ skip rest
-  set('previoustrack', h.more) // ⏮ +15 s
-  // pause/play on the card would otherwise stop our silent audio and hide the card: keep it alive
+  for (const a of ['nexttrack', 'previoustrack', 'seekbackward', 'seekforward', 'seekto'] as MediaSessionAction[]) set(a, null)
   set('pause', () => void audio?.play())
   set('play', () => void audio?.play())
 }

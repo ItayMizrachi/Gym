@@ -122,8 +122,7 @@ function LockScreenSync() {
       stopLockScreen()
       return
     }
-    const st = useStore.getState
-    setLockScreenActions({ skip: () => st().clearRest(), more: () => st().adjustRest(15) })
+    setLockScreenActions()
     if (lockScreenActive()) return
     const kick = () => void startLockScreen()
     window.addEventListener('pointerdown', kick, { once: true, capture: true })
