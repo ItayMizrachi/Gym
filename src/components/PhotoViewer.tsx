@@ -72,12 +72,29 @@ export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onE
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Tab' && root.current) {
+        // keep keyboard focus inside the viewer while it is open
+        const f = [...root.current.querySelectorAll<HTMLElement>('button:not([disabled])')].filter((b) => b.offsetParent !== null)
+        if (!f.length) return
+        const first = f[0]
+        const last = f[f.length - 1]
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === root.current)) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      } else if (e.key === 'Escape') {
+        // a viewer opened from a sheet closes on its own; the sheet under it stays
+        e.stopPropagation()
+        onClose()
+      }
       else if (e.key === 'ArrowRight') go(1)
       else if (e.key === 'ArrowLeft') go(-1)
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
   })
 
   const dist = () => {

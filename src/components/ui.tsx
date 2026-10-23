@@ -204,7 +204,27 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
 
   useEffect(() => {
     const unlock = lockScroll()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && requestClose()
+    const onKey = (e: KeyboardEvent) => {
+      const el = ref.current
+      // only the top sheet answers keys: a Confirm opened inside this sheet handles its own
+      if (!el || el.querySelector('.sheet') || document.querySelector('.pv')) return
+      if (e.key === 'Escape') return requestClose()
+      if (e.key !== 'Tab') return
+      // keep keyboard focus inside the sheet
+      const f = [...el.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([type=hidden]):not([hidden]), textarea, select, a[href], [tabindex="0"]')].filter(
+        (x) => x.offsetParent !== null
+      )
+      if (!f.length) return
+      const first = f[0]
+      const last = f[f.length - 1]
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === el)) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     window.addEventListener('keydown', onKey)
     // screen readers and keyboards start inside the sheet, and return to where they were after
     const opener = document.activeElement as HTMLElement | null
