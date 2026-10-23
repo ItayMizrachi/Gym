@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs } from '../lib/pr'
 import { Session } from '../lib/types'
@@ -141,15 +140,12 @@ export default function HistoryPage() {
                       <div className="grow">
                         <div className="hname ellipsis">{splitName(s.name)[0]}</div>
                         <div className="hmeta">
-                          {fmtMinutes(m.minutes)} · {m.sets} {m.sets === 1 ? 'set' : 'sets'} · {fmtVolume(m.volume)}
+                          {fmtMinutes(m.minutes)} · {fmtVolume(m.volume)}
                         </div>
                       </div>
                       {s.data.photo_path && <Thumb path={s.data.photo_path} size={44} />}
-                      {prs > 0 && (
-                        <span className="hpr" aria-label={`${prs} record${prs === 1 ? '' : 's'}`}>
-                          <Trophy size={13} aria-hidden /> {prs}
-                        </span>
-                      )}
+                      {/* records: one small mark, the count is in the workout itself */}
+                      {prs > 0 && <span className="hpr-dot" aria-label={`${prs} new record${prs === 1 ? '' : 's'}`} />}
                     </button>
                   )
                 })}

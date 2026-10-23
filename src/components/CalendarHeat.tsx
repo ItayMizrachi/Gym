@@ -9,6 +9,22 @@ const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
  * Month calendar with training days shaded by how many sets were done that day.
  * Pass `names` (day key → workout names) to print the workout name under each training day.
  */
+/**
+ * A workout name short enough for a seventh of a phone: "Push" and "Legs" as they are, longer names as initials
+ * ("Upper Body" → "UB", "Pull + Hamstrings" → "PH"). Two workouts on a day: the first and "+".
+ */
+export function shortName(name: string): string {
+  const base = name.replace(/\s*\([^)]*\)\s*$/, '').trim()
+  if (base.length <= 5) return base
+  const words = base.split(/[^A-Za-z0-9֐-׿]+/).filter(Boolean)
+  if (words.length < 2) return base.slice(0, 4)
+  return words
+    .slice(0, 3)
+    .map((w) => (/^\d+$/.test(w) ? w : w[0].toUpperCase()))
+    .join('')
+}
+const dayLabel = (names: string[]) => (names.length ? shortName(names[0]) + (names.length > 1 ? '+' : '') : '')
+
 export function CalendarHeat({
   days,
   now = new Date(),
@@ -34,7 +50,7 @@ export function CalendarHeat({
   const labels = [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)]
 
   return (
-    <div className="cal">
+    <div className={`cal${names ? ' named' : ''}`}>
       <div className="row cal-head">
         <div className="grow">
           <div className="ins-title">{view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</div>
@@ -70,7 +86,7 @@ export function CalendarHeat({
               title={names && d ? names.get(k)?.join(', ') : undefined}
             >
               <span className="cal-n">{Number(k.slice(8))}</span>
-              {/* names do not fit a seventh of a phone: the day's shade says it, the tap opens the workout */}
+              {names && d && <span className="cal-name">{dayLabel(names.get(k) ?? [])}</span>}
             </button>
           )
         })}

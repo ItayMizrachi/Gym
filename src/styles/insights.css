@@ -641,3 +641,11 @@
 .hlist .hname { font-size: 16px; font-weight: 600; }
 .hlist .hmeta { display: block; margin-top: 2px; }
 .hpr { flex: none; display: inline-flex; align-items: center; gap: 3px; color: var(--accent); font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* History, calmer still: smaller type, no badges; a record day gets one small yellow dot */
+.hlist .hrow { min-height: 58px; padding: 10px 16px; }
+.hlist .hdate .d { font-size: 17px; font-weight: 650; }
+.hlist .hdate .w { font-size: 11px; }
+.hlist .hname { font-size: 15px; font-weight: 600; }
+.hlist .hmeta { font-size: 13px; }
+.hpr-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
