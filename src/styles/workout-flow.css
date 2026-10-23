@@ -207,3 +207,5 @@
 .exo-step .btn.icon { width: 44px; height: 44px; font-size: 22px; font-weight: 600; }
 .exo-step-v { min-width: 52px; text-align: center; font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .exo-sep { border-top: 1px solid var(--line); padding-top: var(--s3); }
+/* "Discard workout": a quiet text button under Finish, still red so it reads as destructive */
+.btn.ghost.danger-text { color: var(--danger-text); }

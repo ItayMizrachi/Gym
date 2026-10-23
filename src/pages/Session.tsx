@@ -825,6 +825,13 @@ export default function SessionPage() {
   const beatLast = lastVolume != null && lastVolume > 0 && volume > lastVolume
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
+  // nothing logged: offer to discard; some sets left: ask first; all done: straight to the summary
+  const finishTap = () =>
+    doneSets === 0
+      ? setConfirmDiscard(true)
+      : doneSets < totalSets
+      ? setConfirmFinish(true)
+      : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } }))
   // the exercise you are on: the first one with a set still to do
   const currentIdx = session.data.exercises.findIndex((e) => e.sets.some((s) => !s.done))
 
@@ -858,7 +865,7 @@ export default function SessionPage() {
           </button>
           <button
             className="btn primary sp-finish"
-            onClick={() => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } })))}
+            onClick={finishTap}
           >
             <Flag size={16} /> Finish
           </button>
@@ -918,8 +925,12 @@ export default function SessionPage() {
         />
       </label>
 
-      <button className="btn danger" onClick={() => setConfirmDiscard(true)}>
-        <Trash2 size={16} /> Discard workout
+      {/* the natural end of the page: finish here as well as in the header */}
+      <button className="btn primary block" onClick={finishTap}>
+        <Flag size={18} aria-hidden /> Finish workout
+      </button>
+      <button className="btn ghost danger-text" onClick={() => setConfirmDiscard(true)}>
+        <Trash2 size={16} aria-hidden /> Discard workout
       </button>
       <button className="btn ghost" onClick={() => nav('/help')}>
         <HelpCircle size={18} aria-hidden /> How the workout screen works
