@@ -153,6 +153,7 @@ export default function Body() {
   const [editing, setEditing] = useState<Metric | 'new' | 'measures' | null>(null)
   const [range, setRange] = useState<'30' | '90' | 'all'>('90')
   const [viewing, setViewing] = useState<number | null>(null)
+  const [allEntries, setAllEntries] = useState(false)
   const nav = useNavigate()
 
   const entries = useMemo(
@@ -315,7 +316,7 @@ export default function Body() {
             <span className="count">{all.length}</span>
           </div>
           <div className="list-group">
-            {all.map((m) => {
+            {(allEntries ? all : all.slice(0, 10)).map((m) => {
               const p = m.weight_kg != null ? prevOf(m) : null
               const d = p ? delta(m.weight_kg, p.weight_kg) : null
               return (
@@ -342,6 +343,11 @@ export default function Body() {
               )
             })}
           </div>
+          {all.length > 10 && (
+            <button className="btn ghost block" style={{ marginTop: 'var(--s2)' }} aria-expanded={allEntries} onClick={() => setAllEntries(!allEntries)}>
+              {allEntries ? 'Show fewer' : `Show all ${all.length} entries`}
+            </button>
+          )}
         </section>
       )}
 

@@ -7,6 +7,7 @@ import { Session } from '../lib/types'
 import { Empty, Thumb } from '../components/ui'
 import { SparkBars } from '../components/Sparkline'
 import { finishedSessions, fmtMinutes, fmtVolume, summarizeSession, SessionSummary, weeklyTrend } from '../lib/stats'
+import { splitName } from '../lib/format'
 import '../styles/insights.css'
 
 interface Item {
@@ -108,7 +109,7 @@ export default function HistoryPage() {
               </button>
               {templates.known.map((w) => (
                 <button key={w.id} className={`chip${filter === w.id ? ' active' : ''}`} onClick={() => setFilter(w.id)}>
-                  {w.name}
+                  {splitName(w.name)[0]}
                 </button>
               ))}
               {templates.other && (
@@ -137,7 +138,7 @@ export default function HistoryPage() {
                         <div className="w">{d.toLocaleDateString('en-GB', { weekday: 'short' })}</div>
                       </div>
                       <div className="grow">
-                        <div className="hname ellipsis">{s.name}</div>
+                        <div className="hname ellipsis">{splitName(s.name)[0]}</div>
                         <div className="hmeta">
                           <span>
                             <Clock size={13} /> {fmtMinutes(m.minutes)}

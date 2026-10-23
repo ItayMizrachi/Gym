@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
-import { fmtClock, fmtDate, fmtDateLong, fmtKg } from '../lib/format'
+import { fmtClock, fmtDate, fmtDateLong, fmtKg, splitName } from '../lib/format'
 import { Confirm, ImageField } from '../components/ui'
 import { ThumbButton } from '../components/ExerciseHowTo'
 import { SessionEditor } from '../components/SessionEditor'
@@ -234,7 +234,7 @@ export default function SessionDetail() {
           <ChevronLeft size={26} />
         </button>
         <div className="grow">
-          <h1 className="ellipsis">{fresh ? 'Summary' : s.name}</h1>
+          <h1 className="ellipsis">{fresh ? 'Summary' : splitName(s.name)[0]}</h1>
           {!fresh && <div className="sub">{fmtDateLong(sessionDate(s))}</div>}
         </div>
         {!fresh && (
@@ -251,7 +251,7 @@ export default function SessionDetail() {
           </div>
           <div className="done-title">Workout complete</div>
           <div className="done-sub">
-            {s.name} · {fmtDateLong(sessionDate(s))}
+            {splitName(s.name)[0]} · {fmtDateLong(sessionDate(s))}
           </div>
           {prs.length > 0 ? (
             <span className="chip pr" style={{ marginTop: 6 }}>
