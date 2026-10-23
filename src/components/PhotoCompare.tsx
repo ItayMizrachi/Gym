@@ -24,7 +24,19 @@ function Chip({ label, m, side }: { label: string; m: Metric; side: 'l' | 'r' })
 }
 
 /** Before / after: side by side, or one over the other with a slider to wipe between them. */
-export function PhotoCompare({ photos, onOpen }: { photos: Metric[]; onOpen: (m: Metric) => void }) {
+/** The photo's own weight, or the closest weigh-in within 3 days (photos are often logged on their own). */
+function weightNear(m: Metric, all: Metric[]): number | null {
+  if (m.weight_kg != null) return m.weight_kg
+  let best: Metric | null = null
+  for (const x of all) {
+    if (x.weight_kg == null) continue
+    const gap = Math.abs(ts(x.date) - ts(m.date))
+    if (gap <= 3 * DAY && (!best || gap < Math.abs(ts(best.date) - ts(m.date)))) best = x
+  }
+  return best?.weight_kg ?? null
+}
+
+export function PhotoCompare({ photos, all = photos, onOpen }: { photos: Metric[]; all?: Metric[]; onOpen: (m: Metric) => void }) {
   const repo = useStore((s) => s.repo)
   const toast = useStore((s) => s.toast)
   const [aId, setAId] = useState<string | null>(null)
@@ -38,7 +50,10 @@ export function PhotoCompare({ photos, onOpen }: { photos: Metric[]; onOpen: (m:
 
   const a0 = photos.find((p) => p.id === aId) ?? photos[0]
   const b0 = photos.find((p) => p.id === bId) ?? photos[photos.length - 1]
-  const [a, b] = a0.date <= b0.date ? [a0, b0] : [b0, a0]
+  const [pa, pb] = a0.date <= b0.date ? [a0, b0] : [b0, a0]
+  // chips, stats and the share card all use the weight nearest to each photo
+  const a = { ...pa, weight_kg: weightNear(pa, all) }
+  const b = { ...pb, weight_kg: weightNear(pb, all) }
   const ua = useImageUrl(a.photo_path)
   const ub = useImageUrl(b.photo_path)
   const days = Math.round((ts(b.date) - ts(a.date)) / DAY)

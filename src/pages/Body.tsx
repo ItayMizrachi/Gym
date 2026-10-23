@@ -288,7 +288,7 @@ export default function Body() {
 
       <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
 
-      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} onOpen={(m) => setViewing(newestFirst.indexOf(m))} />}
+      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} all={metrics} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">
