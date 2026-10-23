@@ -45,7 +45,20 @@ function Slide({ m, offset, dx, zoom }: { m: ViewerPhoto | undefined; offset: nu
  * Full-screen photo viewer: swipe or arrows for the next photo, pinch or double-tap to zoom (then drag to look
  * around), swipe down or X to close. Photos come in the order given.
  */
-export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onEdit }: { photos: T[]; start: number; onClose: () => void; onEdit?: (m: T) => void }) {
+export function PhotoViewer<T extends ViewerPhoto>({
+  photos,
+  start,
+  onClose,
+  onEdit,
+  kgOf
+}: {
+  photos: T[]
+  start: number
+  onClose: () => void
+  onEdit?: (m: T) => void
+  /** weight to show under a photo (e.g. the closest weigh-in); defaults to the entry's own */
+  kgOf?: (m: T) => number | null
+}) {
   const [i, setI] = useState(Math.min(Math.max(0, start), photos.length - 1))
   const [dx, setDx] = useState(0)
   const [dy, setDy] = useState(0)
@@ -209,6 +222,7 @@ export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onE
 
   if (!m) return null
   const fade = Math.max(0.35, 1 - dy / 400)
+  const kgShown = kgOf ? kgOf(m) : m.weight_kg ?? null
 
   return (
     <div className="pv" role="dialog" aria-modal="true" aria-label="Photo viewer" tabIndex={-1} ref={root} style={{ background: `rgba(0,0,0,${fade})` }}>
@@ -255,7 +269,7 @@ export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onE
       <div className="pv-cap">
         {m.date && <div className="pv-date">{fmtDateLong(m.date)}</div>}
         <div className="pv-meta">
-          {[m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : null, m.note || null].filter(Boolean).join(' · ')}
+          {[kgShown != null ? `${fmtKg(kgShown)} kg` : null, m.note || null].filter(Boolean).join(' · ')}
         </div>
       </div>
     </div>
@@ -263,13 +277,14 @@ export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onE
 }
 
 /** A photo tile that opens the viewer: date in the corner, cover-cropped. */
-export function PhotoTile({ m, onOpen, label }: { m: Metric; onOpen: () => void; label?: string }) {
+export function PhotoTile({ m, onOpen, label, kg }: { m: Metric; onOpen: () => void; label?: string; kg?: number | null }) {
   const url = useImageUrl(m.photo_path)
   return (
     <button className="ph-tile" onClick={onOpen} aria-label={`Open photo from ${fmtDateLong(m.date)}`}>
       {url && <img src={url} alt="" />}
       <span className="ph-tile-date" aria-hidden>
         {label ?? new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        {kg != null && ` · ${fmtKg(kg)} kg`}
       </span>
     </button>
   )

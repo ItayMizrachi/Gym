@@ -5,6 +5,7 @@ import { Metric } from '../lib/types'
 import { Empty, PageHeader } from '../components/ui'
 import { PhotoTile, PhotoViewer } from '../components/PhotoViewer'
 import { EntrySheet } from './Body'
+import { weightNear } from '../lib/photos'
 import { Camera, Check } from 'lucide-react'
 import { useImageUrl } from '../components/ui'
 
@@ -65,7 +66,7 @@ export default function BodyPhotos() {
               picking ? (
                 <SelectTile key={m.id} m={m} n={picked.indexOf(m.id)} onTap={() => toggle(m.id)} />
               ) : (
-                <PhotoTile key={m.id} m={m} onOpen={() => setOpen(i)} />
+                <PhotoTile key={m.id} m={m} kg={weightNear(m, metrics)} onOpen={() => setOpen(i)} />
               )
             )}
           </div>
@@ -83,6 +84,7 @@ export default function BodyPhotos() {
           photos={photos}
           start={open}
           onClose={() => setOpen(null)}
+          kgOf={(m) => weightNear(m, metrics)}
           onEdit={(m) => {
             setOpen(null)
             setEditing(m)

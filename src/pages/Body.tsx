@@ -7,6 +7,7 @@ import { Confirm, Empty, ImageField, NumInput, PageHeader, Sheet, Thumb } from '
 import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
 import { PhotoCompare } from '../components/PhotoCompare'
+import { weightNear } from '../lib/photos'
 import { PhotoTile, PhotoViewer } from '../components/PhotoViewer'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MeasureFields, MeasureValues, MeasuresCard } from '../components/Measures'
@@ -306,7 +307,7 @@ export default function Body() {
           </div>
           <div className="ph-grid preview">
             {newestFirst.slice(0, 5).map((m, i) => (
-              <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
+              <PhotoTile key={m.id} m={m} kg={weightNear(m, metrics)} onOpen={() => setViewing(i)} />
             ))}
           </div>
           {withPhotos.length > 3 && (
@@ -364,6 +365,7 @@ export default function Body() {
           photos={newestFirst}
           start={viewing}
           onClose={() => setViewing(null)}
+          kgOf={(m) => weightNear(m, metrics)}
           onEdit={(m) => {
             setViewing(null)
             setEditing(m)
