@@ -89,14 +89,14 @@ export function AchievementsSection() {
 
       {/* two rows by default (earned first): the full wall of locked badges is one tap away */}
       <div className="ach-grid" id="ach-grid">
-        {(all ? grid : grid.slice(0, Math.max(6, Math.ceil(earned / 3) * 3))).map((a) => (
+        {(all ? grid : grid.slice(0, 6)).map((a) => (
           <button
             key={a.id}
             className={`ach-tile${a.earned ? ' earned' : ''}`}
             onClick={() => setOpen(a)}
             aria-label={`${a.title}. ${a.earned ? `Earned ${fmtDate(a.date!, true)}` : `Not earned yet. ${progressText(a)}`}`}
           >
-            <AchievementIconBadge a={a} />
+            <AchievementIconBadge a={a} size={40} />
             <span className="ach-tile-t">{a.title}</span>
             <span className="tiny ach-tile-d">
               {a.earned ? (

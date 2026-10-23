@@ -132,26 +132,20 @@ export default function Profile() {
       </button>
 
       {stalled.length > 0 && (
-        <section className="card stack" aria-label="Stalled lifts" style={{ gap: 10 }}>
-          <div>
-            <h2 style={{ fontSize: 'var(--fs-md)' }}>Stalled lifts</h2>
-            <div className="small muted">No new best for a few sessions. That's normal; a change usually gets it moving again.</div>
+        <section className="card stall" aria-label="Stalled lifts">
+          <div className="stall-head">
+            <h2>Stalled lifts</h2>
+            <span className="small muted">No new best lately</span>
           </div>
           {stalled.slice(0, 3).map((p) => (
             <button key={p.exerciseId} className="stall-row" onClick={() => nav(`/exercise/${p.exerciseId}`)}>
-              <span className="grow">
-                <span className="stall-name">{p.name}</span>
-                <span className="small muted" style={{ display: 'block' }}>
-                  {p.sessions} sessions since your best (est. 1-rep max {Math.round(p.best)} kg)
-                </span>
-              </span>
-              <ChevronRight size={18} aria-hidden className="muted" />
+              <span className="grow ellipsis stall-name">{p.name}</span>
+              <span className="small muted stall-n">{p.sessions} sessions</span>
+              <ChevronRight size={16} aria-hidden className="muted" />
             </button>
           ))}
-          <div className="small" style={{ color: 'var(--text-2)' }}>
-            Try one easier week at about 90% of your usual weights, or switch the rep range (for example 5–8 instead of 8–12)
-            for a few weeks.
-          </div>
+          {/* the advice is one line; the details are on each exercise's page */}
+          <div className="tiny muted stall-tip">Try an easier week at ~90%, or a different rep range for a few weeks.</div>
         </section>
       )}
 

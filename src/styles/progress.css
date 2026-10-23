@@ -231,7 +231,8 @@
 /* calendar with workout names */
 .cal.named .cal-cell {
   aspect-ratio: auto;
-  min-height: 50px;
+  min-height: 52px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -243,7 +244,10 @@
   min-height: 0;
 }
 .cal-name {
-  max-width: 100%;
+  display: block;
+  width: 100%;
+  padding: 0 2px;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

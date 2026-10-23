@@ -257,7 +257,8 @@
 }
 .cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* minmax(0, …): equal columns; a long workout name is cut short instead of widening its day */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 5px;
 }
 .cal-wd {
@@ -267,6 +268,7 @@
   padding-bottom: 2px;
 }
 .cal-cell {
+  min-width: 0;
   aspect-ratio: 1;
   border-radius: 8px;
   display: grid;
@@ -629,3 +631,13 @@
   .ins-actions .btn { font-size: 15px; padding: 0 8px; }
   .ins-actions .btn svg { display: none; }
 }
+
+/* History, quieter: one grouped list per month, rows split by a hairline, plain text meta */
+.hlist { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.hlist .hrow { background: none; border: 0; border-radius: 0; padding: 12px 14px; gap: 14px; min-height: 64px; }
+.hlist .hrow + .hrow { margin-top: 0; border-top: 1px solid var(--line); }
+.hlist .hdate { border-right: 0; padding-right: 0; width: 34px; }
+.hlist .hdate .d { font-size: 20px; }
+.hlist .hname { font-size: 16px; font-weight: 600; }
+.hlist .hmeta { display: block; margin-top: 2px; }
+.hpr { flex: none; display: inline-flex; align-items: center; gap: 3px; color: var(--accent); font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Clock, Layers, Trophy, Weight } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs } from '../lib/pr'
 import { Session } from '../lib/types'
@@ -129,6 +129,7 @@ export default function HistoryPage() {
                     {g.items.length} workout{g.items.length === 1 ? '' : 's'} · {fmtVolume(g.volume)}
                   </span>
                 </div>
+                <div className="hlist">
                 {g.items.map(({ s, m, prs }) => {
                   const d = new Date(sessionDate(s))
                   return (
@@ -140,27 +141,19 @@ export default function HistoryPage() {
                       <div className="grow">
                         <div className="hname ellipsis">{splitName(s.name)[0]}</div>
                         <div className="hmeta">
-                          <span>
-                            <Clock size={13} /> {fmtMinutes(m.minutes)}
-                          </span>
-                          <span>
-                            <Layers size={13} /> {m.sets} {m.sets === 1 ? 'set' : 'sets'}
-                          </span>
-                          <span>
-                            <Weight size={13} /> {fmtVolume(m.volume)}
-                          </span>
+                          {fmtMinutes(m.minutes)} · {m.sets} {m.sets === 1 ? 'set' : 'sets'} · {fmtVolume(m.volume)}
                         </div>
                       </div>
                       {s.data.photo_path && <Thumb path={s.data.photo_path} size={44} />}
                       {prs > 0 && (
-                        <span className="chip pr">
-                          <Trophy size={12} /> {prs}
+                        <span className="hpr" aria-label={`${prs} record${prs === 1 ? '' : 's'}`}>
+                          <Trophy size={13} aria-hidden /> {prs}
                         </span>
                       )}
-                      <ChevronRight size={18} className="muted" />
                     </button>
                   )
                 })}
+                </div>
               </section>
             ))}
             {items.length === 0 && <div className="card small muted">No workouts of this type yet.</div>}

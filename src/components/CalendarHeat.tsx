@@ -34,7 +34,7 @@ export function CalendarHeat({
   const labels = [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)]
 
   return (
-    <div className={`cal${names ? ' named' : ''}`}>
+    <div className="cal">
       <div className="row cal-head">
         <div className="grow">
           <div className="ins-title">{view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</div>
@@ -66,15 +66,11 @@ export function CalendarHeat({
               className={`cal-cell l${lvl}${k === today ? ' today' : ''}${future ? ' future' : ''}`}
               disabled={!d}
               onClick={() => d && onDay?.(k, d)}
-              aria-label={`${k}${d ? `, ${d.workouts} workout${d.workouts > 1 ? 's' : ''}, ${d.sets} sets` : ''}`}
+              aria-label={`${k}${d ? `, ${names?.get(k)?.join(', ') ?? `${d.workouts} workout${d.workouts > 1 ? 's' : ''}`}, ${d.sets} sets` : ''}`}
+              title={names && d ? names.get(k)?.join(', ') : undefined}
             >
               <span className="cal-n">{Number(k.slice(8))}</span>
-              {names && d && (
-                <span className="cal-name">
-                  {names.get(k)?.[0] ?? ''}
-                  {(names.get(k)?.length ?? 0) > 1 && ' +'}
-                </span>
-              )}
+              {/* names do not fit a seventh of a phone: the day's shade says it, the tap opens the workout */}
             </button>
           )
         })}
