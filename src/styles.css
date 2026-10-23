@@ -1702,6 +1702,12 @@ table.t td {
 .seg.block button {
   flex: 1;
 }
+/* a small secondary toggle, e.g. a time range beside a heading */
+.seg.sm button {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
 
 /* =============================================================== toggle */
 .toggle {

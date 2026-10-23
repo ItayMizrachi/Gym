@@ -1,4 +1,4 @@
-import { Calculator, Check, Disc, FolderInput, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
+import { Calculator, Check, Disc, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
 import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
 
@@ -33,8 +33,7 @@ export default function Help() {
 
       <Sec title="Folders">
         <p>
-          Folders group your workouts on Train. A program goes into its own folder. Tap a folder name to fold it away. Use{' '}
-          <FolderInput size={13} aria-label="Move to folder" /> or the Folder field in a workout to move it. Tap{' '}
+          Folders group your workouts on Train. A program goes into its own folder. Tap a folder name to fold it away. To move a workout, open it and tap <b>Move</b> next to Folder. Tap{' '}
           <MoreHorizontal size={13} aria-label="Folder options" /> next to a folder to rename it.
         </p>
       </Sec>

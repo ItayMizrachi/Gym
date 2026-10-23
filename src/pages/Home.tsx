@@ -1,7 +1,7 @@
 import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, FolderInput, MoreHorizontal, HelpCircle, BookOpen, PencilLine } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -27,7 +27,7 @@ import {
   summarizeSession,
   weeklyStreak
 } from '../lib/stats'
-import { MoveToFolderSheet, RenameFolderSheet } from '../components/FolderSheet'
+import { RenameFolderSheet } from '../components/FolderSheet'
 import { groupByFolder } from '../lib/folders'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
@@ -53,9 +53,10 @@ function templateInfo(db: DB, w: Workout) {
   return { wes, names, sets, last, usual }
 }
 
-/** "Lower A (Sunday)" → ["Lower A", "Sunday"] */
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
+  // nothing last week: "↑ 17 vs last wk" says nothing new, so say it plainly
+  if (before === 0) return now > 0 ? <div className="delta muted">none last wk</div> : null
   if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
   return (
     <div className={`delta ${d > 0 ? 'up' : 'down'}`}>
@@ -82,7 +83,6 @@ export default function Home() {
   const save = useStore((s) => s.save)
   const user = useStore((s) => s.user)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
-  const [moving, setMoving] = useState<string | null>(null)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [folded, setFolded] = useState<string[]>(loadFolds)
@@ -298,12 +298,10 @@ export default function Home() {
                               {splitName(w.name)[1] && <span className="trow-days">{splitName(w.name)[1]} · </span>}
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
                               {info.wes.length} exercises
-                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
+                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · new'}
                             </div>
                           </button>
-                          <button className="btn icon ghost trow-more" onClick={() => setMoving(w.id)} aria-label={`Move ${w.name} to a folder`}>
-                            <FolderInput size={18} />
-                          </button>
+                          {/* moving to a folder lives in the workout editor (Folder → Move), not on every row */}
                           <button
                             className="btn sm trow-start"
                             disabled={!!active || info.wes.length === 0}
@@ -322,7 +320,6 @@ export default function Home() {
           })}
         </section>
       )}
-      {moving && <MoveToFolderSheet workoutId={moving} onClose={() => setMoving(null)} />}
       {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
         <Sheet title="Add a workout" onClose={() => setAdding(false)}>
@@ -398,8 +395,8 @@ export default function Home() {
           <section className="card stack" style={{ gap: 12 }}>
             <div>
               <div className="row">
-                <div className="ins-title grow">Sets per muscle</div>
-                <div className="seg">
+                <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>Sets per muscle</div>
+                <div className="seg sm">
                   <button className={muscleWeek === 'this' ? 'on' : ''} onClick={() => setMuscleWeek('this')}>
                     This wk
                   </button>
