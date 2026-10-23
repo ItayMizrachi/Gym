@@ -128,7 +128,8 @@ export default function SettingsPage() {
   )
   const toggleRow = (label: string, sub: ReactNode, on: boolean, onChange: (v: boolean) => void) => (
     <div className="row set-tog">
-      <div className="grow">
+      {/* the whole row flips the switch, like iOS Settings; the switch itself is the labelled control */}
+      <div className="grow" onClick={() => onChange(!on)} style={{ cursor: 'pointer' }}>
         <div>{label}</div>
         <div className="small muted">{sub}</div>
       </div>

@@ -209,3 +209,6 @@
 .exo-sep { border-top: 1px solid var(--line); padding-top: var(--s3); }
 /* "Discard workout": a quiet text button under Finish, still red so it reads as destructive */
 .btn.ghost.danger-text { color: var(--danger-text); }
+/* the small "kg" header button gets a finger-sized tap area */
+.hdr-btn { position: relative; }
+.hdr-btn::before { content: ''; position: absolute; inset: -12px -2px; }
