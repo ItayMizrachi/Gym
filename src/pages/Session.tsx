@@ -413,9 +413,9 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
     if (s.kind !== 'warmup' && se.superset) {
       const next = nextInSuperset(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index)
       if (next != null) {
-        // superset: go straight to the paired exercise; rest only at the end of the round
+        // superset: no rest before the paired exercise; rest only at the end of the round.
+        // The screen never scrolls by itself (it moved under the lifter's thumb).
         useStore.getState().clearRest()
-        setTimeout(() => document.getElementById(`ex-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)
         return
       }
     }

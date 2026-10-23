@@ -3,6 +3,9 @@ import type { RestTimer } from './store'
 import { fmtClock } from './format'
 
 /*
+ * NOT IN USE (removed from the app on 23 Oct 2026): on iPhone the web "now playing" card looks like a music player
+ * and freezes while the phone is locked. Kept for the future native app (real Live Activity).
+ *
  * Workout on the lock screen
  * --------------------------
  * A web app cannot draw an iPhone Live Activity, but it can fill the "now playing" card that iOS and Android show

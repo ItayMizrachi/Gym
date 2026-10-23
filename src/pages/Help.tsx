@@ -137,8 +137,8 @@ export default function Help() {
 
       <Sec title="Supersets">
         <p>
-          Exercises with the same superset letter (blue rail) are done back to back. Log a set and GymLog skips the rest and
-          scrolls to the paired exercise; the rest timer starts once every exercise in the round has its set logged.
+          Exercises with the same superset letter (blue rail) are done back to back. Log a set and GymLog skips the rest so you
+          can go straight to the paired exercise; the rest timer starts once every exercise in the round has its set logged.
         </p>
       </Sec>
 
@@ -163,16 +163,6 @@ export default function Help() {
         </p>
       </Sec>
 
-      <Sec title="Workout on the lock screen">
-        <p>
-          Turn on <b>Show workout on lock screen</b> in Settings. While you train, the lock screen shows the current exercise,
-          the set you are on and the rest countdown.
-        </p>
-        <p className="muted">
-          It uses the same card as music, so it replaces Spotify or other audio while it is on. A true iPhone Live Activity
-          needs an App Store app; this is the closest a web app can get.
-        </p>
-      </Sec>
 
       <Sec title="Saving and offline">
         <div>

@@ -70,6 +70,7 @@ Always keep something in progress. When the "Next" list runs low:
 - ~~Toasts covering Finish on the workout screen~~ — fixed: shown under the header there.
 
 ## Later / ideas
+- **Native iPhone app** (App Store, $99/year developer account): real lock-screen Live Activity for the rest timer, Apple Health heart rate during workouts (AirPods / Apple Watch), reliable rest-over alerts. The web lock-screen card was removed on 23 Oct because Apple only offers a music-style card that freezes while locked; its code is kept in src/lib/lockscreen.ts.
 - Pounds as a unit (Settings → Units): store kg, show and type lb everywhere. Touches every weight display and input, so plan it as one careful pass with tests.
 - Rest-day suggestions and deload hints from training load.
 - Exercise animations (two-frame from the library images).
