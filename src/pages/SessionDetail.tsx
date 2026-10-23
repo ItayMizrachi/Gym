@@ -38,6 +38,8 @@ function SetText({ x, tracking }: { x: SessionSet; tracking: Tracking }) {
     ) : (
       <>{x.reps ?? 0} reps</>
     )
+  // a set without weight (body weight, or a warm-up) is just its reps: "0 kg × 8" reads like a mistake
+  if (!x.weight) return <>{x.reps ?? 0} reps</>
   return (
     <>
       {fmtKg(x.weight)} kg<span className="x">×</span>
