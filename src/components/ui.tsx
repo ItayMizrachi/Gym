@@ -296,6 +296,7 @@ export function Confirm({
   title,
   text,
   confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   danger,
   onConfirm,
   onClose
@@ -303,6 +304,7 @@ export function Confirm({
   title: string
   text?: string
   confirmLabel?: string
+  cancelLabel?: string
   danger?: boolean
   onConfirm: () => void
   onClose: () => void
@@ -312,7 +314,7 @@ export function Confirm({
       {text && <p className="confirm-text">{text}</p>}
       <div className="row" style={{ gap: 'var(--s2)' }}>
         <button className="btn grow" onClick={onClose}>
-          Cancel
+          {cancelLabel}
         </button>
         <button
           className={`btn grow ${danger ? 'danger' : 'primary'}`}

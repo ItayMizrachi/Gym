@@ -991,8 +991,9 @@ export default function SessionPage() {
       {confirmFinish && (
         <Confirm
           title="Finish workout?"
-          text={`${totalSets - doneSets} planned set${totalSets - doneSets === 1 ? '' : 's'} not logged will be dropped from this workout.`}
+          text={`You logged ${doneSets} of ${totalSets} sets. The ${totalSets - doneSets} you skipped won't be saved; your plan stays the same for next time.`}
           confirmLabel="Finish"
+          cancelLabel="Keep going"
           onConfirm={() => {
             finishSession(session.id)
             nav(`/history/${session.id}`, { state: { fresh: true } })
@@ -1002,9 +1003,10 @@ export default function SessionPage() {
       )}
       {confirmDiscard && (
         <Confirm
-          title="Discard this workout?"
-          text="Nothing from this session will be saved."
+          title={doneSets === 0 ? 'No sets logged yet' : 'Discard this workout?'}
+          text={doneSets === 0 ? 'There is nothing to save. Tick a set to log it, or discard this workout.' : 'Nothing from this session will be saved.'}
           confirmLabel="Discard"
+          cancelLabel={doneSets === 0 ? 'Keep going' : 'Cancel'}
           danger
           onConfirm={() => {
             discardSession(session.id)
