@@ -340,12 +340,3 @@ span.pv-btn {
     transform: rotate(360deg);
   }
 }
-
-/* Body: small unit after a weight change */
-.delta-u {
-  margin-left: 3px;
-  font-family: var(--body);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-}

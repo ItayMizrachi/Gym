@@ -2317,3 +2317,12 @@ input[type='search']::-webkit-search-decoration {
 .we-card .we-head {
   padding-left: var(--s3);
 }
+
+/* small unit after a change, e.g. "−0.7 kg" on Body and in measurements */
+.delta-u {
+  margin-left: 3px;
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}

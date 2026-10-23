@@ -232,11 +232,17 @@ export function MeasuresCard({ metrics, onLog }: { metrics: Metric[]; onLog: () 
           )}
           <div className="delta-row ms-deltas">
             <div>
-              <div className="kpi">{fmtDelta(d.vsDays)}</div>
+              <div className="kpi">
+                {fmtDelta(d.vsDays)}
+                {d.vsDays != null && <span className="delta-u">{info.unit}</span>}
+              </div>
               <div className="l">vs 30 days ago</div>
             </div>
             <div>
-              <div className="kpi">{fmtDelta(d.sinceFirst)}</div>
+              <div className="kpi">
+                {fmtDelta(d.sinceFirst)}
+                {d.sinceFirst != null && <span className="delta-u">{info.unit}</span>}
+              </div>
               <div className="l">since {d.first ? fmtDate(d.first.date) : 'first'}</div>
             </div>
           </div>
