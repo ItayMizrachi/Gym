@@ -30,7 +30,8 @@ export default function HistoryPage() {
 
   // filters by workout name ("Push", "Legs"…), so imported history groups as well as plan workouts.
   // Names done at least twice get a chip, most frequent first; the rest share "Other".
-  const keyOf = (i: Item) => splitName(i.s.name)[0].trim().toLowerCase()
+  // prefixed so a workout called "Other" or "All" cannot clash with those two filters
+  const keyOf = (i: Item) => 'n:' + splitName(i.s.name)[0].trim().toLowerCase()
   const names = useMemo(() => {
     const count = new Map<string, { label: string; n: number }>()
     for (const i of all) {
