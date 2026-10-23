@@ -12,11 +12,31 @@ export type ViewerPhoto = Pick<Metric, 'id' | 'photo_path'> & { date?: string; w
 
 function Slide({ m, offset, dx, zoom }: { m: ViewerPhoto | undefined; offset: number; dx: number; zoom: { s: number; x: number; y: number } | null }) {
   const url = useImageUrl(m?.photo_path)
+  const [failed, setFailed] = useState(false)
+  // no picture after a while (offline, not cached) or a broken file: say so instead of spinning forever
+  useEffect(() => {
+    setFailed(false)
+    if (url) return
+    const t = window.setTimeout(() => setFailed(true), 8000)
+    return () => window.clearTimeout(t)
+  }, [url, m?.photo_path])
   if (!m) return null
   const z = offset === 0 && zoom ? `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.s})` : ''
   return (
     <div className="pv-slide" style={{ transform: `translateX(calc(${offset * 100}% + ${offset * 16}px + ${dx}px))` }} aria-hidden={offset !== 0}>
-      {url ? <img src={url} alt={offset === 0 ? (m.date ? `Photo, ${fmtDateLong(m.date)}` : 'Photo') : ''} style={{ transform: z }} draggable={false} /> : <div className="pv-wait" />}
+      {failed ? (
+        <div className="pv-fail">This photo cannot load right now. Check your connection and try again.</div>
+      ) : url ? (
+        <img
+          src={url}
+          alt={offset === 0 ? (m.date ? `Photo, ${fmtDateLong(m.date)}` : 'Photo') : ''}
+          style={{ transform: z }}
+          draggable={false}
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <div className="pv-wait" />
+      )}
     </div>
   )
 }
