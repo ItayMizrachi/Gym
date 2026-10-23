@@ -163,7 +163,7 @@ function blockTouch(e: TouchEvent) {
   const sheet = (e.target as Element | null)?.closest?.('.sheet')
   if (!sheet || sheet.scrollHeight <= sheet.clientHeight) e.preventDefault()
 }
-function lockScroll() {
+export function lockScroll() {
   if (locks++ === 0) {
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'

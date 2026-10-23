@@ -49,6 +49,7 @@ const ExerciseDetail = lazyPage(() => import('./pages/ExerciseDetail'))
 const HistoryPage = lazyPage(() => import('./pages/History'))
 const SessionDetail = lazyPage(() => import('./pages/SessionDetail'))
 const Body = lazyPage(() => import('./pages/Body'))
+const BodyPhotos = lazyPage(() => import('./pages/BodyPhotos'))
 const SettingsPage = lazyPage(() => import('./pages/Settings'))
 const Help = lazyPage(() => import('./pages/Help'))
 const Profile = lazyPage(() => import('./pages/Profile'))
@@ -105,6 +106,7 @@ export default function App() {
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/history/:id" element={<SessionDetail />} />
               <Route path="/body" element={<Body />} />
+              <Route path="/body/photos" element={<BodyPhotos />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/help" element={<Help />} />
               <Route path="/profile" element={<Profile />} />

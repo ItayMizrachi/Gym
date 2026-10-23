@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { Camera, Plus, Ruler, Scale, Share2, Trash2 } from 'lucide-react'
+import { Camera, Plus, Ruler, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
 import { LineChart } from '../components/Chart'
-import { Confirm, Empty, ImageField, NumInput, Sheet, Thumb, useImageUrl } from '../components/ui'
+import { Confirm, Empty, ImageField, NumInput, Sheet, Thumb } from '../components/ui'
 import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
-import { renderCompareCard, shareOrDownload } from '../lib/shareCard'
+import { PhotoCompare } from '../components/PhotoCompare'
+import { PhotoTile, PhotoViewer } from '../components/PhotoViewer'
+import { useNavigate } from 'react-router-dom'
 import { MeasureFields, MeasureValues, MeasuresCard } from '../components/Measures'
 import { cleanMeasures, measureInfo, rememberUsedFields } from '../lib/measures'
 import '../styles/progress.css'
@@ -37,7 +39,7 @@ function weeklyRate(entries: Metric[], days = 28): number | null {
   return (num / den) * 7
 }
 
-function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Metric | null; onClose: () => void; measuresOpen?: boolean }) {
+export function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Metric | null; onClose: () => void; measuresOpen?: boolean }) {
   const metrics = useStore((s) => s.db.metrics)
   const save = useStore((s) => s.save)
   const remove = useStore((s) => s.remove)
@@ -146,97 +148,12 @@ function entryMeta(m: Metric): string {
   return [...parts, m.note].filter(Boolean).join(' · ')
 }
 
-function PhotoSide({ m, label, photos, onPick, picking }: { m: Metric; label: string; photos: Metric[]; onPick: (m: Metric) => void; picking: boolean }) {
-  const u = useImageUrl(m.photo_path)
-  return (
-    <div className="grow stack" style={{ gap: 4, minWidth: 0, flexBasis: 0 }}>
-      <div className="thumb" style={{ width: '100%', height: 'auto', aspectRatio: '3/4', borderRadius: 14 }}>
-        {u && <img src={u} alt={`${label} photo, ${fmtDate(m.date, true)}`} />}
-      </div>
-      <div className="small center">
-        <b>{label}</b> · {fmtDate(m.date, true)}
-      </div>
-      <div className="small center muted">{m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : ' '}</div>
-      {picking && (
-        <div className="cmp-strip" role="listbox" aria-label={`Pick the ${label.toLowerCase()} photo`}>
-          {photos.map((p) => (
-            <button key={p.id} role="option" aria-selected={p.id === m.id} className={p.id === m.id ? 'on' : ''} onClick={() => onPick(p)}>
-              <Thumb path={p.photo_path} size={44} />
-              <span className="tiny">{fmtDate(p.date)}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/** Two progress photos side by side; "Compare" picks any two, Share renders the pair to an image. */
-function PhotoCompare({ photos }: { photos: Metric[] }) {
-  const repo = useStore((s) => s.repo)
-  const toast = useStore((s) => s.toast)
-  const [aId, setAId] = useState<string | null>(null)
-  const [bId, setBId] = useState<string | null>(null)
-  const [picking, setPicking] = useState(false)
-  const [sharing, setSharing] = useState(false)
-  const a = photos.find((p) => p.id === aId) ?? photos[0]
-  const b = photos.find((p) => p.id === bId) ?? photos[photos.length - 1]
-  const [older, newer] = a.date <= b.date ? [a, b] : [b, a]
-  const days = Math.round((ts(newer.date) - ts(older.date)) / DAY)
-  const dKg = older.weight_kg != null && newer.weight_kg != null ? Math.round((newer.weight_kg - older.weight_kg) * 10) / 10 : null
-  const caption =
-    days > 0
-      ? `${dKg != null ? `${dKg > 0 ? '+' : dKg < 0 ? '−' : '±'}${fmtKg(Math.abs(dKg))} kg in ` : ''}${days} day${days === 1 ? '' : 's'}`
-      : null
-
-  async function share() {
-    if (!repo) return
-    setSharing(true)
-    try {
-      const [ua, ub] = await Promise.all([repo.imageUrl(a.photo_path), repo.imageUrl(b.photo_path)])
-      if (!ua || !ub) throw new Error('Photo not available offline')
-      const kg = (m: Metric) => (m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : null)
-      const blob = await renderCompareCard(
-        { url: ua, date: fmtDate(a.date, true), weight: kg(a) },
-        { url: ub, date: fmtDate(b.date, true), weight: kg(b) },
-        caption
-      )
-      const res = await shareOrDownload(blob, `gymlog-progress-${older.date}-${newer.date}.png`, caption ? `My progress: ${caption}` : 'My progress')
-      if (res === 'downloaded') toast({ kind: 'info', text: 'Comparison image saved' })
-    } catch (e: any) {
-      toast({ kind: 'error', text: 'Could not create the image', sub: String(e?.message ?? e) })
-    } finally {
-      setSharing(false)
-    }
-  }
-
-  return (
-    <div className="card stack">
-      <div className="card-head">
-        <h2>Progress photos</h2>
-        <div className="row" style={{ gap: 'var(--s2)' }}>
-          <button className={`btn sm${picking ? ' primary' : ''}`} onClick={() => setPicking(!picking)} aria-pressed={picking}>
-            {picking ? 'Done' : 'Compare'}
-          </button>
-          <button className="btn icon sm" onClick={share} disabled={sharing} aria-label="Share comparison">
-            <Share2 size={18} />
-          </button>
-        </div>
-      </div>
-      {picking && <div className="small muted">Pick a photo under each side.</div>}
-      <div className="row" style={{ alignItems: 'flex-start' }}>
-        <PhotoSide m={a} label="Before" photos={photos} onPick={(m) => setAId(m.id)} picking={picking} />
-        <PhotoSide m={b} label="After" photos={photos} onPick={(m) => setBId(m.id)} picking={picking} />
-      </div>
-      {caption && <div className="small center muted">{caption}</div>}
-    </div>
-  )
-}
-
 export default function Body() {
   const metrics = useStore((s) => s.db.metrics)
   const [editing, setEditing] = useState<Metric | 'new' | 'measures' | null>(null)
   const [range, setRange] = useState<'30' | '90' | 'all'>('90')
+  const [viewing, setViewing] = useState<number | null>(null)
+  const nav = useNavigate()
 
   const entries = useMemo(
     () => metrics.filter((m) => m.weight_kg != null).sort((a, b) => a.date.localeCompare(b.date)),
@@ -248,6 +165,7 @@ export default function Body() {
     return entries.filter((e) => ts(e.date) >= cut)
   }, [entries, range])
   const withPhotos = useMemo(() => metrics.filter((m) => m.photo_path).sort((a, b) => a.date.localeCompare(b.date)), [metrics])
+  const newestFirst = useMemo(() => [...withPhotos].reverse(), [withPhotos])
   const all = useMemo(() => [...metrics].sort((a, b) => b.date.localeCompare(a.date)), [metrics])
 
   const cur = entries[entries.length - 1]
@@ -361,23 +279,23 @@ export default function Body() {
 
       <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
 
-      {withPhotos.length >= 2 && (
-        <PhotoCompare photos={withPhotos} />
-      )}
+      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} onOpen={(m) => setViewing(newestFirst.indexOf(m))} />}
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">
-            <span>All photos</span>
+            <span>Photos</span>
             <span className="count">{withPhotos.length}</span>
           </div>
-          <div className="photo-grid">
-            {[...withPhotos].reverse().map((m) => (
-              <button key={m.id} className="stack" style={{ gap: 4 }} onClick={() => setEditing(m)} aria-label={`Photo from ${m.date}`}>
-                <Thumb path={m.photo_path} />
-                <div className="tiny muted center">{fmtDate(m.date)}</div>
-              </button>
+          <div className="ph-grid">
+            {newestFirst.slice(0, 3).map((m, i) => (
+              <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
             ))}
           </div>
+          {withPhotos.length > 3 && (
+            <button className="btn block" style={{ marginTop: 'var(--s3)' }} onClick={() => nav('/body/photos')}>
+              See all {withPhotos.length} photos
+            </button>
+          )}
         </section>
       )}
 
@@ -418,6 +336,17 @@ export default function Body() {
         </section>
       )}
 
+      {viewing != null && (
+        <PhotoViewer
+          photos={newestFirst}
+          start={viewing}
+          onClose={() => setViewing(null)}
+          onEdit={(m) => {
+            setViewing(null)
+            setEditing(m)
+          }}
+        />
+      )}
       {editing && (
         <EntrySheet
           entry={editing === 'new' || editing === 'measures' ? null : editing}
