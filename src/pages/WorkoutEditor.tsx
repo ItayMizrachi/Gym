@@ -295,9 +295,12 @@ export default function WorkoutEditor() {
       </div>
 
       {wes.length > 0 && (
-        <div className="section-label" style={{ marginBottom: 0 }}>
-          <span>Exercises</span>
-          <span className="count">Tap one to change or remove it · arrows move it</span>
+        <div style={{ marginBottom: 0 }}>
+          <div className="section-label" style={{ marginBottom: 2 }}>
+            <span>Exercises</span>
+            <span className="count">{wes.length}</span>
+          </div>
+          <div className="small muted">Tap one to change or remove it. The arrows move it up or down.</div>
         </div>
       )}
 

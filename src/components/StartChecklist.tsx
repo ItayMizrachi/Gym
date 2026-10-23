@@ -42,7 +42,7 @@ export function StartChecklist() {
         <span className="grow" style={{ minWidth: 0 }}>
           <span className="hm-row-t">Getting started</span>
           <span className="small muted ellipsis" style={{ display: 'block' }}>
-            {open ? `${doneN} of ${steps.length} done` : `Next: ${next.t.toLowerCase()}`}
+            {open ? `${doneN} of ${steps.length} done` : `Next: ${next.t.charAt(0).toLowerCase()}${next.t.slice(1)}`}
           </span>
         </span>
         <ChevronDown size={18} className="hm-start-caret" aria-hidden />

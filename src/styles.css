@@ -578,6 +578,12 @@ div.field {
   color: var(--accent-ink);
   font-weight: 600;
 }
+/* "Any …" is the resting state of a filter: lit in chalk, so yellow only marks a filter you chose */
+.chips .chip.any.active {
+  background: var(--card3);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
 .chips .chip .n {
   font-variant-numeric: tabular-nums;
   opacity: 0.6;

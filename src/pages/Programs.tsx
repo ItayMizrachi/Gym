@@ -170,7 +170,7 @@ function FilterRow<T extends string>({
   return (
     <div className="pg-filter" role="group" aria-label={label}>
       <div className="chips">
-        <button className={`chip ${value == null ? 'active' : ''}`} aria-pressed={value == null} onClick={() => onChange(null)}>
+        <button className={`chip any ${value == null ? 'active' : ''}`} aria-pressed={value == null} onClick={() => onChange(null)}>
           {label === 'Level' ? 'Any level' : label === 'Equipment' ? 'Any equipment' : label === 'Length' ? 'Any length' : 'Any days'}
         </button>
         {options.map((o) => (

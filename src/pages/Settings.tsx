@@ -126,7 +126,7 @@ export default function SettingsPage() {
     </button>
   )
   const toggleRow = (label: string, sub: ReactNode, on: boolean, onChange: (v: boolean) => void) => (
-    <div className="row">
+    <div className="row set-tog">
       <div className="grow">
         <div>{label}</div>
         <div className="small muted">{sub}</div>
@@ -138,19 +138,6 @@ export default function SettingsPage() {
   return (
     <div className="stack" style={{ gap: 14 }}>
       <PageHeader title="Settings" sub="Your account, workout options, plates and backups." />
-
-      {group(
-        'Help',
-        'New here? Start with these.',
-        <>
-          {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
-          {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
-          <div className="tiny muted">
-            <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
-            opens full screen and keeps working with a weak signal.
-          </div>
-        </>
-      )}
 
       {group(
         'Account',
@@ -305,6 +292,19 @@ export default function SettingsPage() {
             <ArrowRightLeft size={16} aria-hidden /> Import from Hevy or Strong
           </button>
           <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
+        </>
+      )}
+
+      {group(
+        'Help',
+        'Answers, the welcome tour and how to install.',
+        <>
+          {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
+          {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
+          <div className="tiny muted">
+            <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
+            opens full screen and keeps working with a weak signal.
+          </div>
         </>
       )}
 

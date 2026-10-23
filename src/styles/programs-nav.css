@@ -240,3 +240,11 @@
 }
 .ins-home .welcome h2 { font-size: 26px; }
 .ins-home .welcome .muted { color: var(--text-2); font-size: 16px; line-height: 1.45; }
+
+/* Settings: label and sub-text never run into the chevron; switches sit in a divided list */
+.set-link-t { min-width: 0; }
+.set-link > svg { flex: none; }
+.set-tog { gap: var(--s3); align-items: center; }
+.set-tog .grow { min-width: 0; }
+.set-tog + .set-tog,
+.set-link + .set-tog { border-top: 1px solid var(--line); padding-top: var(--s3); }
