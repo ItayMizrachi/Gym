@@ -157,7 +157,8 @@ export default function WorkoutEditor() {
             </div>
             <ChevronDown size={18} className="we-caret" />
           </button>
-          <div className="reorder">
+          {/* drag (hold the header) moves an exercise; these stay for keyboards and screen readers */}
+          <div className="reorder sr-only">
             <button className="btn ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">
               <ChevronUp size={22} />
             </button>
