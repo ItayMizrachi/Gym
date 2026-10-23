@@ -8,7 +8,7 @@ import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/t
 import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
-import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo } from '../lib/format'
+import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo, splitName } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
 import { exerciseMeta } from '../lib/exerciseFilters'
@@ -833,7 +833,7 @@ export default function SessionPage() {
             <ChevronLeft size={22} />
           </button>
           <div className="grow" style={{ minWidth: 0 }}>
-            <h1 className="sp-name">{session.name}</h1>
+            <h1 className="sp-name ellipsis">{splitName(session.name)[0]}</h1>
           </div>
           <button className="btn icon sm ghost" onClick={() => setTools(true)} aria-label="Tools: 1-rep max, percent of max, plates">
             <Calculator size={20} />

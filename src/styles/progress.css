@@ -366,3 +366,19 @@
 .sd-set .what {
   font-size: 20px;
 }
+
+/* time range: a compact control beside its label */
+.prof-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+.seg.sm button {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+.prof-seg .seg.sm button {
+  min-height: 32px;
+}

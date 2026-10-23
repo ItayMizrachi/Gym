@@ -31,10 +31,10 @@ const METRICS: { id: WeekMetric; label: string }[] = [
   { id: 'volume', label: 'Volume' },
   { id: 'reps', label: 'Reps' }
 ]
-const RANGES: { id: WeekRange; label: string }[] = [
-  { id: '4w', label: '4 weeks' },
-  { id: '3m', label: '3 months' },
-  { id: '1y', label: '1 year' }
+const RANGES: { id: WeekRange; label: string; short: string }[] = [
+  { id: '4w', label: 'Last 4 weeks', short: '4w' },
+  { id: '3m', label: 'Last 3 months', short: '3m' },
+  { id: '1y', label: 'Last year', short: '1y' }
 ]
 const FORMAT: Record<WeekMetric, (v: number) => string> = {
   duration: (v) => fmtMinutes(Math.round(v)),
@@ -109,12 +109,16 @@ export default function Profile() {
                   </button>
                 ))}
               </div>
-              <div className="seg block" role="tablist" aria-label="Time range">
-                {RANGES.map((r) => (
-                  <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id}>
-                    {r.label}
-                  </button>
-                ))}
+              {/* the range is secondary: a small control on its own line, not a second full-width bar */}
+              <div className="prof-range">
+                <span className="small muted">{RANGES.find((r) => r.id === range)?.label}</span>
+                <div className="seg sm" role="tablist" aria-label="Time range">
+                  {RANGES.map((r) => (
+                    <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id} aria-label={r.label}>
+                      {r.short}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <WeekBars values={series.map((w) => w.value)} starts={series.map((w) => w.start)} format={FORMAT[metric]} />
@@ -164,7 +168,7 @@ export default function Profile() {
             {inRow > 0 ? `${inRow} week${inRow === 1 ? '' : 's'} in a row` : 'Weekly goal'}
           </div>
           <div className="small muted">
-            Goal: {week.goal} a week · {week.done} done this week
+            {week.done >= week.goal ? `Goal met: ${week.done} workouts this week` : `${week.done} of ${week.goal} workouts this week`}
           </div>
         </div>
         <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label="Change weekly goal">

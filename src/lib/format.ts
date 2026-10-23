@@ -53,3 +53,9 @@ export function parseNum(input: string): number | null {
 export function roundTo(n: number, step = 0.5): number {
   return Math.round(n / step) * step
 }
+
+/** "Lower B (Wednesday)" → ['Lower B', 'Wednesday']: the bracket part shows on a second, quieter line. */
+export function splitName(name: string): [string, string] {
+  const m = name.match(/^(.*?)\s*\(([^)]*)\)\s*$/)
+  return m && m[1] ? [m[1], m[2]] : [name, '']
+}

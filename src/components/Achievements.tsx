@@ -51,6 +51,7 @@ export function AchievementsSection() {
   const list = useMemo(() => achievements(db, { weeklyGoal: goal }), [db, goal])
   const next = useMemo(() => nextUp(list), [list])
   const [open, setOpen] = useState<Achievement | null>(null)
+  const [all, setAll] = useState(false)
   const earned = list.filter((a) => a.earned).length
   // earned first (newest first), then the rest in their natural order
   const grid = useMemo(
@@ -86,8 +87,9 @@ export function AchievementsSection() {
         </div>
       )}
 
-      <div className="ach-grid">
-        {grid.map((a) => (
+      {/* two rows by default (earned first): the full wall of locked badges is one tap away */}
+      <div className="ach-grid" id="ach-grid">
+        {(all ? grid : grid.slice(0, Math.max(6, Math.ceil(earned / 3) * 3))).map((a) => (
           <button
             key={a.id}
             className={`ach-tile${a.earned ? ' earned' : ''}`}
@@ -108,6 +110,11 @@ export function AchievementsSection() {
           </button>
         ))}
       </div>
+      {grid.length > 6 && (
+        <button className="btn block ghost" aria-expanded={all} aria-controls="ach-grid" onClick={() => setAll(!all)}>
+          {all ? 'Show fewer' : `Show all ${grid.length} achievements`}
+        </button>
+      )}
 
       {open && (
         <Sheet title={open.title} onClose={() => setOpen(null)}>

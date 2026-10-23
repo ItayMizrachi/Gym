@@ -6,7 +6,7 @@ import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
 import { primeAudio } from '../lib/beep'
-import { fmtDate } from '../lib/format'
+import { fmtDate, splitName } from '../lib/format'
 import { nowIso, uid } from '../lib/uid'
 import { DB, Workout } from '../lib/types'
 import { sessionDate } from '../lib/pr'
@@ -54,11 +54,6 @@ function templateInfo(db: DB, w: Workout) {
 }
 
 /** "Lower A (Sunday)" → ["Lower A", "Sunday"] */
-function splitName(name: string): [string, string] {
-  const m = name.match(/^(.*?)\s*\(([^)]*)\)\s*$/)
-  return m && m[1] ? [m[1], m[2]] : [name, '']
-}
-
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
   if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
@@ -297,8 +292,10 @@ export default function Home() {
                       return (
                         <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
                           <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                            <div className="trow-name ellipsis">{w.name}</div>
+                            <div className="trow-name ellipsis">{splitName(w.name)[0]}</div>
                             <div className="small muted ellipsis">
+                              {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
+                              {splitName(w.name)[1] && <span className="trow-days">{splitName(w.name)[1]} · </span>}
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
                               {info.wes.length} exercises
                               {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · not done yet'}
