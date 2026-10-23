@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Share2, Trash2, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Plus, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg, splitName } from '../lib/format'
@@ -19,6 +19,8 @@ import {
   summarizeSession
 } from '../lib/stats'
 import { renderShareCard, shareOrDownload } from '../lib/shareCard'
+import { workoutFromSession } from '../lib/planSync'
+import { nowIso } from '../lib/uid'
 import { SessionSet, Tracking, trackingOf } from '../lib/types'
 import '../styles/insights.css'
 import '../styles/progress.css'
@@ -114,6 +116,20 @@ export default function SessionDetail() {
   const [allMuscles, setAllMuscles] = useState(false)
   const [editing, setEditing] = useState(false)
   const save = useStore((st) => st.save)
+  const userId = useStore((st) => st.user?.id ?? 'local')
+  const toastFn = useStore((st) => st.toast)
+  /** turn this finished workout into a plan, and link it so Previous and Up next use it from now on */
+  function saveAsWorkout() {
+    const cur = useStore.getState().db
+    const sess = cur.sessions.find((x) => x.id === id)
+    if (!sess) return
+    const pos = cur.workouts.length ? Math.max(...cur.workouts.map((w) => w.position)) + 1 : 0
+    const { workout, rows } = workoutFromSession(sess, userId, pos, nowIso())
+    save('workouts', workout)
+    rows.forEach((r) => save('workout_exercises', r))
+    save('sessions', { ...sess, workout_id: workout.id })
+    toastFn({ kind: 'info', text: `${splitName(workout.name)[0]} is now one of your workouts`, sub: 'Find it on Train. Change sets and reps any time.' })
+  }
   const s = db.sessions.find((x) => x.id === id)
   const prs = useMemo(() => (s ? sessionPRs(db, s) : []), [db, s])
   const prIds = useMemo(() => (s ? prSetIds(db, s) : new Set<string>()), [db, s])
@@ -401,6 +417,12 @@ export default function SessionDetail() {
         </div>
       )}
 
+      {/* an imported or quick workout has no plan yet: one tap makes it a workout on Train */}
+      {!(s.workout_id && db.workouts.some((w) => w.id === s.workout_id)) && s.data.exercises.some((e) => e.sets.some((x) => x.kind !== 'warmup')) && (
+        <button className="btn primary block" onClick={saveAsWorkout}>
+          <Plus size={16} aria-hidden /> Save as a workout
+        </button>
+      )}
       <button className="btn" onClick={() => setEditing(true)}>
         <Pencil size={16} /> Edit workout
       </button>

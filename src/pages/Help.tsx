@@ -59,6 +59,12 @@ export default function Help() {
         </p>
       </Sec>
 
+      <Sec title="Workouts imported from Hevy or Strong">
+        <p>
+          Imported workouts land in History. Open one and tap <b>Save as a workout</b> to make it a plan on Train, with the same
+          exercises, sets and rep range. From then on, Previous and Up next use it.
+        </p>
+      </Sec>
       <Sec title="Editing a finished workout">
         <p>
           Forgot a set or typed the wrong weight? Open the workout in <b>History</b> and tap <b>Edit workout</b>. Records update to match.

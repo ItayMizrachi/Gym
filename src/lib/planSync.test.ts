@@ -70,3 +70,17 @@ describe('planUpdate', () => {
     expect(save[1].workout_id).toBe('w')
   })
 })
+
+describe('workoutFromSession', () => {
+  it('keeps order, work sets, the rep range done and drops warm-up-only exercises', async () => {
+    const { workoutFromSession } = await import('./planSync')
+    const warm = se('w', ['warmup'])
+    const a = se('a', ['warmup', 'work', 'work', 'drop'])
+    a.sets[1].reps = 10
+    a.sets[2].reps = 7
+    const { workout, rows } = workoutFromSession(session([warm, a]), 'u', 4, 'now')
+    expect(workout.name).toBe('Upper A')
+    expect(workout.position).toBe(4)
+    expect(rows.map((r) => [r.exercise_id, r.sets, r.rep_min, r.rep_max, r.drop_last, r.workout_id === workout.id])).toEqual([['a', 2, 7, 10, true, true]])
+  })
+})

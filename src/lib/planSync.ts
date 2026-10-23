@@ -74,3 +74,35 @@ export function planUpdate(session: Session, wes: WorkoutExercise[], workoutId: 
   })
   return { save, remove: removed.map((w) => w.id) }
 }
+
+/**
+ * A plan made from a finished workout (e.g. one imported from Hevy): same exercises in the same order, the number
+ * of work sets, the rep range you actually did, the weight of your first work set, rest and supersets.
+ * Exercises with only warm-up sets are left out.
+ */
+export function workoutFromSession(session: Session, userId: string, position: number, now: string) {
+  const id = uid()
+  const workout = { id, user_id: userId, name: session.name.trim() || 'Workout', notes: '', position, created_at: now }
+  const rows: WorkoutExercise[] = []
+  for (const e of session.data.exercises) {
+    const work = e.sets.filter((s) => s.kind === 'work' || s.kind === 'failure')
+    if (!work.length) continue
+    const reps = work.map((s) => s.reps ?? 0).filter((r) => r > 0)
+    rows.push({
+      id: uid(),
+      user_id: userId,
+      workout_id: id,
+      exercise_id: e.exercise_id,
+      position: rows.length,
+      sets: work.length,
+      rep_min: reps.length ? Math.min(...reps) : e.rep_min || 8,
+      rep_max: reps.length ? Math.max(...reps) : e.rep_max || 12,
+      weight: work[0].weight ?? 0,
+      rest_sec: e.rest_sec || 90,
+      superset: e.superset || '',
+      drop_last: e.sets.some((s) => s.kind === 'drop'),
+      note: ''
+    })
+  }
+  return { workout, rows }
+}
