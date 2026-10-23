@@ -109,10 +109,8 @@ export default function SettingsPage() {
 
   const group = (title: string, sub: string, children: ReactNode) => (
     <section className="card stack" aria-label={title}>
-      <div>
-        <h2>{title}</h2>
-        <div className="small muted">{sub}</div>
-      </div>
+      {/* the heading says it; the old one-line sub per group only added noise (kept for screen readers) */}
+      <h2 aria-description={sub}>{title}</h2>
       {children}
     </section>
   )

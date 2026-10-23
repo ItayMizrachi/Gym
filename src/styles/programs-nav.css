@@ -248,3 +248,5 @@
 .set-tog .grow { min-width: 0; }
 .set-tog + .set-tog,
 .set-link + .set-tog { border-top: 1px solid var(--line); padding-top: var(--s3); }
+.set-link-sub { white-space: normal; line-height: 1.3; }
+.set-link-t { overflow: hidden; }
