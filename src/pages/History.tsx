@@ -149,7 +149,7 @@ export default function HistoryPage() {
                       <div className="grow">
                         <div className="hname ellipsis">{splitName(s.name)[0]}</div>
                         <div className="hmeta">
-                          {fmtMinutes(m.minutes)} · {fmtVolume(m.volume)}
+                          {fmtMinutes(m.minutes)} · {m.volume > 0 ? fmtVolume(m.volume) : `${m.sets} ${m.sets === 1 ? 'set' : 'sets'}`}
                         </div>
                       </div>
                       {s.data.photo_path && <Thumb path={s.data.photo_path} size={44} />}
