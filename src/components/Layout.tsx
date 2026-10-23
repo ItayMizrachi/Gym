@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Skeleton, SkeletonList } from './ui'
-import { fmtClock } from '../lib/format'
+import { fmtClock, splitName } from '../lib/format'
 import { beep } from '../lib/beep'
 import { usePrefs } from '../lib/prefs'
 import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
@@ -217,7 +217,7 @@ function ResumeBar() {
     <button className="resume-bar" onClick={() => nav(`/session/${active.id}`)} aria-label={`Workout in progress: ${active.name}. Resume`}>
       <span className="resume-dot" aria-hidden />
       <span className="grow ellipsis">
-        <b>{active.name}</b> <span className="muted">· {fmtClock(secs)}</span>
+        <b>{splitName(active.name)[0]}</b> <span className="muted">· {fmtClock(secs)}</span>
       </span>
       <span className="resume-go">
         <Play size={16} /> Resume

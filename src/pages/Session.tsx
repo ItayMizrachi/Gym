@@ -463,10 +463,8 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
             {finished && shut ? (
               <span className="ex-sum-t done">{doneLine}</span>
             ) : (
-              <span className="ex-sum-t">
-                {firstTime ? 'First time · ' : ''}
-                {plan}
-              </span>
+              // "First time" lives in the details (and the empty Previous column): this line keeps the plan readable
+              <span className="ex-sum-t">{plan}</span>
             )}
             {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label="Has notes" />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />

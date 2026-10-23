@@ -52,7 +52,7 @@ export default function Login() {
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Images size={18} /></span>
-            <span><b>876 exercises with photos.</b> Plus 30 ready-made plans, so you never start from a blank page.</span>
+            <span><b>870+ exercises with photos.</b> Plus 30 ready-made plans, so you never start from a blank page.</span>
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Trophy size={18} /></span>

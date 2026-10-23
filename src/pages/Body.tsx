@@ -182,7 +182,7 @@ export default function Body() {
   const rate = weeklyRate(entries)
   const delta = (a: number | null | undefined, b: number | null | undefined) =>
     a != null && b != null ? Math.round((a - b) * 10) / 10 : null
-  const fmtDelta = (v: number | null) => (v == null ? '–' : `${v > 0 ? '+' : ''}${v}`)
+  const fmtDelta = (v: number | null) => (v == null ? '–' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${fmtKg(Math.abs(v))}`)
 
   const prevOf = (m: Metric) => {
     const i = entries.findIndex((e) => e.id === m.id)
@@ -227,22 +227,31 @@ export default function Body() {
                 </div>
                 <div className="tiny muted">7-day average</div>
                 <div className={`kpi ${rateClass}`} style={{ fontSize: 18, marginTop: 6 }}>
-                  {rate == null ? '–' : `${rate > 0 ? '+' : ''}${(Math.round(rate * 100) / 100).toFixed(2)}`}
+                  {rate == null ? '–' : `${rate > 0 ? '+' : rate < 0 ? '−' : ''}${Math.abs(Math.round(rate * 100) / 100).toFixed(2)}`}
                   <span className="tiny muted" style={{ fontFamily: 'var(--body)', marginLeft: 4 }}>kg/wk</span>
                 </div>
               </div>
             </div>
             <div className="delta-row">
               <div>
-                <div className="kpi">{fmtDelta(delta(cur.weight_kg, d7?.weight_kg))}</div>
+                <div className="kpi">
+                  {fmtDelta(delta(cur.weight_kg, d7?.weight_kg))}
+                  <span className="delta-u">kg</span>
+                </div>
                 <div className="l">vs 7 days ago</div>
               </div>
               <div>
-                <div className="kpi">{fmtDelta(delta(cur.weight_kg, d30?.weight_kg))}</div>
+                <div className="kpi">
+                  {fmtDelta(delta(cur.weight_kg, d30?.weight_kg))}
+                  <span className="delta-u">kg</span>
+                </div>
                 <div className="l">vs 30 days ago</div>
               </div>
               <div>
-                <div className="kpi">{fmtDelta(delta(cur.weight_kg, first.weight_kg))}</div>
+                <div className="kpi">
+                  {fmtDelta(delta(cur.weight_kg, first.weight_kg))}
+                  <span className="delta-u">kg</span>
+                </div>
                 <div className="l">since {fmtDate(first.date)}</div>
               </div>
             </div>
