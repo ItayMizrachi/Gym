@@ -32,8 +32,9 @@ export function useSteps(id: string | null) {
 }
 
 /** The numbered "how to" list for a library exercise (nothing when it has no steps). */
-export function StepList({ id }: { id: string }) {
+export function StepList({ id, fold = false }: { id: string; fold?: boolean }) {
   const { steps, failed, retry } = useSteps(id)
+  const [all, setAll] = useState(false)
   if (failed)
     return (
       <div className="row small muted" style={{ justifyContent: 'space-between' }}>
@@ -45,12 +46,21 @@ export function StepList({ id }: { id: string }) {
     )
   if (!steps) return <div className="small muted">Loading…</div>
   if (!steps.length) return null
+  // on the exercise page the long library text folds after three steps, so records stay in view
+  const shown = fold && !all ? steps.slice(0, 3) : steps
   return (
-    <ol className="lib-steps">
-      {steps.map((s, i) => (
-        <li key={i}>{s}</li>
-      ))}
-    </ol>
+    <>
+      <ol className="lib-steps">
+        {shown.map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+      </ol>
+      {fold && steps.length > 3 && (
+        <button className="btn ghost block" aria-expanded={all} onClick={() => setAll(!all)}>
+          {all ? 'Show fewer steps' : `Show all ${steps.length} steps`}
+        </button>
+      )}
+    </>
   )
 }
 
@@ -59,7 +69,7 @@ export function HowToCard({ id }: { id: string }) {
   return (
     <div className="card stack">
       <h2>How to do it</h2>
-      <StepList id={id} />
+      <StepList id={id} fold />
     </div>
   )
 }

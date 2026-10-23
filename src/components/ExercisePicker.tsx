@@ -126,7 +126,7 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
             <Toggle on={usePic} onChange={setUsePic} ariaLabel={`Use the picture of ${match.lib.name}`} />
           </div>
         )}
-        <ImageField path={photo} folder="exercises" onChange={setPhoto} label={match ? 'Or use my own photo' : 'Add a photo of the machine'} />
+        <ImageField path={photo} folder="exercises" onChange={setPhoto} label={match ? 'Or use my own photo' : 'Add a photo of the machine'} quiet={!!match} />
       </div>
       <button className="btn primary" type="submit" disabled={!name.trim()}>
         <Plus size={18} /> Create exercise

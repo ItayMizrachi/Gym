@@ -94,7 +94,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       {libId ? (
         <div className="stack" style={{ gap: 'var(--s2)' }}>
           <LibPhoto id={libId} name={ex.name} />
-          <ImageField path={null} folder="exercises" onChange={(p) => save('exercises', { ...ex, image_path: p })} label="Use my own photo instead" />
+          <ImageField path={null} folder="exercises" onChange={(p) => save('exercises', { ...ex, image_path: p })} label="Use my own photo instead" quiet />
         </div>
       ) : (
         <ImageField

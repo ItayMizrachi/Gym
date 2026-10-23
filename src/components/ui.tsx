@@ -74,7 +74,8 @@ export function ImageField({
   onChange,
   large = false,
   label = 'Add photo',
-  autoDelete = true
+  autoDelete = true,
+  quiet = false
 }: {
   path: string | null
   folder: string
@@ -83,6 +84,8 @@ export function ImageField({
   label?: string
   /** delete the replaced / removed file straight away. Turn off when the parent saves later (e.g. a form with a Save button). */
   autoDelete?: boolean
+  /** a secondary choice (e.g. "use my own photo instead" under a library photo): a plain text button */
+  quiet?: boolean
 }) {
   const repo = useStore((s) => s.repo)
   const toast = useStore((s) => s.toast)
@@ -145,7 +148,7 @@ export function ImageField({
           </button>
         </div>
       )}
-      <button type="button" className="btn block" disabled={busy} onClick={() => inputRef.current?.click()}>
+      <button type="button" className={`btn block${quiet && !url ? ' ghost' : ''}`} disabled={busy} onClick={() => inputRef.current?.click()}>
         <Camera size={18} aria-hidden /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
       </button>
       {viewing && path && <PhotoViewer photos={[{ id: path, photo_path: path }]} start={0} onClose={() => setViewing(false)} />}
