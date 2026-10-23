@@ -51,7 +51,7 @@ function signed(n: number, fmt: (x: number) => string): string {
 }
 
 /** " · +120 kg vs last time", in green when it went up */
-function VsLast({ now, before }: { now: number; before: number | null }) {
+function VsLast({ now, before, parts = 1 }: { now: number; before: number | null; parts?: number }) {
   if (before == null || !now) return null
   const d = Math.round(now - before)
   if (d === 0) return <span> · same as last time</span>
@@ -59,7 +59,7 @@ function VsLast({ now, before }: { now: number; before: number | null }) {
     <span className={d > 0 ? 'vs-up' : undefined}>
       {' '}
       · {d > 0 ? '+' : '−'}
-      {Math.abs(d).toLocaleString('en-GB')} kg vs last time
+      {Math.abs(d).toLocaleString('en-GB')} kg vs last time{parts > 1 ? ` (${parts === 2 ? 'both' : 'all'} parts)` : ''}
     </span>
   )
 }
@@ -69,6 +69,12 @@ const workVolume = (sets: SessionSet[]) => sets.filter((x) => x.done && x.kind !
 /** "3 sets · 1,080 kg" under each exercise: work sets, and the volume (or reps / time) they add up to */
 function exLine(done: SessionSet[], tracking: Tracking): string {
   const work = done.filter((x) => x.kind !== 'warmup')
+  // only warm-ups (a timed warm-up, a few easy push-ups): say so instead of "0 sets"
+  if (!work.length) {
+    const sec = done.reduce((t, x) => t + (x.time_sec ?? 0), 0)
+    const reps = done.reduce((t, x) => t + (x.reps ?? 0), 0)
+    return ['Warm-up', sec ? fmtClock(sec) : reps ? `${reps} reps` : ''].filter(Boolean).join(' · ')
+  }
   const sets = `${work.length} set${work.length === 1 ? '' : 's'}`
   if (tracking === 'time') {
     const sec = work.reduce((t, x) => t + (x.time_sec ?? 0), 0)
@@ -347,7 +353,14 @@ export default function SessionDetail() {
                 <div className="hv-exname">{nameOf(e.exercise_id, e.name)}</div>
                 <div className="small muted">
                   {exLine(done, tracking)}
-                  {tracking === 'weight_reps' && <VsLast now={workVolume(e.sets)} before={lastVolume(e.exercise_id)} />}
+                  {/* compare the whole exercise (it may appear twice in a workout), once, on its first card */}
+                  {tracking === 'weight_reps' && s.data.exercises.findIndex((x) => x.exercise_id === e.exercise_id) === i && (
+                    <VsLast
+                      now={s.data.exercises.filter((x) => x.exercise_id === e.exercise_id).reduce((t, x) => t + workVolume(x.sets), 0)}
+                      before={lastVolume(e.exercise_id)}
+                      parts={s.data.exercises.filter((x) => x.exercise_id === e.exercise_id).length}
+                    />
+                  )}
                 </div>
               </div>
               {hasPr && (
