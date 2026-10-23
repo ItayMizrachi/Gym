@@ -271,7 +271,8 @@ export default function Layout() {
       </main>
       <RestBar inSession={inSession} />
       <Toasts inSession={inSession} />
-      {!inSession && !rest && <ResumeBar />}
+      {/* Train has its own big Resume card at the top */}
+      {!inSession && !rest && loc.pathname !== '/' && <ResumeBar />}
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && (
         <nav className="nav" aria-label="Main">

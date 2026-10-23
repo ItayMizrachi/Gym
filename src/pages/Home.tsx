@@ -53,6 +53,15 @@ function templateInfo(db: DB, w: Workout) {
   return { wes, names, sets, last, usual }
 }
 
+/** "Started at 16:52" today, "Started Thu 22 Oct" for an older one left open */
+function startedText(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date().toDateString() === d.toDateString()
+  return today
+    ? `Started at ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+    : `Started ${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}`
+}
+
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
   // nothing last week: "↑ 17 vs last wk" says nothing new, so say it plainly
@@ -185,7 +194,7 @@ export default function Home() {
             {splitName(active.name)[0]}
             {splitName(active.name)[1] && <span className="hm-when">{splitName(active.name)[1]}</span>}
           </div>
-          <div className="hm-meta">Started {fmtDate(active.started_at)}</div>
+          <div className="hm-meta">{startedText(active.started_at)}</div>
           <button
             className="btn primary block hm-go"
             onClick={() => {
