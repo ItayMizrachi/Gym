@@ -14,6 +14,7 @@ import { cloudConfigured } from '../lib/supabase'
 import { usePrefs } from '../lib/prefs'
 import { notifyPermission, notifySupported, requestNotify } from '../lib/notify'
 import { fmtKg } from '../lib/format'
+import { plateColor } from '../lib/plates'
 import '../styles/workout-flow.css'
 import '../styles/programs-nav.css'
 
@@ -256,6 +257,8 @@ export default function SettingsPage() {
                   <button
                     key={v}
                     className={`chip ${on ? 'active' : ''}`}
+                    // an owned plate shows in its real colour, like on the bar in the plate calculator
+                    style={on ? { background: plateColor(v), borderColor: plateColor(v), color: v >= 20 || (v >= 10 && v < 15) ? '#fff' : '#17181b' } : undefined}
                     aria-pressed={on}
                     aria-label={`${fmtKg(v)} kg plate`}
                     onClick={() => {
@@ -278,19 +281,11 @@ export default function SettingsPage() {
         'Add ready-made workouts, or save and restore everything.',
         <>
           {link('Browse programs', '20 single workouts and 10 weekly plans', <LayoutGrid size={18} aria-hidden />, () => nav('/programs'))}
-          <button className="btn" onClick={loadStarter}>
-            <Sparkles size={16} aria-hidden /> Add the starter plan (4 workouts)
-          </button>
-          <button className="btn" onClick={exportJson}>
-            <Download size={16} aria-hidden /> Export backup (JSON)
-          </button>
+          {link('Add the starter plan', '4 workouts, Upper / Lower twice a week', <Sparkles size={18} aria-hidden />, loadStarter)}
+          {link('Export backup', 'Everything as one JSON file', <Download size={18} aria-hidden />, exportJson)}
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
-          <button className="btn" onClick={() => fileRef.current?.click()}>
-            <Upload size={16} aria-hidden /> Import backup
-          </button>
-          <button className="btn" onClick={() => setImportOther(true)}>
-            <ArrowRightLeft size={16} aria-hidden /> Import from Hevy or Strong
-          </button>
+          {link('Import backup', 'Restore from a GymLog JSON file', <Upload size={18} aria-hidden />, () => fileRef.current?.click())}
+          {link('Import from Hevy or Strong', 'Bring your history from a CSV export', <ArrowRightLeft size={18} aria-hidden />, () => setImportOther(true))}
           <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
         </>
       )}
