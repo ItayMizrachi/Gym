@@ -140,6 +140,13 @@ export function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Me
   )
 }
 
+/** "Fri 23 Oct" this year, "Fri 23 Oct 2025" before: the year only when it tells you something */
+function entryDate(iso: string): string {
+  const d = new Date(iso + 'T12:00:00')
+  const thisYear = d.getFullYear() === new Date().getFullYear()
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', ...(thisYear ? {} : { year: 'numeric' }) })
+}
+
 /** "Waist 84 · Chest 102 · note" line under an entry */
 function entryMeta(m: Metric): string {
   const parts = Object.entries(cleanMeasures(m.measures ?? {}) ?? {}).map(([k, v]) => {
@@ -332,7 +339,7 @@ export default function Body() {
                 <button key={m.id} className="list-row" style={{ minHeight: 56 }} onClick={() => setEditing(m)}>
                   {m.photo_path && <Thumb path={m.photo_path} size={40} />}
                   <div className="grow">
-                    <div className="title entry-date">{fmtDateLong(m.date)}</div>
+                    <div className="title entry-date">{entryDate(m.date)}</div>
                     {(m.note || m.measures) && <div className="meta ellipsis">{entryMeta(m)}</div>}
                   </div>
                   <div className="trail">
