@@ -50,6 +50,22 @@ function signed(n: number, fmt: (x: number) => string): string {
   return `${n > 0 ? '+' : n < 0 ? '−' : '±'}${fmt(Math.abs(n))}`
 }
 
+/** "3 sets · 1,080 kg" under each exercise: work sets, and the volume (or reps / time) they add up to */
+function exLine(done: SessionSet[], tracking: Tracking): string {
+  const work = done.filter((x) => x.kind !== 'warmup')
+  const sets = `${work.length} set${work.length === 1 ? '' : 's'}`
+  if (tracking === 'time') {
+    const sec = work.reduce((t, x) => t + (x.time_sec ?? 0), 0)
+    return sec ? `${sets} · ${fmtClock(sec)}` : sets
+  }
+  if (tracking === 'reps') {
+    const reps = work.reduce((t, x) => t + (x.reps ?? 0), 0)
+    return `${sets} · ${reps} reps`
+  }
+  const vol = work.reduce((t, x) => t + (x.weight ?? 0) * (x.reps ?? 0), 0)
+  return vol ? `${sets} · ${Math.round(vol).toLocaleString('en-GB')} kg` : sets
+}
+
 export default function SessionDetail() {
   const { id } = useParams()
   const nav = useNavigate()
@@ -300,7 +316,10 @@ export default function SessionDetail() {
           <div key={i} className="card">
             <div className="row" style={{ marginBottom: 8 }}>
               <ThumbButton exercise={exOf} name={nameOf(e.exercise_id, e.name)} size={44} />
-              <div className="grow hv-exname">{nameOf(e.exercise_id, e.name)}</div>
+              <div className="grow" style={{ minWidth: 0 }}>
+                <div className="hv-exname">{nameOf(e.exercise_id, e.name)}</div>
+                <div className="small muted">{exLine(done, tracking)}</div>
+              </div>
               {hasPr && (
                 <span className="chip pr">
                   <Trophy size={12} /> PR
