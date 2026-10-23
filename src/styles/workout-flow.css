@@ -241,3 +241,7 @@
 /* the waiting rest bar: same place and controls, quieter */
 .rp.idle .rp-time { color: var(--text-2); font-size: 15px; }
 .rp.idle .rp-title { color: var(--text-2); }
+/* long-press an exercise header to reorder: no text selection or iOS callout menu on it */
+.ex-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.ro-row { touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
+.ro-row.dragging { cursor: grabbing; }

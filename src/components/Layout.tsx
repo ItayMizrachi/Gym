@@ -58,7 +58,7 @@ function RestBar({ inSession }: { inSession: boolean }) {
     else if (!rest.finished) scheduleRestNotification(rest.endsAt, rest.label)
   }, [rest?.endsAt, rest == null, restNotify])
 
-  if (!rest) return inSession ? <IdleRest /> : null
+  if (!rest) return null
   const left = Math.max(0, (rest.endsAt - Date.now()) / 1000)
   const frac = rest.finished ? 1 : Math.min(1, Math.max(0, (rest.total - left) / rest.total))
   return (
@@ -102,55 +102,6 @@ function RestBar({ inSession }: { inSession: boolean }) {
               </button>
             </>
           )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * In a workout with no rest running, the bar still sits at the bottom: it shows the rest coming up after
- * the next set, lets you change it (−15 s / +15 s, saved to that exercise) and start a rest by hand, e.g.
- * between the exercises of a superset.
- */
-function IdleRest() {
-  const loc = useLocation()
-  const id = loc.pathname.split('/')[2]
-  const session = useStore((s) => s.db.sessions.find((x) => x.id === id && !x.finished_at))
-  const save = useStore((s) => s.save)
-  const startRest = useStore((s) => s.startRest)
-  if (!session) return null
-  const exs = session.data.exercises
-  const i = exs.findIndex((e) => e.sets.some((x) => !x.done))
-  if (i < 0) return null
-  const ex = exs[i]
-  const k = ex.sets.findIndex((x) => !x.done)
-  const sec = ex.rest_sec
-  const setSec = (v: number) =>
-    save('sessions', { ...session, data: { ...session.data, exercises: exs.map((e, j) => (j === i ? { ...e, rest_sec: Math.min(600, Math.max(0, v)) } : e)) } })
-  return (
-    <div className="rp full idle" role="group" aria-label="Rest timer">
-      <div className="rp-ring">
-        <svg viewBox="0 0 72 72" aria-hidden>
-          <circle className="track" cx="36" cy="36" r={RING_R} />
-        </svg>
-        <div className="rp-time">{sec ? fmtClock(sec) : 'Off'}</div>
-      </div>
-      <div className="rp-body">
-        <div className="rp-title">Rest timer</div>
-        <div className="rp-label ellipsis">
-          Next: {ex.name} · Set {k + 1} of {ex.sets.length}
-        </div>
-        <div className="rp-ctrl">
-          <button className="btn sm" onClick={() => setSec(sec - 15)} disabled={sec <= 0} aria-label="15 seconds less rest">
-            −15s
-          </button>
-          <button className="btn sm" onClick={() => setSec(sec + 15)} disabled={sec >= 600} aria-label="15 seconds more rest">
-            +15s
-          </button>
-          <button className="btn sm grow" onClick={() => startRest(sec || 60, `${ex.name} · Set ${k + 1} of ${ex.sets.length}`)}>
-            <Play size={15} aria-hidden /> Start
-          </button>
         </div>
       </div>
     </div>
@@ -304,7 +255,7 @@ export default function Layout() {
   return (
     <>
       <SyncDot />
-      <main className={`app ${rest || inSession ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
+      <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
         <div className="screen" ref={screen}>
         <ScreenBoundary resetKey={loc.pathname}>
         <Suspense

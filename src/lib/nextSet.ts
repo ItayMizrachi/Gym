@@ -2,14 +2,20 @@ import type { Session } from './types'
 
 /**
  * What the rest bar and the rest-over alert point to: the next set of this exercise, else the next
- * exercise with sets left (in a superset round, the first of the group), else anything left.
+ * exercise with sets left (in a superset, the partner exercise in turn), else anything left.
  */
 export function nextSetLabel(session: Session, index: number): string {
   const exs = session.data.exercises
   const open = (i: number) => exs[i]?.sets.findIndex((x) => !x.done) ?? -1
   const group = exs[index]?.superset
   const order = [
-    ...(group ? exs.map((e, i) => (e.superset === group ? i : -1)).filter((i) => i >= 0) : [index]),
+    // a superset goes in turns: the partner after this one first, then round again to the start of the group
+    ...(group
+      ? (() => {
+          const g = exs.map((e, i) => (e.superset === group ? i : -1)).filter((i) => i >= 0)
+          return [...g.filter((i) => i > index), ...g.filter((i) => i <= index)]
+        })()
+      : [index]),
     ...exs.map((_, i) => i).filter((i) => i > index),
     ...exs.map((_, i) => i).filter((i) => i < index)
   ]

@@ -150,8 +150,8 @@ export default function Help() {
 
       <Sec title="Supersets">
         <p>
-          Exercises with the same superset letter (blue rail) are done back to back. Log a set and GymLog skips the rest so you
-          can go straight to the paired exercise; the rest timer starts once every exercise in the round has its set logged.
+          Exercises with the same superset letter (blue rail) are done back to back. The rest timer starts after every set; when
+          you go straight on to the paired exercise, tap <b>Skip</b>.
         </p>
       </Sec>
 

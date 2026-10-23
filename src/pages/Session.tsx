@@ -5,7 +5,6 @@ import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, 
 import { useStore } from '../lib/store'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
-import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { nextSetLabel } from '../lib/nextSet'
@@ -312,7 +311,7 @@ function revealNextSet() {
 /** Inert + aria-hidden while folded, so hidden controls are not tabbable or read out. */
 const folded = (shut: boolean) => (shut ? ({ inert: '', 'aria-hidden': true } as any) : {})
 
-function ExerciseCard({ session, index, onMore, showLegend, current }: { session: Session; index: number; onMore: () => void; showLegend?: boolean; current?: boolean }) {
+function ExerciseCard({ session, index, onMore, onReorder, showLegend, current }: { session: Session; index: number; onMore: () => void; onReorder: () => void; showLegend?: boolean; current?: boolean }) {
   const nav = useNavigate()
   const se = session.data.exercises[index]
   const db = useStore((s) => s.db)
@@ -447,15 +446,8 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
     }
     patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : { reps: s.reps }) }, true)
     setPop({ id: s.id, pr: isPR })
-    if (s.kind !== 'warmup' && se.superset) {
-      const next = nextInSuperset(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index)
-      if (next != null) {
-        // superset: no rest before the paired exercise; rest only at the end of the round.
-        // The screen never scrolls by itself (it moved under the lifter's thumb).
-        useStore.getState().clearRest()
-        return
-      }
-    }
+    // every logged set starts the rest timer, supersets included (the owner's call: going straight on is one tap on Skip).
+    // The screen never scrolls by itself (it moved under the lifter's thumb).
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, nextSetLabel(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index))
     setTimeout(revealNextSet, 300)
   }
@@ -476,7 +468,7 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
       id={`ex-${index}`}
       className={`ex ${se.superset ? 'ss' : ''} ${current ? 'current' : ''} ${finished ? 'finished' : ''} ${shut ? 'shut' : ''}`}
     >
-      <div className="ex-head">
+      <div className="ex-head" {...longPress(onReorder)}>
         <button className="ex-thumb" onClick={() => setInfo(true)} aria-label={`How to do ${name}`}>
           <ExerciseThumb exercise={ex} name={se.name} size={48} />
           {finished && (
@@ -523,7 +515,7 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
             {ex && <div className="ex-more-meta">{exerciseMeta(ex)}</div>}
             <div className="ex-more-meta">
               {plan}
-              {se.superset ? ` · superset ${se.superset}: go straight to the paired exercise, rest after the round` : ''}
+              {se.superset ? ` · superset ${se.superset}: done in turns with its pair` : ''}
             </div>
             {se.note && <div className="ex-more-note">📝 {se.note}</div>}
             {lastNote && <div className="ex-more-last">💬 Last time: {lastNote}</div>}
@@ -964,6 +956,7 @@ export default function SessionPage() {
           key={i + session.data.exercises[i].exercise_id}
           session={session}
           index={i}
+          onReorder={() => session.data.exercises.length > 1 && setReordering(true)}
           onMore={() => setMoreIdx(i)}
           showLegend={i === 0 && loggedEver < 5}
           current={i === currentIdx}
@@ -973,6 +966,11 @@ export default function SessionPage() {
       <button className="btn wl-addex" onClick={() => setPicking(true)}>
         <Plus size={20} /> Add exercise
       </button>
+      {session.data.exercises.length > 1 && (
+        <button className="btn ghost" onClick={() => setReordering(true)}>
+          <GripVertical size={16} aria-hidden /> Reorder exercises
+        </button>
+      )}
 
       <label className="field">
         Workout notes
@@ -1140,6 +1138,40 @@ function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => voi
   )
 }
 
+/**
+ * Hold a finger on an exercise's header for half a second to pick it up: the reorder list opens.
+ * A scroll or a quick tap cancels it, so normal taps on the name and buttons keep working.
+ */
+function longPress(fire: () => void) {
+  let t: number | undefined
+  let start: { x: number; y: number } | null = null
+  const cancel = () => {
+    window.clearTimeout(t)
+    start = null
+  }
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      start = { x: e.clientX, y: e.clientY }
+      t = window.setTimeout(() => {
+        start = null
+        try {
+          navigator.vibrate?.(15)
+        } catch {
+          /* ignore */
+        }
+        fire()
+      }, 450)
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) cancel()
+    },
+    onPointerUp: cancel,
+    onPointerCancel: cancel,
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault()
+  }
+}
+
 const ROW_H = 64
 
 /**
@@ -1168,7 +1200,7 @@ function ReorderSheet({
   return (
     <Sheet title="Reorder exercises" onClose={onClose}>
       <div className="stack">
-        <div className="small muted">Drag ≡ to move an exercise.</div>
+        <div className="small muted">Press an exercise and drag it up or down.</div>
         <div className="ro-list" style={{ height: order.length * ROW_H }}>
           {order.map((k, pos) => {
             const it = items[k]
@@ -1181,7 +1213,26 @@ function ReorderSheet({
             const dragging = drag?.from === pos
             const y = pos * ROW_H + (dragging ? drag!.dy : shift)
             return (
-              <div key={k} className={`ro-row${dragging ? ' dragging' : ''}`} style={{ transform: `translateY(${y}px)` }}>
+              <div
+                key={k}
+                className={`ro-row${dragging ? ' dragging' : ''}`}
+                style={{ transform: `translateY(${y}px)` }}
+                // the whole row is the handle: press anywhere on it and drag
+                onPointerDown={(e) => {
+                  try {
+                    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+                  } catch {
+                    /* fine without capture */
+                  }
+                  setDrag({ from: pos, y0: e.clientY, dy: 0 })
+                }}
+                onPointerMove={(e) => drag && setDrag({ ...drag, dy: e.clientY - drag.y0 })}
+                onPointerUp={() => {
+                  if (drag && to !== drag.from) moveTo(drag.from, to)
+                  setDrag(null)
+                }}
+                onPointerCancel={() => setDrag(null)}
+              >
                 <ExerciseThumb exercise={it.exercise} name={it.name} size={40} />
                 <span className="grow ellipsis ro-name">
                   {it.name}
@@ -1193,24 +1244,7 @@ function ReorderSheet({
                 <button className="sr-only" disabled={pos === order.length - 1} onClick={() => moveTo(pos, pos + 1)} aria-label={`Move ${it.name} down`}>
                   <ChevronDown size={18} aria-hidden />
                 </button>
-                <span
-                  className="ro-grip"
-                  aria-hidden
-                  onPointerDown={(e) => {
-                    try {
-                      ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
-                    } catch {
-                      /* fine without capture */
-                    }
-                    setDrag({ from: pos, y0: e.clientY, dy: 0 })
-                  }}
-                  onPointerMove={(e) => drag && setDrag({ ...drag, dy: e.clientY - drag.y0 })}
-                  onPointerUp={() => {
-                    if (drag && to !== drag.from) moveTo(drag.from, to)
-                    setDrag(null)
-                  }}
-                  onPointerCancel={() => setDrag(null)}
-                >
+                <span className="ro-grip" aria-hidden>
                   <GripVertical size={20} />
                 </span>
               </div>

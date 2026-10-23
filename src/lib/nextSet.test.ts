@@ -46,6 +46,13 @@ describe('nextSetLabel', () => {
     ])
     expect(nextSetLabel(s, 1)).toBe('Bench · Set 2 of 2')
   })
+  it('goes to the paired exercise after the first of a superset', () => {
+    const s = session([
+      { name: 'Bench', superset: 'A', sets: [true, false] },
+      { name: 'Pull up', superset: 'A', sets: [false, false] }
+    ])
+    expect(nextSetLabel(s, 0)).toBe('Pull up · Set 1 of 2')
+  })
   it('says when everything is logged', () => {
     expect(nextSetLabel(session([{ name: 'Bench', sets: [true] }]), 0)).toBe('All sets logged')
   })
