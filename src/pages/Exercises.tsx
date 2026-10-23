@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Plus, RotateCw, Search, X } from 'lucide-react'
+import { Plus, RotateCw, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, Exercise, MUSCLES, trackingOf } from '../lib/types'
 import { NewExerciseForm } from '../components/ExercisePicker'
@@ -78,11 +78,12 @@ export default function Exercises() {
     const rec = records.get(e.id)
     const best = trackingOf(e) === 'weight_reps' && rec?.bestE1rm ? Math.round(rec.bestE1rm.value) : null
     const bestSet = rec?.heaviest
-      ? trackingOf(e) === 'weight_reps' || rec.heaviest.weight > 0
+      ? rec.heaviest.weight > 0
         ? `Best ${fmtKg(rec.heaviest.weight)} kg × ${rec.heaviest.reps}`
         : `Best ${Math.max(...rec.repTable.map((r) => r.reps))} reps`
       : ''
-    const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
+    // the best set is on the right (est. max) or, for reps-only moves, the only extra on this line
+    const meta = [withMuscle ? e.muscle : '', e.equipment, best == null ? bestSet : ''].filter(Boolean).join(' · ')
     return (
       <div key={e.id} className="lib-row">
         <ThumbButton exercise={e} size={48} />
@@ -102,7 +103,6 @@ export default function Exercises() {
             <div className="tiny muted">est. max</div>
           </div>
         )}
-        <ChevronRight size={18} className="chev" />
         </button>
       </div>
     )
