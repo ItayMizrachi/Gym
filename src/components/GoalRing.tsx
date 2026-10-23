@@ -35,7 +35,8 @@ export function GoalRing({ done, goal, size = 64, count = true }: { done: number
       {count && (
         <span className="goal-ring-n">
           {done}
-          <span className="goal-ring-of">/{goal}</span>
+          {/* once past the goal the green ring says it; "6/3" would read like a mistake */}
+          {done < goal && <span className="goal-ring-of">/{goal}</span>}
         </span>
       )}
     </div>
@@ -88,15 +89,24 @@ export function WeekLine() {
       <button
         className="hm-row"
         onClick={() => setEditing(true)}
-        aria-label={`${g.done} of ${g.goal} workouts this week${trained.length ? ` (${trained.join(', ')})` : ''}. ${note}. Change weekly goal`}
+        aria-label={`${g.done >= g.goal ? `${g.done} workouts this week, goal of ${g.goal} met` : `${g.done} of ${g.goal} workouts this week`}${trained.length ? ` (${trained.join(', ')})` : ''}. ${note}. Change weekly goal`}
       >
         <GoalRing done={g.done} goal={g.goal} size={40} count={false} />
         <span className="hm-row-body">
           <span className="hm-row-t">
-            <b>
-              {g.done} of {g.goal}
-            </b>{' '}
-            this week
+            {g.done >= g.goal ? (
+              // past the goal "6 of 3" reads oddly: say the count and that the goal is met
+              <>
+                <b>{g.done}</b> this week · <span className="hm-goal-met">goal met</span>
+              </>
+            ) : (
+              <>
+                <b>
+                  {g.done} of {g.goal}
+                </b>{' '}
+                this week
+              </>
+            )}
           </span>
           <span className="hm-days" aria-hidden>
             {g.days.map((on, i) => (

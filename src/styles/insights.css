@@ -649,3 +649,4 @@
 .hlist .hname { font-size: 15px; font-weight: 600; }
 .hlist .hmeta { font-size: 13px; }
 .hpr-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.hm-goal-met { color: var(--ok); font-weight: 600; }
