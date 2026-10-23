@@ -2326,3 +2326,7 @@ input[type='search']::-webkit-search-decoration {
   font-weight: 500;
   color: var(--muted);
 }
+/* "+120 kg vs last time" in a workout summary */
+.vs-up {
+  color: var(--ok);
+}

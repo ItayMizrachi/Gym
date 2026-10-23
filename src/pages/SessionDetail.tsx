@@ -50,6 +50,22 @@ function signed(n: number, fmt: (x: number) => string): string {
   return `${n > 0 ? '+' : n < 0 ? '−' : '±'}${fmt(Math.abs(n))}`
 }
 
+/** " · +120 kg vs last time", in green when it went up */
+function VsLast({ now, before }: { now: number; before: number | null }) {
+  if (before == null || !now) return null
+  const d = Math.round(now - before)
+  if (d === 0) return <span> · same as last time</span>
+  return (
+    <span className={d > 0 ? 'vs-up' : undefined}>
+      {' '}
+      · {d > 0 ? '+' : '−'}
+      {Math.abs(d).toLocaleString('en-GB')} kg vs last time
+    </span>
+  )
+}
+
+const workVolume = (sets: SessionSet[]) => sets.filter((x) => x.done && x.kind !== 'warmup').reduce((t, x) => t + (x.weight ?? 0) * (x.reps ?? 0), 0)
+
 /** "3 sets · 1,080 kg" under each exercise: work sets, and the volume (or reps / time) they add up to */
 function exLine(done: SessionSet[], tracking: Tracking): string {
   const work = done.filter((x) => x.kind !== 'warmup')
@@ -72,6 +88,17 @@ export default function SessionDetail() {
   const loc = useLocation()
   const fresh = !!(loc.state as { fresh?: boolean } | null)?.fresh
   const db = useStore((s) => s.db)
+  /** this exercise's work volume in the latest finished workout before this one (null if none) */
+  const lastVolume = (exId: string): number | null => {
+    if (!s) return null
+    const at = sessionDate(s)
+    const prev = db.sessions
+      .filter((x) => x.finished_at && x.id !== s.id && sessionDate(x) < at && x.data.exercises.some((e) => e.exercise_id === exId))
+      .sort((a, b) => sessionDate(b).localeCompare(sessionDate(a)))[0]
+    if (!prev) return null
+    const v = prev.data.exercises.filter((e) => e.exercise_id === exId).reduce((t, e) => t + workVolume(e.sets), 0)
+    return v || null
+  }
   const remove = useStore((s) => s.remove)
   const toast = useStore((s) => s.toast)
   const [confirm, setConfirm] = useState(false)
@@ -318,7 +345,10 @@ export default function SessionDetail() {
               <ThumbButton exercise={exOf} name={nameOf(e.exercise_id, e.name)} size={44} />
               <div className="grow" style={{ minWidth: 0 }}>
                 <div className="hv-exname">{nameOf(e.exercise_id, e.name)}</div>
-                <div className="small muted">{exLine(done, tracking)}</div>
+                <div className="small muted">
+                  {exLine(done, tracking)}
+                  {tracking === 'weight_reps' && <VsLast now={workVolume(e.sets)} before={lastVolume(e.exercise_id)} />}
+                </div>
               </div>
               {hasPr && (
                 <span className="chip pr">
