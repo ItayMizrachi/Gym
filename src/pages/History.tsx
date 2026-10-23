@@ -28,22 +28,30 @@ export default function HistoryPage() {
     [db]
   )
 
-  // templates that actually appear in history, in plan order; "Other" for empty / deleted templates
-  const templates = useMemo(() => {
-    const used = new Set(all.map((i) => i.s.workout_id ?? ''))
-    const known = [...db.workouts].sort((a, b) => a.position - b.position).filter((w) => used.has(w.id))
-    const other = all.some((i) => !i.s.workout_id || !db.workouts.some((w) => w.id === i.s.workout_id))
-    return { known, other }
-  }, [all, db.workouts])
+  // filters by workout name ("Push", "Legs"…), so imported history groups as well as plan workouts.
+  // Names done at least twice get a chip, most frequent first; the rest share "Other".
+  const keyOf = (i: Item) => splitName(i.s.name)[0].trim().toLowerCase()
+  const names = useMemo(() => {
+    const count = new Map<string, { label: string; n: number }>()
+    for (const i of all) {
+      const k = keyOf(i)
+      const c = count.get(k)
+      if (c) c.n++
+      else count.set(k, { label: splitName(i.s.name)[0], n: 1 })
+    }
+    const chips = [...count.entries()].filter(([, c]) => c.n >= 2).sort((x, y) => y[1].n - x[1].n).slice(0, 8)
+    const shown = new Set(chips.map(([k]) => k))
+    return { chips, shown, other: all.some((i) => !shown.has(keyOf(i))) }
+  }, [all])
 
   const items = useMemo(
     () =>
       all.filter((i) => {
         if (filter === 'all') return true
-        if (filter === 'other') return !i.s.workout_id || !db.workouts.some((w) => w.id === i.s.workout_id)
-        return i.s.workout_id === filter
+        if (filter === 'other') return !names.shown.has(keyOf(i))
+        return keyOf(i) === filter
       }),
-    [all, filter, db.workouts]
+    [all, filter, names]
   )
 
   const months = useMemo(() => {
@@ -101,17 +109,17 @@ export default function HistoryPage() {
             <SparkBars values={trend.map((w) => w.volume)} labels={['8 weeks ago', 'This week']} />
           </div>
 
-          {(templates.known.length > 1 || (templates.known.length > 0 && templates.other)) && (
+          {names.chips.length + (names.other ? 1 : 0) > 1 && (
             <div className="chips" role="tablist" aria-label="Filter by workout">
               <button className={`chip${filter === 'all' ? ' active' : ''}`} onClick={() => setFilter('all')}>
                 All
               </button>
-              {templates.known.map((w) => (
-                <button key={w.id} className={`chip${filter === w.id ? ' active' : ''}`} onClick={() => setFilter(w.id)}>
-                  {splitName(w.name)[0]}
+              {names.chips.map(([k, c]) => (
+                <button key={k} className={`chip${filter === k ? ' active' : ''}`} onClick={() => setFilter(k)}>
+                  {c.label}
                 </button>
               ))}
-              {templates.other && (
+              {names.other && (
                 <button className={`chip${filter === 'other' ? ' active' : ''}`} onClick={() => setFilter('other')}>
                   Other
                 </button>
