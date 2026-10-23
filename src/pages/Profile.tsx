@@ -1,7 +1,7 @@
 import { plateaus } from '../lib/plateau'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, CalendarDays, ChevronRight, Flame, History, Moon, Scale, Trophy } from 'lucide-react'
+import { BookOpen, ChevronRight, Flame, Moon, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Empty, PageHeader } from '../components/ui'
 import { CalendarHeat } from '../components/CalendarHeat'
@@ -68,12 +68,6 @@ export default function Profile() {
   const [editGoal, setEditGoal] = useState(false)
   useAchievementToasts()
 
-  const links = [
-    { label: 'Exercises', icon: <BookOpen size={18} />, go: () => nav('/exercises') },
-    { label: 'Body / measures', icon: <Scale size={18} />, go: () => nav('/body') },
-    { label: 'Calendar', icon: <CalendarDays size={18} />, go: () => calRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) },
-    { label: 'History', icon: <History size={18} />, go: () => nav('/history') }
-  ]
 
   return (
     <div className="stack" style={{ gap: 18 }}>
@@ -179,14 +173,17 @@ export default function Profile() {
 
       <AchievementsSection />
 
-      <div className="prof-links">
-        {links.map((l) => (
-          <button key={l.label} className="prof-link" onClick={l.go}>
-            {l.icon}
-            <span className="grow">{l.label}</span>
-          </button>
-        ))}
-      </div>
+      {/* Body and History are tabs and the calendar is right below: only the exercise list needs a way in */}
+      <button className="list-group list-row rec-link" onClick={() => nav('/exercises')}>
+        <BookOpen size={22} aria-hidden className="muted" />
+        <span className="grow">
+          <span className="title">Exercises</span>
+          <span className="meta" style={{ display: 'block' }}>
+            Your list, photos, setup notes and records per exercise
+          </span>
+        </span>
+        <ChevronRight size={18} aria-hidden className="muted" />
+      </button>
 
       {sum.workouts > 0 && (
         <div className="card" ref={calRef} style={{ scrollMarginTop: 12 }}>
