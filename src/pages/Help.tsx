@@ -83,7 +83,7 @@ export default function Help() {
           <span className="kind failure">F</span>
           <span>To failure. Counts for records.</span>
         </div>
-        <p>Tap the set number to change its type.</p>
+        <p>Tap the set number to change its type or remove the set.</p>
       </Sec>
 
       <Sec title="Logging a set">
@@ -155,6 +155,13 @@ export default function Help() {
         </p>
       </Sec>
 
+      <Sec title="Changing a workout as you go">
+        <p>
+          Tap a set number to make it a warm-up, drop or failure set, or to remove it. The timer button on each exercise sets its rest.
+          Tap ⋯ and then <b>Reorder exercises</b> to drag them into a new order. When you finish, GymLog asks whether to save these
+          changes to the plan or keep the plan as it was.
+        </p>
+      </Sec>
       <Sec title="Swapping an exercise">
         <p>
           Machine taken? In a workout, tap ⋯ on the exercise → <b>Replace exercise</b>. Sets you already logged stay with the

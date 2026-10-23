@@ -1,14 +1,15 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
+import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
+import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
 import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { nextSetLabel } from '../lib/nextSet'
+import { planChanges, planUpdate } from '../lib/planSync'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, roundTo, splitName } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
@@ -27,7 +28,40 @@ import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
 import '../styles/workout-live.css'
 
-const KIND_ORDER: SetKind[] = ['work', 'failure', 'drop', 'warmup']
+const KIND_ORDER: SetKind[] = ['work', 'warmup', 'drop', 'failure']
+const KIND_INFO: Record<SetKind, { t: string; tag: string; d: string }> = {
+  work: { t: 'Work set', tag: '1', d: 'A normal set. Counts towards records and progress.' },
+  warmup: { t: 'Warm-up', tag: 'W', d: 'Lighter, to get ready. Never counts towards records.' },
+  drop: { t: 'Drop set', tag: 'D', d: 'Straight after a set, with less weight and no rest.' },
+  failure: { t: 'To failure', tag: 'F', d: 'As many reps as you can. Counts towards records.' }
+}
+
+/** Tap a set number: choose its type, or remove the row. */
+function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionSet; label: string; onPick: (k: SetKind) => void; onRemove: () => void; onClose: () => void }) {
+  return (
+    <Sheet title={label} onClose={onClose}>
+      <div className="stack" style={{ gap: 'var(--s2)' }}>
+        <div className="kind-list" role="radiogroup" aria-label="Set type">
+          {KIND_ORDER.map((k) => (
+            <button key={k} role="radio" aria-checked={set.kind === k} className={`kind-opt${set.kind === k ? ' on' : ''}`} onClick={() => onPick(k)}>
+              <span className={`kind ${k}`} aria-hidden>
+                {KIND_INFO[k].tag}
+              </span>
+              <span className="grow">
+                <span className="kind-opt-t">{KIND_INFO[k].t}</span>
+                <span className="kind-opt-d">{KIND_INFO[k].d}</span>
+              </span>
+              {set.kind === k && <Check size={18} aria-hidden className="kind-opt-check" />}
+            </button>
+          ))}
+        </div>
+        <button className="btn danger block" onClick={onRemove}>
+          <Trash2 size={16} aria-hidden /> Remove set
+        </button>
+      </div>
+    </Sheet>
+  )
+}
 // sets that already fired a record / near-record message, so un-ticking and re-ticking does not repeat it
 const celebrated = new Set<string>()
 const ELIGIBLE = new Set(['work', 'failure'])
@@ -255,7 +289,7 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
 }
 
 const WORKOUT_TIPS: CoachStep[] = [
-  { target: '.ex .set-row .kind', title: 'Set type', text: 'Tap the set number to switch between work, warm-up (W), drop (D) and failure (F).' },
+  { target: '.ex .set-row .kind', title: 'Set type', text: 'Tap the set number to make it a warm-up (W), drop (D) or failure (F) set, or to remove it.' },
   {
     target: '.ex [data-kp$=":reps"], .ex [data-kp$=":time"], .ex input[aria-label="Reps"], .ex input[aria-label^="Time"]',
     title: 'Enter what you did',
@@ -291,6 +325,8 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
   const [rpeSet, setRpeSet] = useState<string | null>(null)
   const [warmup, setWarmup] = useState(false)
   const [details, setDetails] = useState(false)
+  const [kindFor, setKindFor] = useState<string | null>(null)
+  const [restOpen, setRestOpen] = useState(false)
   // the set that was just logged: its check pops, a new record also gets a light glow
   const [pop, setPop] = useState<{ id: string; pr: boolean } | null>(null)
   // a finished exercise folds down to one line; tapping its name opens it again
@@ -429,7 +465,8 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
 
   const name = ex?.name ?? se.name
   const firstTime = !last && prior.length === 0 && tracking !== 'time'
-  const plan = `${tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps · ` : ''}rest ${fmtRest(se.rest_sec)}`
+  // rest has its own button on the card, so the line under the name is just the target
+  const plan = tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps` : tracking === 'time' ? 'Timed' : 'Reps'
   const hasNotes = !!(se.note || lastNote || ex?.setup)
   const prog = se.progression
   const doneLine = `${se.sets.length} ${se.sets.length === 1 ? 'set' : 'sets'} · ${se.sets.map((x) => setLabel(x, tracking)).join(' · ')}`
@@ -470,6 +507,10 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
             {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label="Has notes" />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
           </span>
+        </button>
+        <button className="ex-rest" onClick={() => setRestOpen(true)} aria-label={`Rest ${se.rest_sec ? fmtRest(se.rest_sec) : 'off'} for ${name}. Change`}>
+          <Timer size={15} aria-hidden />
+          <span>{se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}</span>
         </button>
         <button className="btn icon ghost" onClick={onMore} aria-label={`More options for ${name}`}>
           <MoreHorizontal size={20} />
@@ -583,8 +624,8 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
               <div className={`set-row ${s.done ? 'done' : 'todo'}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}`}>
                 <button
                   className={`kind ${s.kind}`}
-                  onClick={() => patchSet(s.id, { kind: KIND_ORDER[(KIND_ORDER.indexOf(s.kind) + 1) % KIND_ORDER.length] }, true)}
-                  aria-label={`Set type ${s.kind}, tap to change`}
+                  onClick={() => setKindFor(s.id)}
+                  aria-label={`Set ${setNo}, ${KIND_INFO[s.kind].t.toLowerCase()}. Change type or remove`}
                 >
                   {s.kind === 'work' ? workNo(i) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'}
                 </button>
@@ -749,6 +790,26 @@ function ExerciseCard({ session, index, onMore, showLegend, current }: { session
           }}
         />
       )}
+      {restOpen && <RestSheet name={name} value={se.rest_sec} onSet={(v) => mutate((e) => ({ ...e, rest_sec: v }), true)} onClose={() => setRestOpen(false)} />}
+      {kindFor && se.sets.find((x) => x.id === kindFor) && (
+        <SetTypeSheet
+          set={se.sets.find((x) => x.id === kindFor)!}
+          label={(() => {
+            const k = se.sets.findIndex((x) => x.id === kindFor)
+            const x = se.sets[k]
+            return x.kind === 'work' ? `Set ${workNo(k)}` : KIND_INFO[x.kind].t
+          })()}
+          onPick={(kind) => {
+            patchSet(kindFor, { kind }, true)
+            setKindFor(null)
+          }}
+          onRemove={() => {
+            mutate((e) => ({ ...e, sets: e.sets.filter((x) => x.id !== kindFor) }), true)
+            setKindFor(null)
+          }}
+          onClose={() => setKindFor(null)}
+        />
+      )}
     </div>
   )
 }
@@ -781,6 +842,10 @@ export default function SessionPage() {
   const [showMuscles, setShowMuscles] = useState(false)
   const [tools, setTools] = useState(false)
   const [replaceIdx, setReplaceIdx] = useState<number | null>(null)
+  const [planAsk, setPlanAsk] = useState<string[] | null>(null)
+  const [reordering, setReordering] = useState(false)
+  const removeRow = useStore((s) => s.remove)
+  const toast = useStore((s) => s.toast)
   const userId = useStore((s) => s.user?.id ?? 'local')
   useWakeLock()
 
@@ -807,12 +872,28 @@ export default function SessionPage() {
   const doneSets = session.data.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0)
   const totalSets = session.data.exercises.reduce((a, e) => a + e.sets.length, 0)
   // nothing logged: offer to discard; some sets left: ask first; all done: straight to the summary
-  const finishTap = () =>
-    doneSets === 0
-      ? setConfirmDiscard(true)
-      : doneSets < totalSets
-      ? setConfirmFinish(true)
-      : (finishSession(session.id), nav(`/history/${session.id}`, { state: { fresh: true } }))
+  const finishTap = () => (doneSets === 0 ? setConfirmDiscard(true) : doneSets < totalSets ? setConfirmFinish(true) : finishOrAsk())
+  // a workout from a plan whose shape changed on the way (sets, exercises, order, rest): ask before finishing
+  // whether the plan should follow. Compared before finishing, while the planned rows are still there.
+  const planRows = session.workout_id ? db.workout_exercises.filter((w) => w.workout_id === session.workout_id) : []
+  const planWorkout = session.workout_id ? db.workouts.find((w) => w.id === session.workout_id) : undefined
+  function finishOrAsk() {
+    const changes = planWorkout ? planChanges(session!, planRows, (id) => db.exercises.find((e) => e.id === id)?.name ?? 'an exercise') : []
+    if (changes.length) setPlanAsk(changes)
+    else finishNow()
+  }
+  function finishNow() {
+    finishSession(session!.id)
+    nav(`/history/${session!.id}`, { state: { fresh: true } })
+  }
+  function updatePlanAndFinish() {
+    const cur = useStore.getState().db.sessions.find((x) => x.id === session!.id)!
+    const { save: rows, remove: gone } = planUpdate(cur, planRows, planWorkout!.id, userId)
+    for (const r of rows) save('workout_exercises', r)
+    for (const id of gone) removeRow('workout_exercises', id)
+    toast({ kind: 'info', text: `${splitName(planWorkout!.name)[0]} updated`, sub: 'Next time it starts with these exercises and sets.' })
+    finishNow()
+  }
   // the exercise you are on: the first one with a set still to do
   const currentIdx = session.data.exercises.findIndex((e) => e.sets.some((s) => !s.done))
 
@@ -821,13 +902,10 @@ export default function SessionPage() {
     save('sessions', { ...cur, data: { ...cur.data, exercises: cur.data.exercises.map((e, k) => (k === i ? fn(e) : e)) } })
   }
 
-  function move(i: number, dir: -1 | 1) {
+  /** new order from the reorder sheet, as indexes into the current list */
+  function reorder(order: number[]) {
     const cur = useStore.getState().db.sessions.find((x) => x.id === session!.id)!
-    const arr = [...cur.data.exercises]
-    const j = i + dir
-    if (j < 0 || j >= arr.length) return
-    ;[arr[i], arr[j]] = [arr[j], arr[i]]
-    save('sessions', { ...cur, data: { ...cur.data, exercises: arr } })
+    save('sessions', { ...cur, data: { ...cur.data, exercises: order.map((k) => cur.data.exercises[k]) } })
   }
 
   return (
@@ -934,13 +1012,12 @@ export default function SessionPage() {
       {moreIdx != null && session.data.exercises[moreIdx] && (
         <MoreSheet
           se={session.data.exercises[moreIdx]}
-          index={moreIdx}
           count={session.data.exercises.length}
           onClose={() => setMoreIdx(null)}
           onChange={(fn) => mutateEx(moreIdx, fn)}
-          onMove={(d) => {
-            move(moreIdx, d)
-            setMoreIdx(moreIdx + d)
+          onReorder={() => {
+            setMoreIdx(null)
+            setReordering(true)
           }}
           onReplace={() => {
             setReplaceIdx(moreIdx)
@@ -972,15 +1049,46 @@ export default function SessionPage() {
       {confirmFinish && (
         <Confirm
           title="Finish workout?"
-          text={`You logged ${doneSets} of ${totalSets} sets. The ${totalSets - doneSets} you skipped won't be saved; your plan stays the same for next time.`}
+          text={`You logged ${doneSets} of ${totalSets} sets. The ${totalSets - doneSets} you skipped won't be saved. Skipping sets doesn't change your plan.`}
           confirmLabel="Finish"
           cancelLabel="Keep going"
           onConfirm={() => {
-            finishSession(session.id)
-            nav(`/history/${session.id}`, { state: { fresh: true } })
+            finishOrAsk()
           }}
           onClose={() => setConfirmFinish(false)}
         />
+      )}
+      {reordering && (
+        <ReorderSheet
+          items={session.data.exercises.map((e) => ({ name: e.name, exercise: db.exercises.find((x) => x.id === e.exercise_id), superset: e.superset }))}
+          onDone={(order) => {
+            reorder(order)
+            setReordering(false)
+          }}
+          onClose={() => setReordering(false)}
+        />
+      )}
+      {planAsk && planWorkout && (
+        <Sheet title={`Update ${splitName(planWorkout.name)[0]}?`} onClose={() => setPlanAsk(null)}>
+          <div className="stack">
+            <p className="confirm-text" style={{ margin: 0 }}>
+              You changed this workout today. Save the changes to the plan, so next time starts the same way?
+            </p>
+            <ul className="plan-changes">
+              {planAsk.slice(0, 6).map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+              {planAsk.length > 6 && <li>and {planAsk.length - 6} more</li>}
+            </ul>
+            <button className="btn primary block" onClick={updatePlanAndFinish}>
+              Update the plan
+            </button>
+            <button className="btn block" onClick={finishNow}>
+              Keep the plan as it is
+            </button>
+            <div className="tiny muted center">Either way, today's workout is saved as you did it.</div>
+          </div>
+        </Sheet>
       )}
       {confirmDiscard && (
         <Confirm
@@ -1032,27 +1140,153 @@ function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => voi
   )
 }
 
+const ROW_H = 64
+
+/**
+ * Drag the handle to move an exercise; the arrows do the same for keyboards and screen readers.
+ * The new order is applied when you tap Done, so a slip of the finger is easy to undo.
+ */
+function ReorderSheet({
+  items,
+  onDone,
+  onClose
+}: {
+  items: { name: string; exercise: Exercise | undefined; superset: string }[]
+  onDone: (order: number[]) => void
+  onClose: () => void
+}) {
+  const [order, setOrder] = useState(() => items.map((_, i) => i))
+  const [drag, setDrag] = useState<{ from: number; y0: number; dy: number } | null>(null)
+  const to = drag ? Math.min(order.length - 1, Math.max(0, drag.from + Math.round(drag.dy / ROW_H))) : -1
+  const moveTo = (from: number, target: number) =>
+    setOrder((o) => {
+      const n = [...o]
+      const [x] = n.splice(from, 1)
+      n.splice(target, 0, x)
+      return n
+    })
+  return (
+    <Sheet title="Reorder exercises" onClose={onClose}>
+      <div className="stack">
+        <div className="small muted">Drag ≡ to move an exercise.</div>
+        <div className="ro-list" style={{ height: order.length * ROW_H }}>
+          {order.map((k, pos) => {
+            const it = items[k]
+            // where this row is drawn: the dragged one follows the finger, the others make room
+            let shift = 0
+            if (drag && pos !== drag.from) {
+              if (drag.from < to && pos > drag.from && pos <= to) shift = -ROW_H
+              if (drag.from > to && pos < drag.from && pos >= to) shift = ROW_H
+            }
+            const dragging = drag?.from === pos
+            const y = pos * ROW_H + (dragging ? drag!.dy : shift)
+            return (
+              <div key={k} className={`ro-row${dragging ? ' dragging' : ''}`} style={{ transform: `translateY(${y}px)` }}>
+                <ExerciseThumb exercise={it.exercise} name={it.name} size={40} />
+                <span className="grow ellipsis ro-name">
+                  {it.name}
+                  {it.superset && <span className="chip blue ro-ss">{it.superset}</span>}
+                </span>
+                <button className="sr-only" disabled={pos === 0} onClick={() => moveTo(pos, pos - 1)} aria-label={`Move ${it.name} up`}>
+                  <ChevronUp size={18} aria-hidden />
+                </button>
+                <button className="sr-only" disabled={pos === order.length - 1} onClick={() => moveTo(pos, pos + 1)} aria-label={`Move ${it.name} down`}>
+                  <ChevronDown size={18} aria-hidden />
+                </button>
+                <span
+                  className="ro-grip"
+                  aria-hidden
+                  onPointerDown={(e) => {
+                    try {
+                      ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+                    } catch {
+                      /* fine without capture */
+                    }
+                    setDrag({ from: pos, y0: e.clientY, dy: 0 })
+                  }}
+                  onPointerMove={(e) => drag && setDrag({ ...drag, dy: e.clientY - drag.y0 })}
+                  onPointerUp={() => {
+                    if (drag && to !== drag.from) moveTo(drag.from, to)
+                    setDrag(null)
+                  }}
+                  onPointerCancel={() => setDrag(null)}
+                >
+                  <GripVertical size={20} />
+                </span>
+              </div>
+            )
+          })}
+        </div>
+        <button className="btn primary block" onClick={() => onDone(order)}>
+          Done
+        </button>
+      </div>
+    </Sheet>
+  )
+}
+
+/** Rest for one exercise: − / + in 15 s steps and the common presets. Saves straight away. */
+function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => void }) {
+  const set = (v: number) => onSet(Math.min(600, Math.max(0, v)))
+  return (
+    <div className="stack" style={{ gap: 'var(--s3)' }}>
+      <div className="exo-step big" role="group" aria-label="Rest time">
+        <button className="btn icon" onClick={() => set(value - 15)} disabled={value <= 0} aria-label="15 seconds less">
+          −
+        </button>
+        <span className="exo-step-v" aria-live="polite">
+          {value ? fmtRest(value) : 'Off'}
+        </span>
+        <button className="btn icon" onClick={() => set(value + 15)} disabled={value >= 600} aria-label="15 seconds more">
+          +
+        </button>
+      </div>
+      <div className="chips exo-presets" role="group" aria-label="Rest presets">
+        {[0, 60, 90, 120, 180].map((v) => (
+          <button key={v} className={`chip${value === v ? ' active' : ''}`} aria-pressed={value === v} onClick={() => set(v)}>
+            {v ? fmtRest(v) : 'Off'}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function RestSheet({ name, value, onSet, onClose }: { name: string; value: number; onSet: (sec: number) => void; onClose: () => void }) {
+  return (
+    <Sheet title="Rest time" onClose={onClose}>
+      <div className="stack">
+        <div className="small muted">
+          After each set of <b style={{ color: 'var(--text)' }}>{name}</b> the rest timer starts with this time. Applies to this workout; save it
+          to the plan when you finish.
+        </div>
+        <RestEditor value={value} onSet={onSet} />
+        <button className="btn primary block" onClick={onClose}>
+          Done
+        </button>
+      </div>
+    </Sheet>
+  )
+}
+
 function MoreSheet({
   se,
-  index,
   count,
   onClose,
   onChange,
-  onMove,
+  onReorder,
   onRemove,
   onReplace
 }: {
   se: SessionExercise
-  index: number
   count: number
   onClose: () => void
   onChange: (fn: (e: SessionExercise) => SessionExercise) => void
-  onMove: (d: -1 | 1) => void
+  onReorder: () => void
   onRemove: () => void
   onReplace: () => void
 }) {
   const [kpMode, setKpMode] = useKeypadMode()
-  const setRest = (sec: number) => onChange((e) => ({ ...e, rest_sec: Math.min(600, Math.max(0, sec)) }))
   // most used first (swap a taken machine), settings in the middle, the destructive one last
   return (
     <Sheet title={se.name} onClose={onClose}>
@@ -1064,45 +1298,12 @@ function MoreSheet({
           Machine taken? Swap it for another one. Sets you already logged stay as they are.
         </div>
 
-        <div className="exo-rest">
-          <div className="grow">
-            <div>Rest</div>
-            <div className="small muted">For this exercise, in this workout</div>
-          </div>
-          <div className="exo-step" role="group" aria-label="Rest time">
-            <button className="btn icon" onClick={() => setRest(se.rest_sec - 15)} disabled={se.rest_sec <= 0} aria-label="15 seconds less">
-              −
-            </button>
-            <span className="exo-step-v" aria-live="polite">
-              {se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}
-            </span>
-            <button className="btn icon" onClick={() => setRest(se.rest_sec + 15)} disabled={se.rest_sec >= 600} aria-label="15 seconds more">
-              +
-            </button>
-          </div>
-        </div>
-        <div className="chips" role="group" aria-label="Rest presets">
-          {[60, 90, 120, 180].map((v) => (
-            <button key={v} className={`chip${se.rest_sec === v ? ' active' : ''}`} aria-pressed={se.rest_sec === v} onClick={() => setRest(v)}>
-              {fmtRest(v)}
-            </button>
-          ))}
-        </div>
-
         <label className="field">
           Note for this workout
           <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
         </label>
-        <div className="row">
-          <button className="btn grow" disabled={index === 0} onClick={() => onMove(-1)}>
-            <ChevronUp size={16} aria-hidden /> Move up
-          </button>
-          <button className="btn grow" disabled={index === count - 1} onClick={() => onMove(1)}>
-            <ChevronDown size={16} aria-hidden /> Move down
-          </button>
-        </div>
-        <button className="btn ghost" disabled={se.sets.length === 0} onClick={() => onChange((e) => ({ ...e, sets: e.sets.slice(0, -1) }))}>
-          Remove last set row
+        <button className="btn block" disabled={count < 2} onClick={onReorder}>
+          <GripVertical size={16} aria-hidden /> Reorder exercises
         </button>
         <div className="exo-sep">
           <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
