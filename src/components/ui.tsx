@@ -167,9 +167,20 @@ export function ImageField({
  * Counted, so a sheet opened from another sheet does not unlock the page early.
  */
 let locks = 0
+/** true when this element or a parent up to the sheet can scroll: a long sheet, or a sideways row of chips */
+function canScroll(from: Element | null, sheet: Element): boolean {
+  for (let el = from; el; el = el.parentElement) {
+    const cs = getComputedStyle(el)
+    if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight) return true
+    if (/(auto|scroll)/.test(cs.overflowX) && el.scrollWidth > el.clientWidth) return true
+    if (el === sheet) return false
+  }
+  return false
+}
 function blockTouch(e: TouchEvent) {
-  const sheet = (e.target as Element | null)?.closest?.('.sheet')
-  if (!sheet || sheet.scrollHeight <= sheet.clientHeight) e.preventDefault()
+  const target = e.target as Element | null
+  const sheet = target?.closest?.('.sheet')
+  if (!sheet || !canScroll(target, sheet)) e.preventDefault()
 }
 export function lockScroll() {
   if (locks++ === 0) {
