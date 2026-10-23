@@ -155,7 +155,18 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
   function styleFor(i: number): React.CSSProperties | undefined {
     if (!drag) return undefined
     const { from, dy, rects } = drag
-    if (i === from) return { transform: `translateY(${dy}px) scale(1.02)`, zIndex: 20, position: 'relative', transition: 'none' }
+    if (i === from) {
+      // the held item follows the finger with a slight tilt, eased in as it lifts (none with Reduce Motion)
+      const calm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      return {
+        transform: `translateY(${dy}px)`,
+        rotate: calm ? undefined : '-2deg',
+        scale: calm ? undefined : '1.03',
+        zIndex: 20,
+        position: 'relative',
+        transition: 'rotate 0.15s ease-out, scale 0.15s ease-out'
+      } as React.CSSProperties
+    }
     // the gap the dragged item leaves: its height plus the spacing to its neighbour
     const next = rects[from + 1] ?? rects[from - 1]
     const gap = next ? Math.abs(next.top - rects[from].top) - (next.top > rects[from].top ? rects[from].h : next.h) : 0
