@@ -42,7 +42,7 @@ function RecordCard({ r, onOpen }: { r: ExerciseRecord; onOpen: () => void }) {
           </div>
           <div>
             <div className="rec-v accent">{kg(r.e1rm)}</div>
-            <div className="rec-l">Est. max</div>
+            <div className="rec-l">Est. 1-rep max</div>
           </div>
         </div>
       ) : (
@@ -109,7 +109,7 @@ export default function Records() {
             )}
           </div>
           <div className="small muted">
-            Est. max is the most you could likely lift once, worked out from your best set.
+            Est. 1-rep max: the most you could likely lift once, worked out from your best set.
           </div>
           {list.length === 0 ? (
             <div className="card muted">No exercise matches “{q.trim()}”.</div>
