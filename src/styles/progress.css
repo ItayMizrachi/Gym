@@ -381,3 +381,6 @@
 .prof-seg .seg.sm button {
   min-height: 32px;
 }
+
+/* summary without a photo: just the button, no card around it */
+.card.sd-photo.bare { background: none; border: 0; padding: 0; box-shadow: none; }

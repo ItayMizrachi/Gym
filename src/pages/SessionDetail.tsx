@@ -179,11 +179,9 @@ export default function SessionDetail() {
           </div>
         </div>
       </div>
-      <div className="hv-foot">
-        <span>
-          Calories <b>{kcal} kcal</b> <span className="est">estimate</span>
-        </span>
-        <span className="tiny">from time and {bodyKg ? `your ${fmtKg(bodyKg)} kg` : 'an average 75 kg'}</span>
+      {/* one quiet line; how it is worked out is in the tooltip / screen-reader label */}
+      <div className="hv-foot" title={`Estimated from the time and ${bodyKg ? `your ${fmtKg(bodyKg)} kg` : 'an average 75 kg'}`}>
+        <span>≈ {kcal} kcal burned</span>
       </div>
     </div>
   )
@@ -216,11 +214,12 @@ export default function SessionDetail() {
   )
 
   const photo = (
-    <div className="card sd-photo">
+    <div className={`card sd-photo${s.data.photo_path ? '' : ' bare'}`}>
       <ImageField
         path={s.data.photo_path ?? null}
         folder="sessions"
-        large
+        // no photo yet: one plain button, not a big dashed box; a photo shows large
+        large={!!s.data.photo_path}
         label="Add a workout photo"
         onChange={(p) => save('sessions', { ...s, data: { ...s.data, photo_path: p } })}
       />
