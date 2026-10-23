@@ -1,14 +1,14 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, Timer, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
 import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
-import { fmtDate, fmtDuration, fmtKg, fmtRest, parseRest, roundTo, splitName } from '../lib/format'
+import { fmtDate, fmtDuration, fmtKg, fmtRest, roundTo, splitName } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
 import { exerciseMeta } from '../lib/exerciseFilters'
@@ -1057,48 +1057,64 @@ function MoreSheet({
   onRemove: () => void
   onReplace: () => void
 }) {
-  const [rest, setRest] = useState(fmtRest(se.rest_sec))
   const [kpMode, setKpMode] = useKeypadMode()
+  const setRest = (sec: number) => onChange((e) => ({ ...e, rest_sec: Math.min(600, Math.max(0, sec)) }))
+  // most used first (swap a taken machine), settings in the middle, the destructive one last
   return (
     <Sheet title={se.name} onClose={onClose}>
       <div className="stack">
-        <label className="field">
-          Rest for this exercise (m:ss), applies to this workout
-          <div className="row">
-            <input className="input" value={rest} onChange={(e) => setRest(e.target.value)} inputMode="numeric" />
-            <button className="btn" onClick={() => onChange((e) => ({ ...e, rest_sec: parseRest(rest) }))}>
-              <Timer size={16} /> Set
-            </button>
-          </div>
-        </label>
-        <label className="field">
-          Note for this workout
-          <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} />
-        </label>
-        <div className="row">
-          <button className="btn grow" disabled={index === 0} onClick={() => onMove(-1)}>
-            <ChevronUp size={16} /> Move up
-          </button>
-          <button className="btn grow" disabled={index === count - 1} onClick={() => onMove(1)}>
-            <ChevronDown size={16} /> Move down
-          </button>
-        </div>
-        <button
-          className="btn"
-          disabled={se.sets.length === 0}
-          onClick={() => onChange((e) => ({ ...e, sets: e.sets.slice(0, -1) }))}
-        >
-          Remove last set row
-        </button>
-        <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
-        <button className="btn" onClick={onReplace}>
-          <Repeat size={16} /> Replace exercise
+        <button className="btn block" onClick={onReplace}>
+          <Repeat size={16} aria-hidden /> Replace exercise
         </button>
         <div className="small muted" style={{ marginTop: -4 }}>
           Machine taken? Swap it for another one. Sets you already logged stay as they are.
         </div>
+
+        <div className="exo-rest">
+          <div className="grow">
+            <div>Rest</div>
+            <div className="small muted">For this exercise, in this workout</div>
+          </div>
+          <div className="exo-step" role="group" aria-label="Rest time">
+            <button className="btn icon" onClick={() => setRest(se.rest_sec - 15)} disabled={se.rest_sec <= 0} aria-label="15 seconds less">
+              −
+            </button>
+            <span className="exo-step-v" aria-live="polite">
+              {se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}
+            </span>
+            <button className="btn icon" onClick={() => setRest(se.rest_sec + 15)} disabled={se.rest_sec >= 600} aria-label="15 seconds more">
+              +
+            </button>
+          </div>
+        </div>
+        <div className="chips" role="group" aria-label="Rest presets">
+          {[60, 90, 120, 180].map((v) => (
+            <button key={v} className={`chip${se.rest_sec === v ? ' active' : ''}`} aria-pressed={se.rest_sec === v} onClick={() => setRest(v)}>
+              {fmtRest(v)}
+            </button>
+          ))}
+        </div>
+
+        <label className="field">
+          Note for this workout
+          <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
+        </label>
+        <div className="row">
+          <button className="btn grow" disabled={index === 0} onClick={() => onMove(-1)}>
+            <ChevronUp size={16} aria-hidden /> Move up
+          </button>
+          <button className="btn grow" disabled={index === count - 1} onClick={() => onMove(1)}>
+            <ChevronDown size={16} aria-hidden /> Move down
+          </button>
+        </div>
+        <button className="btn ghost" disabled={se.sets.length === 0} onClick={() => onChange((e) => ({ ...e, sets: e.sets.slice(0, -1) }))}>
+          Remove last set row
+        </button>
+        <div className="exo-sep">
+          <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
+        </div>
         <button className="btn danger" onClick={onRemove}>
-          <Trash2 size={16} /> Remove exercise from workout
+          <Trash2 size={16} aria-hidden /> Remove exercise from workout
         </button>
       </div>
     </Sheet>
