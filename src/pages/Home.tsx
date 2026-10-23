@@ -253,7 +253,10 @@ export default function Home() {
             </div>
             <div className="hm-name">
               {heroName}
-              {heroWhen && <span className="hm-when">{heroWhen}</span>}
+              {/* "(Wednesday)" in the name only helps on a Wednesday: then it reads "Today", other days nothing */}
+              {heroWhen && heroWhen.toLowerCase() === new Date().toLocaleDateString('en-GB', { weekday: 'long' }).toLowerCase() && (
+                <span className="hm-when">Today</span>
+              )}
             </div>
             <div className="hm-meta">
               <span>
