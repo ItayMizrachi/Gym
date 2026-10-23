@@ -346,3 +346,18 @@ span.pv-btn {
     transform: rotate(360deg);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .pv,
+  .ph-tile img,
+  .photo-field img,
+  .help-a {
+    animation: none;
+  }
+  .pv-stage.anim,
+  .pv-stage.anim .pv-slide,
+  .pv-stage.anim .pv-slide img,
+  .ph-tile img {
+    transition: none;
+  }
+}
