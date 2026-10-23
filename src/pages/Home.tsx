@@ -460,11 +460,11 @@ export default function Home() {
           </button>
         )}
         {finished.length > 0 && (
-          <button className="list-row" onClick={() => nav('/history')}>
+          <button className="list-row" onClick={() => nav('/records')}>
             <Trophy size={20} aria-hidden />
             <span className="grow">
-              <span className="home-link-t">History and records</span>
-              <span className="tiny muted">Every finished workout and your best lifts</span>
+              <span className="home-link-t">Records</span>
+              <span className="tiny muted">Your best lifts for every exercise</span>
             </span>
             <ChevronRight size={18} aria-hidden />
           </button>
