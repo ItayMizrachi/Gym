@@ -24,7 +24,14 @@
 @keyframes wl-in { from { opacity: 0; transform: translateX(16px); } }
 
 /* help page */
-.help-sec h2 { font-size: 20px; margin-bottom: 8px; }
+/* Help: one grouped list of questions; tap a row to open its answer */
+.help-list { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.help-sec + .help-sec { border-top: 1px solid var(--line); }
+.help-sec h2 { margin: 0; font-size: 17px; }
+.help-q { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 56px; padding: 0 var(--s4); background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.help-caret { color: var(--muted); transition: transform var(--dur-fast) var(--ease); flex: none; }
+.help-sec.open .help-caret { transform: rotate(180deg); }
+.help-a { padding: 0 var(--s4) var(--s4); animation: fade var(--dur-base) var(--ease); }
 .help-sec p { margin: 0; color: var(--text-2); font-size: 15px; }
 .help-legend { display: grid; grid-template-columns: 44px 1fr; gap: 10px 8px; align-items: center; }
 .help-legend .kind { pointer-events: none; }

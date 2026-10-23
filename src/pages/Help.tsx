@@ -1,12 +1,25 @@
-import { Calculator, Check, Disc, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
+import { useState } from 'react'
+import { Calculator, Check, ChevronDown, Disc, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
 import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
 
+/** One question: a row you tap to open, so the whole list fits on a couple of screens. */
 function Sec({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const id = 'help-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   return (
-    <div className="card stack help-sec" style={{ gap: 8 }}>
-      <h2>{title}</h2>
-      {children}
+    <div className={`help-sec${open ? ' open' : ''}`}>
+      <h2>
+        <button className="help-q" aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
+          <span className="grow">{title}</span>
+          <ChevronDown size={18} aria-hidden className="help-caret" />
+        </button>
+      </h2>
+      {open && (
+        <div className="help-a stack" id={id} style={{ gap: 8 }}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }
@@ -16,6 +29,7 @@ export default function Help() {
     <div className="stack" style={{ gap: 14 }}>
       <PageHeader title="How it works" sub="Short answers about every part of GymLog." back={true} />
 
+      <div className="help-list">
       <Sec title="Getting started">
         <p>
           On <b>Train</b>, tap <b>Browse programs</b>. Pick a single workout and tap <b>Start now</b>, or add a weekly program. Its workouts
@@ -185,6 +199,7 @@ export default function Help() {
           <b>Android (Chrome):</b> ⋮ menu → Install app.
         </p>
       </Sec>
+      </div>
     </div>
   )
 }
