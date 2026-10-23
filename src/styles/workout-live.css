@@ -395,3 +395,9 @@
 /* compact live header: name, Finish, then one row of numbers */
 .ls-strip { margin-top: 6px; }
 .ls-map { min-height: 42px; }
+/* card header: name on its own line at full width; superset, rest and plan on the line below */
+.ex-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ex-titles .ex-title { min-height: 0; flex: none; }
+.ex-titles .ex-sum { cursor: pointer; }
+.ex-sum .ex-rest { min-height: 26px; padding: 0 8px; font-size: 13px; gap: 3px; background: var(--card2); }
+.ex-sum .ex-rest::after { inset: -9px -3px; }

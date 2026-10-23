@@ -429,7 +429,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="small muted" style={{ marginTop: 4 }}>
-                Shaded band: {MUSCLE_SETS_MIN}–{MUSCLE_SETS_MAX} hard sets a week, a common growth range. Drop sets count half.
+                Shaded band: {MUSCLE_SETS_MIN}–{MUSCLE_SETS_MAX} sets a week, a good range to grow.
               </div>
             </div>
             {muscles.length === 0 ? (

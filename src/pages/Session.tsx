@@ -348,6 +348,7 @@ function ExerciseCard({
   const [details, setDetails] = useState(false)
   const [kindFor, setKindFor] = useState<string | null>(null)
   const [restOpen, setRestOpen] = useState(false)
+  const toggleCard = () => (finished ? setShut((v) => !v) : setDetails((v) => !v))
   // the set that was just logged: its check pops, a new record also gets a light glow
   const [pop, setPop] = useState<{ id: string; pr: boolean } | null>(null)
   // a finished exercise folds down to one line; tapping its name opens it again
@@ -501,33 +502,43 @@ function ExerciseCard({
             </span>
           )}
         </button>
-        <button
-          className="ex-title"
-          onClick={() => (finished ? setShut((v) => !v) : setDetails((v) => !v))}
-          aria-expanded={finished ? !shut : details}
-          aria-label={finished ? `${name}, done. ${shut ? 'Show sets' : 'Hide sets'}` : `${name}. ${details ? 'Hide' : 'Show'} details`}
-        >
-          <span className="ex-name">{name}</span>
-          <span className="ex-sum">
+        <div className="ex-titles">
+          <button
+            className="ex-title"
+            onClick={toggleCard}
+            aria-expanded={finished ? !shut : details}
+            aria-label={finished ? `${name}, done. ${shut ? 'Show sets' : 'Hide sets'}` : `${name}. ${details ? 'Hide' : 'Show'} details`}
+          >
+            {/* "Shoulder Press (Machine Plates)": the name on top, the equipment joins the line below, so neither is cut */}
+            <span className="ex-name">{splitName(name)[0]}</span>
+          </button>
+          {/* the line under the name: superset, rest (its own button, so the name keeps the full width), the plan */}
+          <div className="ex-sum" onClick={toggleCard}>
             {se.superset && (
               <span className="chip blue ex-ss" aria-label={`Superset ${se.superset}`}>
                 <Link2 size={13} aria-hidden /> {se.superset}
               </span>
             )}
+            <button
+              className="ex-rest"
+              onClick={(e) => {
+                e.stopPropagation()
+                setRestOpen(true)
+              }}
+              aria-label={`Rest ${se.rest_sec ? fmtRest(se.rest_sec) : 'off'} for ${name}. Change`}
+            >
+              <Timer size={13} aria-hidden />
+              <span>{se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}</span>
+            </button>
             {finished && shut ? (
               <span className="ex-sum-t done">{doneLine}</span>
             ) : (
-              // "First time" lives in the details (and the empty Previous column): this line keeps the plan readable
-              <span className="ex-sum-t">{plan}</span>
+              <span className="ex-sum-t">{[plan, splitName(name)[1]].filter(Boolean).join(' · ')}</span>
             )}
             {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label="Has notes" />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
-          </span>
-        </button>
-        <button className="ex-rest" onClick={() => setRestOpen(true)} aria-label={`Rest ${se.rest_sec ? fmtRest(se.rest_sec) : 'off'} for ${name}. Change`}>
-          <Timer size={15} aria-hidden />
-          <span>{se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}</span>
-        </button>
+          </div>
+        </div>
         <button className="btn icon ghost" onClick={onMore} aria-label={`More options for ${name}`}>
           <MoreHorizontal size={20} />
         </button>
@@ -984,7 +995,7 @@ export default function SessionPage() {
               <span className="u">kg</span>
             </div>
             <div className={`l${beatLast ? ' beat' : ''}`}>
-              {beatLast ? 'Beat last time' : lastVolume ? `Last ${fmtVolume(lastVolume)}` : 'Volume'}
+              {beatLast ? 'Beat last time' : lastVolume ? `last: ${fmtVolume(lastVolume)}` : 'Volume'}
             </div>
           </div>
           <div className="ls-stat">
