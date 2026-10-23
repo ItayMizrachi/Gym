@@ -110,6 +110,8 @@ export default function Home() {
   const workouts = useMemo(() => [...db.workouts].sort((a, b) => a.position - b.position), [db.workouts])
   const groups = useMemo(() => groupByFolder(db.workouts), [db.workouts])
   const active = db.sessions.find((s) => !s.finished_at)
+  const activeDone = active ? active.data.exercises.reduce((a, e) => a + e.sets.filter((x) => x.done).length, 0) : 0
+  const activeTotal = active ? active.data.exercises.reduce((a, e) => a + e.sets.length, 0) : 0
   const finished = useMemo(() => finishedSessions(db), [db])
   // a workout planned for today wins over the rotation suggestion
   const planned = useMemo(() => todaysWorkout(db), [db])
@@ -190,11 +192,11 @@ export default function Home() {
       {active && (
         <div className="card hm-hero">
           <div className="hm-label">Workout in progress</div>
-          <div className="hm-name">
-            {splitName(active.name)[0]}
-            {splitName(active.name)[1] && <span className="hm-when">{splitName(active.name)[1]}</span>}
+          {/* the day in the name ("Monday") says nothing about a workout already running: show how far along it is */}
+          <div className="hm-name">{splitName(active.name)[0]}</div>
+          <div className="hm-meta">
+            {startedText(active.started_at)} · {activeDone} of {activeTotal} sets
           </div>
-          <div className="hm-meta">{startedText(active.started_at)}</div>
           <button
             className="btn primary block hm-go"
             onClick={() => {
