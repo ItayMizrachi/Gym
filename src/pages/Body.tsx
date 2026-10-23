@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Camera, Plus, Ruler, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -8,7 +8,7 @@ import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
 import { PhotoCompare } from '../components/PhotoCompare'
 import { PhotoTile, PhotoViewer } from '../components/PhotoViewer'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { MeasureFields, MeasureValues, MeasuresCard } from '../components/Measures'
 import { cleanMeasures, measureInfo, rememberUsedFields } from '../lib/measures'
 import '../styles/progress.css'
@@ -155,6 +155,11 @@ export default function Body() {
   const [viewing, setViewing] = useState<number | null>(null)
   const [allEntries, setAllEntries] = useState(false)
   const nav = useNavigate()
+  // arriving from the gallery's Compare: show those two and bring the card into view
+  const compareIds = (useLocation().state as { compare?: string[] } | null)?.compare
+  useEffect(() => {
+    if (compareIds) setTimeout(() => document.getElementById('photo-compare')?.scrollIntoView({ block: 'start' }), 50)
+  }, [compareIds])
 
   const entries = useMemo(
     () => metrics.filter((m) => m.weight_kg != null).sort((a, b) => a.date.localeCompare(b.date)),
@@ -289,7 +294,7 @@ export default function Body() {
 
       <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
 
-      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} all={metrics} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
+      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} all={metrics} initial={compareIds} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">

@@ -36,11 +36,22 @@ function weightNear(m: Metric, all: Metric[]): number | null {
   return best?.weight_kg ?? null
 }
 
-export function PhotoCompare({ photos, all = photos, onOpen }: { photos: Metric[]; all?: Metric[]; onOpen: (m: Metric) => void }) {
+export function PhotoCompare({
+  photos,
+  all = photos,
+  initial,
+  onOpen
+}: {
+  photos: Metric[]
+  all?: Metric[]
+  /** two photo ids picked in the gallery */
+  initial?: string[]
+  onOpen: (m: Metric) => void
+}) {
   const repo = useStore((s) => s.repo)
   const toast = useStore((s) => s.toast)
-  const [aId, setAId] = useState<string | null>(null)
-  const [bId, setBId] = useState<string | null>(null)
+  const [aId, setAId] = useState<string | null>(initial?.[0] ?? null)
+  const [bId, setBId] = useState<string | null>(initial?.[1] ?? null)
   const [mode, setMode] = useState<'side' | 'slide'>('side')
   const [pos, setPos] = useState(50)
   const [picking, setPicking] = useState<null | 'a' | 'b'>(null)
@@ -100,7 +111,7 @@ export function PhotoCompare({ photos, all = photos, onOpen }: { photos: Metric[
   }
 
   return (
-    <section className="card stack pc">
+    <section className="card stack pc" id="photo-compare" style={{ scrollMarginTop: 12 }}>
       <div className="card-head">
         <h2>Progress photos</h2>
         <button className="btn icon sm" onClick={share} disabled={sharing} aria-label="Share comparison">
