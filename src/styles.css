@@ -1078,6 +1078,15 @@ div.field {
   display: block;
   animation: fade 0.25s ease-out;
 }
+.photo-open {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
 /* remove: a round X in the corner, 44 px to tap, 30 px to see */
 .photo-x {
   position: absolute;

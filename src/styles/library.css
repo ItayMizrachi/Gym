@@ -10,6 +10,14 @@
 .thumb.lib-thumb img {
   object-fit: cover;
 }
+.thumb.lib-thumb.loading {
+  background: var(--card2);
+  border-color: var(--line);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+.thumb.lib-thumb.loading img {
+  opacity: 0;
+}
 
 /* ------------------------------------------------------------ big photo */
 .lib-photo {

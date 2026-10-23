@@ -7,14 +7,16 @@ import { reducedMotion } from '../lib/motion'
 import '../styles/photos.css'
 
 type Pt = { x: number; y: number }
+/** Anything with a photo: a body-weight entry, or a single photo from a workout or an exercise. */
+export type ViewerPhoto = Pick<Metric, 'id' | 'photo_path'> & { date?: string; weight_kg?: number | null; note?: string }
 
-function Slide({ m, offset, dx, zoom }: { m: Metric | undefined; offset: number; dx: number; zoom: { s: number; x: number; y: number } | null }) {
+function Slide({ m, offset, dx, zoom }: { m: ViewerPhoto | undefined; offset: number; dx: number; zoom: { s: number; x: number; y: number } | null }) {
   const url = useImageUrl(m?.photo_path)
   if (!m) return null
   const z = offset === 0 && zoom ? `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.s})` : ''
   return (
     <div className="pv-slide" style={{ transform: `translateX(calc(${offset * 100}% + ${offset * 16}px + ${dx}px))` }} aria-hidden={offset !== 0}>
-      {url ? <img src={url} alt={offset === 0 ? `Progress photo, ${fmtDateLong(m.date)}` : ''} style={{ transform: z }} draggable={false} /> : <div className="pv-wait" />}
+      {url ? <img src={url} alt={offset === 0 ? (m.date ? `Photo, ${fmtDateLong(m.date)}` : 'Photo') : ''} style={{ transform: z }} draggable={false} /> : <div className="pv-wait" />}
     </div>
   )
 }
@@ -23,7 +25,7 @@ function Slide({ m, offset, dx, zoom }: { m: Metric | undefined; offset: number;
  * Full-screen photo viewer: swipe or arrows for the next photo, pinch or double-tap to zoom (then drag to look
  * around), swipe down or X to close. Photos come in the order given.
  */
-export function PhotoViewer({ photos, start, onClose, onEdit }: { photos: Metric[]; start: number; onClose: () => void; onEdit?: (m: Metric) => void }) {
+export function PhotoViewer<T extends ViewerPhoto>({ photos, start, onClose, onEdit }: { photos: T[]; start: number; onClose: () => void; onEdit?: (m: T) => void }) {
   const [i, setI] = useState(Math.min(Math.max(0, start), photos.length - 1))
   const [dx, setDx] = useState(0)
   const [dy, setDy] = useState(0)
@@ -178,7 +180,7 @@ export function PhotoViewer({ photos, start, onClose, onEdit }: { photos: Metric
           <X size={22} aria-hidden />
         </button>
         <div className="pv-count" aria-live="polite">
-          {i + 1} of {photos.length}
+          {photos.length > 1 ? `${i + 1} of ${photos.length}` : ''}
         </div>
         {onEdit ? (
           <button className="pv-btn" onClick={() => onEdit(m)} aria-label="Edit entry">
@@ -214,7 +216,7 @@ export function PhotoViewer({ photos, start, onClose, onEdit }: { photos: Metric
       )}
 
       <div className="pv-cap">
-        <div className="pv-date">{fmtDateLong(m.date)}</div>
+        {m.date && <div className="pv-date">{fmtDateLong(m.date)}</div>}
         <div className="pv-meta">
           {[m.weight_kg != null ? `${fmtKg(m.weight_kg)} kg` : null, m.note || null].filter(Boolean).join(' · ')}
         </div>

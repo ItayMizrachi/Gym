@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
 import { DUR, exitDelay } from '../lib/motion'
+import { PhotoViewer } from './PhotoViewer'
 
 /* ---------- image helpers ---------- */
 
@@ -88,6 +89,7 @@ export function ImageField({
   const url = useImageUrl(path)
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
+  const [viewing, setViewing] = useState(false)
 
   async function pick(file: File | undefined) {
     if (!file || !repo) return
@@ -135,7 +137,9 @@ export function ImageField({
       {input}
       {url && (
         <div className={`photo-field${large ? ' lg' : ''}`}>
-          <img src={url} alt="" />
+          <button type="button" className="photo-open" onClick={() => setViewing(true)} aria-label="Open photo full screen">
+            <img src={url} alt="" />
+          </button>
           <button type="button" className="photo-x" onClick={remove} aria-label="Remove photo">
             <X size={16} aria-hidden />
           </button>
@@ -144,6 +148,7 @@ export function ImageField({
       <button type="button" className="btn block" disabled={busy} onClick={() => inputRef.current?.click()}>
         <Camera size={18} aria-hidden /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
       </button>
+      {viewing && path && <PhotoViewer photos={[{ id: path, photo_path: path }]} start={0} onClose={() => setViewing(false)} />}
     </div>
   )
 }

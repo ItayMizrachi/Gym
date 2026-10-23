@@ -41,11 +41,16 @@ export function ExerciseThumb({ exercise, name, size = 44 }: { exercise: ExLike;
 /** Round thumbnail of a library exercise. Falls back to the initials plate when the photo cannot load (offline, not cached). */
 export function LibThumb({ id, name, muscle, size = 44 }: { id: string; name?: string; muscle?: string; size?: number }) {
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [id])
+  const [loaded, setLoaded] = useState(false)
+  useEffect(() => {
+    setFailed(false)
+    setLoaded(false)
+  }, [id])
   if (failed) return <Thumb path={null} name={name} muscle={muscle} size={size} className="round" />
+  // until the photo arrives the disc breathes on graphite, instead of sitting there as an empty grey circle
   return (
-    <div className="thumb round lib-thumb" style={{ width: size, height: size }}>
-      <img src={libImageUrl(id)} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />
+    <div className={`thumb round lib-thumb${loaded ? '' : ' loading'}`} style={{ width: size, height: size }}>
+      <img src={libImageUrl(id)} alt="" loading="lazy" decoding="async" onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
     </div>
   )
 }
