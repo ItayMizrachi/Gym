@@ -6,6 +6,17 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
 }
+@media (min-width: 640px) {
+  .ph-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+/* Body shows one row: three photos on a phone, five on a tablet */
+@media (max-width: 639px) {
+  .ph-grid.preview > :nth-child(n + 4) {
+    display: none;
+  }
+}
 .ph-tile {
   position: relative;
   display: block;
@@ -64,6 +75,10 @@
 /* ---------- before / after ---------- */
 .pc-frame {
   position: relative;
+  /* on a tablet the pair would fill the screen: keep it phone-sized and centred */
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
   border-radius: var(--r-lg);
   overflow: hidden;
   background: var(--card2);

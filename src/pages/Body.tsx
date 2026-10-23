@@ -296,8 +296,8 @@ export default function Body() {
             <span>Photos</span>
             <span className="count">{withPhotos.length}</span>
           </div>
-          <div className="ph-grid">
-            {newestFirst.slice(0, 3).map((m, i) => (
+          <div className="ph-grid preview">
+            {newestFirst.slice(0, 5).map((m, i) => (
               <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
             ))}
           </div>
