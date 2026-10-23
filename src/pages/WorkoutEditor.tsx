@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Info, Link2, Plus, Trash2 } from 'lucide-react'
 import '../styles/programs-nav.css'
 import { MoveToFolderSheet } from '../components/FolderSheet'
+import { moved, useDragReorder } from '../components/useDragReorder'
 import { folderOf, NO_FOLDER } from '../lib/folders'
 import { DAY_NAME, DAY_SHORT, plannedDays } from '../lib/plan'
 import { useStore } from '../lib/store'
@@ -50,6 +51,11 @@ export default function WorkoutEditor() {
   const [open, setOpen] = useState<string | null>(null)
   const [movingFolder, setMovingFolder] = useState(false)
   const [help, setHelp] = useState(false)
+  // hold an exercise's header and drag it to a new place; positions are renumbered 0, 1, 2…
+  const dl = useDragReorder((a, b) => {
+    const list = useStore.getState().db.workout_exercises.filter((x) => x.workout_id === id).sort((p, q) => p.position - q.position)
+    moved(list, a, b).forEach((we, k) => we.position !== k && save('workout_exercises', { ...we, position: k }))
+  })
 
   const w = db.workouts.find((x) => x.id === id)
   if (!w)
@@ -117,13 +123,21 @@ export default function WorkoutEditor() {
     else blocks.push({ label: we.superset, items: [{ we, i }] })
   })
 
+  const drag = (i: number) => dl.item(i)
+  // the hold-to-drag handlers without ref and style (those go on the whole card)
+  const holdOnly = ({ ref: _r, style: _s, ...h }: ReturnType<typeof dl.item>) => h
   const row = (we: WorkoutExercise, i: number) => {
     const ex = db.exercises.find((e) => e.id === we.exercise_id)
     const timed = trackingOf(ex) === 'time'
     const reps = (we.rep_min === we.rep_max ? `${we.rep_min}` : `${we.rep_min}–${we.rep_max}`) + (timed ? ' s' : '')
     return (
-      <div key={we.id} className={`we-card ${we.superset ? 'ss' : ''} ${open === we.id ? 'open' : ''}`}>
-        <div className="we-head">
+      <div
+        key={we.id}
+        ref={drag(i).ref}
+        style={drag(i).style}
+        className={`we-card ${we.superset ? 'ss' : ''} ${open === we.id ? 'open' : ''}${dl.dragging === i ? ' lifted' : ''}`}
+      >
+        <div className="we-head" {...holdOnly(drag(i))}>
           <button className="we-toggle" onClick={() => setOpen(open === we.id ? null : we.id)} aria-expanded={open === we.id}>
             <ExerciseThumb exercise={ex} size={44} />
             <div className="grow" style={{ minWidth: 0 }}>
@@ -300,7 +314,7 @@ export default function WorkoutEditor() {
             <span>Exercises</span>
             <span className="count">{wes.length}</span>
           </div>
-          <div className="small muted">Tap one to change or remove it. The arrows move it up or down.</div>
+          <div className="small muted">Tap one to change or remove it. Hold and drag to move it.</div>
         </div>
       )}
 

@@ -47,7 +47,7 @@ export default function Help() {
 
       <Sec title="Folders">
         <p>
-          Folders group your workouts on Train. A program goes into its own folder. Tap a folder name to fold it away. To move a workout, open it and tap <b>Move</b> next to Folder. Tap{' '}
+          Folders group your workouts on Train. A program goes into its own folder. Tap a folder name to fold it away. Hold a workout and drag it to change the order. To move a workout, open it and tap <b>Move</b> next to Folder. Tap{' '}
           <MoreHorizontal size={13} aria-label="Folder options" /> next to a folder to rename it.
         </p>
       </Sec>
@@ -158,7 +158,7 @@ export default function Help() {
       <Sec title="Changing a workout as you go">
         <p>
           Tap a set number to make it a warm-up, drop or failure set, or to remove it. The timer button on each exercise sets its rest.
-          Tap ⋯ and then <b>Reorder exercises</b> to drag them into a new order. When you finish, GymLog asks whether to save these
+          Hold an exercise's name for a moment: the cards fold to one line each and you can drag it to a new place. When you finish, GymLog asks whether to save these
           changes to the plan or keep the plan as it was.
         </p>
       </Sec>

@@ -1,5 +1,5 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -12,6 +12,7 @@ import { planChanges, planUpdate } from '../lib/planSync'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, roundTo, splitName } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
+import { moved, useDragReorder } from '../components/useDragReorder'
 import { exerciseMeta } from '../lib/exerciseFilters'
 import { nowIso } from '../lib/uid'
 import { PlateCalc } from '../components/PlateCalc'
@@ -311,7 +312,28 @@ function revealNextSet() {
 /** Inert + aria-hidden while folded, so hidden controls are not tabbable or read out. */
 const folded = (shut: boolean) => (shut ? ({ inert: '', 'aria-hidden': true } as any) : {})
 
-function ExerciseCard({ session, index, onMore, onReorder, showLegend, current }: { session: Session; index: number; onMore: () => void; onReorder: () => void; showLegend?: boolean; current?: boolean }) {
+function ExerciseCard({
+  session,
+  index,
+  onMore,
+  onReorder,
+  showLegend,
+  current,
+  compact,
+  drag,
+  lifted
+}: {
+  session: Session
+  index: number
+  onMore: () => void
+  onReorder: (clientY: number) => void
+  showLegend?: boolean
+  current?: boolean
+  /** every card folds to its header while one is being dragged */
+  compact?: boolean
+  drag?: { ref: (el: HTMLElement | null) => void; style?: React.CSSProperties }
+  lifted?: boolean
+}) {
   const nav = useNavigate()
   const se = session.data.exercises[index]
   const db = useStore((s) => s.db)
@@ -466,7 +488,9 @@ function ExerciseCard({ session, index, onMore, onReorder, showLegend, current }
   return (
     <div
       id={`ex-${index}`}
-      className={`ex ${se.superset ? 'ss' : ''} ${current ? 'current' : ''} ${finished ? 'finished' : ''} ${shut ? 'shut' : ''}`}
+      ref={drag?.ref}
+      style={drag?.style}
+      className={`ex ${se.superset ? 'ss' : ''} ${current ? 'current' : ''} ${finished ? 'finished' : ''} ${shut ? 'shut' : ''}${compact ? ' compact' : ''}${lifted ? ' lifted' : ''}`}
     >
       <div className="ex-head" {...longPress(onReorder)}>
         <button className="ex-thumb" onClick={() => setInfo(true)} aria-label={`How to do ${name}`}>
@@ -836,6 +860,34 @@ export default function SessionPage() {
   const [replaceIdx, setReplaceIdx] = useState<number | null>(null)
   const [planAsk, setPlanAsk] = useState<string[] | null>(null)
   const [reordering, setReordering] = useState(false)
+  // long-press on an exercise: every card folds to one line and the held one follows the finger
+  const [lifted, setLifted] = useState<{ from: number; y: number } | null>(null)
+  const dropAt = useRef<number | null>(null)
+  const dragList = useDragReorder(
+    (a, b) => {
+      const cur = useStore.getState().db.sessions.find((x) => x.id === id)
+      if (!cur) return
+      save('sessions', { ...cur, data: { ...cur.data, exercises: moved(cur.data.exercises, a, b) } })
+      dropAt.current = b
+    },
+    () => {
+      setLifted(null)
+      const at = dropAt.current
+      dropAt.current = null
+      // back to full cards: keep the exercise you moved in view
+      requestAnimationFrame(() => at != null && document.getElementById(`ex-${at}`)?.scrollIntoView({ block: 'center' }))
+    }
+  )
+  // the cards have folded: put the held one under the finger, then pick it up
+  useLayoutEffect(() => {
+    if (!lifted) return
+    const el = document.getElementById(`ex-${lifted.from}`)
+    if (el) {
+      const r = el.getBoundingClientRect()
+      window.scrollBy(0, r.top + r.height / 2 - lifted.y)
+    }
+    dragList.start(lifted.from, lifted.y)
+  }, [lifted?.from, lifted?.y])
   const removeRow = useStore((s) => s.remove)
   const toast = useStore((s) => s.toast)
   const userId = useStore((s) => s.user?.id ?? 'local')
@@ -956,7 +1008,10 @@ export default function SessionPage() {
           key={i + session.data.exercises[i].exercise_id}
           session={session}
           index={i}
-          onReorder={() => session.data.exercises.length > 1 && setReordering(true)}
+          onReorder={(y) => session.data.exercises.length > 1 && setLifted({ from: i, y })}
+          compact={lifted != null}
+          drag={dragList.item(i)}
+          lifted={dragList.dragging === i}
           onMore={() => setMoreIdx(i)}
           showLegend={i === 0 && loggedEver < 5}
           current={i === currentIdx}
@@ -1142,7 +1197,7 @@ function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => voi
  * Hold a finger on an exercise's header for half a second to pick it up: the reorder list opens.
  * A scroll or a quick tap cancels it, so normal taps on the name and buttons keep working.
  */
-function longPress(fire: () => void) {
+function longPress(fire: (clientY: number) => void) {
   let t: number | undefined
   let start: { x: number; y: number } | null = null
   const cancel = () => {
@@ -1153,15 +1208,11 @@ function longPress(fire: () => void) {
     onPointerDown: (e: React.PointerEvent) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return
       start = { x: e.clientX, y: e.clientY }
+      const y = e.clientY
       t = window.setTimeout(() => {
         start = null
-        try {
-          navigator.vibrate?.(15)
-        } catch {
-          /* ignore */
-        }
-        fire()
-      }, 450)
+        fire(y)
+      }, 400)
     },
     onPointerMove: (e: React.PointerEvent) => {
       if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) cancel()

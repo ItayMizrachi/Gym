@@ -28,6 +28,7 @@ import {
   weeklyStreak
 } from '../lib/stats'
 import { RenameFolderSheet } from '../components/FolderSheet'
+import { DragList } from '../components/DragList'
 import { groupByFolder } from '../lib/folders'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
@@ -90,6 +91,16 @@ export default function Home() {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
+  /** a folder's workouts in their new order: they take over that folder's places, then every workout is numbered 0, 1, 2… */
+  function reorderWorkouts(list: Workout[]) {
+    const all = [...useStore.getState().db.workouts].sort((a, b) => a.position - b.position)
+    const ids = new Set(list.map((w) => w.id))
+    let k = 0
+    const next = all.map((w) => (ids.has(w.id) ? list[k++] : w))
+    next.forEach((w, i) => {
+      if (w.position !== i) save('workouts', { ...w, position: i })
+    })
+  }
   const user = useStore((s) => s.user)
   const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -296,12 +307,13 @@ export default function Home() {
                   </div>
                 )}
                 {!shut && (
-                  <div className="tlist">
-                    {g.workouts.map((w) => {
+                  // hold a workout and drag it to a new place in its folder
+                  <DragList className="tlist" items={g.workouts} onReorder={(list) => reorderWorkouts(list)}>
+                    {(w, _i, drag, lifted) => {
                       const info = templateInfo(db, w)
                       const isNext = next?.workout.id === w.id
                       return (
-                        <div key={w.id} className={`trow${isNext ? ' next' : ''}`}>
+                        <div key={w.id} {...drag} className={`trow${isNext ? ' next' : ''}${lifted ? ' lifted' : ''}`}>
                           <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
                             <div className="trow-name ellipsis">{splitName(w.name)[0]}</div>
                             <div className="small muted ellipsis">
@@ -323,8 +335,8 @@ export default function Home() {
                           </button>
                         </div>
                       )
-                    })}
-                  </div>
+                    }}
+                  </DragList>
                 )}
               </div>
             )

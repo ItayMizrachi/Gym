@@ -245,3 +245,18 @@
 .ex-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .ro-row { touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; }
 .ro-row.dragging { cursor: grabbing; }
+/* press-and-hold drag: the lifted item floats; nothing on the rows selects as text */
+.trow { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.trow.lifted { background: var(--card3); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5); border-radius: var(--radius); }
+.cr-list { display: grid; gap: 8px; }
+.cr-row { display: flex; align-items: center; gap: var(--s3); height: 60px; padding: 0 14px 0 10px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+.cr-row.ss { border-left: 3px solid var(--plate-blue); }
+.cr-row.lifted { background: var(--card3); border-color: var(--accent); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); }
+.cr-name { font-weight: 600; min-width: 0; }
+/* while dragging an exercise: every card is just its header, the held one floats */
+.ex.compact > :not(.ex-head) { display: none; }
+.ex.compact .ex-sum, .ex.compact .ex-rest, .ex.compact .ex-head > .btn { display: none; }
+.ex.compact { padding-top: 8px; padding-bottom: 8px; }
+.ex.lifted { background: var(--card3); border-color: var(--accent); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); }
+.we-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.we-card.lifted { background: var(--card3); border-color: var(--accent); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); }
