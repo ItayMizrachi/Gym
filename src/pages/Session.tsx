@@ -8,6 +8,7 @@ import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/t
 import { nextInSuperset } from '../lib/superset'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
+import { nextSetLabel } from '../lib/nextSet'
 import { fmtDate, fmtDuration, fmtKg, fmtRest, roundTo, splitName } from '../lib/format'
 import { ExercisePicker } from '../components/ExercisePicker'
 import { Confirm, NumInput, Sheet, Toggle } from '../components/ui'
@@ -764,26 +765,6 @@ function ElapsedClock({ start }: { start: string }) {
   const mm = String(Math.floor((sec % 3600) / 60)).padStart(h ? 2 : 1, '0')
   const ss = String(sec % 60).padStart(2, '0')
   return <span className="sp-clock">{h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`}</span>
-}
-
-/**
- * What the rest bar and the rest-over alert point to: the next set of this exercise, else the next
- * exercise with sets left (in a superset round, the first of the group), else anything left.
- */
-function nextSetLabel(session: Session, index: number): string {
-  const exs = session.data.exercises
-  const open = (i: number) => exs[i]?.sets.findIndex((x) => !x.done) ?? -1
-  const group = exs[index]?.superset
-  const order = [
-    ...(group ? exs.map((e, i) => (e.superset === group ? i : -1)).filter((i) => i >= 0) : [index]),
-    ...exs.map((_, i) => i).filter((i) => i > index),
-    ...exs.map((_, i) => i).filter((i) => i < index)
-  ]
-  for (const i of order) {
-    const k = open(i)
-    if (k >= 0) return `${exs[i].name} · Set ${k + 1} of ${exs[i].sets.length}`
-  }
-  return 'All sets logged'
 }
 
 export default function SessionPage() {
