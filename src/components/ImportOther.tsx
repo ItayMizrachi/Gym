@@ -2,23 +2,33 @@ import { useRef, useState } from 'react'
 import { FileUp } from 'lucide-react'
 import { Sheet, Toggle } from './ui'
 import { useStore } from '../lib/store'
-import { ParseResult, parseExport, planImport } from '../lib/importCsv'
+import { BodyRow, ParseResult, isMeasurementExport, parseExport, parseMeasurements, planBodyImport, planImport } from '../lib/importCsv'
+import { nowIso, uid } from '../lib/uid'
 import { loadLibrary } from '../lib/library'
 
 const fmtDay = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
-/** Import workout history from a Hevy or Strong CSV export. */
+/** Import workout history from a Hevy or Strong CSV export, or body weight from Hevy's measurements export. */
 export default function ImportOther({ onClose }: { onClose: () => void }) {
   const toast = useStore((s) => s.toast)
   const fileRef = useRef<HTMLInputElement>(null)
   const [text, setText] = useState<string | null>(null)
   const [pounds, setPounds] = useState(false)
   const [res, setRes] = useState<ParseResult | null>(null)
+  // Hevy's measurement_data.csv: body weight and tape measures, one row per day
+  const [body, setBody] = useState<BodyRow[] | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   function read(t: string, lb: boolean) {
     try {
+      if (isMeasurementExport(t)) {
+        setRes(null)
+        setBody(parseMeasurements(t))
+        setErr(null)
+        return
+      }
+      setBody(null)
       setRes(parseExport(t, lb))
       setErr(null)
     } catch (e: any) {
@@ -35,7 +45,21 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
+  function runBody() {
+    if (!body) return
+    const { db, save, user } = useStore.getState()
+    const plan = planBodyImport(body, db.metrics, user?.id ?? 'local', nowIso(), uid)
+    plan.save.forEach((m) => save('metrics', m))
+    toast({
+      kind: 'info',
+      text: plan.added + plan.updated ? `${plan.added + plan.updated} weigh-ins imported` : 'Nothing new to import',
+      sub: plan.skipped ? `${plan.skipped} days were already in GymLog and kept as they are.` : 'They are on the Body tab.'
+    })
+    onClose()
+  }
+
   async function run() {
+    if (body) return runBody()
     if (!res) return
     setBusy(true)
     let lib: Awaited<ReturnType<typeof loadLibrary>> = []
@@ -65,7 +89,8 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
     <Sheet title="Import from Hevy or Strong" onClose={onClose}>
       <div className="stack">
         <div className="small muted">
-          <b style={{ color: 'var(--text)' }}>Hevy:</b> Profile → Settings → Export &amp; import data → Export workouts.
+          <b style={{ color: 'var(--text)' }}>Hevy:</b> Profile → Settings → Export &amp; import data → Export workouts, and Export
+          measurements for your body weight.
           <br />
           <b style={{ color: 'var(--text)' }}>Strong:</b> Settings → Export Strong data.
           <br />
@@ -77,6 +102,18 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
         </button>
 
         {err && <div className="msg err">{err}</div>}
+
+        {body && (
+          <div className="card stack" style={{ gap: 8 }}>
+            <div style={{ fontWeight: 600 }}>Hevy measurements · {body.length} days</div>
+            {body.length > 0 && (
+              <div className="small muted">
+                {fmtDay(new Date(body[0].date + 'T12:00:00'))} – {fmtDay(new Date(body[body.length - 1].date + 'T12:00:00'))} · {body.filter((b) => b.weight_kg != null).length}{' '}
+                weigh-ins
+              </div>
+            )}
+          </div>
+        )}
 
         {res && (
           <div className="card stack" style={{ gap: 8 }}>
@@ -108,10 +145,10 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        <button className="btn primary block" disabled={!res || !res.workouts.length || busy} onClick={run}>
-          {busy ? 'Importing…' : res ? `Import ${res.workouts.length} workouts` : 'Import'}
+        <button className="btn primary block" disabled={body ? !body.length : !res || !res.workouts.length || busy} onClick={run}>
+          {busy ? 'Importing…' : body ? `Import ${body.length} days` : res ? `Import ${res.workouts.length} workouts` : 'Import'}
         </button>
-        <div className="tiny muted">Importing the same file again is safe: workouts already in GymLog are skipped.</div>
+        <div className="tiny muted">Importing the same file again is safe: workouts and days already in GymLog are skipped.</div>
       </div>
     </Sheet>
   )

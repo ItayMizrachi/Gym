@@ -1,4 +1,4 @@
-import { EQUIPMENT, Exercise, Session, SessionExercise, SessionSet, SetKind } from './types'
+import { EQUIPMENT, Exercise, Metric, Session, SessionExercise, SessionSet, SetKind } from './types'
 import { uid, nowIso } from './uid'
 import { LibraryExercise, bestLibraryMatch, exerciseFromLibrary } from './library'
 
@@ -268,4 +268,92 @@ export function planImport(
     })
   }
   return { exercises: created, sessions, skipped }
+}
+
+/* ------------------------------------------------------------ Hevy measurements (body weight and tape) */
+
+export interface BodyRow {
+  date: string // YYYY-MM-DD
+  weight_kg: number | null
+  measures: Record<string, number>
+}
+
+/** Hevy's measurement_data.csv column → GymLog measure key (forearms have no place in GymLog and are left out) */
+const HEVY_MEASURES: Record<string, string> = {
+  fat_percent: 'body_fat_pct',
+  neck_cm: 'neck',
+  shoulder_cm: 'shoulders',
+  chest_cm: 'chest',
+  left_bicep_cm: 'arm_l',
+  right_bicep_cm: 'arm_r',
+  waist_cm: 'waist',
+  hips_cm: 'hips',
+  left_thigh_cm: 'thigh_l',
+  right_thigh_cm: 'thigh_r'
+}
+
+/** true when the file is Hevy's body measurements export rather than workouts */
+export const isMeasurementExport = (text: string) => {
+  const head = text.slice(0, 400).toLowerCase()
+  return head.includes('"date"') && head.includes('weight_kg') && !head.includes('exercise_title')
+}
+
+/** Hevy measurement_data.csv → one row per day with a weight and/or measurements; empty days are dropped. */
+export function parseMeasurements(text: string): BodyRow[] {
+  const rows = parseCsv(text.replace(/^﻿/, ''))
+  if (rows.length < 2) return []
+  const head = rows[0].map((h) => h.trim().toLowerCase())
+  const at = (name: string) => head.indexOf(name)
+  const iDate = at('date')
+  const iKg = at('weight_kg')
+  const iLb = at('weight_lbs')
+  const out: BodyRow[] = []
+  for (const r of rows.slice(1)) {
+    const d = parseDate(r[iDate] ?? '')
+    if (!d) continue
+    const num = (i: number) => {
+      const v = i >= 0 ? parseFloat((r[i] ?? '').replace(',', '.')) : NaN
+      return isFinite(v) && v > 0 ? v : null
+    }
+    const kg = num(iKg) ?? (num(iLb) != null ? Math.round(num(iLb)! * 0.45359237 * 10) / 10 : null)
+    const measures: Record<string, number> = {}
+    for (const [col, key] of Object.entries(HEVY_MEASURES)) {
+      const v = num(at(col))
+      if (v != null) measures[key] = v
+    }
+    // GymLog has one calf and one waist: take the right calf (or left), and abdomen when there is no waist
+    const calf = num(at('right_calf_cm')) ?? num(at('left_calf_cm'))
+    if (calf != null) measures.calf = calf
+    if (measures.waist == null && num(at('abdomen_cm')) != null) measures.waist = num(at('abdomen_cm'))!
+    if (kg == null && !Object.keys(measures).length) continue
+    const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    out.push({ date, weight_kg: kg, measures })
+  }
+  return out.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+/** New and updated body entries for these rows. A day already in GymLog keeps its weight; only missing measures are added. */
+export function planBodyImport(rows: BodyRow[], existing: Metric[], userId: string, now: string, newId: () => string): { save: Metric[]; added: number; updated: number; skipped: number } {
+  const save: Metric[] = []
+  let added = 0
+  let updated = 0
+  let skipped = 0
+  for (const r of rows) {
+    const cur = existing.find((m) => m.date === r.date)
+    if (!cur) {
+      save.push({ id: newId(), user_id: userId, date: r.date, weight_kg: r.weight_kg, note: '', photo_path: null, ...(Object.keys(r.measures).length ? { measures: r.measures } : {}), created_at: now })
+      added++
+      continue
+    }
+    const measures = { ...r.measures, ...(cur.measures ?? {}) }
+    const weight = cur.weight_kg ?? r.weight_kg
+    const changed = weight !== cur.weight_kg || Object.keys(measures).length !== Object.keys(cur.measures ?? {}).length
+    if (!changed) {
+      skipped++
+      continue
+    }
+    save.push({ ...cur, weight_kg: weight, ...(Object.keys(measures).length ? { measures } : {}) })
+    updated++
+  }
+  return { save, added, updated, skipped }
 }
