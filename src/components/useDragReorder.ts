@@ -160,7 +160,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
       const calm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
       return {
         transform: `translateY(${dy}px)`,
-        rotate: calm ? undefined : '-2deg',
+        rotate: calm ? undefined : '2deg',
         scale: calm ? undefined : '1.03',
         zIndex: 20,
         position: 'relative',
