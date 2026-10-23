@@ -155,6 +155,31 @@ export function ImageField({
 /* ---------- modal ---------- */
 
 /** Bottom sheet with a drag handle: drag it down (or tap the backdrop) to close. */
+/**
+ * Freeze the page behind a sheet. iOS Safari ignores overflow:hidden on body, so the body is pinned in
+ * place (position fixed at the current scroll) and put back exactly where it was. Counted, so a sheet
+ * opened from another sheet does not unlock the page early.
+ */
+let locks = 0
+let lockedY = 0
+function lockScroll() {
+  if (locks++ === 0) {
+    lockedY = window.scrollY
+    const b = document.body.style
+    b.position = 'fixed'
+    b.top = `-${lockedY}px`
+    b.left = '0'
+    b.right = '0'
+    b.overflow = 'hidden'
+  }
+  return () => {
+    if (--locks > 0) return
+    const b = document.body.style
+    b.position = b.top = b.left = b.right = b.overflow = ''
+    window.scrollTo(0, lockedY)
+  }
+}
+
 export function Sheet({ title, onClose, children }: { title?: string; onClose: () => void; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y0: number; dy: number; t0: number } | null>(null)
@@ -173,15 +198,14 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
   }).current
 
   useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const unlock = lockScroll()
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && requestClose()
     window.addEventListener('keydown', onKey)
     // screen readers and keyboards start inside the sheet, and return to where they were after
     const opener = document.activeElement as HTMLElement | null
     if (!ref.current?.contains(document.activeElement)) ref.current?.focus({ preventScroll: true })
     return () => {
-      document.body.style.overflow = prev
+      unlock()
       window.removeEventListener('keydown', onKey)
       opener?.focus?.({ preventScroll: true })
     }

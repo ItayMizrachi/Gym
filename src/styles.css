@@ -458,8 +458,19 @@ table.t,
   resize: vertical;
   line-height: 1.45;
 }
+/* iOS gives date fields a fixed native width that can push a sheet wider than the screen */
 input[type='date'].input {
   min-height: var(--tap);
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+}
+input[type='date'].input::-webkit-date-and-time-value {
+  text-align: left;
 }
 label.field,
 div.field {
@@ -828,6 +839,7 @@ div.field {
   width: 100%;
   max-width: 720px;
   max-height: calc(92vh - var(--safe-t));
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--bg2);
@@ -881,6 +893,16 @@ div.field {
 .sheet-head h2 {
   flex: 1;
   min-width: 0;
+}
+/* a primary action pinned to the bottom of a long sheet */
+.sheet-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 calc(-1 * var(--s4)) calc(-1 * var(--s3));
+  padding: var(--s3) var(--s4);
+  background: var(--bg2);
+  box-shadow: 0 -1px 0 var(--line);
 }
 .sheet.dragging {
   transition: none;
