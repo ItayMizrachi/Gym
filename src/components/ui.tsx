@@ -1,5 +1,5 @@
 import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
-import { X, Camera, Trash2, ChevronLeft } from 'lucide-react'
+import { X, Camera, ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
@@ -123,31 +123,27 @@ export function ImageField({
       </>
     )
 
+  function remove() {
+    const old = path
+    onChange(null)
+    if (old && repo && autoDelete) void repo.deleteImage(old)
+  }
+
+  // a photo with a small X in its corner to remove it, and one full-width button to change or add
   return (
-    <div className="stack" style={{ gap: 8 }}>
+    <div className="stack" style={{ gap: 'var(--s2)' }}>
+      {input}
       {url && (
-        <div className={large ? 'thumb lg' : 'thumb'} style={large ? undefined : { width: 96, height: 96 }}>
+        <div className={`photo-field${large ? ' lg' : ''}`}>
           <img src={url} alt="" />
+          <button type="button" className="photo-x" onClick={remove} aria-label="Remove photo">
+            <X size={16} aria-hidden />
+          </button>
         </div>
       )}
-      <div className="row" style={{ flexWrap: 'wrap' }}>
-        {input}
-        <button className="btn sm" disabled={busy} onClick={() => inputRef.current?.click()}>
-          <Camera size={16} /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
-        </button>
-        {url && (
-          <button
-            className="btn sm danger"
-            onClick={() => {
-              const old = path
-              onChange(null)
-              if (old && repo && autoDelete) void repo.deleteImage(old)
-            }}
-          >
-            <Trash2 size={16} /> Remove
-          </button>
-        )}
-      </div>
+      <button type="button" className="btn block" disabled={busy} onClick={() => inputRef.current?.click()}>
+        <Camera size={18} aria-hidden /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
+      </button>
     </div>
   )
 }
@@ -156,27 +152,28 @@ export function ImageField({
 
 /** Bottom sheet with a drag handle: drag it down (or tap the backdrop) to close. */
 /**
- * Freeze the page behind a sheet. iOS Safari ignores overflow:hidden on body, so the body is pinned in
- * place (position fixed at the current scroll) and put back exactly where it was. Counted, so a sheet
- * opened from another sheet does not unlock the page early.
+ * Freeze the page behind a sheet. overflow:hidden alone does not stop iOS Safari, so while a sheet is
+ * open any touch drag outside a sheet, or on a sheet with nothing to scroll, is cancelled; the sheet's
+ * own scrolling stays (overscroll-behavior keeps it from chaining to the page). The body is not pinned
+ * with position:fixed: in the installed iOS app that cut the sheet short of the bottom of the screen.
+ * Counted, so a sheet opened from another sheet does not unlock the page early.
  */
 let locks = 0
-let lockedY = 0
+function blockTouch(e: TouchEvent) {
+  const sheet = (e.target as Element | null)?.closest?.('.sheet')
+  if (!sheet || sheet.scrollHeight <= sheet.clientHeight) e.preventDefault()
+}
 function lockScroll() {
   if (locks++ === 0) {
-    lockedY = window.scrollY
-    const b = document.body.style
-    b.position = 'fixed'
-    b.top = `-${lockedY}px`
-    b.left = '0'
-    b.right = '0'
-    b.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('touchmove', blockTouch, { passive: false })
   }
   return () => {
     if (--locks > 0) return
-    const b = document.body.style
-    b.position = b.top = b.left = b.right = b.overflow = ''
-    window.scrollTo(0, lockedY)
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+    document.removeEventListener('touchmove', blockTouch)
   }
 }
 

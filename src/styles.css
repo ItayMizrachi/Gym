@@ -894,16 +894,6 @@ div.field {
   flex: 1;
   min-width: 0;
 }
-/* a primary action pinned to the bottom of a long sheet */
-.sheet-foot {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  margin: 0 calc(-1 * var(--s4)) calc(-1 * var(--s3));
-  padding: var(--s3) var(--s4);
-  background: var(--bg2);
-  box-shadow: 0 -1px 0 var(--line);
-}
 .sheet.dragging {
   transition: none;
   animation: none;
@@ -1061,6 +1051,53 @@ div.field {
   justify-content: center;
   color: var(--muted);
   overflow: hidden;
+}
+.photo-field {
+  position: relative;
+  width: 112px;
+  aspect-ratio: 1;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--card2);
+  border: 1px solid var(--line);
+}
+.photo-field.lg {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+.photo-field img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: fade 0.25s ease-out;
+}
+/* remove: a round X in the corner, 44 px to tap, 30 px to see */
+.photo-x {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  color: var(--text);
+  cursor: pointer;
+}
+.photo-x::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.photo-x svg {
+  position: relative;
 }
 .thumb.lg {
   width: 100%;

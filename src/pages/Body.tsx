@@ -110,12 +110,9 @@ function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Metric | 
           open={showMeasures}
           onToggle={() => setShowMeasures(!showMeasures)}
         />
-        {/* Save stays in reach while the measurements list is open */}
-        <div className="sheet-foot">
-          <button className="btn primary block" disabled={weight == null && !photo && !cleaned} onClick={commit}>
-            Save
-          </button>
-        </div>
+        <button className="btn primary block" disabled={weight == null && !photo && !cleaned} onClick={commit}>
+          Save
+        </button>
         {entry && (
           <button className="btn danger" onClick={() => setConfirm(true)}>
             <Trash2 size={16} /> Delete entry
