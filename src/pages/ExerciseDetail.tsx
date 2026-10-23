@@ -130,7 +130,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                   {rec.bestE1rm ? fmtKg(Math.round(rec.bestE1rm.value * 10) / 10) : '–'}
                   <span className="u">kg</span>
                 </div>
-                <div className="l">Best est. 1RM</div>
+                <div className="l">Best est. 1-rep max</div>
               </div>
               <div className="stat">
                 <div className="v">
@@ -158,7 +158,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               })}
             </div>
             <div className="tiny muted">
-              Warm-up and drop sets never count towards records. Est. 1RM uses the Epley formula (reps capped at 12).
+              Warm-up and drop sets never count towards records. The estimated 1-rep max uses the Epley formula (reps capped at 12).
             </div>
           </>
         ) : (
@@ -172,7 +172,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             <h2>Progress</h2>
             <div className="seg">
               <button className={metric === 'e1rm' ? 'on' : ''} onClick={() => setMetric('e1rm')}>
-                Est. 1RM
+                1-rep max
               </button>
               <button className={metric === 'top' ? 'on' : ''} onClick={() => setMetric('top')}>
                 Top weight
@@ -183,7 +183,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             unit=" kg"
             series={[
               {
-                name: metric === 'e1rm' ? 'Est. 1RM' : 'Top weight',
+                name: metric === 'e1rm' ? 'Est. 1-rep max' : 'Top weight',
                 color: '#f0b92a',
                 points: hist.map((h) => ({ t: new Date(h.date).getTime(), y: metric === 'e1rm' ? h.bestE1rm : h.topWeight }))
               }

@@ -99,7 +99,7 @@ export default function Exercises() {
                 kg
               </span>
             </div>
-            <div className="tiny muted">best 1RM</div>
+            <div className="tiny muted">est. max</div>
           </div>
         )}
         <ChevronRight size={18} className="chev" />

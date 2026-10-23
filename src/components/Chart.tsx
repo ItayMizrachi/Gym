@@ -96,7 +96,8 @@ export function LineChart({ series, unit = '', digits = 1 }: { series: Series[];
     if (tMax === tMin) tMax = tMin + DAY
     let yMin = Math.min(...all.map((p) => p.y))
     let yMax = Math.max(...all.map((p) => p.y))
-    const padY = (yMax - yMin || Math.max(1, yMax * 0.05)) * 0.15
+    // a flat line (same value every time) gets a roomy axis in whole numbers, not 71.6 / 71.8 / 72 / 72.2
+    const padY = yMax === yMin ? Math.max(2, Math.abs(yMax) * 0.08) : (yMax - yMin) * 0.15
     yMin -= padY
     yMax += padY
     const x = (t: number) => PAD.l + ((t - tMin) / (tMax - tMin)) * (W - PAD.l - PAD.r)
