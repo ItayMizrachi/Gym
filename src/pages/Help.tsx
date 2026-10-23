@@ -180,16 +180,16 @@ export default function Help() {
       <Sec title="Saving and offline">
         <div>
           <span className="help-dot">
-            <span className="dot" /> saved
-          </span>
-          <span className="help-dot">
             <span className="dot busy" /> saving
           </span>
           <span className="help-dot">
             <span className="dot err" /> not saved
           </span>
         </div>
-        <p>The dot in the top corner shows sync status. With no signal, keep logging. Changes sync when you are back online.</p>
+        <p>
+          Everything saves by itself. A note appears in the top corner only while something is saving, waiting for a signal, or did not save.
+          With no signal, keep logging: changes sync when you are back online.
+        </p>
       </Sec>
 
       <Sec title="Install on your phone">

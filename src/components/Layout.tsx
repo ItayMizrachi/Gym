@@ -183,8 +183,10 @@ function SyncDot() {
   const repo = useStore((s) => s.repo)
   const queued = useStore((s) => s.queued)
   if (!repo) return null
-  // Local mode is a developer tool: nothing to show in production builds.
-  if (repo.mode !== 'cloud' && !queued && !err && !pending && !import.meta.env.DEV) return null
+  // All saved is the normal state: say nothing. Only saving, waiting or a failed save shows up.
+  // (Local mode is a developer tool and shows its label in dev builds only.)
+  const idle = !queued && !err && !pending
+  if (idle && (repo.mode === 'cloud' || !import.meta.env.DEV)) return null
   return (
     <div className="sync" role="status">
       <span aria-hidden className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />
