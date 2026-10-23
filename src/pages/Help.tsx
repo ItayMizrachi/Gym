@@ -100,11 +100,12 @@ export default function Help() {
       <Sec title="Records">
         <div className="help-ex">
           <span className="chip pr">🏆 100×5</span>
-          <span className="chip pr">1RM ~117</span>
+          <span className="chip pr">Est. 1-rep max ~117</span>
         </div>
         <p>
           A record is your heaviest weight, best estimated one-rep max, or most reps at a weight. You get a 🏆 alert when you beat one, and a
-          “So close” alert when you reach 95% of your best.
+          “So close” alert when you reach 95% of your best. Warm-up and drop sets never count. The estimated 1-rep max uses the Epley
+          formula, with reps capped at 12.
         </p>
       </Sec>
 

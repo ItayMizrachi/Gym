@@ -145,7 +145,8 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               Best weight (kg) for at least N reps
             </div>
             <div className="reps-table">
-              {REP_COLS.map((n) => {
+              {/* only rep counts you have done: a row of dashes says nothing */}
+              {REP_COLS.filter((n) => rec.repTable.some((r) => r.reps === n)).map((n) => {
                 const row = rec.repTable.find((r) => r.reps === n)
                 return (
                   <div key={n} title={row ? fmtDate(row.date, true) : undefined}>
@@ -156,9 +157,6 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                   </div>
                 )
               })}
-            </div>
-            <div className="tiny muted">
-              Warm-up and drop sets never count towards records. The estimated 1-rep max uses the Epley formula (reps capped at 12).
             </div>
           </>
         ) : (
