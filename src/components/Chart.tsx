@@ -218,7 +218,8 @@ export function LineChart({ series, unit = '', digits = 1 }: { series: Series[];
                 fontSize={14}
                 fontWeight={600}
                 textAnchor="end"
-                style={{ fill: 'var(--text)', fontFamily: 'var(--display)' }}
+                // a halo in the card colour keeps the number readable where it crosses the line
+                style={{ fill: 'var(--text)', fontFamily: 'var(--display)', stroke: 'var(--card)', strokeWidth: 4, paintOrder: 'stroke', strokeLinejoin: 'round' }}
               >
                 {last.y.toFixed(digits)}
                 {unit}
