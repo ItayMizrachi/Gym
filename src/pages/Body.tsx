@@ -3,7 +3,7 @@ import { Camera, Plus, Ruler, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
 import { LineChart } from '../components/Chart'
-import { Confirm, Empty, ImageField, NumInput, Sheet, Thumb } from '../components/ui'
+import { Confirm, Empty, ImageField, NumInput, PageHeader, Sheet, Thumb } from '../components/ui'
 import { fmtDate, fmtDateLong, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
 import { PhotoCompare } from '../components/PhotoCompare'
@@ -199,12 +199,15 @@ export default function Body() {
 
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>
-      <div className="page-head" style={{ marginBottom: 0 }}>
-        <h1>Body</h1>
-        <button className="btn primary" onClick={() => setEditing('new')}>
-          <Plus size={18} /> Log weight
-        </button>
-      </div>
+      <PageHeader
+        title="Body"
+        sub="Weight, measurements and progress photos."
+        action={
+          <button className="btn primary" onClick={() => setEditing('new')}>
+            <Plus size={18} aria-hidden /> Log weight
+          </button>
+        }
+      />
 
       {!entries.length ? (
         <Empty
