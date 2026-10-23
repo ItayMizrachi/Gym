@@ -83,7 +83,7 @@ function RestBar({ inSession }: { inSession: boolean }) {
           <span>{rest.finished ? 'Rest over' : 'Resting'}</span>
           {!rest.finished && <span className="muted"> · {fmtClock(rest.total)}</span>}
         </div>
-        <div className="rp-label ellipsis">{rest.label}</div>
+        <div className="rp-label ellipsis">{rest.label && rest.label.includes(' · Set ') ? `Next: ${rest.label}` : rest.label}</div>
         <div className="rp-ctrl">
           {rest.finished ? (
             <button className="btn sm ok grow" onClick={clear}>
