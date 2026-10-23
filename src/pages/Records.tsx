@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Search, Trophy, X } from 'lucide-react'
+import { Search, Trophy, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { exerciseRecords, ExerciseRecord } from '../lib/records'
 import { fmtKg } from '../lib/format'
@@ -11,58 +11,23 @@ import '../styles/records.css'
 
 const kg = (n: number) => `${fmtKg(Math.round(n * 10) / 10)} kg`
 
-function RecordCard({ r, onOpen }: { r: ExerciseRecord; onOpen: () => void }) {
+/** One line per exercise: name, when the last record was, and the number that matters most on the right. */
+function RecordRow({ r, onOpen }: { r: ExerciseRecord; onOpen: () => void }) {
   const ex = useStore((s) => s.db.exercises.find((e) => e.id === r.exercise_id))
   const weighted = r.heaviest.weight > 0
   return (
-    <button className="card rec-card" onClick={onOpen} aria-label={`${r.name}: open exercise`}>
-      <div className="rec-head">
-        <ExerciseThumb exercise={ex} name={r.name} size={44} />
-        <div className="grow" style={{ minWidth: 0 }}>
-          <div className="rec-name ellipsis">{r.name}</div>
-          <div className="small muted ellipsis">
-            {r.prCount > 0 ? `Last record ${relativeDay(r.lastPR)}` : `First logged ${relativeDay(r.lastPR)}`}
-            {r.prCount > 0 && ` · ${r.prCount} record${r.prCount === 1 ? '' : 's'}`}
-          </div>
-        </div>
-        <ChevronRight size={18} className="muted" aria-hidden />
-      </div>
-
-      {weighted ? (
-        <div className="rec-stats">
-          <div>
-            <div className="rec-v">{kg(r.heaviest.weight)}</div>
-            <div className="rec-l">Heaviest</div>
-          </div>
-          <div>
-            <div className="rec-v">
-              {fmtKg(r.best.weight)} × {r.best.reps}
-            </div>
-            <div className="rec-l">Best set</div>
-          </div>
-          <div>
-            <div className="rec-v accent">{kg(r.e1rm)}</div>
-            <div className="rec-l">Est. 1-rep max</div>
-          </div>
-        </div>
-      ) : (
-        <div className="rec-stats">
-          <div>
-            <div className="rec-v accent">{r.mostReps.reps}</div>
-            <div className="rec-l">Most reps in one set</div>
-          </div>
-        </div>
-      )}
-
-      {r.repRecords.length > 1 && (
-        <div className="rec-reps" aria-label="Rep records: heaviest weight for at least this many reps">
-          {r.repRecords.map((x) => (
-            <span key={x.reps} className="chip">
-              {x.reps} rep{x.reps === 1 ? '' : 's'}: <b>{kg(x.weight)}</b>
-            </span>
-          ))}
-        </div>
-      )}
+    <button className="rec-row" onClick={onOpen} aria-label={`${r.name}: ${weighted ? `estimated 1-rep max ${kg(r.e1rm)}, best set ${fmtKg(r.best.weight)} by ${r.best.reps}` : `${r.mostReps.reps} reps`}. Open exercise`}>
+      <ExerciseThumb exercise={ex} name={r.name} size={40} />
+      <span className="grow" style={{ minWidth: 0 }}>
+        <span className="rec-name ellipsis">{r.name}</span>
+        <span className="small muted ellipsis" style={{ display: 'block' }}>
+          {weighted ? `Best set ${fmtKg(r.best.weight)} × ${r.best.reps}` : 'Most reps in one set'} · {relativeDay(r.lastPR)}
+        </span>
+      </span>
+      <span className="rec-main">
+        <span className="rec-v accent">{weighted ? kg(r.e1rm) : r.mostReps.reps}</span>
+        <span className="rec-l">{weighted ? 'est. max' : 'reps'}</span>
+      </span>
     </button>
   )
 }
@@ -81,7 +46,7 @@ export default function Records() {
 
   return (
     <div className="stack" style={{ gap: 16 }}>
-      <PageHeader title="Records" sub="Your best lifts for every exercise, newest record first." back="/profile" />
+      <PageHeader title="Records" sub="Newest record first. Est. max = the most you could likely lift once." back="/profile" />
 
       {all.length === 0 ? (
         <Empty icon={<Trophy size={28} />} title="No records yet" text="Finish a workout with weights and reps, and your best lifts show up here.">
@@ -108,15 +73,12 @@ export default function Records() {
               </button>
             )}
           </div>
-          <div className="small muted">
-            Est. 1-rep max: the most you could likely lift once, worked out from your best set.
-          </div>
           {list.length === 0 ? (
             <div className="card muted">No exercise matches “{q.trim()}”.</div>
           ) : (
-            <div className="stack" style={{ gap: 10 }}>
+            <div className="rec-list">
               {list.map((r) => (
-                <RecordCard key={r.exercise_id} r={r} onOpen={() => nav(`/exercise/${r.exercise_id}`)} />
+                <RecordRow key={r.exercise_id} r={r} onOpen={() => nav(`/exercise/${r.exercise_id}`)} />
               ))}
             </div>
           )}
