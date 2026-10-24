@@ -200,11 +200,11 @@ export default function SettingsPage() {
           <div>
             <div>Weight increase</div>
             <div className="small muted">Suggested when you reach the top of the rep range on every work set</div>
-            <div className="chips" style={{ marginTop: 8 }} role="group" aria-label="Weight increase">
+            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label="Weight increase">
               {INCREMENTS.map((v) => (
                 <button
                   key={v}
-                  className={`chip ${prefs.increment === v ? 'active' : ''}`}
+                  className={prefs.increment === v ? 'on' : ''}
                   aria-pressed={prefs.increment === v}
                   onClick={() => prefs.setPrefs({ increment: v })}
                 >
@@ -222,11 +222,11 @@ export default function SettingsPage() {
         <>
           <div>
             <div>Bar</div>
-            <div className="chips" style={{ marginTop: 8 }} role="group" aria-label="Bar weight">
+            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label="Bar weight">
               {BARS.map((v) => (
                 <button
                   key={v}
-                  className={`chip ${prefs.barKg === v ? 'active' : ''}`}
+                  className={prefs.barKg === v ? 'on' : ''}
                   aria-pressed={prefs.barKg === v}
                   onClick={() => prefs.setPrefs({ barKg: v })}
                 >

@@ -264,3 +264,5 @@
 .card > .set-link { background: transparent; border: 0; border-radius: 0; padding-left: 0; padding-right: 0; min-height: 52px; box-shadow: none; }
 .card > .set-link + .set-link, .card > .set-tog + .set-link, .card > input + .set-link { border-top: 1px solid var(--line); }
 .card > .set-link .set-link-t { font-weight: 500; }
+/* one-of-four choices in Settings: a full-width segmented control, equal gaps to both edges */
+.set-seg button { padding: 0 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }

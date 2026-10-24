@@ -2330,3 +2330,5 @@ input[type='search']::-webkit-search-decoration {
 .vs-up {
   color: var(--ok);
 }
+/* a short set of choices inside a card: wrap onto a second line instead of running to the card edge */
+.chips.wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 2px 0 4px; }
