@@ -76,3 +76,7 @@
 .nav a:focus-visible .nav-ico {
   box-shadow: var(--focus);
 }
+/* sliding along the tab bar: no scrolling or text selection, the highlight glides between tabs */
+.nav-inner { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.nav .nav-ico { transition: background 0.15s ease, transform 0.15s ease; }
+.nav-inner.dragging a.active .nav-ico { transform: scale(1.12); }

@@ -234,6 +234,67 @@ export default function Layout() {
   const inSession = loc.pathname.startsWith('/session')
   const screen = useRef<HTMLDivElement>(null)
   const firstScreen = useRef(true)
+  // slide a finger along the tab bar to move between tabs (like iOS): the highlight jumps to the tab
+  // under the finger, lifting the finger opens it. A plain tap still works as before.
+  const navNav = useNavigate()
+  const navRef = useRef<HTMLDivElement>(null)
+  const [navDrag, setNavDrag] = useState<number | null>(null)
+  const navGesture = useRef<{ x: number; dragging: boolean; idx: number } | null>(null)
+  const navSuppressClick = useRef(false)
+  const tabAt = (clientX: number) => {
+    const r = navRef.current?.getBoundingClientRect()
+    if (!r) return 0
+    return Math.min(TABS.length - 1, Math.max(0, Math.floor(((clientX - r.left) / r.width) * TABS.length)))
+  }
+  const navSwipe = {
+    onPointerDown: (e: React.PointerEvent) => {
+      navGesture.current = { x: e.clientX, dragging: false, idx: tabAt(e.clientX) }
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const g = navGesture.current
+      if (!g) return
+      if (!g.dragging && Math.abs(e.clientX - g.x) > 10) {
+        g.dragging = true
+        try {
+          ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
+        } catch {
+          /* fine without capture */
+        }
+      }
+      if (!g.dragging) return
+      const i = tabAt(e.clientX)
+      if (i !== g.idx) {
+        g.idx = i
+        try {
+          navigator.vibrate?.(6)
+        } catch {
+          /* ignore */
+        }
+      }
+      setNavDrag(i)
+    },
+    onPointerUp: () => {
+      const g = navGesture.current
+      navGesture.current = null
+      if (g?.dragging) {
+        navSuppressClick.current = true
+        setNavDrag(null)
+        const t = TABS[g.idx]
+        if (!t.match(loc.pathname)) navNav(t.to)
+        window.setTimeout(() => (navSuppressClick.current = false), 60)
+      }
+    },
+    onPointerCancel: () => {
+      navGesture.current = null
+      setNavDrag(null)
+    },
+    onClickCapture: (e: React.MouseEvent) => {
+      if (navSuppressClick.current) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+  }
   // a new screen starts at the top, not wherever the last one was scrolled to, and arrives with a short
   // fade and 6 px rise. 'top' rather than transform so fixed children (sheets, keypad) keep the viewport.
   useEffect(() => {
@@ -278,11 +339,12 @@ export default function Layout() {
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && (
         <nav className="nav" aria-label="Main">
-          <div className="nav-inner">
-            {TABS.map((t) => {
-              const on = t.match(loc.pathname)
+          <div className={`nav-inner${navDrag != null ? ' dragging' : ''}`} ref={navRef} {...navSwipe}>
+            {TABS.map((t, i) => {
+              // while a finger slides along the bar, the highlight follows it; lifting opens that tab
+              const on = navDrag != null ? navDrag === i : t.match(loc.pathname)
               return (
-                <Link key={t.to} to={t.to} className={on ? 'active' : ''} aria-current={on ? 'page' : undefined}>
+                <Link key={t.to} to={t.to} className={on ? 'active' : ''} aria-current={t.match(loc.pathname) ? 'page' : undefined}>
                   <span className="nav-ico" aria-hidden>
                     <t.icon size={22} />
                   </span>
