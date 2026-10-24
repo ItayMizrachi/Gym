@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { dayKey, intensityLevel, monthGrid, TrainingDay } from '../lib/stats'
 import '../styles/insights.css'
@@ -48,6 +48,59 @@ export function CalendarHeat({
   const earliest = [...days.keys()].sort()[0]
   const canBack = earliest != null && earliest.slice(0, 7) < prefix
   const labels = [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)]
+  const canNext = offset < 0
+
+  // swipe between months: the grid follows the finger sideways, a flick of 50 px changes month.
+  // Vertical drags stay page scrolls (touch-action: pan-y); a swipe never also taps a day.
+  const [dx, setDx] = useState(0)
+  const [enter, setEnter] = useState<'' | 'from-left' | 'from-right'>('')
+  const swipe = useRef<{ x: number; y: number; dx: number; axis?: 'x' | 'y' } | null>(null)
+  const swiped = useRef(false)
+  const go = (dir: -1 | 1) => {
+    if (dir < 0 ? !canBack : !canNext) return
+    setOffset((o) => o + dir)
+    setEnter(dir < 0 ? 'from-left' : 'from-right')
+    window.setTimeout(() => setEnter(''), 260)
+  }
+  const swipeProps = {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse') return
+      swipe.current = { x: e.clientX, y: e.clientY, dx: 0 }
+      swiped.current = false
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const s = swipe.current
+      if (!s) return
+      const mx = e.clientX - s.x
+      const my = e.clientY - s.y
+      if (!s.axis && Math.hypot(mx, my) > 10) s.axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y'
+      if (s.axis !== 'x') return
+      // resist where there is no month to go to
+      const blocked = (mx > 0 && !canBack) || (mx < 0 && !canNext)
+      s.dx = blocked ? mx / 4 : mx
+      setDx(s.dx)
+    },
+    onPointerUp: () => {
+      const s = swipe.current
+      swipe.current = null
+      if (!s || s.axis !== 'x') return setDx(0)
+      swiped.current = true
+      setDx(0)
+      if (s.dx > 50) go(-1)
+      else if (s.dx < -50) go(1)
+    },
+    onPointerCancel: () => {
+      swipe.current = null
+      setDx(0)
+    },
+    onClickCapture: (e: React.MouseEvent) => {
+      if (swiped.current) {
+        swiped.current = false
+        e.stopPropagation()
+        e.preventDefault()
+      }
+    }
+  }
 
   return (
     <div className={`cal${names ? ' named' : ''}`}>
@@ -58,14 +111,19 @@ export function CalendarHeat({
             {count === 0 ? 'No training days' : `${count} training day${count === 1 ? '' : 's'}`}
           </div>
         </div>
-        <button className="btn icon sm ghost" disabled={!canBack} onClick={() => setOffset(offset - 1)} aria-label="Previous month">
+        <button className="btn icon sm ghost" disabled={!canBack} onClick={() => go(-1)} aria-label="Previous month">
           <ChevronLeft size={18} />
         </button>
-        <button className="btn icon sm ghost" disabled={offset >= 0} onClick={() => setOffset(offset + 1)} aria-label="Next month">
+        <button className="btn icon sm ghost" disabled={!canNext} onClick={() => go(1)} aria-label="Next month">
           <ChevronRight size={18} />
         </button>
       </div>
-      <div className="cal-grid" role="grid">
+      <div
+        className={`cal-grid${enter ? ` ${enter}` : ''}`}
+        role="grid"
+        style={dx ? { transform: `translateX(${dx}px)`, transition: 'none' } : undefined}
+        {...swipeProps}
+      >
         {labels.map((l, i) => (
           <div key={'h' + i} className="cal-wd">
             {l}

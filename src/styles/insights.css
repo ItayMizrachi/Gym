@@ -670,3 +670,10 @@
 .hlist.hmonth + .hlist.hmonth, section + section .hlist.hmonth { margin-top: 8px; }
 /* "Earlier" needs air after this month's list (month-head:first-child would otherwise pull it up) */
 section + section > .month-head:first-child { margin-top: 28px; }
+/* calendar: swipe sideways between months */
+.cal-grid { touch-action: pan-y; transition: transform 0.2s var(--ease); }
+.cal-grid.from-left { animation: cal-from-left 0.24s var(--ease); }
+.cal-grid.from-right { animation: cal-from-right 0.24s var(--ease); }
+@keyframes cal-from-left { from { transform: translateX(-24px); opacity: 0.3; } }
+@keyframes cal-from-right { from { transform: translateX(24px); opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .cal-grid.from-left, .cal-grid.from-right { animation: none; } }
