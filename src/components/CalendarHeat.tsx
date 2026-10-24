@@ -39,59 +39,84 @@ export function CalendarHeat({
   names?: Map<string, string[]>
 }) {
   const [offset, setOffset] = useState(0)
-  const view = new Date(now.getFullYear(), now.getMonth() + offset, 1)
-  const rows = useMemo(() => monthGrid(view.getFullYear(), view.getMonth(), weekStartsOn), [view.getFullYear(), view.getMonth(), weekStartsOn])
   const today = dayKey(now)
   const maxSets = useMemo(() => Math.max(0, ...[...days.values()].map((d) => d.sets)), [days])
-  const prefix = dayKey(view).slice(0, 7)
-  const count = [...days.keys()].filter((k) => k.startsWith(prefix)).length
-  const earliest = [...days.keys()].sort()[0]
-  const canBack = earliest != null && earliest.slice(0, 7) < prefix
+  const earliest = useMemo(() => [...days.keys()].sort()[0], [days])
   const labels = [...WEEKDAYS.slice(weekStartsOn), ...WEEKDAYS.slice(0, weekStartsOn)]
+  const monthAt = (o: number) => new Date(now.getFullYear(), now.getMonth() + o, 1)
+  const prefixOf = (o: number) => dayKey(monthAt(o)).slice(0, 7)
+  const canBack = earliest != null && earliest.slice(0, 7) < prefixOf(offset)
   const canNext = offset < 0
 
-  // swipe between months: the grid follows the finger sideways, a flick of 50 px changes month.
-  // Vertical drags stay page scrolls (touch-action: pan-y); a swipe never also taps a day.
+  /*
+   * Swipe between months like a photo carousel: last month, this month and next month sit side by side and
+   * move with the finger, so the next month slides in as you drag. Let go past a third of the width (or with a
+   * quick flick) and it settles on the new month; otherwise it springs back. Vertical drags stay page scrolls.
+   */
+  const viewport = useRef<HTMLDivElement>(null)
   const [dx, setDx] = useState(0)
-  const [enter, setEnter] = useState<'' | 'from-left' | 'from-right'>('')
-  const swipe = useRef<{ x: number; y: number; dx: number; axis?: 'x' | 'y' } | null>(null)
+  const [settle, setSettle] = useState<null | -1 | 0 | 1>(null) // animating to prev (-1), back (0) or next (1)
+  const settleRef = useRef<null | -1 | 0 | 1>(null)
+  const swipe = useRef<{ x: number; y: number; t: number; dx: number; axis?: 'x' | 'y' } | null>(null)
   const swiped = useRef(false)
-  const go = (dir: -1 | 1) => {
-    if (dir < 0 ? !canBack : !canNext) return
-    setOffset((o) => o + dir)
-    setEnter(dir < 0 ? 'from-left' : 'from-right')
-    window.setTimeout(() => setEnter(''), 260)
+  const width = () => viewport.current?.clientWidth ?? 320
+
+  function slide(dir: -1 | 0 | 1) {
+    if (dir === -1 && !canBack) dir = 0
+    if (dir === 1 && !canNext) dir = 0
+    const calm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (calm || dir === 0 && dx === 0) {
+      if (dir) setOffset((o) => o + dir)
+      setDx(0)
+      setSettle(null)
+      return
+    }
+    settleRef.current = dir
+    setSettle(dir)
+    // safety net: if the browser skips transitionend (e.g. nothing moved), finish anyway
+    window.setTimeout(() => settleRef.current === dir && onSettled(), 450)
   }
+  // when the slide animation ends, swap the months under it with no animation
+  function onSettled() {
+    const dir = settleRef.current
+    if (dir == null) return
+    settleRef.current = null
+    setSettle(null)
+    if (dir) setOffset((o) => o + dir)
+    setDx(0)
+  }
+
   const swipeProps = {
     onPointerDown: (e: React.PointerEvent) => {
-      if (e.pointerType === 'mouse') return
-      swipe.current = { x: e.clientX, y: e.clientY, dx: 0 }
+      if (e.pointerType === 'mouse' || settle != null) return
+      swipe.current = { x: e.clientX, y: e.clientY, t: performance.now(), dx: 0 }
       swiped.current = false
     },
     onPointerMove: (e: React.PointerEvent) => {
-      const s = swipe.current
-      if (!s) return
-      const mx = e.clientX - s.x
-      const my = e.clientY - s.y
-      if (!s.axis && Math.hypot(mx, my) > 10) s.axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y'
-      if (s.axis !== 'x') return
-      // resist where there is no month to go to
+      const g = swipe.current
+      if (!g) return
+      const mx = e.clientX - g.x
+      const my = e.clientY - g.y
+      if (!g.axis && Math.hypot(mx, my) > 8) g.axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y'
+      if (g.axis !== 'x') return
+      // past the first or the latest month: a rubber band instead of an empty page
       const blocked = (mx > 0 && !canBack) || (mx < 0 && !canNext)
-      s.dx = blocked ? mx / 4 : mx
-      setDx(s.dx)
+      g.dx = blocked ? mx / 3 : mx
+      setDx(g.dx)
     },
     onPointerUp: () => {
-      const s = swipe.current
+      const g = swipe.current
       swipe.current = null
-      if (!s || s.axis !== 'x') return setDx(0)
+      if (!g || g.axis !== 'x') return
       swiped.current = true
-      setDx(0)
-      if (s.dx > 50) go(-1)
-      else if (s.dx < -50) go(1)
+      const v = g.dx / Math.max(1, performance.now() - g.t) // px per ms
+      const far = Math.abs(g.dx) > width() / 3
+      const flick = Math.abs(v) > 0.45 && Math.abs(g.dx) > 24
+      slide(far || flick ? (g.dx > 0 ? -1 : 1) : 0)
     },
     onPointerCancel: () => {
       swipe.current = null
-      setDx(0)
+      slide(0)
     },
     onClickCapture: (e: React.MouseEvent) => {
       if (swiped.current) {
@@ -100,6 +125,43 @@ export function CalendarHeat({
         e.preventDefault()
       }
     }
+  }
+
+  // the title follows the month that is mostly in view, so it changes halfway through a swipe
+  const peek = settle ?? (Math.abs(dx) > width() / 2 ? (dx > 0 ? -1 : 1) : 0)
+  const shown = offset + (peek === -1 && canBack ? -1 : peek === 1 && canNext ? 1 : 0)
+  const view = monthAt(shown)
+  const count = [...days.keys()].filter((k) => k.startsWith(prefixOf(shown))).length
+  // track: [prev | current | next], current in the middle (-1/3)
+  const pos = settle != null ? `${(-1 - settle) * 33.3333}%` : `calc(-33.3333% + ${dx}px)`
+
+  const grid = (o: number) => {
+    const v = monthAt(o)
+    const rows = monthGrid(v.getFullYear(), v.getMonth(), weekStartsOn)
+    return (
+      <div className="cal-grid" role={o === offset ? 'grid' : undefined} aria-hidden={o !== offset}>
+        {rows.flat().map((k, i) => {
+          if (!k) return <div key={i} className="cal-cell pad" />
+          const d = days.get(k)
+          const lvl = intensityLevel(d, maxSets)
+          const future = k > today
+          return (
+            <button
+              key={k}
+              className={`cal-cell l${lvl}${k === today ? ' today' : ''}${future ? ' future' : ''}`}
+              disabled={!d || o !== offset}
+              tabIndex={o === offset ? undefined : -1}
+              onClick={() => d && onDay?.(k, d)}
+              aria-label={`${k}${d ? `, ${names?.get(k)?.join(', ') ?? `${d.workouts} workout${d.workouts > 1 ? 's' : ''}`}, ${d.sets} sets` : ''}`}
+              title={names && d ? names.get(k)?.join(', ') : undefined}
+            >
+              <span className="cal-n">{Number(k.slice(8))}</span>
+              {names && d && <span className="cal-name">{dayLabel(names.get(k) ?? [])}</span>}
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   return (
@@ -111,43 +173,30 @@ export function CalendarHeat({
             {count === 0 ? 'No training days' : `${count} training day${count === 1 ? '' : 's'}`}
           </div>
         </div>
-        <button className="btn icon sm ghost" disabled={!canBack} onClick={() => go(-1)} aria-label="Previous month">
+        <button className="btn icon sm ghost" disabled={!canBack || settle != null} onClick={() => slide(-1)} aria-label="Previous month">
           <ChevronLeft size={18} />
         </button>
-        <button className="btn icon sm ghost" disabled={!canNext} onClick={() => go(1)} aria-label="Next month">
+        <button className="btn icon sm ghost" disabled={!canNext || settle != null} onClick={() => slide(1)} aria-label="Next month">
           <ChevronRight size={18} />
         </button>
       </div>
-      <div
-        className={`cal-grid${enter ? ` ${enter}` : ''}`}
-        role="grid"
-        style={dx ? { transform: `translateX(${dx}px)`, transition: 'none' } : undefined}
-        {...swipeProps}
-      >
+      <div className="cal-wds" aria-hidden>
         {labels.map((l, i) => (
           <div key={'h' + i} className="cal-wd">
             {l}
           </div>
         ))}
-        {rows.flat().map((k, i) => {
-          if (!k) return <div key={i} className="cal-cell pad" />
-          const d = days.get(k)
-          const lvl = intensityLevel(d, maxSets)
-          const future = k > today
-          return (
-            <button
-              key={k}
-              className={`cal-cell l${lvl}${k === today ? ' today' : ''}${future ? ' future' : ''}`}
-              disabled={!d}
-              onClick={() => d && onDay?.(k, d)}
-              aria-label={`${k}${d ? `, ${names?.get(k)?.join(', ') ?? `${d.workouts} workout${d.workouts > 1 ? 's' : ''}`}, ${d.sets} sets` : ''}`}
-              title={names && d ? names.get(k)?.join(', ') : undefined}
-            >
-              <span className="cal-n">{Number(k.slice(8))}</span>
-              {names && d && <span className="cal-name">{dayLabel(names.get(k) ?? [])}</span>}
-            </button>
-          )
-        })}
+      </div>
+      <div className="cal-viewport" ref={viewport} {...swipeProps}>
+        <div
+          className={`cal-track${settle != null ? ' settling' : ''}`}
+          style={{ transform: `translateX(${pos})` }}
+          onTransitionEnd={(e) => e.target === e.currentTarget && onSettled()}
+        >
+          <div className="cal-pane">{grid(offset - 1)}</div>
+          <div className="cal-pane">{grid(offset)}</div>
+          <div className="cal-pane">{canNext ? grid(offset + 1) : null}</div>
+        </div>
       </div>
       <div className="row cal-legend tiny muted">
         <span className="grow">Shade = sets that day</span>

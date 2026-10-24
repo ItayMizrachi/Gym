@@ -670,10 +670,10 @@
 .hlist.hmonth + .hlist.hmonth, section + section .hlist.hmonth { margin-top: 8px; }
 /* "Earlier" needs air after this month's list (month-head:first-child would otherwise pull it up) */
 section + section > .month-head:first-child { margin-top: 28px; }
-/* calendar: swipe sideways between months */
-.cal-grid { touch-action: pan-y; transition: transform 0.2s var(--ease); }
-.cal-grid.from-left { animation: cal-from-left 0.24s var(--ease); }
-.cal-grid.from-right { animation: cal-from-right 0.24s var(--ease); }
-@keyframes cal-from-left { from { transform: translateX(-24px); opacity: 0.3; } }
-@keyframes cal-from-right { from { transform: translateX(24px); opacity: 0.3; } }
-@media (prefers-reduced-motion: reduce) { .cal-grid.from-left, .cal-grid.from-right { animation: none; } }
+/* calendar carousel: [last month | this month | next month] move together with the finger */
+.cal-wds { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-bottom: 5px; }
+.cal-viewport { overflow: hidden; touch-action: pan-y; margin: 0 -2px; padding: 0 2px; }
+.cal-track { display: flex; width: 300%; align-items: flex-start; will-change: transform; }
+.cal-track.settling { transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.cal-pane { width: 33.3333%; flex: none; padding: 0 2px; }
+
