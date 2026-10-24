@@ -169,7 +169,15 @@ export default function HistoryPage() {
                     <div className="hlist">
                       {shown.map(row)}
                       {g.items.length > 3 && (
-                        <button className="hmore" aria-expanded={open} onClick={() => flip(g.key)}>
+                        <button
+                          className="hmore"
+                          aria-expanded={open}
+                          onClick={(e) => {
+                            const list = e.currentTarget.closest('.hlist')
+                            flip(g.key)
+                            if (open) requestAnimationFrame(() => list?.scrollIntoView({ block: 'nearest' }))
+                          }}
+                        >
                           {open ? 'Show less' : `${g.items.length - 3} more this month`}
                           <ChevronDown size={18} aria-hidden className={`hweek-caret${open ? ' up' : ''}`} />
                         </button>
@@ -193,7 +201,24 @@ export default function HistoryPage() {
                       </span>
                       <ChevronDown size={18} aria-hidden className={`hweek-caret${open ? ' up' : ''}`} />
                     </button>
-                    {open && <div className="hweek-list">{g.items.map(row)}</div>}
+                    {open && (
+                      <div className="hweek-list">
+                        {g.items.map(row)}
+                        {/* close again from the bottom, then bring the folded card back into view */}
+                        <button
+                          className="hmore"
+                          aria-expanded
+                          onClick={(e) => {
+                            const card = e.currentTarget.closest('.hmonth')
+                            flip(g.key)
+                            requestAnimationFrame(() => card?.scrollIntoView({ block: 'nearest' }))
+                          }}
+                        >
+                          Show less
+                          <ChevronDown size={18} aria-hidden className="hweek-caret up" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               })()}
