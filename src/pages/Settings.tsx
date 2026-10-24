@@ -137,41 +137,30 @@ export default function SettingsPage() {
 
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <PageHeader title="Settings" sub="Your account, workout options, plates and backups." />
+      <PageHeader title="Settings" sub="Workout options, plates, backups and your account." />
 
-      {group(
-        'Account',
-        'Your Google account.',
-        <>
-          {repo?.mode === 'cloud' ? (
-            <>
-              <div className="acct-row">
-                <div className="acct-avatar" aria-hidden>
-                  {(user?.email ?? '?').slice(0, 1).toUpperCase()}
-                </div>
-                <div className="grow" style={{ minWidth: 0 }}>
-                  <div className="acct-email ellipsis">{user?.email ?? user?.id}</div>
-                  <div className="small muted">Signed in with Google · synced across your devices</div>
-                </div>
-              </div>
-              <button className="btn secondary block" onClick={() => signOut()}>
-                <LogOut size={16} aria-hidden /> Sign out
-              </button>
-              <button className="btn block del-acct-row" onClick={() => setDeleting(true)}>
-                <Trash2 size={16} aria-hidden /> Delete account
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="small muted">Not signed in. Workouts are saved on this device only.</div>
-              {cloudConfigured && (
-                <button className="btn primary block" onClick={() => signOut()}>
-                  <LogIn size={18} aria-hidden /> Sign in with Google
-                </button>
-              )}
-            </>
+      {/* who you are, at a glance; signing out and deleting live at the very bottom */}
+      {repo?.mode === 'cloud' ? (
+        <section className="card acct-card" aria-label="Account">
+          <div className="acct-avatar" aria-hidden>
+            {(user?.email ?? '?').slice(0, 1).toUpperCase()}
+          </div>
+          <div className="grow" style={{ minWidth: 0 }}>
+            <div className="acct-email ellipsis">{user?.email ?? user?.id}</div>
+            <div className="small muted acct-sync">
+              <span className="acct-dot" aria-hidden /> Signed in with Google · synced
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="card stack" aria-label="Account">
+          <div className="small muted">Not signed in. Workouts are saved on this device only.</div>
+          {cloudConfigured && (
+            <button className="btn primary block" onClick={() => signOut()}>
+              <LogIn size={18} aria-hidden /> Sign in with Google
+            </button>
           )}
-        </>
+        </section>
       )}
 
       {group(
@@ -301,6 +290,18 @@ export default function SettingsPage() {
           </div>
         </>
       )}
+
+      {repo?.mode === 'cloud' && (
+        <section className="card set-danger" aria-label="Sign out or delete account">
+          <button className="set-row-btn" onClick={() => signOut()}>
+            <LogOut size={18} aria-hidden /> Sign out
+          </button>
+          <button className="set-row-btn danger-text" onClick={() => setDeleting(true)}>
+            <Trash2 size={18} aria-hidden /> Delete account
+          </button>
+        </section>
+      )}
+      <div className="tiny muted center set-version">GymLog</div>
 
       {importOther && <ImportOther onClose={() => setImportOther(false)} />}
       {deleting && <DeleteAccountSheet email={user?.email ?? 'your account'} onExport={exportJson} onClose={() => setDeleting(false)} />}
