@@ -664,3 +664,7 @@
 .hweek-list .hrow + .hrow { border-top: 1px solid var(--line); }
 .hist-filter { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent); font-weight: 600; cursor: pointer; }
 .month-head h2 { font-size: 17px; }
+/* this month: "9 more this month" under the last three; past months: one card each, a little apart */
+.hmore { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 48px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--text-2); font-weight: 600; font-size: 14px; cursor: pointer; }
+.hweek-caret.up { transform: rotate(180deg); }
+.hlist.hmonth + .hlist.hmonth, section + section .hlist.hmonth { margin-top: 8px; }

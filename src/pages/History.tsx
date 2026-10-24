@@ -5,7 +5,7 @@ import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs } from '../lib/pr'
 import { Session } from '../lib/types'
 import { Empty, Sheet, Thumb } from '../components/ui'
-import { finishedSessions, fmtMinutes, fmtVolume, startOfWeek, summarizeSession, SessionSummary, weeklyTrend } from '../lib/stats'
+import { finishedSessions, fmtMinutes, fmtVolume, summarizeSession, SessionSummary, weeklyTrend } from '../lib/stats'
 import { splitName } from '../lib/format'
 import '../styles/insights.css'
 
@@ -15,32 +15,16 @@ interface Item {
   prs: number
 }
 
-interface Week {
-  key: string
-  start: Date
-  items: Item[]
-  volume: number
-}
-
-/** "This week", "12–18 Oct", "28 Sept–4 Oct" */
-function weekLabel(start: Date): string {
-  if (start.getTime() === startOfWeek(new Date()).getTime()) return 'This week'
-  const end = new Date(start.getTime() + 6 * 86400000)
-  const sameMonth = start.getMonth() === end.getMonth()
-  const f = (d: Date, month: boolean) => d.toLocaleDateString('en-GB', { day: 'numeric', ...(month ? { month: 'short' } : {}) })
-  return `${f(start, !sameMonth)}–${f(end, true)}`
-}
-
 /**
- * History, one line per week: the list stays short however much you train. The newest week is open; tap any
- * week to see its workouts. Filtering to one kind of workout (Push, Legs…) shows them one per line instead.
+ * History kept short: this month shows its last three workouts (the rest one tap away), every month before it
+ * is one card you open. Filtering to one kind of workout (Push, Legs…) works the same way.
  */
 export default function HistoryPage() {
   const nav = useNavigate()
   const db = useStore((s) => s.db)
   const [filter, setFilter] = useState<string>('all')
   const [picking, setPicking] = useState(false)
-  // weeks opened or closed by hand; the newest week starts open
+  // months opened by hand (and "the rest of this month")
   const [toggled, setToggled] = useState<Set<string>>(new Set())
 
   const all = useMemo<Item[]>(
@@ -78,33 +62,28 @@ export default function HistoryPage() {
     [all, filter, names]
   )
 
-  /** month → week → workouts. A week sits in the month it starts in. */
+  /** workouts by calendar month, newest first */
   const months = useMemo(() => {
-    const out: { key: string; label: string; weeks: Week[]; items: Item[] }[] = []
+    const out: { key: string; label: string; items: Item[]; volume: number }[] = []
     for (const i of items) {
-      const ws = startOfWeek(new Date(sessionDate(i.s)))
-      const mKey = `${ws.getFullYear()}-${ws.getMonth()}`
+      const d = new Date(sessionDate(i.s))
+      const key = `${d.getFullYear()}-${d.getMonth()}`
       let g = out[out.length - 1]
-      if (!g || g.key !== mKey) {
-        const sameYear = ws.getFullYear() === new Date().getFullYear()
-        g = { key: mKey, label: ws.toLocaleDateString('en-GB', { month: 'long', ...(sameYear ? {} : { year: 'numeric' }) }), weeks: [], items: [] }
+      if (!g || g.key !== key) {
+        const sameYear = d.getFullYear() === new Date().getFullYear()
+        g = { key, label: d.toLocaleDateString('en-GB', { month: 'long', ...(sameYear ? {} : { year: 'numeric' }) }), items: [], volume: 0 }
         out.push(g)
       }
       g.items.push(i)
-      const wKey = `${ws.getFullYear()}-${ws.getMonth()}-${ws.getDate()}`
-      let w = g.weeks[g.weeks.length - 1]
-      if (!w || w.key !== wKey) {
-        w = { key: wKey, start: ws, items: [], volume: 0 }
-        g.weeks.push(w)
-      }
-      w.items.push(i)
-      w.volume += i.m.volume
+      g.volume += i.m.volume
     }
     return out
   }, [items])
+  const now = new Date()
+  const thisMonthKey = `${now.getFullYear()}-${now.getMonth()}`
 
-  const newestWeek = months[0]?.weeks[0]?.key
-  const isOpen = (k: string) => (k === newestWeek) !== toggled.has(k)
+  // everything starts folded; a tap opens a month (or the rest of this month)
+  const isOpen = (k: string) => toggled.has(k)
   const flip = (k: string) =>
     setToggled((t) => {
       const n = new Set(t)
@@ -168,47 +147,56 @@ export default function HistoryPage() {
         <Empty title="No finished workouts yet" text="Complete a workout and it shows up here, with your volume and records." />
       ) : (
         <div>
-          {months.map((g) => (
+          {months.map((g, idx) => (
             <section key={g.key}>
-              <div className="month-head">
-                <h2>{g.label}</h2>
-              </div>
-              {filter !== 'all' ? (
-                // one kind of workout: a plain list, most weeks have one of it anyway
-                <div className="hlist">{g.items.map(row)}</div>
-              ) : (
-                <div className="hlist">
-                  {g.weeks.map((w) => {
-                    const open = isOpen(w.key)
-                    return (
-                      <div key={w.key} className={`hweek${open ? ' open' : ''}`}>
-                        <button className="hweek-head" aria-expanded={open} onClick={() => flip(w.key)}>
-                          <span className="grow" style={{ minWidth: 0 }}>
-                            <span className="hweek-t">
-                              {weekLabel(w.start)}
-                              <span className="hweek-n">
-                                {' '}
-                                · {w.items.length} workout{w.items.length === 1 ? '' : 's'}
-                                {w.volume > 0 && ` · ${fmtVolume(w.volume)}`}
-                              </span>
-                            </span>
-                            {!open && (
-                              <span className="hweek-names ellipsis">
-                                {[...w.items]
-                                  .reverse()
-                                  .map((i) => splitName(i.s.name)[0])
-                                  .join(' · ')}
-                              </span>
-                            )}
-                          </span>
-                          <ChevronDown size={18} aria-hidden className="hweek-caret" />
-                        </button>
-                        {open && <div className="hweek-list">{w.items.map(row)}</div>}
-                      </div>
-                    )
-                  })}
+              {idx === 0 && g.key === thisMonthKey && (
+                <div className="month-head">
+                  <h2>{g.label}</h2>
                 </div>
               )}
+              {idx === 1 || (idx === 0 && g.key !== thisMonthKey) ? (
+                <div className="month-head">
+                  <h2>Earlier</h2>
+                </div>
+              ) : null}
+              {(() => {
+                const current = idx === 0 && g.key === thisMonthKey
+                const open = isOpen(g.key)
+                if (current) {
+                  // this month: the last three workouts, the rest one tap away
+                  const shown = open ? g.items : g.items.slice(0, 3)
+                  return (
+                    <div className="hlist">
+                      {shown.map(row)}
+                      {g.items.length > 3 && (
+                        <button className="hmore" aria-expanded={open} onClick={() => flip(g.key)}>
+                          {open ? 'Show less' : `${g.items.length - 3} more this month`}
+                          <ChevronDown size={18} aria-hidden className={`hweek-caret${open ? ' up' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+                  )
+                }
+                // a month that is over: one card, its workouts inside
+                return (
+                  <div className={`hlist hmonth${open ? ' open' : ''}`}>
+                    <button className="hweek-head" aria-expanded={open} onClick={() => flip(g.key)}>
+                      <span className="grow" style={{ minWidth: 0 }}>
+                        <span className="hweek-t">
+                          {g.label}
+                          <span className="hweek-n">
+                            {' '}
+                            · {g.items.length} workout{g.items.length === 1 ? '' : 's'}
+                            {g.volume > 0 && ` · ${fmtVolume(g.volume)}`}
+                          </span>
+                        </span>
+                      </span>
+                      <ChevronDown size={18} aria-hidden className={`hweek-caret${open ? ' up' : ''}`} />
+                    </button>
+                    {open && <div className="hweek-list">{g.items.map(row)}</div>}
+                  </div>
+                )
+              })()}
             </section>
           ))}
           {items.length === 0 && <div className="card small muted">No workouts of this type yet.</div>}
