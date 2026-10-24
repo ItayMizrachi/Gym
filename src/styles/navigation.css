@@ -83,7 +83,7 @@
 /* the sliding highlight: drawn once behind the icons instead of per tab */
 .nav-inner { position: relative; }
 .nav a.active .nav-ico { background: transparent; }
-.nav-bubble { position: absolute; left: 0; top: 7px; width: 60px; height: 32px; border-radius: var(--r-pill); background: rgba(240, 185, 42, 0.18); pointer-events: none; transition: transform 0.3s cubic-bezier(0.22, 0.9, 0.3, 1.15), scale 0.15s ease; }
+.nav-bubble { position: absolute; left: 0; top: 7px; width: 60px; height: 32px; border-radius: var(--r-pill); background: rgba(240, 185, 42, 0.18); pointer-events: none; transition: translate 0.3s cubic-bezier(0.22, 0.9, 0.3, 1.15), scale 0.15s ease; }
 .nav-bubble.held { transition: scale 0.15s ease; scale: 1.15 1.1; background: rgba(240, 185, 42, 0.24); }
 .nav a { z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .nav-bubble { transition: none; } }

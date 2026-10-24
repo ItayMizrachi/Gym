@@ -242,21 +242,33 @@ export default function Layout() {
   // where the highlight bubble sits: on the active tab, or under the finger while sliding
   const [bubbleX, setBubbleX] = useState<number | null>(null)
   const [navW, setNavW] = useState(0)
+  // the centre of each tab, measured from the links (the bar may have side padding, e.g. on iPhone)
+  const [centers, setCenters] = useState<number[]>([])
   const navGesture = useRef<{ x: number; dragging: boolean; idx: number } | null>(null)
   const navSuppressClick = useRef(false)
   useEffect(() => {
     const el = navRef.current
     if (!el) return
-    const ro = new ResizeObserver(() => setNavW(el.clientWidth))
+    const measure = () => {
+      setNavW(el.clientWidth)
+      setCenters([...el.querySelectorAll('a')].map((a) => (a as HTMLElement).offsetLeft + (a as HTMLElement).offsetWidth / 2))
+    }
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
-    setNavW(el.clientWidth)
+    measure()
     return () => ro.disconnect()
   }, [inSession])
   const activeTab = TABS.findIndex((t) => t.match(loc.pathname))
+  /** the tab whose centre is nearest the finger */
   const tabAt = (clientX: number) => {
     const r = navRef.current?.getBoundingClientRect()
-    if (!r) return 0
-    return Math.min(TABS.length - 1, Math.max(0, Math.floor(((clientX - r.left) / r.width) * TABS.length)))
+    if (!r || !centers.length) return 0
+    const x = clientX - r.left
+    let best = 0
+    centers.forEach((c, i) => {
+      if (Math.abs(c - x) < Math.abs(centers[best] - x)) best = i
+    })
+    return best
   }
   const navSwipe = {
     onPointerDown: (e: React.PointerEvent) => {
@@ -285,8 +297,8 @@ export default function Layout() {
       }
       setNavDrag(i)
       const r = navRef.current!.getBoundingClientRect()
-      const tabW = r.width / TABS.length
-      setBubbleX(Math.min(r.width - tabW / 2, Math.max(tabW / 2, e.clientX - r.left)))
+      // follow the finger, but never past the first or last tab, so the bubble stays inside the bar
+      setBubbleX(Math.min(centers[centers.length - 1], Math.max(centers[0], e.clientX - r.left)))
     },
     onPointerUp: () => {
       const g = navGesture.current
@@ -358,11 +370,12 @@ export default function Layout() {
         <nav className="nav" aria-label="Main">
           <div className={`nav-inner${navDrag != null ? ' dragging' : ''}`} ref={navRef} {...navSwipe}>
             {/* one bubble for the whole bar: it slides to the active tab, and follows the finger while sliding */}
-            {navW > 0 && (activeTab >= 0 || bubbleX != null) && (
+            {navW > 0 && centers.length === TABS.length && (activeTab >= 0 || bubbleX != null) && (
               <span
                 className={`nav-bubble${bubbleX != null ? ' held' : ''}`}
                 aria-hidden
-                style={{ transform: `translateX(${(bubbleX ?? (activeTab + 0.5) * (navW / TABS.length)) - 30}px)` }}
+                // `translate`, not `transform`: the hold scale must not multiply the position
+                style={{ translate: `${(bubbleX ?? centers[activeTab]) - 30}px 0` }}
               />
             )}
             {TABS.map((t, i) => {
