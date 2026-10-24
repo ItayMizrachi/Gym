@@ -239,8 +239,20 @@ export default function Layout() {
   const navNav = useNavigate()
   const navRef = useRef<HTMLDivElement>(null)
   const [navDrag, setNavDrag] = useState<number | null>(null)
+  // where the highlight bubble sits: on the active tab, or under the finger while sliding
+  const [bubbleX, setBubbleX] = useState<number | null>(null)
+  const [navW, setNavW] = useState(0)
   const navGesture = useRef<{ x: number; dragging: boolean; idx: number } | null>(null)
   const navSuppressClick = useRef(false)
+  useEffect(() => {
+    const el = navRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setNavW(el.clientWidth))
+    ro.observe(el)
+    setNavW(el.clientWidth)
+    return () => ro.disconnect()
+  }, [inSession])
+  const activeTab = TABS.findIndex((t) => t.match(loc.pathname))
   const tabAt = (clientX: number) => {
     const r = navRef.current?.getBoundingClientRect()
     if (!r) return 0
@@ -272,6 +284,9 @@ export default function Layout() {
         }
       }
       setNavDrag(i)
+      const r = navRef.current!.getBoundingClientRect()
+      const tabW = r.width / TABS.length
+      setBubbleX(Math.min(r.width - tabW / 2, Math.max(tabW / 2, e.clientX - r.left)))
     },
     onPointerUp: () => {
       const g = navGesture.current
@@ -279,6 +294,7 @@ export default function Layout() {
       if (g?.dragging) {
         navSuppressClick.current = true
         setNavDrag(null)
+        setBubbleX(null)
         const t = TABS[g.idx]
         if (!t.match(loc.pathname)) navNav(t.to)
         window.setTimeout(() => (navSuppressClick.current = false), 60)
@@ -287,6 +303,7 @@ export default function Layout() {
     onPointerCancel: () => {
       navGesture.current = null
       setNavDrag(null)
+      setBubbleX(null)
     },
     onClickCapture: (e: React.MouseEvent) => {
       if (navSuppressClick.current) {
@@ -340,6 +357,14 @@ export default function Layout() {
       {!inSession && (
         <nav className="nav" aria-label="Main">
           <div className={`nav-inner${navDrag != null ? ' dragging' : ''}`} ref={navRef} {...navSwipe}>
+            {/* one bubble for the whole bar: it slides to the active tab, and follows the finger while sliding */}
+            {navW > 0 && (activeTab >= 0 || bubbleX != null) && (
+              <span
+                className={`nav-bubble${bubbleX != null ? ' held' : ''}`}
+                aria-hidden
+                style={{ transform: `translateX(${(bubbleX ?? (activeTab + 0.5) * (navW / TABS.length)) - 30}px)` }}
+              />
+            )}
             {TABS.map((t, i) => {
               // while a finger slides along the bar, the highlight follows it; lifting opens that tab
               const on = navDrag != null ? navDrag === i : t.match(loc.pathname)
