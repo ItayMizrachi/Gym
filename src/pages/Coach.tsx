@@ -186,13 +186,13 @@ function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: ()
         <button
           className={`btn block${canShare ? '' : ' primary'}`}
           onClick={() =>
-            navigator.clipboard?.writeText(text).then(
+            navigator.clipboard?.writeText(link.code).then(
               () => setCopied(true),
               () => {}
             )
           }
         >
-          <Copy size={18} aria-hidden /> {copied ? 'Copied' : 'Copy the message'}
+          <Copy size={18} aria-hidden /> {copied ? 'Code copied' : 'Copy the code'}
         </button>
         <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={onCancel}>
           Cancel invite

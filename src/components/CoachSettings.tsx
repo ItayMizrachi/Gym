@@ -5,6 +5,12 @@ import { MyCoach, acceptInvite, leaveCoach, myCoaches, setCoachRole, useCoachRol
 import { useStore } from '../lib/store'
 import { Confirm, Toggle } from './ui'
 
+/** a typed or pasted code; from a pasted invite message, the code after the word "code" */
+export function cleanCode(v: string): string {
+  const m = v.match(/\bcode\s+([A-Za-z0-9]{6})\b/i)
+  return (m ? m[1] : v).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
+}
+
 /** Settings → Coaching: "I coach other people", and the trainee's side (enter a code, see or remove the coach). */
 export function CoachSettings() {
   const nav = useNavigate()
@@ -74,7 +80,7 @@ export function CoachSettings() {
           <input
             className="input grow"
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+            onChange={(e) => setCode(cleanCode(e.target.value))}
             placeholder="Code from your coach"
             aria-label="Code from your coach"
             autoCapitalize="characters"
