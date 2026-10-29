@@ -15,6 +15,8 @@ import { libIdForExercise, linkedLibIds, useLibrary } from '../lib/library'
 import { HowToCard } from '../components/ExerciseHowTo'
 import { ensureLibraryExercise } from '../lib/libraryActions'
 import '../styles/library.css'
+import '../styles/records.css'
+import { GoalCard } from '../components/GoalCard'
 
 const REP_COLS = [1, 3, 5, 6, 8, 10, 12, 15]
 
@@ -163,6 +165,8 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
           <div className="muted small">Log this exercise in a workout and your records will appear here.</div>
         )}
       </div>
+
+      {trackingOf(ex) === 'weight_reps' && <GoalCard exerciseId={ex.id} hist={hist} />}
 
       {hist.length > 1 && (
         <div className="card stack">
