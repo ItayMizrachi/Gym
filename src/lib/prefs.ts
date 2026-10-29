@@ -13,6 +13,8 @@ export interface Prefs {
   lockScreen: boolean
   /** workouts a week the user aims for (1–7), shown as a ring on Home */
   weeklyGoal: number
+  /** on starting a workout, add warm-up sets to the first heavy barbell or plate-loaded lift of each muscle */
+  autoWarmup: boolean
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -22,7 +24,8 @@ export const DEFAULT_PREFS: Prefs = {
   showRpe: false,
   restNotify: false,
   lockScreen: false,
-  weeklyGoal: 3
+  weeklyGoal: 3,
+  autoWarmup: true
 }
 
 const KEY = 'gymlog:prefs'

@@ -202,6 +202,7 @@ export default function SettingsPage() {
             setFlag('gymlog:awake', v)
           })}
           {toggleRow('Log RPE', 'Rate how hard each set felt, from 6 to 10', prefs.showRpe, (v) => prefs.setPrefs({ showRpe: v }))}
+          {toggleRow('Warm-up sets automatically', 'Before the first heavy barbell or plate-loaded lift for each muscle', prefs.autoWarmup, (v) => prefs.setPrefs({ autoWarmup: v }))}
           <div>
             <div>Weight increase</div>
             <div className="small muted">Suggested when you reach the top of the rep range on every work set</div>

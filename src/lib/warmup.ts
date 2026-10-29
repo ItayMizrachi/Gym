@@ -89,3 +89,31 @@ export function insertWarmups(sets: SessionSet[], plan: WarmupSet[], make: (w: W
   if (!fresh.length) return null
   return [...keptBefore, ...fresh.map(make), ...sets.slice(firstWork)]
 }
+
+/** heavier than this (kg of work weight), a barbell or plate-loaded lift gets warm-ups automatically */
+export const AUTO_WARMUP_KG = 40
+
+/**
+ * Settings → Warm-up sets automatically: when the first lift for a muscle is a heavy barbell or plate-loaded one,
+ * it gets warm-up sets before its work sets (none when the plan already has some). `add` builds the warm-ups
+ * (actions.addWarmupSets). Changes the list in place.
+ */
+export function withAutoWarmups<E extends { exercise_id: string; name: string; sets: SessionSet[] }, X extends { id: string; muscle: string; equipment?: string; name: string }>(
+  list: E[],
+  exercises: X[],
+  add: (se: E, ex: X | undefined) => E | null
+) {
+  const warmed = new Set<string>()
+  list.forEach((se, i) => {
+    const ex = exercises.find((e) => e.id === se.exercise_id)
+    const muscle = ex?.muscle ?? 'Other'
+    if (warmed.has(muscle)) return
+    // whatever the first exercise for a muscle is, the muscle is warm after it
+    warmed.add(muscle)
+    const style = warmupStyle(ex?.equipment, ex?.name ?? se.name)
+    const work = se.sets.find((x) => x.kind === 'work' || x.kind === 'failure')?.weight ?? 0
+    if ((style !== 'barbell' && style !== 'plates') || work < AUTO_WARMUP_KG || se.sets.some((x) => x.kind === 'warmup')) return
+    const next = add(se, ex)
+    if (next) list[i] = next
+  })
+}

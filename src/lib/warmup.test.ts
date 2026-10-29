@@ -151,3 +151,20 @@ describe('one-rep max tools', () => {
     expect(eighty.loadable).toBe(112.5)
   })
 })
+
+describe('automatic warm-ups when a workout starts', () => {
+  const ex = (id: string, muscle: string, equipment: string, name = id) => ({ id, user_id: 'u', name, muscle, equipment, notes: '', setup: '', image_path: null, rest_sec: 90, created_at: '' })
+  const se = (id: string, weight: number) => ({ exercise_id: id, name: id, rest_sec: 90, rep_min: 5, rep_max: 8, superset: '', note: '', sets: [1, 2, 3].map((n) => ({ id: id + n, kind: 'work' as const, weight, reps: null, done: false })) })
+  it('warms up the first heavy barbell lift per muscle only', async () => {
+    const { withAutoWarmups } = await import('./warmup')
+    const add = (s: { sets: { kind: string }[] }) => ({ ...s, sets: [{ kind: 'warmup' }, ...s.sets] })
+    const exercises = [ex('squat', 'Quads', 'Barbell', 'Back Squat'), ex('legext', 'Quads', 'Machine', 'Leg Extension'), ex('bench', 'Chest', 'Barbell', 'Bench Press'), ex('curl', 'Biceps', 'Dumbbell', 'Curl')]
+    const list = [se('squat', 100), se('legext', 50), se('bench', 30), se('curl', 15)] as never[]
+    withAutoWarmups(list, exercises as never, add as never)
+    const warm = (i: number) => (list[i] as { sets: { kind: string }[] }).sets.filter((x) => x.kind === 'warmup').length
+    expect(warm(0)).toBeGreaterThan(0)
+    expect(warm(1)).toBe(0) // quads already warm
+    expect(warm(2)).toBe(0) // too light
+    expect(warm(3)).toBe(0) // dumbbells
+  })
+})

@@ -5,7 +5,7 @@ import { nowIso, uid } from './uid'
 import { roundTo } from './format'
 import { suggestProgression } from './progression'
 import { getPrefs } from './prefs'
-import { insertWarmups, warmupSets, warmupStyle } from './warmup'
+import { insertWarmups, warmupSets, warmupStyle, withAutoWarmups } from './warmup'
 
 const st = () => useStore.getState()
 const userId = () => st().user?.id ?? 'local'
@@ -82,6 +82,7 @@ export function startSessionFromWorkout(workout: Workout): string {
     if (!ex) continue
     exercises.push(buildSessionExercise(db, ex, we))
   }
+  if (getPrefs().autoWarmup) withAutoWarmups(exercises, db.exercises, (se, ex) => addWarmupSets(se, ex))
   const session: Session = {
     id: uid(),
     user_id: userId(),
