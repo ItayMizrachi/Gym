@@ -403,6 +403,15 @@ function ExerciseCard({
   }
   const patchSet = (setId: string, p: Partial<SessionSet>, immediate = false) =>
     mutate((e) => ({ ...e, sets: e.sets.map((s) => (s.id === setId ? { ...s, ...p } : s)) }), immediate)
+  // hold a set's number (or its Previous cell) and drag to move the set; the hint and RPE lines hide meanwhile
+  const [setLift, setSetLift] = useState<{ from: number; y: number } | null>(null)
+  const setDrag = useDragReorder(
+    (a, b) => mutate((e) => ({ ...e, sets: moved(e.sets, a, b) }), true),
+    () => setSetLift(null)
+  )
+  useLayoutEffect(() => {
+    if (setLift) setDrag.start(setLift.from, setLift.y, true)
+  }, [setLift?.from, setLift?.y])
 
   function runningPrior(excludeId: string): SetRec[] {
     const own: SetRec[] = se.sets
@@ -646,17 +655,23 @@ function ExerciseCard({
           const hintReps = need != null && need <= 20 ? need : null
           const setNo = s.kind === 'work' ? String(workNo(i)) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'
           const nearTarget = hintReps != null && se.rep_max ? hintReps <= se.rep_max + 2 : false
+          const { ref: rowRef, style: rowStyle, ...hold } = setDrag.item(i, (y) => setSetLift({ from: i, y }))
           return (
             <div key={s.id} style={{ display: 'contents' }}>
-              <div className={`set-row ${s.done ? 'done' : 'todo'}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}`}>
+              <div
+                ref={rowRef}
+                style={rowStyle}
+                className={`set-row ${s.done ? 'done' : 'todo'}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}${setDrag.dragging === i ? ' lifted' : ''}`}
+              >
                 <button
+                  {...hold}
                   className={`kind ${s.kind}`}
                   onClick={() => setKindFor(s.id)}
                   aria-label={`Set ${setNo}, ${KIND_INFO[s.kind].t.toLowerCase()}. Change type or remove`}
                 >
                   {s.kind === 'work' ? workNo(i) : s.kind === 'failure' ? 'F' : s.kind === 'drop' ? 'D' : 'W'}
                 </button>
-                <div className="prev">{prevLabel(prev, tracking)}</div>
+                <div className="prev" {...hold}>{prevLabel(prev, tracking)}</div>
                 {tracking === 'time' ? (
                   <>
                     <KpField
@@ -712,7 +727,7 @@ function ExerciseCard({
                   <Check size={20} />
                 </button>
               </div>
-              {showRpe && s.done && (
+              {showRpe && s.done && !setLift && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="rpe-line">
                     <button className={`rpe-chip ${s.rpe != null ? 'set' : ''}`} onClick={() => setRpeSet(s.id)}>
@@ -721,7 +736,7 @@ function ExerciseCard({
                   </div>
                 </div>
               )}
-              {hintReps != null && nearTarget && (
+              {hintReps != null && nearTarget && !setLift && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
                     🏆 {hintReps} {hintReps === 1 ? 'rep' : 'reps'}{tracking === 'weight_reps' || s.weight > 0 ? ` at ${fmtKg(s.weight)} kg` : ''} = new PR
@@ -893,11 +908,19 @@ export default function SessionPage() {
   useLayoutEffect(() => {
     if (!lifted) return
     const el = document.getElementById(`ex-${lifted.from}`)
-    if (el) {
+    const first = document.getElementById('ex-0')
+    const last = document.getElementById(`ex-${session ? session.data.exercises.length - 1 : 0}`)
+    if (el && first && last) {
+      const head = document.querySelector('.sp-head')?.getBoundingClientRect().bottom ?? 0
+      const listTop = first.getBoundingClientRect().top
+      const listH = last.getBoundingClientRect().bottom - listTop
       const r = el.getBoundingClientRect()
-      window.scrollBy(0, r.top + r.height / 2 - lifted.y)
+      // a folded list that fits on screen is shown whole, right under the header; a longer one keeps the held
+      // card under the finger. Either way the held card then jumps to the finger (snap).
+      const by = listH <= window.innerHeight - head - 160 ? listTop - head - 12 : r.top + r.height / 2 - lifted.y
+      window.scrollTo({ top: window.scrollY + by, behavior: 'instant' as ScrollBehavior })
     }
-    dragList.start(lifted.from, lifted.y)
+    dragList.start(lifted.from, lifted.y, true)
   }, [lifted?.from, lifted?.y])
   const removeRow = useStore((s) => s.remove)
   const toast = useStore((s) => s.toast)

@@ -1,3 +1,4 @@
+import { LIBRARY_EXTRA } from '../data/libraryExtra'
 import { describe, expect, it } from 'vitest'
 import raw from '../data/library.json'
 import { EQUIPMENT, Exercise, MUSCLES } from './types'
@@ -148,5 +149,28 @@ describe('bestLibraryMatch with gym words', () => {
     expect(m('Pec Deck')?.id).toBe('Butterfly')
     expect(m('Crunches')?.name).toMatch(/crunch/i)
     expect(m('Warm Up')).toBeUndefined()
+  })
+})
+
+describe('GymLog additions and gym words', () => {
+  const all = [...(raw as unknown as Parameters<typeof fromRaw>[0][]), ...LIBRARY_EXTRA].map(fromRaw)
+  const top = (q: string) => searchLibrary(all, { q }).slice(0, 5).map((e) => e.name)
+  it('every addition borrows a real photo and has a unique name', () => {
+    const ids = new Set(all.map((e) => e.id))
+    const names = all.map((e) => e.name.toLowerCase())
+    for (const e of LIBRARY_EXTRA) {
+      expect(ids.has(e.p)).toBe(true)
+      expect(names.filter((n) => n === e.n.toLowerCase())).toHaveLength(1)
+      expect(NAME_TO_LIB[e.n.toLowerCase()]).toBeUndefined()
+      expect(libImageUrl(e.i)).toContain(`/${encodeURIComponent(e.p)}/0.jpg`)
+    }
+  })
+  it('finds lifts by the names people use', () => {
+    expect(top('single leg calf')).toContain('Single Leg Standing Calf Raise')
+    expect(top('hex bar deadlift')).toContain('Trap Bar Deadlift')
+    expect(top('trap bar deadlift')[0]).toBe('Trap Bar Deadlift')
+    expect(top('machine bench press')).toContain('Bench Press (Machine)')
+    expect(searchLibrary(all, { q: 'machine chest press' }).map((e) => e.name)).toContain('Leverage Chest Press')
+    expect(top('pec deck')).toContain('Pec Deck (Machine)')
   })
 })

@@ -260,3 +260,6 @@
 .ex.lifted { background: var(--card3); border-color: var(--accent); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); }
 .we-head { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .we-card.lifted { background: var(--card3); border-color: var(--accent); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55); }
+/* a set lifted by its number: floats over its neighbours inside the card */
+.set-row.lifted { background: var(--card3); border-radius: var(--radius); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5); outline: 1px solid var(--accent); }
+.set-row .kind, .set-row .prev { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

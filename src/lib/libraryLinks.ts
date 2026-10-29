@@ -6,14 +6,19 @@
  * An exercise links to the library by storing `lib:<id>` in `image_path` (Exercise has no library field).
  */
 
+import { LIBRARY_EXTRA } from '../data/libraryExtra'
+
 export const LIB_PREFIX = 'lib:'
 const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/'
 
 export const libPath = (id: string) => LIB_PREFIX + id
 export const libIdOf = (path: string | null | undefined): string | null => (path?.startsWith(LIB_PREFIX) ? path.slice(LIB_PREFIX.length) : null)
 
+/** GymLog's added entries (GL_…) → the original entry whose photos and steps they borrow */
+export const PHOTO_OF: Record<string, string> = Object.fromEntries(LIBRARY_EXTRA.map((e) => [e.i, e.p]))
+
 /** Photo of a library exercise. Frame 0 is the start position, frame 1 the end position. */
-export const libImageUrl = (id: string, frame: 0 | 1 = 0) => `${IMG_BASE}${encodeURIComponent(id)}/${frame}.jpg`
+export const libImageUrl = (id: string, frame: 0 | 1 = 0) => `${IMG_BASE}${encodeURIComponent(PHOTO_OF[id] ?? id)}/${frame}.jpg`
 
 /**
  * Built-in exercise name (lower case) → closest library entry. Covers every name in seed.ts and programCatalog.ts

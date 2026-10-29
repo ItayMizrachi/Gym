@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Exercise, Tracking } from './types'
 import { nowIso, uid } from './uid'
-import { NAME_TO_LIB, libIdForExercise, libPath } from './libraryLinks'
+import { NAME_TO_LIB, PHOTO_OF, libIdForExercise, libPath } from './libraryLinks'
+import { LIBRARY_EXTRA } from '../data/libraryExtra'
 
 export * from './libraryLinks'
 
@@ -58,7 +59,7 @@ let stepsPromise: Promise<Record<string, string[]>> | null = null
 export function loadLibrary(): Promise<LibraryExercise[]> {
   listPromise ??= import('../data/library.json')
     .then((m) => {
-      listCache = (m.default as unknown as RawEntry[]).map(fromRaw)
+      listCache = [...(m.default as unknown as RawEntry[]), ...LIBRARY_EXTRA].map(fromRaw)
       return listCache
     })
     .catch((err) => {
@@ -76,7 +77,8 @@ export async function loadInstructions(id: string): Promise<string[]> {
       stepsPromise = null
       throw err
     })
-  return (await stepsPromise)[id] ?? []
+  const steps = await stepsPromise
+  return steps[id] ?? steps[PHOTO_OF[id]] ?? []
 }
 
 /** React hook: the library, or null while it loads; `error` when it could not be loaded. */
@@ -110,6 +112,19 @@ export interface LibraryFilter {
 }
 
 const SHORT: Record<string, string> = { db: 'dumbbell', bb: 'barbell', kb: 'kettlebell', bw: 'bodyweight' }
+/** gym words that the library spells another way: any of them matches */
+const SAME: string[][] = [
+  ['single', 'one', 'unilateral'],
+  ['machine', 'leverage'],
+  ['hex', 'trap'],
+  ['pec', 'butterfly', 'fly'],
+  ['fly', 'flye', 'flyes'],
+  ['pulldown', 'pull down'],
+  ['pushdown', 'push down'],
+  ['calf', 'calves'],
+  ['smith', 'machine']
+]
+const alts = (w: string): string[] => [w, ...SAME.filter((g) => g.includes(w)).flat()]
 const POPULAR = new Set(Object.values(NAME_TO_LIB))
 const any = (v: string | undefined) => !v || v === 'All'
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
@@ -127,13 +142,13 @@ export function searchLibrary(list: LibraryExercise[], f: LibraryFilter): Librar
     if (!any(f.level) && e.level !== f.level) return false
     if (!words.length) return true
     const hay = norm([e.name, ...e.muscles, ...e.secondary, e.equipment].join(' '))
-    return words.every((w) => hay.includes(w))
+    return words.every((w) => alts(w).some((a) => hay.includes(a)))
   })
   // no query: the well-known gym lifts (the ones the built-in plans use) first, then A–Z
   if (!q) return [...out].sort((a, b) => Number(!POPULAR.has(a.id)) - Number(!POPULAR.has(b.id)))
   const rank = (e: LibraryExercise) => {
     const n = norm(e.name)
-    return n.startsWith(q) ? 0 : n.includes(q) ? 1 : words.every((w) => n.includes(w)) ? 2 : 3
+    return n.startsWith(q) ? 0 : n.includes(q) ? 1 : words.every((w) => alts(w).some((a) => n.includes(a))) ? 2 : 3
   }
   return out.map((e) => [rank(e), e] as const).sort((a, b) => a[0] - b[0] || a[1].name.localeCompare(b[1].name)).map((x) => x[1])
 }

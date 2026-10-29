@@ -838,13 +838,15 @@ div.field {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  /* with the keyboard up, the sheet rests on top of it (--kb from src/lib/keyboard.ts) */
+  padding-bottom: var(--kb, 0px);
   animation: fade var(--dur-base) var(--ease);
 }
 .sheet {
   position: relative;
   width: 100%;
   max-width: 720px;
-  max-height: calc(92vh - var(--safe-t));
+  max-height: min(calc(92vh - var(--safe-t)), calc(var(--vvh, 100vh) - var(--safe-t) - 8px));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;

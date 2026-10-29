@@ -25,7 +25,7 @@ export function toIndex(rects: Rect[], from: number, dy: number): number {
 export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd?: () => void) {
   const [drag, setDrag] = useState<Drag | null>(null)
   const refs = useRef<(HTMLElement | null)[]>([])
-  const live = useRef<{ from: number; y0: number; s0: number; rects: Rect[]; y: number } | null>(null)
+  const live = useRef<{ from: number; y0: number; s0: number; rects: Rect[]; y: number; off: number } | null>(null)
   const hold = useRef<{ t: number; x: number; y: number } | null>(null)
   const suppressClick = useRef(false)
   const dropRef = useRef(onDrop)
@@ -40,17 +40,20 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     })
   }
 
-  /** start dragging item `from` with the finger at clientY (also used to continue a drag after a re-layout) */
-  function start(from: number, clientY: number) {
+  /** start dragging item `from` with the finger at clientY (also used to continue a drag after a re-layout).
+   *  With `snap`, the item jumps to sit centred under the finger even when the re-layout left its slot elsewhere. */
+  function start(from: number, clientY: number, snap = false) {
     const rects = measure()
-    live.current = { from, y0: clientY, s0: window.scrollY, rects, y: clientY }
+    const r = rects[from]
+    const off = snap && r ? clientY - (r.top - window.scrollY + r.h / 2) : 0
+    live.current = { from, y0: clientY, s0: window.scrollY, rects, y: clientY, off }
     suppressClick.current = true
     try {
       navigator.vibrate?.(15)
     } catch {
       /* ignore */
     }
-    setDrag({ from, dy: 0, rects })
+    setDrag({ from, dy: off, rects })
   }
 
   useEffect(() => {
@@ -59,7 +62,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     const update = () => {
       const l = live.current
       if (!l) return
-      setDrag({ from: l.from, rects: l.rects, dy: l.y - l.y0 + (window.scrollY - l.s0) })
+      setDrag({ from: l.from, rects: l.rects, dy: l.y - l.y0 + l.off + (window.scrollY - l.s0) })
     }
     const move = (e: PointerEvent) => {
       if (!live.current) return
@@ -71,7 +74,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
       live.current = null
       cancelAnimationFrame(raf)
       if (l) {
-        const dy = l.y - l.y0 + (window.scrollY - l.s0)
+        const dy = l.y - l.y0 + l.off + (window.scrollY - l.s0)
         const to = toIndex(l.rects, l.from, dy)
         if (to !== l.from) dropRef.current(l.from, to)
       }
@@ -86,11 +89,13 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     const edge = () => {
       const l = live.current
       if (l) {
-        const top = 90
-        const bottom = window.innerHeight - 120
+        // the zones start just inside the sticky header and above the rest bar, so they are easy to reach
+        const head = document.querySelector('.sp-head')?.getBoundingClientRect().bottom ?? 0
+        const top = Math.max(90, head + 70)
+        const bottom = window.innerHeight - 140
         const v = l.y < top ? -Math.ceil((top - l.y) / 6) : l.y > bottom ? Math.ceil((l.y - bottom) / 6) : 0
         if (v) {
-          window.scrollBy(0, v)
+          window.scrollTo({ top: window.scrollY + v, behavior: 'instant' as ScrollBehavior })
           update()
         }
       }
