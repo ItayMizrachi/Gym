@@ -47,6 +47,7 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
     [lib, name, muscle, equipment]
   )
   const [usePic, setUsePic] = useState(true)
+  const cloud = useStore((s) => s.repo?.mode === 'cloud')
   return (
     <form
       className="stack"
@@ -57,6 +58,8 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
         const e = createExercise(name, muscle, { equipment, tracking, image_path: photo ?? libPic })
         // said no to the picture: do not add one later in the background either
         if (!photo && !libPic) declineLibraryPhoto(e.id)
+        // offered to everyone's library; it shows there once an admin approves it
+        void import('../lib/community').then((c) => c.suggestExercise(e))
         onCreated(e)
       }}
     >
@@ -131,6 +134,7 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
       <button className="btn primary" type="submit" disabled={!name.trim()}>
         <Plus size={18} /> Create exercise
       </button>
+      {cloud && <div className="small muted" style={{ textAlign: 'center' }}>New exercises join everyone's library after a quick review.</div>}
     </form>
   )
 }

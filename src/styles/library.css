@@ -389,3 +389,8 @@
   color: var(--muted);
 }
 .lib-frames .lib-paused { background: rgba(0,0,0,0.55); color: var(--text); }
+
+/* Settings → Suggested exercises (admins): one quiet row per suggestion */
+.sx-list { display: flex; flex-direction: column; }
+.sx-row { display: flex; align-items: center; gap: var(--s2); padding: 10px 0; }
+.sx-row + .sx-row { border-top: 1px solid var(--line); }

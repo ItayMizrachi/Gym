@@ -12,6 +12,8 @@ import './styles/pwa.css'
 registerUpdates()
 // scrolling closes the keyboard; sheets sit above it
 installKeyboardHelpers()
+// exercises suggested for the shared library while offline go out when the connection is back
+window.addEventListener('online', () => void import('./lib/community').then((c) => c.flushSuggestions()))
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

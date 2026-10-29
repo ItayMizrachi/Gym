@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
 import ImportOther from '../components/ImportOther'
 import DeleteAccountSheet from '../components/DeleteAccount'
+import { SuggestedExercises } from '../components/SuggestedExercises'
+import '../styles/library.css'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
@@ -162,6 +164,7 @@ export default function SettingsPage() {
           )}
         </section>
       )}
+      {repo?.mode === 'cloud' && <SuggestedExercises />}
 
       {group(
         'Workout',

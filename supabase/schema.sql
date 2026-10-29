@@ -169,3 +169,58 @@ revoke all on function public.delete_my_account() from anon;
 grant execute on function public.delete_my_account() to authenticated;
 
 notify pgrst, 'reload schema';
+
+-- Shared exercise library ---------------------------------------------------------------------------------------
+-- An exercise someone creates is suggested for everyone's library. It shows for all users only after an admin
+-- approves it (Settings -> Suggested exercises, visible to admins only). Admins are the user ids in
+-- exercise_admins; add one by hand in the SQL editor:
+--   insert into public.exercise_admins (user_id) select id from auth.users where email = '<admin email>';
+create table if not exists public.shared_exercises (
+  id uuid primary key default gen_random_uuid(),
+  name text not null check (char_length(name) between 2 and 60),
+  muscle text not null check (char_length(muscle) <= 30),
+  equipment text not null default '' check (char_length(equipment) <= 30),
+  tracking text not null default 'weight_reps' check (tracking in ('weight_reps', 'reps', 'time')),
+  -- id of a built-in library entry whose photo it shows (own photos stay private)
+  photo text check (photo is null or char_length(photo) <= 120),
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  created_by uuid default auth.uid() references auth.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+-- one live entry per name (a rejected name may be suggested again)
+create unique index if not exists shared_exercises_name on public.shared_exercises (lower(name)) where status <> 'rejected';
+
+create table if not exists public.exercise_admins (
+  user_id uuid primary key references auth.users (id) on delete cascade
+);
+alter table public.exercise_admins enable row level security; -- no policies: only the SQL editor sees it
+
+create or replace function public.is_exercise_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (select 1 from public.exercise_admins where user_id = auth.uid())
+$$;
+revoke all on function public.is_exercise_admin() from public;
+revoke all on function public.is_exercise_admin() from anon;
+grant execute on function public.is_exercise_admin() to authenticated;
+
+alter table public.shared_exercises enable row level security;
+drop policy if exists "read approved, own or as admin" on public.shared_exercises;
+create policy "read approved, own or as admin" on public.shared_exercises for select to authenticated
+  using (status = 'approved' or created_by = auth.uid() or public.is_exercise_admin());
+drop policy if exists "suggest as yourself" on public.shared_exercises;
+create policy "suggest as yourself" on public.shared_exercises for insert to authenticated
+  with check (created_by = auth.uid() and status = 'pending' and reviewed_at is null);
+drop policy if exists "admins review" on public.shared_exercises;
+create policy "admins review" on public.shared_exercises for update to authenticated
+  using (public.is_exercise_admin()) with check (public.is_exercise_admin());
+drop policy if exists "admins delete" on public.shared_exercises;
+create policy "admins delete" on public.shared_exercises for delete to authenticated
+  using (public.is_exercise_admin());
+
+notify pgrst, 'reload schema';

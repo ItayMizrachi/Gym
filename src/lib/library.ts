@@ -57,9 +57,19 @@ let stepsPromise: Promise<Record<string, string[]>> | null = null
 
 /** The whole library (~870 exercises). A separate chunk: the first call downloads it, later calls are instant. */
 export function loadLibrary(): Promise<LibraryExercise[]> {
-  listPromise ??= import('../data/library.json')
-    .then((m) => {
-      listCache = [...(m.default as unknown as RawEntry[]), ...LIBRARY_EXTRA].map(fromRaw)
+  listPromise ??= Promise.all([import('../data/library.json'), import('./community').then((c) => c.loadShared()).catch(() => [])])
+    .then(([m, shared]) => {
+      const base = [...(m.default as unknown as RawEntry[]), ...LIBRARY_EXTRA]
+      const names = new Set(base.map((e) => e.n.toLowerCase()))
+      // approved exercises from other users (src/lib/community.ts); a name the library has already is skipped
+      const extra: RawEntry[] = shared
+        .filter((x) => !names.has(x.name.toLowerCase()))
+        .map((x) => {
+          const i = 'SH_' + x.id
+          if (x.photo) PHOTO_OF[i] = x.photo
+          return { i, n: x.name, m: [x.muscle], s: [], e: x.equipment, t: x.tracking, l: 'Beginner', f: x.photo ? 2 : 0 }
+        })
+      listCache = [...base, ...extra].map(fromRaw)
       return listCache
     })
     .catch((err) => {
@@ -174,7 +184,7 @@ export function exerciseFromLibrary(lib: LibraryExercise, userId: string): Exerc
     muscle: lib.muscle,
     notes: '',
     setup: '',
-    image_path: libPath(lib.id),
+    image_path: lib.id.startsWith('SH_') ? (PHOTO_OF[lib.id] ? libPath(PHOTO_OF[lib.id]) : null) : libPath(lib.id),
     rest_sec: lib.tracking === 'time' ? 60 : lib.equipment === 'Barbell' ? 150 : 90,
     created_at: nowIso(),
     equipment: lib.equipment,
