@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
+import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
@@ -230,9 +231,32 @@ function TimeInput({ value, onChange, placeholder, running }: { value: number | 
 }
 
 /** Start / stop button for a time set. While running, the time column shows the live count. */
-function StopwatchBtn({ set, onStop }: { set: SessionSet; onStop: (sec: number) => void }) {
+/** last countdown cue played per set (3, 2, 1, 0), so each plays once */
+const cued = new Map<string, number>()
+/** time left to the target while a stopwatch runs; negative = past it */
+const watchLeft = (id: string, target: number | null | undefined) => (target ? target - watchSec(id) : null)
+/** m:ss left, or +m:ss once past the target */
+const fmtLeft = (left: number) => (left >= 0 ? fmtTime(left) : '+' + fmtTime(-left))
+
+function StopwatchBtn({ set, target, onStop }: { set: SessionSet; target?: number | null; onStop: (sec: number) => void }) {
   const running = watches.has(set.id)
-  useTick(running)
+  useTick(running, 250)
+  // with a target (last time's time): three short beeps in the last seconds, a long cue and "Time" at zero
+  const left = running ? watchLeft(set.id, target) : null
+  useEffect(() => {
+    if (left == null || left > 3 || left < 0 || cued.get(set.id) === left) return
+    cued.set(set.id, left)
+    if (localStorage.getItem('gymlog:sound') === 'off') return
+    beep(left === 0 ? 3 : 1)
+    if (left === 0)
+      try {
+        const u = new SpeechSynthesisUtterance('Time')
+        u.lang = 'en-US'
+        window.speechSynthesis?.speak(u)
+      } catch {
+        /* no speech on this device */
+      }
+  }, [left, set.id])
   return (
     <button
       className={`sw ${running ? 'on' : ''}`}
@@ -241,6 +265,7 @@ function StopwatchBtn({ set, onStop }: { set: SessionSet; onStop: (sec: number) 
         if (running) {
           const sec = watchSec(set.id)
           watches.delete(set.id)
+          cued.delete(set.id)
           onStop(sec)
         } else {
           // continue from what is already filled in
@@ -685,7 +710,7 @@ function ExerciseCard({
                       }}
                       className={`num time ${watches.has(s.id) ? 'running' : ''}`}
                       disabled={watches.has(s.id) || s.done}
-                      display={watches.has(s.id) ? fmtTime(watchSec(s.id)) : undefined}
+                      display={watches.has(s.id) ? (prev?.time_sec && !s.time_sec ? fmtLeft(watchLeft(s.id, prev.time_sec)!) : fmtTime(watchSec(s.id))) : undefined}
                       native={
                         <TimeInput
                           value={watches.has(s.id) ? watchSec(s.id) : s.time_sec}
@@ -695,7 +720,7 @@ function ExerciseCard({
                         />
                       }
                     />
-                    <StopwatchBtn set={s} onStop={(sec) => patchSet(s.id, { time_sec: sec || null }, true)} />
+                    <StopwatchBtn set={s} target={s.time_sec ? null : prev?.time_sec} onStop={(sec) => patchSet(s.id, { time_sec: sec || null }, true)} />
                   </>
                 ) : (
                 <>
