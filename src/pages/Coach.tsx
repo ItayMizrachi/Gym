@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Copy, Share2, UserPlus } from 'lucide-react'
-import { CoachLink, createInvite, listTrainees, removeTrainee } from '../lib/coach'
+import { ChevronRight, Copy, Share2, Sparkles, UserPlus } from 'lucide-react'
+import { COACH_FREE_LIMIT, CoachLink, createInvite, listTrainees, removeTrainee } from '../lib/coach'
 import { TraineeGlance, prefetchTrainees } from '../lib/coachData'
 import { useStore } from '../lib/store'
 import { Confirm, PageHeader, Sheet } from '../components/ui'
@@ -16,6 +16,7 @@ export default function Coach() {
   const [adding, setAdding] = useState(false)
   const [invite, setInvite] = useState<CoachLink | null>(null)
   const [cancel, setCancel] = useState<CoachLink | null>(null)
+  const [pro, setPro] = useState(false)
   const [glances, setGlances] = useState<Map<string, TraineeGlance>>(new Map())
 
   const load = () =>
@@ -74,8 +75,14 @@ export default function Coach() {
             </div>
           )}
 
-          <button className="btn primary block" onClick={() => setAdding(true)}>
+          <button
+            className="btn primary block"
+            onClick={() => (COACH_FREE_LIMIT != null && (list?.length ?? 0) >= COACH_FREE_LIMIT ? setPro(true) : setAdding(true))}
+          >
             <UserPlus size={18} aria-hidden /> Add trainee
+          </button>
+          <button className="btn ghost block coach-pro-link" onClick={() => setPro(true)}>
+            <Sparkles size={16} aria-hidden /> Coaching is free during the preview
           </button>
 
           {waiting.length > 0 && (
@@ -109,6 +116,7 @@ export default function Coach() {
           }}
         />
       )}
+      {pro && <ProSheet onClose={() => setPro(false)} />}
       {invite && <InviteSheet link={invite} onClose={() => setInvite(null)} onCancel={() => setCancel(invite)} />}
       {cancel && (
         <Confirm
@@ -213,5 +221,29 @@ function GlanceLine({ g, fallback }: { g: TraineeGlance | undefined; fallback: s
       <span className={idle ? 'coach-idle' : undefined}>{when}</span>
       {g.newPRs > 0 && <span className="coach-pr-inline"> · {g.newPRs} new {g.newPRs === 1 ? 'record' : 'records'}</span>}
     </span>
+  )
+}
+
+/** what GymLog Pro for coaches will be; nothing to buy yet */
+function ProSheet({ onClose }: { onClose: () => void }) {
+  const limited = COACH_FREE_LIMIT != null
+  return (
+    <Sheet title="GymLog Pro for coaches" onClose={onClose}>
+      <div className="stack">
+        <div className="small muted">
+          {limited
+            ? `The free plan coaches up to ${COACH_FREE_LIMIT} trainees. Pro is for coaches with more.`
+            : 'Coaching is free while it is new. Later it becomes part of GymLog Pro; your trainees and their plans stay as they are.'}
+        </div>
+        <ul className="coach-pro-list">
+          <li>Unlimited trainees</li>
+          <li>Plans, notes and progress for each of them</li>
+          <li>Alerts when someone stops training or breaks a record</li>
+        </ul>
+        <button className="btn primary block" onClick={onClose}>
+          {limited ? 'Coming soon' : 'Got it'}
+        </button>
+      </div>
+    </Sheet>
   )
 }

@@ -28,6 +28,12 @@ export interface MyCoach {
   accepted_at: string | null
 }
 
+/**
+ * Trainees a coach can have without Pro. null = no limit (coaching is free during the preview, owner's call
+ * 2026-10-29). Setting a number shows the Pro screen instead of a new invite once the limit is reached.
+ */
+export const COACH_FREE_LIMIT: number | null = null
+
 /** folder the coach's workouts land in on the trainee's Train tab */
 export const COACH_FOLDER = 'From your coach'
 
