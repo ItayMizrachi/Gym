@@ -210,6 +210,7 @@ revoke all on function public.is_exercise_admin() from anon;
 grant execute on function public.is_exercise_admin() to authenticated;
 
 alter table public.shared_exercises enable row level security;
+grant select, insert, update, delete on public.shared_exercises to authenticated;
 drop policy if exists "read approved, own or as admin" on public.shared_exercises;
 create policy "read approved, own or as admin" on public.shared_exercises for select to authenticated
   using (status = 'approved' or created_by = auth.uid() or public.is_exercise_admin());
