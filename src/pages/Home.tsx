@@ -1,7 +1,8 @@
 import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
+import { useCoachRole } from '../lib/coach'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -89,6 +90,7 @@ function loadFolds(): string[] {
 
 export default function Home() {
   const nav = useNavigate()
+  const coachRole = useCoachRole()
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
   /** a folder's workouts in their new order: they take over that folder's places, then every workout is numbered 0, 1, 2… */
@@ -187,6 +189,11 @@ export default function Home() {
           <h1>{greeting}</h1>
           <div className="sub">{now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
+        {coachRole && (
+          <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label="Coaching: your trainees">
+            <Users size={16} aria-hidden /> Coaching
+          </button>
+        )}
         {streak.current > 0 && (
           <div
             className={`streak-pill${streak.thisWeekDone ? '' : ' pending'}`}

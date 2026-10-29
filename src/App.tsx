@@ -55,6 +55,8 @@ const Help = lazyPage(() => import('./pages/Help'))
 const Profile = lazyPage(() => import('./pages/Profile'))
 const Programs = lazyPage(() => import('./pages/Programs'))
 const Records = lazyPage(() => import('./pages/Records'))
+const Coach = lazyPage(() => import('./pages/Coach'))
+const CoachTrainee = lazyPage(() => import('./pages/CoachTrainee'))
 
 /** The home-screen shortcut opens `#/?start=next`; act on it once the data is loaded. */
 function useLaunchShortcut(ready: boolean) {
@@ -112,6 +114,8 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/programs" element={<Programs />} />
               <Route path="/records" element={<Records />} />
+              <Route path="/coach" element={<Coach />} />
+              <Route path="/coach/:id" element={<CoachTrainee />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>

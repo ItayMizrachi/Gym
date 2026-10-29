@@ -5,6 +5,7 @@ import { reopenWelcome } from '../components/Welcome'
 import ImportOther from '../components/ImportOther'
 import DeleteAccountSheet from '../components/DeleteAccount'
 import { SuggestedExercises } from '../components/SuggestedExercises'
+import { CoachSettings } from '../components/CoachSettings'
 import '../styles/library.css'
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
@@ -164,6 +165,7 @@ export default function SettingsPage() {
           )}
         </section>
       )}
+      {repo?.mode === 'cloud' && <CoachSettings />}
       {repo?.mode === 'cloud' && <SuggestedExercises />}
 
       {group(

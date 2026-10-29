@@ -225,3 +225,123 @@ create policy "admins delete" on public.shared_exercises for delete to authentic
   using (public.is_exercise_admin());
 
 notify pgrst, 'reload schema';
+
+-- Coaching ------------------------------------------------------------------------------------------------------
+-- A coach invites a trainee with a short code (Coach screen -> Add trainee). The trainee enters it under
+-- Settings -> My coach; from then on the coach can read the trainee's training and add workouts to their plan.
+-- Either side can end it at any time. Free for now; a paid tier can later gate creating invites.
+create table if not exists public.coach_links (
+  id uuid primary key default gen_random_uuid(),
+  coach_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  trainee_id uuid references auth.users (id) on delete cascade,
+  -- the coach's own label for the trainee
+  name text not null check (char_length(name) between 1 and 60),
+  code text not null unique default upper(substr(md5(gen_random_uuid()::text), 1, 6)),
+  status text not null default 'invited' check (status in ('invited', 'active', 'ended')),
+  trainee_email text,
+  created_at timestamptz not null default now(),
+  accepted_at timestamptz
+);
+create index if not exists coach_links_coach on public.coach_links (coach_id);
+create index if not exists coach_links_trainee on public.coach_links (trainee_id);
+
+alter table public.coach_links enable row level security;
+grant select, insert, update, delete on public.coach_links to authenticated;
+drop policy if exists "coach or trainee reads" on public.coach_links;
+create policy "coach or trainee reads" on public.coach_links for select to authenticated
+  using (coach_id = auth.uid() or trainee_id = auth.uid());
+drop policy if exists "coach invites" on public.coach_links;
+create policy "coach invites" on public.coach_links for insert to authenticated
+  with check (coach_id = auth.uid() and trainee_id is null and status = 'invited');
+drop policy if exists "coach edits" on public.coach_links;
+create policy "coach edits" on public.coach_links for update to authenticated
+  using (coach_id = auth.uid()) with check (coach_id = auth.uid());
+drop policy if exists "trainee ends" on public.coach_links;
+create policy "trainee ends" on public.coach_links for update to authenticated
+  using (trainee_id = auth.uid()) with check (trainee_id = auth.uid() and status = 'ended');
+drop policy if exists "coach deletes" on public.coach_links;
+create policy "coach deletes" on public.coach_links for delete to authenticated
+  using (coach_id = auth.uid());
+
+-- the trainee accepts an invite by its code
+create or replace function public.accept_coach_invite(p_code text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := auth.uid();
+  link uuid;
+begin
+  if me is null then
+    raise exception 'Not signed in' using errcode = '42501';
+  end if;
+  update public.coach_links
+     set trainee_id = me, status = 'active', accepted_at = now(),
+         trainee_email = (select email from auth.users where id = me)
+   where code = upper(trim(p_code)) and status = 'invited' and coach_id <> me
+  returning id into link;
+  if link is null then
+    raise exception 'No invite with that code' using errcode = 'P0002';
+  end if;
+  return link;
+end;
+$$;
+revoke all on function public.accept_coach_invite(text) from public;
+revoke all on function public.accept_coach_invite(text) from anon;
+grant execute on function public.accept_coach_invite(text) to authenticated;
+
+-- the trainee's coaches, with the coach's email (auth.users is not readable directly)
+create or replace function public.my_coaches()
+returns table (id uuid, coach_email text, status text, accepted_at timestamptz)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select l.id, u.email::text, l.status, l.accepted_at
+    from public.coach_links l join auth.users u on u.id = l.coach_id
+   where l.trainee_id = auth.uid() and l.status = 'active'
+$$;
+revoke all on function public.my_coaches() from public;
+revoke all on function public.my_coaches() from anon;
+grant execute on function public.my_coaches() to authenticated;
+
+create or replace function public.is_coach_of(p_user uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.coach_links
+     where coach_id = auth.uid() and trainee_id = p_user and status = 'active'
+  )
+$$;
+revoke all on function public.is_coach_of(uuid) from public;
+revoke all on function public.is_coach_of(uuid) from anon;
+grant execute on function public.is_coach_of(uuid) to authenticated;
+
+-- a coach reads all of an active trainee's training, and builds their plan (workouts, their exercises)
+do $$
+declare t text;
+begin
+  foreach t in array array['exercises', 'workouts', 'workout_exercises', 'sessions', 'metrics'] loop
+    execute format('drop policy if exists "coach reads" on public.%I', t);
+    execute format('create policy "coach reads" on public.%I for select to authenticated using (public.is_coach_of(user_id))', t);
+  end loop;
+  foreach t in array array['exercises', 'workouts', 'workout_exercises'] loop
+    execute format('drop policy if exists "coach adds" on public.%I', t);
+    execute format('create policy "coach adds" on public.%I for insert to authenticated with check (public.is_coach_of(user_id))', t);
+    execute format('drop policy if exists "coach edits" on public.%I', t);
+    execute format('create policy "coach edits" on public.%I for update to authenticated using (public.is_coach_of(user_id)) with check (public.is_coach_of(user_id))', t);
+  end loop;
+  foreach t in array array['workouts', 'workout_exercises'] loop
+    execute format('drop policy if exists "coach removes" on public.%I', t);
+    execute format('create policy "coach removes" on public.%I for delete to authenticated using (public.is_coach_of(user_id))', t);
+  end loop;
+end $$;
+
+notify pgrst, 'reload schema';

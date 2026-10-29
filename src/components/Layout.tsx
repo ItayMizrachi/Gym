@@ -232,6 +232,12 @@ export default function Layout() {
   const rest = useStore((s) => s.rest)
   const loc = useLocation()
   const inSession = loc.pathname.startsWith('/session')
+  // coach screens swap the yellow for sky blue, so it is always clear which side you are on (styles/coach.css)
+  const coaching = loc.pathname.startsWith('/coach')
+  useEffect(() => {
+    if (coaching) document.documentElement.dataset.coach = ''
+    else delete document.documentElement.dataset.coach
+  }, [coaching])
   const screen = useRef<HTMLDivElement>(null)
   const firstScreen = useRef(true)
   // slide a finger along the tab bar to move between tabs (like iOS): the highlight jumps to the tab

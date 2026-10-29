@@ -183,6 +183,8 @@ export class SupabaseRepo implements Repo {
         const { data, error } = await this.sb
           .from(t)
           .select('*')
+          // only this user's rows: a coach can also read their trainees' rows (supabase/schema.sql, Coaching)
+          .eq('user_id', this.userId)
           .order('id', { ascending: true })
           .range(from, from + page - 1)
         if (error) throw Object.assign(new Error(`${t}: ${error.message}`), { code: (error as any).code, status: (error as any).status })

@@ -1,0 +1,45 @@
+/* ================= Coaching: the same design, with sky blue in place of the yellow ================= */
+/* (set on <html> while a coach screen is open, see Layout.tsx; plate blue stays for drops and supersets) */
+:root[data-coach] {
+  --accent: #38bdf8;
+  --accent-ink: #03202e;
+  --accent-soft: rgba(56, 189, 248, 0.12);
+  --accent-line: rgba(56, 189, 248, 0.38);
+  --focus: 0 0 0 3px rgba(56, 189, 248, 0.35);
+}
+:root[data-coach] .nav-bubble { background: rgba(56, 189, 248, 0.18); }
+:root[data-coach] .nav-bubble.held { background: rgba(56, 189, 248, 0.24); }
+
+.coach-h2 { font-size: 17px; margin: 4px 2px 0; }
+.coach-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+.coach-empty .title { font-weight: 600; font-size: 16px; }
+.coach-code {
+  text-align: center;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 18px 0;
+  border-radius: var(--r-lg);
+  background: var(--card2);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  -webkit-user-select: all;
+  user-select: all;
+}
+.coach-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; }
+.coach-stats > div { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px; }
+.coach-n { font-size: 20px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.coach-pr { flex: none; font-size: 13px; font-weight: 600; color: var(--accent); }
+/* entry on the Train tab and the coach badge in Settings */
+.coach-entry { color: var(--text); }
