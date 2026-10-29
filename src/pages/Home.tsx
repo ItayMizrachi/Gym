@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
 import { useCoachRole } from '../lib/coach'
 import { upNext } from '../lib/upNext'
+import { WeeklyRecap } from '../components/WeeklyRecap'
 
 /** "Quads" / "Quads and Glutes" (two at most, the line stays short) */
 const listMuscles = (m: string[]) => (m.length <= 1 ? m.join('') : `${m[0]} and ${m[1]}`)
@@ -290,6 +291,7 @@ export default function Home() {
         )
       )}
 
+      {!active && <WeeklyRecap />}
       {workouts.length > 0 && <StartChecklist />}
 
       {workouts.length > 0 && (

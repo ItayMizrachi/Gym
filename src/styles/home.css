@@ -162,3 +162,14 @@
 @media (prefers-reduced-motion: reduce) {
   .hm-row, .hm-start-caret { transition: none; }
 }
+
+/* weekly recap (first two days of a week) */
+.recap { position: relative; padding: 14px 44px 14px 16px; }
+.recap-main { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+.recap-t { font-size: 13px; color: var(--muted); }
+.recap-nums { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 15px; color: var(--text-2); }
+.recap-nums b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.recap-nums .up { color: var(--ok); font-weight: 600; }
+.recap-nums .down { color: var(--muted); }
+.recap-pr { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--accent); font-weight: 600; }
+.recap-x { position: absolute; top: 6px; right: 6px; }
