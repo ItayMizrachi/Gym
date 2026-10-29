@@ -3,6 +3,10 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
 import { useCoachRole } from '../lib/coach'
+import { upNext } from '../lib/upNext'
+
+/** "Quads" / "Quads and Glutes" (two at most, the line stays short) */
+const listMuscles = (m: string[]) => (m.length <= 1 ? m.join('') : `${m[0]} and ${m[1]}`)
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -24,7 +28,6 @@ import {
   MUSCLE_SETS_MIN,
   plannedMuscles,
   relativeDay,
-  suggestNextWorkout,
   summarizeSession,
   weeklyStreak
 } from '../lib/stats'
@@ -128,12 +131,8 @@ export default function Home() {
   const finished = useMemo(() => finishedSessions(db), [db])
   // a workout planned for today wins over the rotation suggestion
   const planned = useMemo(() => todaysWorkout(db), [db])
-  const next = useMemo(() => {
-    const s = suggestNextWorkout(db)
-    if (!planned) return s
-    const lastDone = s && s.workout.id === planned.id ? s.lastDone : null
-    return { workout: planned, lastDone, reason: 'rotation' as const }
-  }, [db, planned])
+  // planned for today, else the rotation, unless its muscles are still recovering (src/lib/upNext.ts)
+  const next = useMemo(() => upNext(db, now), [db, now])
   const weeks = useMemo(() => compareWeeks(db, now), [db, now])
   const streak = useMemo(() => weeklyStreak(db, now), [db, now])
   const muscles = useMemo(() => {
@@ -256,7 +255,11 @@ export default function Home() {
           <div className="card hm-hero">
             <div className="hm-label">
               {planned ? "Today's workout" : 'Up next'}
-              {next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>}
+              {next.reason === 'fresh' && next.tired?.length ? (
+                <span className="muted"> · {listMuscles(next.tired)} still recovering</span>
+              ) : (
+                next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>
+              )}
             </div>
             <div className="hm-name">
               {heroName}
