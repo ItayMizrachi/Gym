@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Trash2 } from 'lucide-react'
-import { COACH_FOLDER, CoachLink, assignWorkout, listTrainees, loadTrainee, removeTrainee, unassignWorkout } from '../lib/coach'
+import { ChevronRight, Copy, Plus, Trash2 } from 'lucide-react'
+import { COACH_FOLDER, assignWorkout, removeTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
+import { forgetTrainee, useTraineeData } from '../lib/coachData'
+import { nowIso, uid } from '../lib/uid'
+import { Workout } from '../lib/types'
 import { useStore } from '../lib/store'
-import { DB } from '../lib/types'
-import { compareWeeks, finishedSessions, fmtVolume, latestBodyWeight, prSetIds, relativeDay, summarizeSession, weeklyStreak } from '../lib/stats'
+import { compareWeeks, weeklyTrend, finishedSessions, fmtVolume, latestBodyWeight, prSetIds, relativeDay, summarizeSession, weeklyStreak } from '../lib/stats'
 import { fmtKg } from '../lib/format'
 import { Confirm, PageHeader, Sheet } from '../components/ui'
 import '../styles/coach.css'
@@ -15,28 +17,33 @@ export default function CoachTrainee() {
   const nav = useNavigate()
   const mine = useStore((s) => s.db)
   const toast = useStore((s) => s.toast)
-  const [link, setLink] = useState<CoachLink | null>(null)
-  const [db, setDb] = useState<DB | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { link, db, error, reload } = useTraineeData(id)
   const [picking, setPicking] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
   const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null)
   const [ending, setEnding] = useState(false)
 
-  async function load() {
+  const load = reload
+  /** an empty workout in the trainee's plan, opened in the editor */
+  async function newWorkout() {
+    if (!link?.trainee_id || !db) return
+    const w: Workout = {
+      id: uid(),
+      user_id: link.trainee_id,
+      name: 'New workout',
+      notes: '',
+      position: db.workouts.reduce((m, x) => Math.max(m, x.position), -1) + 1,
+      created_at: nowIso(),
+      folder: COACH_FOLDER
+    }
     try {
-      const l = (await listTrainees()).find((x) => x.id === id && x.status === 'active')
-      if (!l?.trainee_id) throw new Error('This trainee is no longer connected.')
-      setLink(l)
-      setDb(await loadTrainee(l.trainee_id))
-      setError(null)
+      await saveTraineeRow('workouts', w)
+      await reload()
+      nav(`/coach/${id}/w/${w.id}`)
     } catch (e) {
-      setError((e as Error).message)
+      toast({ kind: 'error', text: (e as Error).message })
     }
   }
-  useEffect(() => {
-    void load()
-  }, [id])
 
   const view = useMemo(() => {
     if (!db) return null
@@ -48,6 +55,7 @@ export default function CoachTrainee() {
       week: weeks.thisWeek,
       streak: weeklyStreak(db),
       weight: latestBodyWeight(db),
+      trend: weeklyTrend(db),
       plan: [...db.workouts].sort((a, b) => a.position - b.position)
     }
   }, [db])
@@ -89,6 +97,8 @@ export default function CoachTrainee() {
             )}
           </div>
 
+          <Trend weeks={view.trend} />
+
           <section className="stack" style={{ gap: 8 }} aria-label="Plan">
             <h2 className="coach-h2">Plan</h2>
             {view.plan.length > 0 && (
@@ -98,7 +108,7 @@ export default function CoachTrainee() {
                   const fromYou = w.folder === COACH_FOLDER
                   return (
                     <div key={w.id} className="list-row">
-                      <span className="grow" style={{ minWidth: 0 }}>
+                      <button className="grow coach-rowbtn" style={{ minWidth: 0 }} onClick={() => nav(`/coach/${id}/w/${w.id}`)}>
                         <span className="title ellipsis" style={{ display: 'block' }}>
                           {w.name}
                         </span>
@@ -106,7 +116,7 @@ export default function CoachTrainee() {
                           {n} {n === 1 ? 'exercise' : 'exercises'}
                           {fromYou ? ' · from you' : ''}
                         </span>
-                      </span>
+                      </button>
                       {fromYou && (
                         <button className="btn icon ghost" aria-label={`Remove ${w.name} from the plan`} onClick={() => setRemoving({ id: w.id, name: w.name })}>
                           <Trash2 size={18} aria-hidden />
@@ -117,9 +127,14 @@ export default function CoachTrainee() {
                 })}
               </div>
             )}
-            <button className="btn primary block" onClick={() => setPicking(true)}>
-              <Plus size={18} aria-hidden /> Add a workout
-            </button>
+            <div className="row" style={{ gap: 8 }}>
+              <button className="btn primary grow" onClick={() => void newWorkout()}>
+                <Plus size={18} aria-hidden /> New workout
+              </button>
+              <button className="btn grow" onClick={() => setPicking(true)}>
+                <Copy size={18} aria-hidden /> Copy one of mine
+              </button>
+            </div>
           </section>
 
           <section className="stack" style={{ gap: 8 }} aria-label="Recent workouts">
@@ -129,7 +144,7 @@ export default function CoachTrainee() {
             ) : (
               <div className="list-group">
                 {view.recent.map(({ s, sum, prs }) => (
-                  <div key={s.id} className="list-row">
+                  <button key={s.id} className="list-row" onClick={() => nav(`/coach/${id}/s/${s.id}`)}>
                     <span className="grow" style={{ minWidth: 0 }}>
                       <span className="title ellipsis" style={{ display: 'block' }}>
                         {s.name}
@@ -139,7 +154,8 @@ export default function CoachTrainee() {
                       </span>
                     </span>
                     {prs > 0 && <span className="coach-pr">{prs} PR</span>}
-                  </div>
+                    <ChevronRight size={18} aria-hidden />
+                  </button>
                 ))}
               </div>
             )}
@@ -152,7 +168,7 @@ export default function CoachTrainee() {
       )}
 
       {picking && (
-        <Sheet title="Add a workout" onClose={() => setPicking(false)}>
+        <Sheet title="Copy one of your workouts" onClose={() => setPicking(false)}>
           <div className="stack" style={{ gap: 8 }}>
             <div className="small muted">Pick one of your workouts. It is copied into {link?.name}'s plan, in "{COACH_FOLDER}". Build new ones on your Train tab first.</div>
             {myWorkouts.length === 0 ? (
@@ -220,6 +236,7 @@ export default function CoachTrainee() {
             setEnding(false)
             try {
               await removeTrainee(link)
+              forgetTrainee(link.id)
               nav('/coach', { replace: true })
             } catch (e) {
               toast({ kind: 'error', text: (e as Error).message })
@@ -228,5 +245,33 @@ export default function CoachTrainee() {
         />
       )}
     </div>
+  )
+}
+
+/** weekly volume for the last 8 weeks (sets when nothing was lifted with weight) */
+function Trend({ weeks }: { weeks: { start: Date; volume: number; sets: number; workouts: number }[] }) {
+  const useVol = weeks.some((w) => w.volume > 0)
+  const val = (w: (typeof weeks)[number]) => (useVol ? w.volume : w.sets)
+  const max = Math.max(1, ...weeks.map(val))
+  if (!weeks.some((w) => w.workouts > 0)) return null
+  const label = weeks.map((w) => `${w.start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${useVol ? fmtVolume(w.volume) : `${w.sets} sets`}`).join(', ')
+  return (
+    <section className="card stack" style={{ gap: 6 }} aria-label={`${useVol ? 'Volume' : 'Sets'} per week. ${label}`}>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <span className="small">{useVol ? 'Volume per week' : 'Sets per week'}</span>
+        <span className="tiny muted">8 weeks</span>
+      </div>
+      <div className="coach-trend" aria-hidden>
+        {weeks.map((w, i) => (
+          <div key={i}>
+            <span className={`bar${val(w) === 0 ? ' zero' : ''}${i === weeks.length - 1 ? ' now' : ''}`} style={{ height: `${Math.round((val(w) / max) * 100)}%` }} />
+          </div>
+        ))}
+      </div>
+      <div className="coach-trend-axis tiny muted" aria-hidden>
+        <span>{weeks[0].start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+        <span>This week</span>
+      </div>
+    </section>
   )
 }

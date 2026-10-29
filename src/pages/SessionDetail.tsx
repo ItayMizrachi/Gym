@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Plus, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
+import { CoachNotes } from '../components/CoachNotes'
 import { sessionDate, sessionPRs, PREvent } from '../lib/pr'
 import { fmtClock, fmtDate, fmtDateLong, fmtKg, splitName } from '../lib/format'
 import { Confirm, ImageField } from '../components/ui'
@@ -316,6 +317,7 @@ export default function SessionDetail() {
       )}
 
       {stats}
+      <CoachNotes sessionId={s.id} />
 
       {prs.length > 0 && (
         <div className="card pr-card">

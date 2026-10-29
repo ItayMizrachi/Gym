@@ -345,3 +345,31 @@ begin
 end $$;
 
 notify pgrst, 'reload schema';
+
+-- Coach notes: a short note from the coach on one of the trainee's workouts (or on the trainee in general when
+-- session_id is null). The trainee reads them on that workout's summary.
+create table if not exists public.coach_notes (
+  id uuid primary key default gen_random_uuid(),
+  coach_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  trainee_id uuid not null references auth.users (id) on delete cascade,
+  session_id uuid,
+  text text not null check (char_length(text) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+create index if not exists coach_notes_trainee on public.coach_notes (trainee_id, created_at desc);
+alter table public.coach_notes enable row level security;
+grant select, insert, update, delete on public.coach_notes to authenticated;
+drop policy if exists "coach or trainee reads notes" on public.coach_notes;
+create policy "coach or trainee reads notes" on public.coach_notes for select to authenticated
+  using (coach_id = auth.uid() or trainee_id = auth.uid());
+drop policy if exists "coach writes notes" on public.coach_notes;
+create policy "coach writes notes" on public.coach_notes for insert to authenticated
+  with check (coach_id = auth.uid() and public.is_coach_of(trainee_id));
+drop policy if exists "coach edits notes" on public.coach_notes;
+create policy "coach edits notes" on public.coach_notes for update to authenticated
+  using (coach_id = auth.uid()) with check (coach_id = auth.uid());
+drop policy if exists "coach deletes notes" on public.coach_notes;
+create policy "coach deletes notes" on public.coach_notes for delete to authenticated
+  using (coach_id = auth.uid());
+
+notify pgrst, 'reload schema';

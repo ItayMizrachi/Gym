@@ -187,3 +187,54 @@ export async function leaveCoach(linkId: string) {
   const { error } = await sb().from('coach_links').update({ status: 'ended' }).eq('id', linkId)
   if (error) throw friendly(error, 'Could not disconnect. Check the connection.')
 }
+
+/* ------------------------------------------------------------------ notes */
+
+export interface CoachNote {
+  id: string
+  coach_id: string
+  trainee_id: string
+  session_id: string | null
+  text: string
+  created_at: string
+}
+
+/** coach: notes written for one trainee; trainee: notes from their coaches (RLS decides which) */
+export async function listNotes(traineeId: string): Promise<CoachNote[]> {
+  const { data, error } = await sb().from('coach_notes').select('*').eq('trainee_id', traineeId).order('created_at', { ascending: false }).limit(500)
+  if (error) throw friendly(error, 'Could not load notes. Check the connection.')
+  return (data ?? []) as CoachNote[]
+}
+
+export async function addNote(traineeId: string, sessionId: string | null, text: string): Promise<CoachNote> {
+  const { data, error } = await sb().from('coach_notes').insert({ trainee_id: traineeId, session_id: sessionId, text: text.trim() }).select('*').single()
+  if (error) throw friendly(error, 'Could not save the note. Check the connection.')
+  return data as CoachNote
+}
+
+export async function deleteNote(id: string) {
+  const { error } = await sb().from('coach_notes').delete().eq('id', id)
+  if (error) throw friendly(error, 'Could not delete the note. Check the connection.')
+}
+
+/** trainee: notes on one of my workouts (empty when there is no coach or no connection) */
+export async function notesForMySession(sessionId: string): Promise<CoachNote[]> {
+  if (!supabase || useStore.getState().repo?.mode !== 'cloud') return []
+  const { data, error } = await supabase.from('coach_notes').select('*').eq('session_id', sessionId).order('created_at')
+  return error ? [] : ((data ?? []) as CoachNote[])
+}
+
+/* ------------------------------------------------------- editing a trainee's plan */
+
+type PlanTable = 'workouts' | 'workout_exercises' | 'exercises'
+
+/** coach: save one row of a trainee's plan straight to the server */
+export async function saveTraineeRow(table: PlanTable, row: { id: string; user_id: string }) {
+  const { error } = await sb().from(table).upsert(row)
+  if (error) throw friendly(error, 'Could not save. Check the connection.')
+}
+
+export async function deleteTraineeRow(table: 'workouts' | 'workout_exercises', id: string) {
+  const { error } = await sb().from(table).delete().eq('id', id)
+  if (error) throw friendly(error, 'Could not remove. Check the connection.')
+}

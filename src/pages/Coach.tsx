@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Copy, Share2, UserPlus } from 'lucide-react'
 import { CoachLink, createInvite, listTrainees, removeTrainee } from '../lib/coach'
+import { TraineeGlance, prefetchTrainees } from '../lib/coachData'
 import { useStore } from '../lib/store'
 import { Confirm, PageHeader, Sheet } from '../components/ui'
 import '../styles/coach.css'
@@ -15,12 +16,14 @@ export default function Coach() {
   const [adding, setAdding] = useState(false)
   const [invite, setInvite] = useState<CoachLink | null>(null)
   const [cancel, setCancel] = useState<CoachLink | null>(null)
+  const [glances, setGlances] = useState<Map<string, TraineeGlance>>(new Map())
 
   const load = () =>
     listTrainees().then(
       (l) => {
         setList(l)
         setError(null)
+        void prefetchTrainees(l).then(setGlances)
       },
       (e: Error) => setError(e.message)
     )
@@ -58,9 +61,7 @@ export default function Coach() {
                     <span className="title ellipsis" style={{ display: 'block' }}>
                       {l.name}
                     </span>
-                    <span className="meta ellipsis" style={{ display: 'block' }}>
-                      {l.trainee_email}
-                    </span>
+                    <GlanceLine g={glances.get(l.id)} fallback={l.trainee_email ?? ''} />
                   </span>
                   <ChevronRight size={18} aria-hidden />
                 </button>
@@ -199,5 +200,18 @@ function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: ()
         </button>
       </div>
     </Sheet>
+  )
+}
+
+/** "Trained 2 days ago · 3 new records", or a warning after a week without training */
+function GlanceLine({ g, fallback }: { g: TraineeGlance | undefined; fallback: string }) {
+  if (!g) return <span className="meta ellipsis" style={{ display: 'block' }}>{fallback}</span>
+  const when = g.daysSince == null ? 'No workouts yet' : g.daysSince === 0 ? 'Trained today' : g.daysSince === 1 ? 'Trained yesterday' : `${g.daysSince >= 7 ? 'No workout for' : 'Trained'} ${g.daysSince} days${g.daysSince >= 7 ? '' : ' ago'}`
+  const idle = g.daysSince == null || g.daysSince >= 7
+  return (
+    <span className="meta ellipsis" style={{ display: 'block' }}>
+      <span className={idle ? 'coach-idle' : undefined}>{when}</span>
+      {g.newPRs > 0 && <span className="coach-pr-inline"> · {g.newPRs} new {g.newPRs === 1 ? 'record' : 'records'}</span>}
+    </span>
   )
 }
