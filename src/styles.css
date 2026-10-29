@@ -223,7 +223,7 @@ table.t,
   line-height: 1.35;
 }
 .page-head > .btn.icon.ghost:first-child {
-  margin-left: -10px;
+  margin-inline-start: -10px;
 }
 .stack {
   display: flex;
@@ -448,7 +448,7 @@ table.t,
 .select {
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 36px;
+  padding-inline-end: 36px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%239b9a94' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
@@ -467,10 +467,10 @@ input[type='date'].input {
   max-width: 100%;
   -webkit-appearance: none;
   appearance: none;
-  text-align: left;
+  text-align: start;
 }
 input[type='date'].input::-webkit-date-and-time-value {
-  text-align: left;
+  text-align: start;
 }
 label.field,
 div.field {
@@ -493,7 +493,7 @@ div.field {
   pointer-events: none;
 }
 .search .input {
-  padding-left: 40px;
+  padding-inline-start: 40px;
 }
 .search .clear {
   position: absolute;
@@ -653,7 +653,7 @@ div.field {
   left: 50%;
   width: 28px;
   height: 2px;
-  margin-left: -14px;
+  margin-inline-start: -14px;
   border-radius: 0 0 2px 2px;
   background: var(--accent);
 }
@@ -732,7 +732,7 @@ div.field {
   position: relative;
   background: var(--card2);
   border: 1px solid var(--line-strong);
-  border-left: 4px solid var(--line-strong);
+  border-inline-start: 4px solid var(--line-strong);
   border-radius: var(--r-lg);
   padding: 14px var(--s4);
   box-shadow: var(--shadow-float);
@@ -744,7 +744,7 @@ div.field {
 .toast.pr {
   background: #2b2409;
   border-color: var(--accent-line);
-  border-left-color: var(--accent);
+  border-inline-start-color: var(--accent);
   animation: toast-in var(--dur-slow) var(--ease), toast-out var(--dur-base) var(--ease-in) 6.8s forwards;
 }
 /* tapped away: a quick fade up instead of vanishing */
@@ -796,16 +796,16 @@ div.field {
 .toast.near {
   background: #14233b;
   border-color: var(--blue-line);
-  border-left-color: var(--plate-blue);
+  border-inline-start-color: var(--plate-blue);
 }
 .toast.error {
   background: #2b1519;
   border-color: var(--danger-line);
-  border-left-color: var(--danger);
+  border-inline-start-color: var(--danger);
 }
 .toast.ok,
 .toast.success {
-  border-left-color: var(--ok);
+  border-inline-start-color: var(--ok);
 }
 .toast .t {
   font-weight: 600;
@@ -967,7 +967,7 @@ div.field {
 .banner {
   background: var(--card2);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--accent);
+  border-inline-start: 4px solid var(--accent);
   border-radius: var(--radius);
   padding: 14px var(--s4);
 }
@@ -999,7 +999,7 @@ div.field {
 .stat .v .u {
   font-size: 0.55em;
   color: var(--muted);
-  margin-left: 2px;
+  margin-inline-start: 2px;
   font-weight: 600;
 }
 .stat .l {
@@ -1030,7 +1030,7 @@ div.field {
   box-shadow: none;
 }
 .ex.ss {
-  border-left: 4px solid var(--plate-blue);
+  border-inline-start: 4px solid var(--plate-blue);
 }
 .ex-head {
   display: flex;
@@ -1355,7 +1355,7 @@ div.field {
   height: 3px;
   border-radius: 2px;
   vertical-align: middle;
-  margin-right: 6px;
+  margin-inline-end: 6px;
 }
 
 /* ================================================================ lists */
@@ -1399,7 +1399,7 @@ button.card {
   width: 100%;
   min-height: 64px;
   padding: 12px var(--s4);
-  text-align: left;
+  text-align: start;
   position: relative;
   transition: background var(--t) var(--ease);
 }
@@ -1428,7 +1428,7 @@ a.list-row:active {
   line-height: 1.3;
 }
 .list-row .trail {
-  text-align: right;
+  text-align: end;
   flex: none;
 }
 .list-row .trail .kpi {
@@ -1449,7 +1449,7 @@ table.t {
   font-size: 14px;
 }
 table.t th {
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   color: var(--muted);
   font-size: var(--fs-xs);
@@ -1782,7 +1782,7 @@ table.t td {
   overflow: hidden;
 }
 .we-card.ss {
-  border-left: 4px solid var(--plate-blue);
+  border-inline-start: 4px solid var(--plate-blue);
 }
 .we-card .we-head {
   display: flex;
@@ -1846,7 +1846,7 @@ table.t td {
   flex-direction: column;
   gap: var(--s2);
   position: relative;
-  padding-left: 14px;
+  padding-inline-start: 14px;
 }
 .ss-group::before {
   content: '';
@@ -1859,7 +1859,7 @@ table.t td {
   background: var(--plate-blue);
 }
 .ss-group .we-card.ss {
-  border-left: 1px solid var(--blue-line);
+  border-inline-start: 1px solid var(--blue-line);
 }
 .group-pick {
   display: flex;
@@ -1901,8 +1901,8 @@ table.t td {
 }
 .hero-photo .thumb.lg {
   border-radius: 0;
-  border-left: 0;
-  border-right: 0;
+  border-inline-start: 0;
+  border-inline-end: 0;
 }
 .pr-hero {
   display: grid;
@@ -1995,7 +1995,7 @@ table.t td {
 .body-hero .big .u {
   font-size: 20px;
   color: var(--muted);
-  margin-left: 4px;
+  margin-inline-start: 4px;
 }
 .delta-row {
   display: grid;
@@ -2008,7 +2008,7 @@ table.t td {
   text-align: center;
 }
 .delta-row > div + div {
-  border-left: 1px solid var(--line);
+  border-inline-start: 1px solid var(--line);
 }
 .delta-row .kpi {
   font-size: 20px;
@@ -2038,7 +2038,7 @@ table.t td {
   border-radius: var(--radius);
   color: var(--accent);
   font-weight: 600;
-  text-align: left;
+  text-align: start;
 }
 .create-inline:active {
   transform: scale(0.99);
@@ -2174,7 +2174,7 @@ input[type='search']::-webkit-search-decoration {
   flex: 1;
   min-width: 0;
   min-height: var(--tap);
-  text-align: left;
+  text-align: start;
 }
 .we-caret {
   color: var(--faint);
@@ -2201,7 +2201,7 @@ input[type='search']::-webkit-search-decoration {
   opacity: 0.25;
 }
 .we-card .we-head {
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }
 
 /* Google's own sign-in button (rendered by Google in an iframe) */
@@ -2317,12 +2317,12 @@ input[type='search']::-webkit-search-decoration {
   overflow: hidden;
 }
 .we-card .we-head {
-  padding-left: var(--s3);
+  padding-inline-start: var(--s3);
 }
 
 /* small unit after a change, e.g. "−0.7 kg" on Body and in measurements */
 .delta-u {
-  margin-left: 3px;
+  margin-inline-start: 3px;
   font-family: var(--body);
   font-size: 13px;
   font-weight: 500;
@@ -2334,3 +2334,15 @@ input[type='search']::-webkit-search-decoration {
 }
 /* a short set of choices inside a card: wrap onto a second line instead of running to the card edge */
 .chips.wrap { flex-wrap: wrap; overflow: visible; margin: 0; padding: 2px 0 4px; }
+
+/* ======================================================== right to left (Hebrew) */
+/* arrows and chevrons point the way you read */
+[dir='rtl'] .lucide-chevron-right,
+[dir='rtl'] .lucide-chevron-left,
+[dir='rtl'] .lucide-arrow-left,
+[dir='rtl'] .lucide-arrow-right { transform: scaleX(-1); }
+/* weights, reps, times and codes read left to right inside Hebrew text */
+[dir='rtl'] input[inputmode='decimal'],
+[dir='rtl'] input[inputmode='numeric'],
+[dir='rtl'] .num,
+[dir='rtl'] .coach-code { direction: ltr; }

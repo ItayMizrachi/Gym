@@ -1,4 +1,5 @@
 import { ReactNode, useRef, useState } from 'react'
+import { lang, setLang, t } from '../lib/i18n'
 import { BookOpen, ChevronRight, Download, HelpCircle, LayoutGrid, LogIn, LogOut, PlayCircle, Sparkles, Trash2, Upload, ArrowRightLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { reopenWelcome } from '../components/Welcome'
@@ -113,7 +114,7 @@ export default function SettingsPage() {
   const group = (title: string, sub: string, children: ReactNode) => (
     <section className="card stack" aria-label={title}>
       {/* the heading says it; the old one-line sub per group only added noise (kept for screen readers) */}
-      <h2 aria-description={sub}>{title}</h2>
+      <h2 aria-description={sub}>{t(title)}</h2>
       {children}
     </section>
   )
@@ -168,12 +169,24 @@ export default function SettingsPage() {
       {repo?.mode === 'cloud' && <CoachSettings />}
       {repo?.mode === 'cloud' && <SuggestedExercises />}
 
+      <section className="card stack" aria-label="Language">
+        <h2>{t('Language')}</h2>
+        <div className="seg block set-seg" role="group" aria-label="Language">
+          {(['en', 'he'] as const).map((l) => (
+            <button key={l} className={lang === l ? 'on' : ''} aria-pressed={lang === l} onClick={() => lang !== l && setLang(l)}>
+              {l === 'en' ? 'English' : 'עברית'}
+            </button>
+          ))}
+        </div>
+        {lang === 'he' && <div className="small muted">{t('Some screens are still in English.')}</div>}
+      </section>
+
       {group(
         'Workout',
         'How a workout behaves while you train.',
         <>
           {link('Exercises', 'Your exercise list, photos and setup notes', <BookOpen size={18} aria-hidden />, () => nav('/exercises'))}
-          {toggleRow('Rest timer sound', 'Beeps and vibrates when rest is over', sound, (v) => {
+          {toggleRow(t('Rest timer sound'), t('Beeps and vibrates when rest is over'), sound, (v) => {
             setSound(v)
             setFlag('gymlog:sound', v)
             if (v) {
@@ -197,14 +210,14 @@ export default function SettingsPage() {
               if (!ok) toast({ kind: 'info', text: 'Notifications are not allowed', sub: 'The beep and vibration still work while the app is open.' })
             }
           )}
-          {toggleRow('Keep screen awake', 'During a workout, where the phone allows it', awake, (v) => {
+          {toggleRow(t('Keep screen awake'), t('During a workout, where the phone allows it'), awake, (v) => {
             setAwake(v)
             setFlag('gymlog:awake', v)
           })}
-          {toggleRow('Log RPE', 'Rate how hard each set felt, from 6 to 10', prefs.showRpe, (v) => prefs.setPrefs({ showRpe: v }))}
-          {toggleRow('Warm-up sets automatically', 'Before the first heavy barbell or plate-loaded lift for each muscle', prefs.autoWarmup, (v) => prefs.setPrefs({ autoWarmup: v }))}
+          {toggleRow(t('Log RPE'), t('Rate how hard each set felt, from 6 to 10'), prefs.showRpe, (v) => prefs.setPrefs({ showRpe: v }))}
+          {toggleRow(t('Warm-up sets automatically'), t('Before the first heavy barbell or plate-loaded lift for each muscle'), prefs.autoWarmup, (v) => prefs.setPrefs({ autoWarmup: v }))}
           <div>
-            <div>Weight increase</div>
+            <div>{t('Weight increase')}</div>
             <div className="small muted">Suggested when you reach the top of the rep range on every work set</div>
             <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label="Weight increase">
               {INCREMENTS.map((v) => (

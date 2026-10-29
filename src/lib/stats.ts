@@ -12,6 +12,7 @@
  * - Every function takes `now` explicitly (defaulting to the current time) so results are reproducible.
  */
 import { DB, Session, SessionSet, Workout } from './types'
+import { t } from './i18n'
 import { evaluateSet, priorSets, sessionDate } from './pr'
 
 const DAY = 86_400_000
@@ -359,10 +360,10 @@ export function relativeDay(iso: string, now = new Date()): string {
   const a = new Date(dayKey(iso) + 'T12:00:00').getTime()
   const b = new Date(dayKey(now) + 'T12:00:00').getTime()
   const d = Math.round((b - a) / DAY)
-  if (d <= 0) return 'today'
-  if (d === 1) return 'yesterday'
-  if (d < 14) return `${d} days ago`
-  return `${Math.round(d / 7)} weeks ago`
+  if (d <= 0) return t('today')
+  if (d === 1) return t('yesterday')
+  if (d < 14) return t('{n} days ago', { n: d })
+  return t('{n} weeks ago', { n: Math.round(d / 7) })
 }
 
 /* ---------- full workout summary ---------- */

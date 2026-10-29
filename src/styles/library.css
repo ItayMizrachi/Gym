@@ -140,7 +140,7 @@
 .lib-row > .list-row {
   flex: 1;
   min-width: 0;
-  padding-right: var(--s2);
+  padding-inline-end: var(--s2);
 }
 .lib-row > .list-row::before {
   display: none;
@@ -149,7 +149,7 @@
   flex: none;
   min-width: 64px;
   min-height: 40px;
-  margin-right: 14px;
+  margin-inline-end: 14px;
   padding: 0 12px;
   border-radius: var(--r-pill);
   /* neutral: yellow stays for the one primary action on the screen */
@@ -357,10 +357,10 @@
 
 /* rows with a tappable thumb: the thumb is its own button, the rest of the row is another */
 .lib-row {
-  padding-left: 14px;
+  padding-inline-start: 14px;
 }
 .lib-row > .list-row {
-  padding-left: 12px;
+  padding-inline-start: 12px;
 }
 .lib-row.xp-on {
   background: var(--card2);

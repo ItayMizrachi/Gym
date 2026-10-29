@@ -32,7 +32,7 @@
   font-weight: 700;
   line-height: var(--lh-tight);
   letter-spacing: var(--track-tight);
-  padding-right: 72px;
+  padding-inline-end: 72px;
   overflow-wrap: anywhere;
 }
 .hm-when { display: block; margin-top: 2px; font-size: var(--fs-base); font-weight: 500; letter-spacing: 0; color: var(--muted); }
@@ -50,7 +50,7 @@
   width: 100%;
   min-height: 60px;
   padding: 10px var(--s4);
-  text-align: left;
+  text-align: start;
   color: var(--text);
   background: none;
   transition: background var(--t) var(--ease);
@@ -82,7 +82,7 @@
 .hm-days i.on { background: var(--ok); color: var(--ok-ink); }
 .hm-days i.today { box-shadow: 0 0 0 1.5px var(--text-2); }
 
-.hm-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; background: var(--ok); vertical-align: 1px; }
+.hm-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 4px; background: var(--ok); vertical-align: 1px; }
 .hm-dot.work { background: var(--accent); }
 .hm-rec-line { font-size: var(--fs-sm); color: var(--muted); line-height: 1.4; }
 .hm-rec-line b { color: var(--text); font-weight: 600; }
@@ -96,7 +96,7 @@
   width: 100%;
   min-height: 60px;
   padding: 10px var(--s4) 8px;
-  text-align: left;
+  text-align: start;
   color: var(--text);
 }
 .hm-start-head:focus-visible { outline: none; box-shadow: inset var(--focus); }
@@ -120,7 +120,7 @@
 .hm-start-bar { height: 3px; margin: 0 var(--s4) var(--s3); border-radius: var(--r-pill); background: var(--line-strong); overflow: hidden; }
 .hm-start-bar i { display: block; height: 100%; background: var(--ok); }
 .hm-start-list { display: flex; flex-direction: column; padding: 0 var(--s4) var(--s2); }
-.hm-start-row { display: flex; align-items: center; gap: var(--s3); min-height: 52px; width: 100%; text-align: left; color: var(--text); }
+.hm-start-row { display: flex; align-items: center; gap: var(--s3); min-height: 52px; width: 100%; text-align: start; color: var(--text); }
 .hm-start-row + .hm-start-row { border-top: 1px solid var(--line); }
 .hm-start-row.done { opacity: 0.6; }
 .hm-start-row.done .hm-start-t { text-decoration: line-through; }
@@ -165,7 +165,7 @@
 
 /* weekly recap (first two days of a week) */
 .recap { position: relative; padding: 14px 44px 14px 16px; }
-.recap-main { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+.recap-main { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: start; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
 .recap-t { font-size: 13px; color: var(--muted); }
 .recap-nums { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 15px; color: var(--text-2); }
 .recap-nums b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }

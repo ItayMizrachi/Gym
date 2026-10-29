@@ -44,7 +44,7 @@
   gap: 12px;
   width: 100%;
   padding: 16px;
-  text-align: left;
+  text-align: start;
   font: inherit;
   color: var(--text);
   background: var(--card);
@@ -69,7 +69,7 @@
 }
 .pg-foot { display: flex; align-items: center; gap: 10px; }
 .pg-avs { display: flex; flex: none; }
-.pg-avs .pg-av + .pg-av, .pg-avs .pg-more { margin-left: -4px; }
+.pg-avs .pg-av + .pg-av, .pg-avs .pg-more { margin-inline-start: -4px; }
 .pg-avs .pg-av { box-shadow: 0 0 0 2px var(--card); }
 .pg-more {
   width: 32px; height: 32px; border-radius: 50%;
@@ -155,7 +155,7 @@
   border: 0;
   color: var(--text);
   font: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   border-radius: var(--r-sm);
 }
@@ -204,16 +204,16 @@
 
 /* settings groups */
 .set-group-sub { margin-top: -4px; }
-.home-links .list-row { text-align: left; width: 100%; }
+.home-links .list-row { text-align: start; width: 100%; }
 .home-links .list-row > svg { color: var(--muted); flex: none; }
 .home-links .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .home-link-t { font-weight: 600; }
-.we-help { align-self: flex-start; margin-left: -8px; color: var(--muted); }
+.we-help { align-self: flex-start; margin-inline-start: -8px; color: var(--muted); }
 .we-gloss { margin: 0 0 4px; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
 .we-gloss dt { font-weight: 650; color: var(--text); }
 .we-gloss dd { margin: 0; }
-.set-link { justify-content: flex-start; text-align: left; min-height: 48px; }
-.set-link-t { display: flex; flex-direction: column; gap: 1px; text-align: left; }
+.set-link { justify-content: flex-start; text-align: start; min-height: 48px; }
+.set-link-t { display: flex; flex-direction: column; gap: 1px; text-align: start; }
 .set-link-sub { color: var(--muted); font-weight: 500; }
 .set-link.primary .set-link-sub { color: inherit; opacity: 0.75; }
 
@@ -256,12 +256,12 @@
 .acct-sync { display: flex; align-items: center; gap: 6px; }
 .acct-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex: none; }
 .set-danger { padding: 0; overflow: hidden; }
-.set-row-btn { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 52px; padding: 0 var(--s4); background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.set-row-btn { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 52px; padding: 0 var(--s4); background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: start; cursor: pointer; }
 .set-row-btn + .set-row-btn { border-top: 1px solid var(--line); }
 .set-row-btn.danger-text { color: var(--danger-text); }
 .set-version { margin-top: var(--s2); opacity: 0.6; }
 /* links inside a settings group read as rows, like the switches, not as framed buttons */
-.card > .set-link { background: transparent; border: 0; border-radius: 0; padding-left: 0; padding-right: 0; min-height: 52px; box-shadow: none; }
+.card > .set-link { background: transparent; border: 0; border-radius: 0; padding-inline-start: 0; padding-inline-end: 0; min-height: 52px; box-shadow: none; }
 .card > .set-link + .set-link, .card > .set-tog + .set-link, .card > input + .set-link { border-top: 1px solid var(--line); }
 .card > .set-link .set-link-t { font-weight: 500; }
 /* one-of-four choices in Settings: a full-width segmented control, equal gaps to both edges */

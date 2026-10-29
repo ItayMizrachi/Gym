@@ -82,7 +82,7 @@
   font-size: 28px;
   font-weight: 700;
   line-height: 1;
-  padding-right: 70px;
+  padding-inline-end: 70px;
   letter-spacing: var(--track-tight);
 }
 .hero-meta {
@@ -129,7 +129,7 @@
 }
 .welcome-steps {
   margin: 4px 0 6px;
-  padding-left: 20px;
+  padding-inline-start: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -207,8 +207,8 @@
   position: absolute;
   top: -3px;
   bottom: -3px;
-  border-left: 1px dashed #4d5159;
-  border-right: 1px dashed #4d5159;
+  border-inline-start: 1px dashed #4d5159;
+  border-inline-end: 1px dashed #4d5159;
   background: rgba(95, 207, 143, 0.07);
 }
 .mbar-fill {
@@ -228,7 +228,7 @@
   background: var(--accent);
 }
 .mbar-v {
-  text-align: right;
+  text-align: end;
   font-family: var(--display);
   font-size: 15px;
   font-weight: 650;
@@ -344,7 +344,7 @@
 .trow-main {
   flex: 1;
   min-width: 0;
-  text-align: left;
+  text-align: start;
 }
 .trow-name {
   font-family: var(--display);
@@ -408,7 +408,7 @@
 }
 .hrow {
   width: 100%;
-  text-align: left;
+  text-align: start;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -424,8 +424,8 @@
   flex: none;
   width: 44px;
   text-align: center;
-  border-right: 1px solid var(--line);
-  padding-right: 10px;
+  border-inline-end: 1px solid var(--line);
+  padding-inline-end: 10px;
 }
 .hdate .d {
   font-family: var(--display);
@@ -528,7 +528,7 @@
 }
 .cmp-row .d {
   min-width: 78px;
-  text-align: right;
+  text-align: end;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
@@ -627,7 +627,7 @@
 }
 @media (max-width: 360px) {
   .trow .trow-more { display: none; }
-  .trow { padding-left: var(--s3); }
+  .trow { padding-inline-start: var(--s3); }
   .ins-actions .btn { font-size: 15px; padding: 0 8px; }
   .ins-actions .btn svg { display: none; }
 }
@@ -636,7 +636,7 @@
 .hlist { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .hlist .hrow { background: none; border: 0; border-radius: 0; padding: 12px 14px; gap: 14px; min-height: 64px; }
 .hlist .hrow + .hrow { margin-top: 0; border-top: 1px solid var(--line); }
-.hlist .hdate { border-right: 0; padding-right: 0; width: 34px; }
+.hlist .hdate { border-inline-end: 0; padding-inline-end: 0; width: 34px; }
 .hlist .hdate .d { font-size: 20px; }
 .hlist .hname { font-size: 16px; font-weight: 600; }
 .hlist .hmeta { display: block; margin-top: 2px; }
@@ -653,7 +653,7 @@
 
 /* History by week: one line per week (dates, count, volume, the workouts' names); open it for the workouts */
 .hweek + .hweek { border-top: 1px solid var(--line); }
-.hweek-head { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 60px; padding: 10px 16px; background: none; border: 0; color: var(--text); text-align: left; cursor: pointer; }
+.hweek-head { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 60px; padding: 10px 16px; background: none; border: 0; color: var(--text); text-align: start; cursor: pointer; }
 .hweek-t { display: block; font-size: 15px; font-weight: 600; }
 .hweek-n { font-weight: 400; color: var(--muted); }
 .hweek-names { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }

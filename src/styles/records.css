@@ -133,7 +133,7 @@
   gap: var(--s3);
   width: 100%;
   min-height: 44px;
-  text-align: left;
+  text-align: start;
 }
 .ach-next-row .grow {
   display: flex;
@@ -229,7 +229,7 @@
   flex-direction: column;
   gap: var(--s3);
   width: 100%;
-  text-align: left;
+  text-align: start;
   color: inherit;
 }
 .rec-card:active {
@@ -304,7 +304,7 @@
 .stall { display: flex; flex-direction: column; gap: 2px; }
 .stall-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2); margin-bottom: 4px; }
 .stall-head h2 { font-size: var(--fs-md); }
-.stall .stall-row { display: flex; align-items: center; gap: var(--s2); min-height: 44px; width: 100%; padding: 0; background: none; border: 0; border-top: 1px solid var(--line); color: var(--text); text-align: left; cursor: pointer; }
+.stall .stall-row { display: flex; align-items: center; gap: var(--s2); min-height: 44px; width: 100%; padding: 0; background: none; border: 0; border-top: 1px solid var(--line); color: var(--text); text-align: start; cursor: pointer; }
 .stall .stall-name { min-width: 0; font-weight: 600; }
 .stall-n { flex: none; font-variant-numeric: tabular-nums; }
 .stall-tip { margin-top: 6px; }
@@ -317,7 +317,7 @@
 
 /* Records as one quiet list */
 .rec-list { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
-.rec-row { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 64px; padding: 10px 14px; background: none; border: 0; color: var(--text); text-align: left; cursor: pointer; }
+.rec-row { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 64px; padding: 10px 14px; background: none; border: 0; color: var(--text); text-align: start; cursor: pointer; }
 .rec-row + .rec-row { border-top: 1px solid var(--line); }
 .rec-row .rec-name { display: block; font-weight: 600; }
 .rec-main { flex: none; display: flex; flex-direction: column; align-items: flex-end; }

@@ -141,7 +141,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  margin-left: -1px;
+  margin-inline-start: -1px;
   background: #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   pointer-events: none;
@@ -177,7 +177,7 @@
   color: #fff;
   font-size: 12px;
   line-height: 1.25;
-  text-align: left;
+  text-align: start;
   pointer-events: none;
 }
 .pc-chip.l {
@@ -185,7 +185,7 @@
 }
 .pc-chip.r {
   right: 8px;
-  text-align: right;
+  text-align: end;
 }
 .pc-chip b {
   font-size: 13px;

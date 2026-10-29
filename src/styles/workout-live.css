@@ -39,7 +39,7 @@
   white-space: nowrap;
   letter-spacing: var(--track-tight);
 }
-.ls-stat .u { font-size: 13px; color: var(--muted); margin-left: 2px; font-weight: 500; }
+.ls-stat .u { font-size: 13px; color: var(--muted); margin-inline-start: 2px; font-weight: 500; }
 .ls-stat .l { font-size: 12px; color: var(--muted); }
 .ls-map {
   flex: none;
@@ -61,7 +61,7 @@
 .ls-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; }
 .ls-row .bar .plan { background: var(--line-strong); }
 .ls-row .bar .done { background: var(--accent); }
-.ls-row .n { text-align: right; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ls-row .n { text-align: end; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ls-stat .sp-clock { display: block; }
 
 /* ---------- exercise picker ---------- */
@@ -143,7 +143,7 @@
 }
 .kp-tool.on { background: var(--accent-soft); color: var(--accent); }
 .kp-tool:active { background: var(--card2); }
-.kp-label { font-size: 13px; color: var(--muted); text-align: right; padding-right: 2px; font-variant-numeric: tabular-nums; }
+.kp-label { font-size: 13px; color: var(--muted); text-align: end; padding-inline-end: 2px; font-variant-numeric: tabular-nums; }
 .kp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
 .kp-grid.calc { grid-template-columns: repeat(5, 1fr); }
 .kp-key {
@@ -196,9 +196,9 @@
   font-weight: 650;
   font-size: 11px;
   color: var(--text);
-  margin-left: 4px;
+  margin-inline-start: 4px;
 }
-.lg-dot:first-child { margin-left: 0; }
+.lg-dot:first-child { margin-inline-start: 0; }
 .lg-dot.warmup { border: 2px dashed #8a8984; color: #b8b6ae; }
 .lg-dot.drop { border-color: var(--plate-blue); color: var(--blue-text); }
 .lg-dot.failure { border-color: var(--danger); color: var(--danger-text); }
@@ -231,8 +231,8 @@
   border: 1px solid var(--line-strong);
   transform: rotate(45deg);
 }
-.cm-note.below .cm-arrow { top: -9px; border-right: 0; border-bottom: 0; }
-.cm-note.above .cm-arrow { bottom: -9px; border-left: 0; border-top: 0; }
+.cm-note.below .cm-arrow { top: -9px; border-inline-end: 0; border-bottom: 0; }
+.cm-note.above .cm-arrow { bottom: -9px; border-inline-start: 0; border-top: 0; }
 .cm-step { font-size: 12px; color: var(--accent); font-weight: 600; }
 .cm-title { font-family: var(--display); font-size: 18px; font-weight: 650; margin-top: 2px; }
 .cm-text { font-size: 15px; color: var(--text-2); margin-top: 4px; line-height: 1.35; }
@@ -316,7 +316,7 @@
 .ex { scroll-margin-top: 142px; transition: border-color var(--t) var(--ease), padding var(--t) var(--ease); }
 /* the exercise you are on gets a quiet yellow edge; superset cards keep their blue spine */
 .ex.current { border-color: var(--accent-line); }
-.ex.current.ss { border-left-color: var(--plate-blue); }
+.ex.current.ss { border-inline-start-color: var(--plate-blue); }
 .ex.shut { padding-top: var(--s3); padding-bottom: var(--s3); }
 
 .ex .ex-head { align-items: center; }
@@ -331,7 +331,7 @@
 .ex-title {
   flex: 1; min-width: 0; min-height: 48px;
   display: flex; flex-direction: column; justify-content: center; gap: 2px;
-  text-align: left; color: var(--text);
+  text-align: start; color: var(--text);
 }
 .ex .ex-title .ex-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .ex-sum { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; color: var(--muted); line-height: 1.3; }

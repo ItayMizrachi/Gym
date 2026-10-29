@@ -1,4 +1,5 @@
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
+import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
@@ -640,20 +641,20 @@ function ExerciseCard({
       {prog?.kind === 'increase' && (
         <div className={`prog ${prog.applied === false ? 'off' : ''}`}>
           <TrendingUp size={14} aria-hidden />
-          <span>{prog.applied === false ? `Kept at ${fmtKg(prog.from)} kg` : `+${fmtKg(prog.delta)} kg today`}</span>
-          <button onClick={() => mutate(toggleProgression, true)}>{prog.applied === false ? 'Redo' : 'Undo'}</button>
+          <span>{prog.applied === false ? t('Kept at {w} kg', { w: fmtKg(prog.from) }) : t('+{w} kg today', { w: fmtKg(prog.delta) })}</span>
+          <button onClick={() => mutate(toggleProgression, true)}>{prog.applied === false ? t('Redo') : t('Undo')}</button>
         </div>
       )}
-      {prog?.kind === 'hold' && <div className="prog hold-chip">Hold {fmtKg(prog.from)} kg · aim for {se.rep_min}+ reps</div>}
+      {prog?.kind === 'hold' && <div className="prog hold-chip">{t('Hold {w} kg · aim for {r}+ reps', { w: fmtKg(prog.from), r: se.rep_min })}</div>}
 
       <div className={`sets t-${tracking}`}>
         <div className="set-row">
-          <div className="hdr">Set</div>
-          <div className="hdr">Previous</div>
+          <div className="hdr">{t('Set')}</div>
+          <div className="hdr">{t('Previous')}</div>
           {tracking === 'time' ? (
             <div className="hdr span2">Time</div>
           ) : tracking === 'reps' ? (
-            <div className="hdr span2">Reps</div>
+            <div className="hdr span2">{t('Reps')}</div>
           ) : (
           <>
           <div className="hdr">
@@ -662,10 +663,10 @@ function ExerciseCard({
               onClick={() => setPlateSet((se.sets.find((x) => !x.done) ?? se.sets[se.sets.length - 1])?.id ?? null)}
               aria-label="Plate calculator"
             >
-              kg <Disc size={12} />
+              {t('kg')} <Disc size={12} />
             </button>
           </div>
-          <div className="hdr">Reps</div>
+          <div className="hdr">{t('Reps')}</div>
           </>
           )}
           <div className="hdr">✓</div>
@@ -792,7 +793,7 @@ function ExerciseCard({
             )
           }
         >
-          <Plus size={18} /> Add set
+          <Plus size={18} /> {t('Add set')}
         </button>
         {tracking === 'weight_reps' && (
         <button
@@ -807,11 +808,11 @@ function ExerciseCard({
             )
           }
         >
-          <Plus size={14} /> Drop
+          <Plus size={14} /> {t('Drop')}
         </button>
         )}
         <button className="btn sm" onClick={() => setWarmup(true)}>
-          <Plus size={14} /> Warm-up
+          <Plus size={14} /> {t('Warm-up')}
         </button>
       </div>
       </div>
@@ -1029,13 +1030,13 @@ export default function SessionPage() {
             className="btn primary sp-finish"
             onClick={finishTap}
           >
-            <Flag size={16} /> Finish
+            <Flag size={16} /> {t('Finish')}
           </button>
         </div>
         <div className="ls-strip">
           <div className="ls-stat">
             <ElapsedClock start={session.started_at} />
-            <div className="l">Duration</div>
+            <div className="l">{t('Duration')}</div>
           </div>
           <div className="ls-stat">
             <div className="v">
@@ -1043,7 +1044,7 @@ export default function SessionPage() {
               <span className="u">kg</span>
             </div>
             <div className={`l${beatLast ? ' beat' : ''}`}>
-              {beatLast ? 'Beat last time' : lastVolume ? `last: ${fmtVolume(lastVolume)}` : 'Volume'}
+              {beatLast ? t('Beat last time') : lastVolume ? t('last: {v}', { v: fmtVolume(lastVolume) }) : t('Volume')}
             </div>
           </div>
           <div className="ls-stat">
@@ -1051,7 +1052,7 @@ export default function SessionPage() {
               {doneSets}
               <span className="u">/{totalSets}</span>
             </div>
-            <div className="l">Sets</div>
+            <div className="l">{t('Sets')}</div>
           </div>
           <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label="Sets per muscle">
             <BodyMap intensity={liveIntensity(muscles)} height={40} />
@@ -1078,16 +1079,16 @@ export default function SessionPage() {
       ))}
 
       <button className="btn wl-addex" onClick={() => setPicking(true)}>
-        <Plus size={20} /> Add exercise
+        <Plus size={20} /> {t('Add exercise')}
       </button>
       {session.data.exercises.length > 1 && (
         <button className="btn ghost" onClick={() => setReordering(true)}>
-          <GripVertical size={16} aria-hidden /> Reorder exercises
+          <GripVertical size={16} aria-hidden /> {t('Reorder exercises')}
         </button>
       )}
 
       <label className="field">
-        Workout notes
+        {t('Workout notes')}
         <textarea
           className="textarea"
           placeholder="How did it feel? Anything to remember next time…"
@@ -1098,13 +1099,13 @@ export default function SessionPage() {
 
       {/* the natural end of the page: finish here as well as in the header */}
       <button className="btn primary block" onClick={finishTap}>
-        <Flag size={18} aria-hidden /> Finish workout
+        <Flag size={18} aria-hidden /> {t('Finish workout')}
       </button>
       <button className="btn ghost danger-text" onClick={() => setConfirmDiscard(true)}>
-        <Trash2 size={16} aria-hidden /> Discard workout
+        <Trash2 size={16} aria-hidden /> {t('Discard workout')}
       </button>
       <button className="btn ghost" onClick={() => nav('/help')}>
-        <HelpCircle size={18} aria-hidden /> How the workout screen works
+        <HelpCircle size={18} aria-hidden /> {t('How the workout screen works')}
       </button>
 
       {picking && (
@@ -1447,7 +1448,7 @@ function MoreSheet({
           <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
         </label>
         <button className="btn block" disabled={count < 2} onClick={onReorder}>
-          <GripVertical size={16} aria-hidden /> Reorder exercises
+          <GripVertical size={16} aria-hidden /> {t('Reorder exercises')}
         </button>
         <div className="exo-sep">
           <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />

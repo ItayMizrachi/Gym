@@ -1,4 +1,5 @@
 import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
+import { lang, t } from '../lib/i18n'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
@@ -64,8 +65,8 @@ function startedText(iso: string): string {
   const d = new Date(iso)
   const today = new Date().toDateString() === d.toDateString()
   return today
-    ? `Started at ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
-    : `Started ${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}`
+    ? t('Started at {time}', { time: d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) })
+    : t('Started {date}', { date: d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) })
 }
 
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
@@ -166,7 +167,7 @@ export default function Home() {
   }
 
   const hour = now.getHours()
-  const greeting = hour < 5 ? 'Late session?' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+  const greeting = t(hour < 5 ? 'Late session?' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
   const hero = next && !active ? templateInfo(db, next.workout) : null
   const tw = weeks.thisWeek
   const lw = weeks.lastWeekToDate
@@ -191,7 +192,7 @@ export default function Home() {
         </div>
         {coachRole && (
           <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label="Coaching: your trainees">
-            <Users size={16} aria-hidden /> Coaching
+            <Users size={16} aria-hidden /> {t('Coaching')}
           </button>
         )}
         {streak.current > 0 && (
@@ -209,11 +210,11 @@ export default function Home() {
 
       {active && (
         <div className="card hm-hero">
-          <div className="hm-label">Workout in progress</div>
+          <div className="hm-label">{t('Workout in progress')}</div>
           {/* the day in the name ("Monday") says nothing about a workout already running: show how far along it is */}
           <div className="hm-name">{splitName(active.name)[0]}</div>
           <div className="hm-meta">
-            {startedText(active.started_at)} · {activeDone} of {activeTotal} sets
+            {startedText(active.started_at)} · {t('{a} of {b} sets', { a: activeDone, b: activeTotal })}
           </div>
           <button
             className="btn primary block hm-go"
@@ -222,7 +223,7 @@ export default function Home() {
               nav(`/session/${active.id}`)
             }}
           >
-            <Play size={18} aria-hidden /> Resume workout
+            <Play size={18} aria-hidden /> {t('Resume workout')}
           </button>
           {weekRows}
         </div>
@@ -233,20 +234,20 @@ export default function Home() {
           <div className="welcome-mark" aria-hidden>
             <Dumbbell size={26} />
           </div>
-          <h2>Pick a program to begin</h2>
-          <p className="muted">Choose a ready-made plan, start it, and tick each set as you go. Weights fill in from last time.</p>
+          <h2>{t('Pick a program to begin')}</h2>
+          <p className="muted">{t('Choose a ready-made plan, start it, and tick each set as you go. Weights fill in from last time.')}</p>
           <button className="btn primary block" onClick={() => nav('/programs')}>
-            <LayoutGrid size={18} aria-hidden /> Browse programs
+            <LayoutGrid size={18} aria-hidden /> {t('Browse programs')}
           </button>
           <button className="btn secondary block" onClick={loadStarter}>
-            <Sparkles size={18} aria-hidden /> Load my starter plan (4 days)
+            <Sparkles size={18} aria-hidden /> {t('Load my starter plan (4 days)')}
           </button>
           <div className="hm-welcome-more">
             <button className="btn ghost" onClick={newWorkout}>
-              Build your own
+              {t('Build your own')}
             </button>
             <button className="btn ghost" disabled={!!active} onClick={emptyWorkout}>
-              Empty workout
+              {t('Empty workout')}
             </button>
           </div>
         </div>
@@ -255,36 +256,36 @@ export default function Home() {
         next && (
           <div className="card hm-hero">
             <div className="hm-label">
-              {planned ? "Today's workout" : 'Up next'}
+              {t(planned ? "Today's workout" : 'Up next')}
               {next.reason === 'fresh' && next.tired?.length ? (
-                <span className="muted"> · {listMuscles(next.tired)} still recovering</span>
+                <span className="muted"> · {t('{m} still recovering', { m: listMuscles(next.tired) })}</span>
               ) : (
-                next.lastDone && <span className="muted"> · last done {relativeDay(next.lastDone, now)}</span>
+                next.lastDone && <span className="muted"> · {t('last done {when}', { when: relativeDay(next.lastDone, now) })}</span>
               )}
             </div>
             <div className="hm-name">
               {heroName}
               {/* "(Wednesday)" in the name only helps on a Wednesday: then it reads "Today", other days nothing */}
               {heroWhen && heroWhen.toLowerCase() === new Date().toLocaleDateString('en-GB', { weekday: 'long' }).toLowerCase() && (
-                <span className="hm-when">Today</span>
+                <span className="hm-when">{t('Today')}</span>
               )}
             </div>
             <div className="hm-meta">
               <span>
-                <b>{hero.wes.length}</b> exercises
+                <b>{hero.wes.length}</b> {t('exercises')}
               </span>
               <span>
-                <b>{hero.sets}</b> sets
+                <b>{hero.sets}</b> {t('sets')}
               </span>
               {hero.usual != null && (
                 <span>
-                  about <b>{fmtMinutes(hero.usual)}</b>
+                  {t('about')} <b>{fmtMinutes(hero.usual)}</b>
                 </span>
               )}
             </div>
             {hero.names.length > 0 && <div className="hm-preview">{hero.names.join(' · ')}</div>}
             <button className="btn primary block hm-go" onClick={() => start(next.workout)} disabled={hero.wes.length === 0}>
-              <Play size={18} aria-hidden /> Start {heroName}
+              <Play size={18} aria-hidden /> {t('Start {name}', { name: heroName })}
             </button>
             {weekRows}
           </div>
@@ -297,7 +298,7 @@ export default function Home() {
       {workouts.length > 0 && (
         <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
           <div className="sec-head hm-sec">
-            <h2>Your workouts</h2>
+            <h2>{t('Your workouts')}</h2>
             <button className="btn sm secondary hm-new" onClick={() => setAdding(true)} aria-haspopup="dialog">
               <Plus size={16} aria-hidden /> New
             </button>
@@ -335,8 +336,8 @@ export default function Home() {
                               {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
                               {splitName(w.name)[1] && <span className="trow-days">{splitName(w.name)[1]} · </span>}
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
-                              {info.wes.length} exercises
-                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ' · new'}
+                              {info.wes.length} {t('exercises')}
+                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
                             </div>
                           </button>
                           {/* moving to a folder lives in the workout editor (Folder → Move), not on every row */}

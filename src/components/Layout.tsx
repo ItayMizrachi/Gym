@@ -1,4 +1,5 @@
 import { Component, ReactNode, Suspense, useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -392,7 +393,7 @@ export default function Layout() {
                   <span className="nav-ico" aria-hidden>
                     <t.icon size={22} />
                   </span>
-                  {t.label}
+                  {tr(t.label)}
                 </Link>
               )
             })}

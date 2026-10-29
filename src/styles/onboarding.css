@@ -28,7 +28,7 @@
 .help-list { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
 .help-sec + .help-sec { border-top: 1px solid var(--line); }
 .help-sec h2 { margin: 0; font-size: 17px; }
-.help-q { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 56px; padding: 0 var(--s4); background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.help-q { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 56px; padding: 0 var(--s4); background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: start; cursor: pointer; }
 .help-caret { color: var(--muted); transition: transform var(--dur-fast) var(--ease); flex: none; }
 .help-sec.open .help-caret { transform: rotate(180deg); }
 .help-a { padding: 0 var(--s4) var(--s4); animation: fade var(--dur-base) var(--ease); }
@@ -36,4 +36,4 @@
 .help-legend { display: grid; grid-template-columns: 44px 1fr; gap: 10px 8px; align-items: center; }
 .help-legend .kind { pointer-events: none; }
 .help-ex { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.help-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-2); margin-right: 12px; }
+.help-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-2); margin-inline-end: 12px; }
