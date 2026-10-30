@@ -1,4 +1,5 @@
 import { Exercise, Tracking, Workout, WorkoutExercise } from './types'
+import { t } from './i18n'
 import { uid, nowIso } from './uid'
 import { SINGLE_WORKOUTS, WEEKLY_PROGRAMS } from './programData'
 import { programDays } from './plan'
@@ -48,7 +49,7 @@ export const programById = (id: string | null | undefined) => PROGRAMS.find((p) 
 /* ------------------------------------------------------------- equipment */
 
 export type Gear = 'none' | 'home' | 'gym'
-export const GEAR_LABEL: Record<Gear, string> = { none: 'No equipment', home: 'Dumbbells', gym: 'Gym' }
+export const GEAR_LABEL: Record<Gear, string> = { none: t('No equipment'), home: t('Dumbbells'), gym: t('Gym') }
 const NO_GEAR = new Set(['Bodyweight', 'Other'])
 const HOME_GEAR = new Set(['Bodyweight', 'Other', 'Dumbbell', 'Kettlebell', 'Band'])
 
@@ -80,7 +81,7 @@ export const programMinutes = (p: Program) => Math.max(...p.workouts.map(estimat
 
 /** Short line for a card: "About 45 min · Gym" or "3 days a week · Dumbbells". */
 export function programMeta(p: Program) {
-  const lead = p.kind === 'single' ? `About ${programMinutes(p)} min` : `${p.days} days a week`
+  const lead = p.kind === 'single' ? t('About {n} min', { n: programMinutes(p) }) : t('{n} days a week', { n: p.days })
   return `${lead} · ${GEAR_LABEL[gearOf(p)]}`
 }
 
@@ -104,14 +105,14 @@ export interface ProgramFilter {
 
 export const SIZE_OPTIONS: Record<Program['kind'], { id: string; label: string; test: (p: Program) => boolean }[]> = {
   single: [
-    { id: 'short', label: 'Up to 30 min', test: (p) => programMinutes(p) <= 30 },
-    { id: 'mid', label: '35–40 min', test: (p) => programMinutes(p) > 30 && programMinutes(p) <= 40 },
-    { id: 'long', label: '45 min or more', test: (p) => programMinutes(p) > 40 }
+    { id: 'short', label: t('Up to 30 min'), test: (p) => programMinutes(p) <= 30 },
+    { id: 'mid', label: t('{a}–{b} min', { a: 35, b: 40 }), test: (p) => programMinutes(p) > 30 && programMinutes(p) <= 40 },
+    { id: 'long', label: t('45 min or more'), test: (p) => programMinutes(p) > 40 }
   ],
   weekly: [
-    { id: '2-3', label: '2–3 days', test: (p) => p.days <= 3 },
-    { id: '4', label: '4 days', test: (p) => p.days === 4 },
-    { id: '5-6', label: '5–6 days', test: (p) => p.days >= 5 }
+    { id: '2-3', label: t('{a}–{b} days', { a: 2, b: 3 }), test: (p) => p.days <= 3 },
+    { id: '4', label: t('{n} days', { n: 4 }), test: (p) => p.days === 4 },
+    { id: '5-6', label: t('{a}–{b} days', { a: 5, b: 6 }), test: (p) => p.days >= 5 }
   ]
 }
 

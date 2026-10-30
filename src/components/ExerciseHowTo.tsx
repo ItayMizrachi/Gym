@@ -58,7 +58,7 @@ export function StepList({ id, fold = false }: { id: string; fold?: boolean }) {
       </ol>
       {fold && steps.length > 3 && (
         <button className="btn ghost block" aria-expanded={all} onClick={() => setAll(!all)}>
-          {all ? 'Show fewer steps' : `Show all ${steps.length} steps`}
+          {all ? tr('Show fewer steps') : tr('Show all {n} steps', { n: steps.length })}
         </button>
       )}
     </>

@@ -120,7 +120,7 @@ export default function Exercises() {
         <div className="grow">
           <h1>{tr("Exercises")}</h1>
           <div className="small muted" style={{ marginTop: 2 }}>
-            Your exercises and a library of {lib ? lib.length : '870+'} with photos.
+            {tr('Your exercises and a library of {n} with photos.', { n: lib ? lib.length : '870+' })}
           </div>
         </div>
         <button className="btn primary icon" onClick={() => setCreating(true)} aria-label={tr("Create your own exercise")}>

@@ -195,7 +195,7 @@ export default function SettingsPage() {
             }
           })}
           {toggleRow(
-            'Rest-over notification',
+            t('Rest-over notification'),
             !notifySupported()
               ? 'Not available in this browser. On iPhone, add GymLog to the Home Screen first (iOS 16.4+).'
               : perm === 'denied'
@@ -249,7 +249,7 @@ export default function SettingsPage() {
                   aria-pressed={prefs.barKg === v}
                   onClick={() => prefs.setPrefs({ barKg: v })}
                 >
-                  {v ? `${v} kg` : 'No bar'}
+                  {v ? `${v} kg` : t('No bar')}
                 </button>
               ))}
             </div>

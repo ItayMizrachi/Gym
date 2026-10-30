@@ -41,10 +41,10 @@ function Avatar({ name, size = 44 }: { name: string; size?: number }) {
 function Chips({ p }: { p: Program }) {
   return (
     <div className="pg-facts">
-      <span className={`pg-level ${p.level.toLowerCase()}`}>{p.level}</span>
+      <span className={`pg-level ${p.level.toLowerCase()}`}>{tr(p.level)}</span>
       <span>
         {p.kind === 'single' ? <Clock size={15} aria-hidden /> : <CalendarDays size={15} aria-hidden />}
-        {p.kind === 'single' ? `About ${programMinutes(p)} min` : `${p.days} days a week`}
+        {p.kind === 'single' ? tr('About {n} min', { n: programMinutes(p) }) : tr('{n} days a week', { n: p.days })}
       </span>
       <span>
         <Dumbbell size={15} aria-hidden /> {GEAR_LABEL[gearOf(p)]}
@@ -172,11 +172,11 @@ function FilterRow<T extends string>({
     <div className="pg-filter" role="group" aria-label={label}>
       <div className="chips">
         <button className={`chip any ${value == null ? 'active' : ''}`} aria-pressed={value == null} onClick={() => onChange(null)}>
-          {label === 'Level' ? 'Any level' : label === 'Equipment' ? 'Any equipment' : label === 'Length' ? 'Any length' : 'Any days'}
+          {tr(label === tr('Level') ? 'Any level' : label === tr('Equipment') ? 'Any equipment' : label === tr('Length') ? 'Any length' : 'Any days')}
         </button>
         {options.map((o) => (
           <button key={o.id} className={`chip ${value === o.id ? 'active' : ''}`} aria-pressed={value === o.id} onClick={() => onChange(value === o.id ? null : o.id)}>
-            {o.label}
+            {tr(o.label)}
           </button>
         ))}
       </div>
@@ -194,7 +194,7 @@ function Card({ p, have }: { p: Program; have: boolean }) {
           <div className="pg-name">{p.name}</div>
           <div className="pg-meta">{programMeta(p)}</div>
         </div>
-        <span className={`pg-level ${p.level.toLowerCase()}`}>{p.level}</span>
+        <span className={`pg-level ${p.level.toLowerCase()}`}>{tr(p.level)}</span>
       </div>
       <div className="pg-blurb">{p.description}</div>
       <div className="pg-foot">
@@ -205,7 +205,7 @@ function Card({ p, have }: { p: Program; have: boolean }) {
           {ex.length > 4 && <span className="pg-more">+{ex.length - 4}</span>}
         </span>
         <span className="grow small muted ellipsis">
-          {p.kind === 'single' ? `${ex.length} exercises` : `${p.workouts.length} workouts`}
+          {p.kind === 'single' ? tr('{n} exercises', { n: ex.length }) : tr('{n} workouts', { n: p.workouts.length })}
         </span>
         {have && (
           <span className="small pg-have">
@@ -261,14 +261,14 @@ export default function Programs() {
             className={kind === k ? 'on' : ''}
             onClick={() => setParams(k === 'weekly' ? { tab: 'weekly' } : {}, { replace: true })}
           >
-            {k === 'single' ? 'Single workouts' : 'Weekly programs'}
-            <span className="pg-tab-sub">{k === 'single' ? 'One session, start now' : 'A plan for the whole week'}</span>
+            {tr(k === 'single' ? 'Single workouts' : 'Weekly programs')}
+            <span className="pg-tab-sub">{tr(k === 'single' ? 'One session, start now' : 'A plan for the whole week')}</span>
           </button>
         ))}
       </div>
 
       <div className="stack" style={{ gap: 6 }}>
-        <FilterRow<Level> label={tr("Level")} options={LEVELS.map((l) => ({ id: l, label: l }))} value={f.level} onChange={(v) => setF({ level: v })} />
+        <FilterRow<Level> label={tr("Level")} options={LEVELS.map((l) => ({ id: l, label: tr(l) }))} value={f.level} onChange={(v) => setF({ level: v })} />
         <FilterRow<Gear>
           label={tr("Equipment")}
           options={(['gym', 'home', 'none'] as Gear[]).map((g) => ({ id: g, label: GEAR_LABEL[g] }))}
@@ -276,7 +276,7 @@ export default function Programs() {
           onChange={(v) => setF({ gear: v })}
         />
         <FilterRow<string>
-          label={kind === 'single' ? 'Length' : 'Days'}
+          label={tr(kind === 'single' ? 'Length' : 'Days')}
           options={SIZE_OPTIONS[kind].map((o) => ({ id: o.id, label: o.label }))}
           value={f.size}
           onChange={(v) => setF({ size: v })}
@@ -285,7 +285,7 @@ export default function Programs() {
 
       <div className="pg-count" aria-live="polite">
         <span>
-          {list.length} {kind === 'single' ? (list.length === 1 ? 'workout' : 'workouts') : list.length === 1 ? 'program' : 'programs'}
+          {tr(kind === 'single' ? (list.length === 1 ? '{n} workout' : '{n} workouts') : list.length === 1 ? '{n} program' : '{n} programs', { n: list.length })}
         </span>
         {filtered && (
           <button className="btn ghost sm" onClick={() => setF(NO_FILTER)}>

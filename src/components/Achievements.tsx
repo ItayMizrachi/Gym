@@ -113,7 +113,7 @@ export function AchievementsSection() {
       </div>
       {grid.length > 6 && (
         <button className="btn block ghost" aria-expanded={all} aria-controls="ach-grid" onClick={() => setAll(!all)}>
-          {all ? 'Show fewer' : `Show all ${grid.length} achievements`}
+          {all ? tr('Show fewer') : tr('Show all {n} achievements', { n: grid.length })}
         </button>
       )}
 

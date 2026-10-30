@@ -362,7 +362,7 @@ export default function Body() {
           </div>
           {all.length > 10 && (
             <button className="btn ghost block" style={{ marginTop: 'var(--s2)' }} aria-expanded={allEntries} onClick={() => setAllEntries(!allEntries)}>
-              {allEntries ? 'Show fewer' : `Show all ${all.length} entries`}
+              {allEntries ? tr('Show fewer') : tr('Show all {n} entries', { n: all.length })}
             </button>
           )}
         </section>

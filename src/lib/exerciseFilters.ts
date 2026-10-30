@@ -1,4 +1,5 @@
 import { EQUIPMENT, Exercise, MUSCLES, Session } from './types'
+import { t } from './i18n'
 
 export interface ExerciseFilter {
   q?: string
@@ -52,4 +53,4 @@ export function facets(list: Exercise[]) {
 }
 
 /** "Chest · Barbell" */
-export const exerciseMeta = (e: Pick<Exercise, 'muscle' | 'equipment'>) => [e.muscle, e.equipment].filter(Boolean).join(' · ')
+export const exerciseMeta = (e: Pick<Exercise, 'muscle' | 'equipment'>) => [e.muscle, e.equipment].filter(Boolean).map((x) => t(x!)).join(' · ')
