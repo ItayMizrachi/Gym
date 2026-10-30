@@ -2346,3 +2346,7 @@ input[type='search']::-webkit-search-decoration {
 [dir='rtl'] input[inputmode='numeric'],
 [dir='rtl'] .num,
 [dir='rtl'] .coach-code { direction: ltr; }
+/* lines made of English data (exercise names, "10–15 reps · Machine") keep their own reading order */
+[dir='rtl'] .ex-sum-t,
+[dir='rtl'] .hm-preview,
+[dir='rtl'] .ls-stat .v { unicode-bidi: plaintext; }

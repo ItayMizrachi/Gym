@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { lang, t } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, ChevronRight } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -40,9 +41,9 @@ export function StartChecklist() {
           {doneN}/{steps.length}
         </span>
         <span className="grow" style={{ minWidth: 0 }}>
-          <span className="hm-row-t">Getting started</span>
+          <span className="hm-row-t">{t('Getting started')}</span>
           <span className="small muted ellipsis" style={{ display: 'block' }}>
-            {open ? `${doneN} of ${steps.length} done` : `Next: ${next.t.charAt(0).toLowerCase()}${next.t.slice(1)}`}
+            {open ? t('{a} of {b} done', { a: doneN, b: steps.length }) : t('Next: {x}', { x: lang === 'he' ? t(next.t) : next.t.charAt(0).toLowerCase() + next.t.slice(1) })}
           </span>
         </span>
         <ChevronDown size={18} className="hm-start-caret" aria-hidden />
@@ -58,8 +59,8 @@ export function StartChecklist() {
                 {s.done && <Check size={14} />}
               </span>
               <span className="grow">
-                <span className="hm-start-t">{s.t}</span>
-                {!s.done && <span className="small muted" style={{ display: 'block' }}>{s.d}</span>}
+                <span className="hm-start-t">{t(s.t)}</span>
+                {!s.done && <span className="small muted" style={{ display: 'block' }}>{t(s.d)}</span>}
               </span>
               {!s.done && <ChevronRight size={18} aria-hidden className="muted" />}
               <span className="sr-only">{s.done ? 'done' : 'to do'}</span>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { lang, t } from '../lib/i18n'
 import { Pencil } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { usePrefs } from '../lib/prefs'
@@ -6,7 +7,7 @@ import { GOAL_MAX, GOAL_MIN, goalWeeksInRow, weekGoal } from '../lib/achievement
 import { Sheet } from './ui'
 import '../styles/records.css'
 
-const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const DAY_LETTERS = lang === 'he' ? ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 /** Progress ring: yellow while on the way, green once the goal is reached. */
@@ -97,14 +98,11 @@ export function WeekLine() {
             {g.done >= g.goal ? (
               // past the goal "6 of 3" reads oddly: say the count and that the goal is met
               <>
-                <b>{g.done}</b> this week · <span className="hm-goal-met">goal met</span>
+                <b>{g.done}</b> {t('this week')} · <span className="hm-goal-met">{t('goal met')}</span>
               </>
             ) : (
               <>
-                <b>
-                  {g.done} of {g.goal}
-                </b>{' '}
-                this week
+                <b>{t('{a} of {b}', { a: g.done, b: g.goal })}</b> {t('this week')}
               </>
             )}
           </span>

@@ -776,8 +776,8 @@ function ExerciseCard({
 
       {showLegend && (
         <div className="set-legend">
-          <span className="lg-dot">1</span> work <span className="lg-dot warmup">W</span> warm-up <span className="lg-dot drop">D</span> drop{' '}
-          <span className="lg-dot failure">F</span> failure
+          <span className="lg-dot">1</span> {t('work')} <span className="lg-dot warmup">W</span> {t('warm-up')} <span className="lg-dot drop">D</span> {t('drop')}{' '}
+          <span className="lg-dot failure">F</span> {t('failure')}
         </div>
       )}
       <div className="wl-addrow">

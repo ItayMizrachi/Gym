@@ -8,7 +8,7 @@ import { upNext } from '../lib/upNext'
 import { WeeklyRecap } from '../components/WeeklyRecap'
 
 /** "Quads" / "Quads and Glutes" (two at most, the line stays short) */
-const listMuscles = (m: string[]) => (m.length <= 1 ? m.join('') : `${m[0]} and ${m[1]}`)
+const listMuscles = (m: string[]) => (m.length <= 1 ? t(m[0] ?? '') : t('{a} and {b}', { a: t(m[0]), b: t(m[1]) }))
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
@@ -188,7 +188,7 @@ export default function Home() {
       <div className="page-head">
         <div className="grow">
           <h1>{greeting}</h1>
-          <div className="sub">{now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+          <div className="sub">{now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         {coachRole && (
           <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label="Coaching: your trainees">
@@ -300,7 +300,7 @@ export default function Home() {
           <div className="sec-head hm-sec">
             <h2>{t('Your workouts')}</h2>
             <button className="btn sm secondary hm-new" onClick={() => setAdding(true)} aria-haspopup="dialog">
-              <Plus size={16} aria-hidden /> New
+              <Plus size={16} aria-hidden /> {t('New')}
             </button>
           </div>
           {groups.map((g) => {
@@ -334,7 +334,7 @@ export default function Home() {
                             <div className="trow-name ellipsis">{splitName(w.name)[0]}</div>
                             <div className="small muted ellipsis">
                               {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
-                              {splitName(w.name)[1] && <span className="trow-days">{splitName(w.name)[1]} · </span>}
+                              {splitName(w.name)[1] && <span className="trow-days">{t(splitName(w.name)[1])} · </span>}
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
                               {info.wes.length} {t('exercises')}
                               {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
@@ -347,7 +347,7 @@ export default function Home() {
                             onClick={() => start(w)}
                             aria-label={`Start ${w.name}`}
                           >
-                            <Play size={14} aria-hidden /> Start
+                            <Play size={14} aria-hidden /> {t('Start')}
                           </button>
                         </div>
                       )
@@ -426,7 +426,7 @@ export default function Home() {
             </div>
             {!streak.thisWeekDone && streak.current > 0 && (
               <div className="small muted nudge">
-                <Flame size={14} /> Train once this week to keep your {streak.current}-week streak.
+                <Flame size={14} /> {t('Train once this week to keep your {n}-week streak.', { n: streak.current })}
               </div>
             )}
           </section>
