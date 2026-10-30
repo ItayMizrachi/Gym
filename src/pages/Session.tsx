@@ -516,7 +516,7 @@ function ExerciseCard({
   const name = ex?.name ?? se.name
   const firstTime = !last && prior.length === 0 && tracking !== 'time'
   // rest has its own button on the card, so the line under the name is just the target
-  const plan = tracking !== 'time' && se.rep_min && se.rep_max ? `${se.rep_min}–${se.rep_max} reps` : tracking === 'time' ? 'Timed' : 'Reps'
+  const plan = tracking !== 'time' && se.rep_min && se.rep_max ? t('{a}–{b} reps', { a: se.rep_min, b: se.rep_max }) : t(tracking === 'time' ? 'Timed' : 'Reps')
   const hasNotes = !!(se.note || lastNote || ex?.setup)
   const prog = se.progression
   const doneLine = `${se.sets.length} ${se.sets.length === 1 ? 'set' : 'sets'} · ${se.sets.map((x) => setLabel(x, tracking)).join(' · ')}`
@@ -592,7 +592,7 @@ function ExerciseCard({
             {ex?.setup && <div className="ex-more-setup">⚙ {ex.setup}</div>}
             {firstTime && (
               <div className="first-hint">
-                {tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.'}
+                {t(tracking === 'weight_reps' ? 'First time: pick a comfortable weight. GymLog remembers it for next time.' : 'First time: do what feels good. GymLog remembers it for next time.')}
               </div>
             )}
             {lastDesc && se.sets.length === 0 && (

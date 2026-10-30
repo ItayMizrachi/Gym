@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { t as tr, tm } from '../lib/i18n'
 import { ArrowLeft, Check, Plus, RotateCw, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, Exercise, MUSCLES, Tracking } from '../lib/types'
@@ -162,7 +162,7 @@ export function FilterChips({
         <div className="chips" role="group" aria-label={tr("Muscle group")}>
           {['All', ...muscles].map((m) => (
             <button key={m} aria-pressed={muscle === m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(muscle === m && m !== 'All' ? 'All' : m)}>
-              {m === 'All' ? 'All muscles' : m}
+              {m === 'All' ? tr('All muscles') : tm(m)}
             </button>
           ))}
         </div>
@@ -171,7 +171,7 @@ export function FilterChips({
         <div className="chips" role="group" aria-label={tr("Equipment")}>
           {['All', ...equipment].map((m) => (
             <button key={m} aria-pressed={eq === m} className={`chip ${eq === m ? 'active' : ''}`} onClick={() => setEq(eq === m && m !== 'All' ? 'All' : m)}>
-              {m === 'All' ? 'All equipment' : m}
+              {m === 'All' ? tr('All equipment') : tm(m)}
             </button>
           ))}
         </div>
@@ -294,7 +294,7 @@ export function ExercisePicker({
 
   const searching = !!needle || filtered
   return (
-    <Sheet title={creating ? 'New exercise' : title} onClose={onClose}>
+    <Sheet title={tr(creating ? 'New exercise' : title)} onClose={onClose}>
       {creating ? (
         <div className="stack">
           <button className="btn ghost sm" style={{ alignSelf: 'flex-start', marginLeft: -8 }} onClick={() => setCreating(false)}>
@@ -338,7 +338,7 @@ export function ExercisePicker({
               <span className="plus">
                 <Plus size={20} />
               </span>
-              <span className="grow ellipsis">{q.trim() ? `Create “${q.trim()}”` : 'Create your own exercise'}</span>
+              <span className="grow ellipsis">{q.trim() ? tr('Create “{q}”', { q: q.trim() }) : tr('Create your own exercise')}</span>
             </button>
           )}
           {recent.length > 0 && (

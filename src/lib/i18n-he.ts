@@ -524,4 +524,9 @@ export const HE_SCREENS: Record<string, string> = {
   "{n} program": "תוכנית {n}",
   "{n} programs": "{n} תוכניות",
   "Days": "ימים",
+  "{a}–{b} reps": "{a}–{b} חזרות",
+  "Timed": "בזמן",
+  "First time: pick a comfortable weight. GymLog remembers it for next time.": "פעם ראשונה: בחר משקל נוח. GymLog יזכור אותו לפעם הבאה.",
+  "First time: do what feels good. GymLog remembers it for next time.": "פעם ראשונה: עשה מה שמרגיש טוב. GymLog יזכור את זה לפעם הבאה.",
+  "Create “{q}”": "צור “{q}”",
 }

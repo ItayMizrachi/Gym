@@ -43,6 +43,9 @@ export function t(s: string, vars?: Record<string, string | number>): string {
   return out
 }
 
+/** a muscle or equipment name ("Back" is the muscle here, not the button) */
+export const tm = (x: string) => (lang === 'he' && x === 'Back' ? 'גב' : t(x))
+
 /** plural: t2(n, '{n} set', '{n} sets') */
 export const t2 = (n: number, one: string, many: string) => t(n === 1 ? one : many, { n })
 

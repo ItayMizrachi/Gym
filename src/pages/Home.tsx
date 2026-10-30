@@ -1,5 +1,5 @@
 import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan'
-import { lang, t } from '../lib/i18n'
+import { lang, t, tm } from '../lib/i18n'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
@@ -8,7 +8,7 @@ import { upNext } from '../lib/upNext'
 import { WeeklyRecap } from '../components/WeeklyRecap'
 
 /** "Quads" / "Quads and Glutes" (two at most, the line stays short) */
-const listMuscles = (m: string[]) => (m.length <= 1 ? t(m[0] ?? '') : t('{a} and {b}', { a: t(m[0]), b: t(m[1]) }))
+const listMuscles = (m: string[]) => (m.length <= 1 ? tm(m[0] ?? '') : t('{a} and {b}', { a: tm(m[0]), b: tm(m[1]) }))
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
 import { startEmptySession, startSessionFromWorkout } from '../lib/actions'

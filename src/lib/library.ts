@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { t } from './i18n'
+import { tm } from './i18n'
 import { Exercise, Tracking } from './types'
 import { nowIso, uid } from './uid'
 import { NAME_TO_LIB, PHOTO_OF, libIdForExercise, libPath } from './libraryLinks'
@@ -194,7 +194,7 @@ export function exerciseFromLibrary(lib: LibraryExercise, userId: string): Exerc
 }
 
 /** "Chest · Barbell" */
-export const libMeta = (e: LibraryExercise) => [e.muscle, e.equipment].filter(Boolean).map((x) => t(x)).join(' · ')
+export const libMeta = (e: LibraryExercise) => [e.muscle, e.equipment].filter(Boolean).map((x) => tm(x)).join(' · ')
 
 /* ------------------------------------------------------------- matching */
 
