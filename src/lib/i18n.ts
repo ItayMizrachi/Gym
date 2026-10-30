@@ -6,6 +6,7 @@
  */
 
 import { HE_SCREENS } from './i18n-he'
+import { HE_PROGRAMS } from './i18n-programs'
 
 export type Lang = 'en' | 'he'
 const KEY = 'gymlog:lang'
@@ -51,6 +52,7 @@ export const t2 = (n: number, one: string, many: string) => t(n === 1 ? one : ma
 
 const HE: Record<string, string> = {
   ...HE_SCREENS,
+  ...HE_PROGRAMS,
   "Late session?": "אימון מאוחר?",
   "{a} of {b} sets": "{a} מתוך {b} סטים",
   "Pick a program to begin": "בחר תוכנית כדי להתחיל",

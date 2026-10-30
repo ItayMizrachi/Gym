@@ -164,7 +164,7 @@ function ProgramCard({ p, best }: { p: Program; best: boolean }) {
         <span className="chip">{p.level}</span>
         <span className="chip">{GEAR_LABEL[gearOf(p)]}</span>
       </div>
-      <p>{p.description}</p>
+      <p>{tr(p.description)}</p>
       {p.kind === 'weekly' && (
         <ol className="fp-days">
           {p.workouts.map((w) => (

@@ -50,7 +50,7 @@ function Chips({ p }: { p: Program }) {
         <Dumbbell size={15} aria-hidden /> {GEAR_LABEL[gearOf(p)]}
       </span>
       <span>
-        <Target size={15} aria-hidden /> {p.goal}
+        <Target size={15} aria-hidden /> {tr(p.goal)}
       </span>
     </div>
   )
@@ -81,7 +81,7 @@ function Detail({ p }: { p: Program }) {
     <div className="stack pg" style={{ gap: 20 }}>
       <PageHeader title={p.name} sub={single ? 'Single workout' : 'Weekly program'} back={`/programs${single ? '' : '?tab=weekly'}`} />
       <Chips p={p} />
-      <p className="pg-desc">{p.description}</p>
+      <p className="pg-desc">{tr(p.description)}</p>
 
       {added ? (
         <div className="pg-added" role="status">
@@ -196,7 +196,7 @@ function Card({ p, have }: { p: Program; have: boolean }) {
         </div>
         <span className={`pg-level ${p.level.toLowerCase()}`}>{tr(p.level)}</span>
       </div>
-      <div className="pg-blurb">{p.description}</div>
+      <div className="pg-blurb">{tr(p.description)}</div>
       <div className="pg-foot">
         <span className="pg-avs" aria-hidden>
           {ex.slice(0, 4).map((e) => (
