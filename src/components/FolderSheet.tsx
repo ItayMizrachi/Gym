@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Check, Folder, FolderPlus, Inbox } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { folderOf, listFolders, NO_FOLDER } from '../lib/folders'
@@ -23,13 +24,13 @@ export function MoveToFolderSheet({ workoutId, onClose }: { workoutId: string; o
       <span className="grow" style={{ textAlign: 'left' }}>
         {label}
       </span>
-      {current === folder && <Check size={18} aria-label="Current folder" style={{ color: 'var(--ok)' }} />}
+      {current === folder && <Check size={18} aria-label={tr("Current folder")} style={{ color: 'var(--ok)' }} />}
     </button>
   )
   return (
-    <Sheet title="Move to folder" onClose={onClose}>
+    <Sheet title={tr("Move to folder")} onClose={onClose}>
       <div className="stack" style={{ gap: 12 }}>
-        <div className="small muted">Folders group workouts on the Train tab, for example one folder per program.</div>
+        <div className="small muted">{tr("Folders group workouts on the Train tab, for example one folder per program.")}</div>
         <div className="list-group">
           {row('', `${NO_FOLDER} (no folder)`, <Inbox size={18} aria-hidden />)}
           {listFolders(workouts).map((f) => row(f, f, <Folder size={18} aria-hidden />))}
@@ -43,14 +44,14 @@ export function MoveToFolderSheet({ workoutId, onClose }: { workoutId: string; o
         >
           <input
             className="input grow"
-            placeholder="New folder name"
-            aria-label="New folder name"
+            placeholder={tr("New folder name")}
+            aria-label={tr("New folder name")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             enterKeyHint="done"
           />
           <button className="btn" type="submit" disabled={!name.trim()}>
-            <FolderPlus size={16} /> Create
+            <FolderPlus size={16} /> {tr("Create")}
           </button>
         </form>
       </div>
@@ -68,7 +69,7 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
     onClose()
   }
   return (
-    <Sheet title="Folder" onClose={onClose}>
+    <Sheet title={tr("Folder")} onClose={onClose}>
       <form
         className="stack"
         onSubmit={(e) => {
@@ -77,14 +78,14 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
         }}
       >
         <label className="field">
-          Folder name
+          {tr("Folder name")}
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus enterKeyHint="done" />
         </label>
         <button className="btn primary" type="submit" disabled={!name.trim() || name.trim() === folder}>
-          Rename
+          {tr("Rename")}
         </button>
         <button className="btn" type="button" onClick={() => apply('')}>
-          Remove folder (keeps the workouts)
+          {tr("Remove folder (keeps the workouts)")}
         </button>
       </form>
     </Sheet>

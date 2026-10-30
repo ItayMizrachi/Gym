@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Check, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -70,7 +71,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       <div className="card" style={{ marginTop: 'var(--s5)' }}>
         Exercise not found.{' '}
         <button className="btn sm" onClick={() => nav('/exercises')}>
-          Back
+          {tr("Back")}
         </button>
       </div>
     )
@@ -80,7 +81,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>
       <div className="page-head" style={{ marginBottom: 0 }}>
-        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
+        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label={tr("Back")}>
           <ArrowLeft size={22} />
         </button>
         <div className="grow">
@@ -96,7 +97,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       {libId ? (
         <div className="stack" style={{ gap: 'var(--s2)' }}>
           <LibPhoto id={libId} name={ex.name} />
-          <ImageField path={null} folder="exercises" onChange={(p) => save('exercises', { ...ex, image_path: p })} label="Use my own photo instead" quiet />
+          <ImageField path={null} folder="exercises" onChange={(p) => save('exercises', { ...ex, image_path: p })} label={tr("Use my own photo instead")} quiet />
         </div>
       ) : (
         <ImageField
@@ -104,13 +105,13 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
           folder="exercises"
           large
           onChange={(p) => save('exercises', { ...ex, image_path: p })}
-          label="Add a photo of the machine"
+          label={tr("Add a photo of the machine")}
         />
       )}
 
       <div className="card stack">
         <div className="card-head">
-          <h2>Personal records</h2>
+          <h2>{tr("Personal records")}</h2>
           <Trophy size={18} color="var(--accent)" aria-hidden />
         </div>
         {trackingOf(ex) === 'time' ? (
@@ -122,7 +123,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               </div>
             </div>
           ) : (
-            <div className="muted small">Log this exercise in a workout and your longest set will appear here.</div>
+            <div className="muted small">{tr("Log this exercise in a workout and your longest set will appear here.")}</div>
           )
         ) : rec.heaviest ? (
           <>
@@ -132,7 +133,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                   {rec.bestE1rm ? fmtKg(Math.round(rec.bestE1rm.value * 10) / 10) : '–'}
                   <span className="u">kg</span>
                 </div>
-                <div className="l">Best est. 1-rep max</div>
+                <div className="l">{tr("Best est. 1-rep max")}</div>
               </div>
               <div className="stat">
                 <div className="v">
@@ -144,7 +145,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               </div>
             </div>
             <div className="small muted" style={{ marginBottom: -4 }}>
-              Best weight (kg) for at least N reps
+              {tr("Best weight (kg) for at least N reps")}
             </div>
             <div className="reps-table">
               {/* only rep counts you have done: a row of dashes says nothing */}
@@ -162,7 +163,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             </div>
           </>
         ) : (
-          <div className="muted small">Log this exercise in a workout and your records will appear here.</div>
+          <div className="muted small">{tr("Log this exercise in a workout and your records will appear here.")}</div>
         )}
       </div>
 
@@ -171,13 +172,13 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       {hist.length > 1 && (
         <div className="card stack">
           <div className="card-head">
-            <h2>Progress</h2>
+            <h2>{tr("Progress")}</h2>
             <div className="seg">
               <button className={metric === 'e1rm' ? 'on' : ''} onClick={() => setMetric('e1rm')}>
                 1-rep max
               </button>
               <button className={metric === 'top' ? 'on' : ''} onClick={() => setMetric('top')}>
-                Top weight
+                {tr("Top weight")}
               </button>
             </div>
           </div>
@@ -199,7 +200,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       <div className="card stack">
         <h2>Setup &amp; cues</h2>
         <label className="field">
-          Machine setup (seat, pads, pin, grip)
+          {tr("Machine setup (seat, pads, pin, grip)")}
           <textarea
             className="textarea"
             placeholder="e.g. Seat 4, back pad 3, handles on the lower position"
@@ -220,7 +221,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
 
       {recent.length > 0 && (
         <section>
-          <div className="section-label">Recent sessions</div>
+          <div className="section-label">{tr("Recent sessions")}</div>
           <div className="list-group">
             {recent.map((r) => (
               <button key={r.session} className="list-row" onClick={() => nav(`/history/${r.session}`)}>
@@ -235,7 +236,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                         {x.text}
                       </span>
                     ))}
-                    {!r.sets.length && <span className="small muted">No sets ticked</span>}
+                    {!r.sets.length && <span className="small muted">{tr("No sets ticked")}</span>}
                   </div>
                 </div>
                 <ChevronRight size={18} className="chev" />
@@ -246,14 +247,14 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       )}
 
       <div className="card stack">
-        <h2>Details</h2>
+        <h2>{tr("Details")}</h2>
         <label className="field">
-          Name
+          {tr("Name")}
           <input className="input" value={ex.name} onChange={(e) => upd({ name: e.target.value })} />
         </label>
         <div className="row" style={{ alignItems: 'flex-start', gap: 'var(--s3)' }}>
           <label className="field grow">
-            Muscle
+            {tr("Muscle")}
             <select className="select" value={ex.muscle} onChange={(e) => upd({ muscle: e.target.value }, 0)}>
               {MUSCLES.map((m) => (
                 <option key={m}>{m}</option>
@@ -261,7 +262,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             </select>
           </label>
           <label className="field grow">
-            Default rest (m:ss)
+            {tr("Default rest (m:ss)")}
             <input
               className="input tnum"
               inputMode="numeric"
@@ -278,8 +279,8 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       </div>
 
       <div className="card stack">
-        <h2>What do you record?</h2>
-        <div className="seg" role="radiogroup" aria-label="What do you record">
+        <h2>{tr("What do you record?")}</h2>
+        <div className="seg" role="radiogroup" aria-label={tr("What do you record")}>
           {(['weight_reps', 'reps', 'time'] as Tracking[]).map((t) => (
             <button key={t} role="radio" aria-checked={trackingOf(ex) === t} className={trackingOf(ex) === t ? 'on' : ''} onClick={() => upd({ tracking: t }, 0)}>
               {TRACKING_LABEL[t]}
@@ -294,9 +295,9 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               : 'Each set is a weight and a number of reps.'}
         </div>
         <label className="field">
-          Equipment
+          {tr("Equipment")}
           <select className="select" value={ex.equipment ?? ''} onChange={(e) => upd({ equipment: e.target.value }, 0)}>
-            <option value="">Not set</option>
+            <option value="">{tr("Not set")}</option>
             {EQUIPMENT.map((m) => (
               <option key={m}>{m}</option>
             ))}
@@ -305,13 +306,13 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
       </div>
 
       <button className="btn danger" onClick={() => setConfirmDel(true)}>
-        <Trash2 size={16} /> Delete exercise
+        <Trash2 size={16} /> {tr("Delete exercise")}
       </button>
       {confirmDel && (
         <Confirm
-          title="Delete exercise?"
-          text="It will also be removed from your workout templates. Past sessions keep their data."
-          confirmLabel="Delete"
+          title={tr("Delete exercise?")}
+          text={tr("It will also be removed from your workout templates. Past sessions keep their data.")}
+          confirmLabel={tr("Delete")}
           danger
           onConfirm={() => {
             removeExercise(ex.id)
@@ -336,7 +337,7 @@ function LibraryDetail({ id }: { id: string }) {
 
   const head = (title: string, sub?: string) => (
     <div className="page-head" style={{ marginBottom: 0 }}>
-      <button className="btn icon ghost" onClick={() => nav(-1)} aria-label="Back">
+      <button className="btn icon ghost" onClick={() => nav(-1)} aria-label={tr("Back")}>
         <ArrowLeft size={22} />
       </button>
       <div className="grow" style={{ minWidth: 0 }}>
@@ -355,10 +356,10 @@ function LibraryDetail({ id }: { id: string }) {
       <div className="stack" style={{ gap: 'var(--s4)' }}>
         {head('Exercise library')}
         <div className="empty">
-          <div style={{ fontWeight: 600 }}>The library could not load</div>
-          <div className="small muted">Check your connection and try again.</div>
+          <div style={{ fontWeight: 600 }}>{tr("The library could not load")}</div>
+          <div className="small muted">{tr("Check your connection and try again.")}</div>
           <button className="btn" onClick={retry}>
-            <RotateCw size={16} /> Try again
+            <RotateCw size={16} /> {tr("Try again")}
           </button>
         </div>
       </div>
@@ -375,9 +376,9 @@ function LibraryDetail({ id }: { id: string }) {
       <div className="stack" style={{ gap: 'var(--s4)' }}>
         {head('Not found')}
         <div className="empty">
-          <div style={{ fontWeight: 600 }}>This exercise is not in the library</div>
+          <div style={{ fontWeight: 600 }}>{tr("This exercise is not in the library")}</div>
           <button className="btn primary" onClick={() => nav('/exercises?tab=library')}>
-            Browse the library
+            {tr("Browse the library")}
           </button>
         </div>
       </div>
@@ -393,20 +394,20 @@ function LibraryDetail({ id }: { id: string }) {
       <div className="lib-facts">
         <div>
           <div className="v">{lib.muscles.join(', ')}</div>
-          <div className="l">Main muscle</div>
+          <div className="l">{tr("Main muscle")}</div>
         </div>
         <div>
           <div className="v">{lib.equipment}</div>
-          <div className="l">Equipment</div>
+          <div className="l">{tr("Equipment")}</div>
         </div>
         <div>
           <div className="v">{lib.level}</div>
-          <div className="l">Level</div>
+          <div className="l">{tr("Level")}</div>
         </div>
       </div>
       {also.length > 0 && (
         <div className="lib-muscle-line">
-          Also works <b>{also.join(', ')}</b>
+          {tr("Also works")} <b>{also.join(', ')}</b>
         </div>
       )}
 
@@ -414,7 +415,7 @@ function LibraryDetail({ id }: { id: string }) {
         {mineId ? (
           <>
             <button className="btn primary" onClick={() => setPicking(true)}>
-              <Plus size={18} /> Add to workout
+              <Plus size={18} /> {tr("Add to workout")}
             </button>
             <button className="btn" onClick={() => nav(`/exercise/${mineId}`)}>
               <Check size={18} color="var(--ok)" /> In my exercises · see records
@@ -429,10 +430,10 @@ function LibraryDetail({ id }: { id: string }) {
                 toast({ kind: 'info', text: 'Added to my exercises', sub: lib.name })
               }}
             >
-              <Plus size={18} /> Add to my exercises
+              <Plus size={18} /> {tr("Add to my exercises")}
             </button>
             <button className="btn" onClick={() => setPicking(true)}>
-              Add to workout
+              {tr("Add to workout")}
             </button>
           </>
         )}

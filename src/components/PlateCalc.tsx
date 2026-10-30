@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Minus, Plus } from 'lucide-react'
 import { NumInput, Sheet } from './ui'
 import { loadBar, plateColor } from '../lib/plates'
@@ -27,14 +28,14 @@ export function PlateCalc({ weight, onClose, onUse }: { weight: number; onClose:
   for (const p of load.perSide) counts.set(p, (counts.get(p) ?? 0) + 1)
 
   return (
-    <Sheet title="Plate calculator" onClose={onClose}>
+    <Sheet title={tr("Plate calculator")} onClose={onClose}>
       <div className="stack">
         <div className="pc-target">
-          <button className="btn icon" onClick={() => setTarget((t) => Math.max(barKg, Math.round((t - step) * 100) / 100))} aria-label="Less weight">
+          <button className="btn icon" onClick={() => setTarget((t) => Math.max(barKg, Math.round((t - step) * 100) / 100))} aria-label={tr("Less weight")}>
             <Minus size={18} />
           </button>
           <NumInput value={target} onChange={(n) => setTarget(n ?? 0)} ariaLabel="Target weight kg" />
-          <button className="btn icon" onClick={() => setTarget((t) => Math.round((t + step) * 100) / 100)} aria-label="More weight">
+          <button className="btn icon" onClick={() => setTarget((t) => Math.round((t + step) * 100) / 100)} aria-label={tr("More weight")}>
             <Plus size={18} />
           </button>
         </div>
@@ -57,7 +58,7 @@ export function PlateCalc({ weight, onClose, onUse }: { weight: number; onClose:
 
         <div className="row" style={{ alignItems: 'baseline' }}>
           <div className="grow">
-            <div className="small muted">Each side</div>
+            <div className="small muted">{tr("Each side")}</div>
             <div className="pc-list">
               {load.perSide.length
                 ? [...counts.entries()].map(([p, n]) => `${n > 1 ? `${n} × ` : ''}${fmtKg(p)}`).join('  ·  ')
@@ -65,7 +66,7 @@ export function PlateCalc({ weight, onClose, onUse }: { weight: number; onClose:
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div className="small muted">Bar</div>
+            <div className="small muted">{tr("Bar")}</div>
             <div className="pc-list">{fmtKg(barKg)} kg</div>
           </div>
         </div>
@@ -87,7 +88,7 @@ export function PlateCalc({ weight, onClose, onUse }: { weight: number; onClose:
             Use {fmtKg(load.achieved)} kg
           </button>
         )}
-        <div className="tiny muted">Bar weight and available plates can be changed in Settings.</div>
+        <div className="tiny muted">{tr("Bar weight and available plates can be changed in Settings.")}</div>
       </div>
     </Sheet>
   )

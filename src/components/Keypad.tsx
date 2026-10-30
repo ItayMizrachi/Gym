@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Calculator, ChevronDown, Delete, Disc, Keyboard } from 'lucide-react'
 import { evalExpr, isExpr } from '../lib/calc'
 import { fmtKg, parseNum } from '../lib/format'
@@ -261,17 +262,17 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
           <div className="kp-bar">
             {kind !== 'time' && (
               <button className={`kp-tool ${calc ? 'on' : ''}`} onClick={() => setCalc((c) => !c)} aria-pressed={calc}>
-                <Calculator size={17} /> Calculator
+                <Calculator size={17} /> {tr("Calculator")}
               </button>
             )}
             {kind === 'kg' && (
               <button className="kp-tool" onClick={() => setPlates(true)}>
-                <Disc size={17} /> Plates
+                <Disc size={17} /> {tr("Plates")}
               </button>
             )}
             <button
               className="kp-tool"
-              aria-label="Use the phone keyboard"
+              aria-label={tr("Use the phone keyboard")}
               onClick={() => {
                 const id = field.id
                 close()
@@ -282,7 +283,7 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
               <Keyboard size={17} />
             </button>
             <div className="grow kp-label ellipsis">{calc && isExpr(text) ? `${text} = ${result != null ? fmtVal(kind!, result) : '…'}` : field.label}</div>
-            <button className="kp-tool" onClick={close} aria-label="Close number pad">
+            <button className="kp-tool" onClick={close} aria-label={tr("Close number pad")}>
               <ChevronDown size={20} />
             </button>
           </div>

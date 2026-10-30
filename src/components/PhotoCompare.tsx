@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ArrowLeftRight, Check, Share2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -102,18 +103,18 @@ export function PhotoCompare({
   return (
     <section className="card stack pc" id="photo-compare" style={{ scrollMarginTop: 12 }}>
       <div className="card-head">
-        <h2>Progress photos</h2>
-        <button className="btn icon sm" onClick={share} disabled={sharing} aria-label="Share comparison">
+        <h2>{tr("Progress photos")}</h2>
+        <button className="btn icon sm" onClick={share} disabled={sharing} aria-label={tr("Share comparison")}>
           <Share2 size={18} aria-hidden />
         </button>
       </div>
 
-      <div className="seg block" role="radiogroup" aria-label="Compare view">
+      <div className="seg block" role="radiogroup" aria-label={tr("Compare view")}>
         <button role="radio" aria-checked={mode === 'side'} className={mode === 'side' ? 'on' : ''} onClick={() => setMode('side')}>
-          Side by side
+          {tr("Side by side")}
         </button>
         <button role="radio" aria-checked={mode === 'slide'} className={mode === 'slide' ? 'on' : ''} onClick={() => setMode('slide')}>
-          Slider
+          {tr("Slider")}
         </button>
       </div>
 
@@ -121,11 +122,11 @@ export function PhotoCompare({
         <div className="pc-frame side">
           <button className="pc-half" onClick={() => onOpen(a)} aria-label={`Open before photo, ${fmtDate(a.date, true)}`}>
             {ua && <img src={ua} alt="" />}
-            <Chip label="Before" m={a} side="l" />
+            <Chip label={tr("Before")} m={a} side="l" />
           </button>
           <button className="pc-half" onClick={() => onOpen(b)} aria-label={`Open after photo, ${fmtDate(b.date, true)}`}>
             {ub && <img src={ub} alt="" />}
-            <Chip label="After" m={b} side="l" />
+            <Chip label={tr("After")} m={b} side="l" />
           </button>
         </div>
       ) : (
@@ -152,8 +153,8 @@ export function PhotoCompare({
               <ArrowLeftRight size={16} />
             </span>
           </span>
-          <Chip label="Before" m={a} side="l" />
-          <Chip label="After" m={b} side="r" />
+          <Chip label={tr("Before")} m={a} side="l" />
+          <Chip label={tr("After")} m={b} side="r" />
           <input
             className="sr-only"
             type="range"
@@ -161,7 +162,7 @@ export function PhotoCompare({
             max={100}
             value={Math.round(pos)}
             onChange={(e) => setPos(Number(e.target.value))}
-            aria-label="Slide between before and after"
+            aria-label={tr("Slide between before and after")}
           />
         </div>
       )}
@@ -176,7 +177,7 @@ export function PhotoCompare({
           </div>
           {dKg != null && (
             <div>
-              <div className="pc-k">Weight change</div>
+              <div className="pc-k">{tr("Weight change")}</div>
               <div className="pc-v tnum">
                 {dKg > 0 ? '+' : dKg < 0 ? '−' : '±'}
                 {fmtKg(Math.abs(dKg))} <span>kg</span>
@@ -188,10 +189,10 @@ export function PhotoCompare({
 
       <div className="row" style={{ gap: 'var(--s2)' }}>
         <button className="btn grow" onClick={() => setPicking('a')}>
-          Change before
+          {tr("Change before")}
         </button>
         <button className="btn grow" onClick={() => setPicking('b')}>
-          Change after
+          {tr("Change after")}
         </button>
       </div>
 
@@ -203,7 +204,7 @@ export function PhotoCompare({
             ))}
           </div>
           <button className="btn primary block" style={{ marginTop: 'var(--s4)' }} onClick={() => setPicking(null)}>
-            Done
+            {tr("Done")}
           </button>
         </Sheet>
       )}

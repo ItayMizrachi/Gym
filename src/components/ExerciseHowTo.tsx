@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { RotateCw } from 'lucide-react'
 import { Exercise } from '../lib/types'
@@ -38,9 +39,9 @@ export function StepList({ id, fold = false }: { id: string; fold?: boolean }) {
   if (failed)
     return (
       <div className="row small muted" style={{ justifyContent: 'space-between' }}>
-        Instructions could not load.
+        {tr("Instructions could not load.")}
         <button className="btn sm" onClick={retry}>
-          <RotateCw size={14} /> Try again
+          <RotateCw size={14} /> {tr("Try again")}
         </button>
       </div>
     )
@@ -68,7 +69,7 @@ export function StepList({ id, fold = false }: { id: string; fold?: boolean }) {
 export function HowToCard({ id }: { id: string }) {
   return (
     <div className="card stack">
-      <h2>How to do it</h2>
+      <h2>{tr("How to do it")}</h2>
       <StepList id={id} fold />
     </div>
   )
@@ -92,11 +93,11 @@ export function HowToBody({ exercise, name }: { exercise: ExLike; name?: string 
       {meta && <div className="lib-muscle-line">{meta}</div>}
       {libId ? (
         <>
-          <h3 className="lib-howto-h">How to do it</h3>
+          <h3 className="lib-howto-h">{tr("How to do it")}</h3>
           <StepList id={libId} />
         </>
       ) : (
-        !exercise?.notes && <div className="small muted">No instructions for this exercise yet. Add your own cues on its page.</div>
+        !exercise?.notes && <div className="small muted">{tr("No instructions for this exercise yet. Add your own cues on its page.")}</div>
       )}
     </>
   )
@@ -111,13 +112,13 @@ export function HowToSheet({ exercise, name, onClose }: { exercise: ExLike; name
         <HowToBody exercise={exercise} name={name} />
         {exercise?.setup && (
           <div className="card">
-            <div className="tiny muted">Your setup</div>
+            <div className="tiny muted">{tr("Your setup")}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{exercise.setup}</div>
           </div>
         )}
         {exercise?.notes && (
           <div className="card">
-            <div className="tiny muted">Your notes</div>
+            <div className="tiny muted">{tr("Your notes")}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{exercise.notes}</div>
           </div>
         )}
@@ -129,7 +130,7 @@ export function HowToSheet({ exercise, name, onClose }: { exercise: ExLike; name
               nav(`/exercise/${exercise.id}`)
             }}
           >
-            Open exercise page
+            {tr("Open exercise page")}
           </button>
         )}
       </div>

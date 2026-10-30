@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ChevronRight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { recoveryView } from '../lib/recovery'
@@ -31,7 +32,7 @@ export function RecoveryLine() {
         <span className="hm-row-body" aria-hidden>
           {allReady ? (
             <span className="hm-row-t">
-              <span className="hm-dot" /> Every muscle is rested
+              <span className="hm-dot" /> {tr("Every muscle is rested")}
             </span>
           ) : (
             <>
@@ -49,7 +50,7 @@ export function RecoveryLine() {
         <ChevronRight size={18} className="hm-row-end" aria-hidden />
       </button>
       {open && (
-        <Sheet title="Muscle recovery" onClose={() => setOpen(false)}>
+        <Sheet title={tr("Muscle recovery")} onClose={() => setOpen(false)}>
           <div className="stack" style={{ gap: 16 }}>
             <BodyMap intensity={v.load} height={180} className="hm-map-lg" title={v.recovering.length ? `Recently worked: ${v.recovering.join(', ')}` : 'No muscles worked in the last days'} />
             <div className="stack" style={{ gap: 8 }}>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronRight, Copy, Plus, Trash2 } from 'lucide-react'
 import { COACH_FOLDER, assignWorkout, removeTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
@@ -69,7 +70,7 @@ export default function CoachTrainee() {
         <div className="card stack">
           <div className="small muted">{error}</div>
           <button className="btn" onClick={() => void load()}>
-            Try again
+            {tr("Try again")}
           </button>
         </div>
       ) : !view || !link ? (
@@ -79,28 +80,28 @@ export default function CoachTrainee() {
           <div className="coach-stats">
             <div>
               <div className="coach-n">{view.week.workouts}</div>
-              <div className="tiny muted">This week</div>
+              <div className="tiny muted">{tr("This week")}</div>
             </div>
             <div>
               <div className="coach-n">{view.last ? relativeDay(view.last.finished_at ?? view.last.started_at) : '–'}</div>
-              <div className="tiny muted">Last workout</div>
+              <div className="tiny muted">{tr("Last workout")}</div>
             </div>
             <div>
               <div className="coach-n">{view.streak.current}</div>
-              <div className="tiny muted">Week streak</div>
+              <div className="tiny muted">{tr("Week streak")}</div>
             </div>
             {view.weight != null && (
               <div>
                 <div className="coach-n">{fmtKg(view.weight)}</div>
-                <div className="tiny muted">Body kg</div>
+                <div className="tiny muted">{tr("Body kg")}</div>
               </div>
             )}
           </div>
 
           <Trend weeks={view.trend} />
 
-          <section className="stack" style={{ gap: 8 }} aria-label="Plan">
-            <h2 className="coach-h2">Plan</h2>
+          <section className="stack" style={{ gap: 8 }} aria-label={tr("Plan")}>
+            <h2 className="coach-h2">{tr("Plan")}</h2>
             {view.plan.length > 0 && (
               <div className="list-group">
                 {view.plan.map((w) => {
@@ -129,18 +130,18 @@ export default function CoachTrainee() {
             )}
             <div className="row" style={{ gap: 8 }}>
               <button className="btn primary grow" onClick={() => void newWorkout()}>
-                <Plus size={18} aria-hidden /> New workout
+                <Plus size={18} aria-hidden /> {tr("New workout")}
               </button>
               <button className="btn grow" onClick={() => setPicking(true)}>
-                <Copy size={18} aria-hidden /> Copy one of mine
+                <Copy size={18} aria-hidden /> {tr("Copy one of mine")}
               </button>
             </div>
           </section>
 
-          <section className="stack" style={{ gap: 8 }} aria-label="Recent workouts">
-            <h2 className="coach-h2">Recent workouts</h2>
+          <section className="stack" style={{ gap: 8 }} aria-label={tr("Recent workouts")}>
+            <h2 className="coach-h2">{tr("Recent workouts")}</h2>
             {view.recent.length === 0 ? (
-              <div className="small muted">No finished workouts yet.</div>
+              <div className="small muted">{tr("No finished workouts yet.")}</div>
             ) : (
               <div className="list-group">
                 {view.recent.map(({ s, sum, prs }) => (
@@ -168,12 +169,12 @@ export default function CoachTrainee() {
       )}
 
       {picking && (
-        <Sheet title="Copy one of your workouts" onClose={() => setPicking(false)}>
+        <Sheet title={tr("Copy one of your workouts")} onClose={() => setPicking(false)}>
           <div className="stack" style={{ gap: 8 }}>
             <div className="small muted">Pick one of your workouts. It is copied into {link?.name}'s plan, in "{COACH_FOLDER}". Build new ones on your Train tab first.</div>
             {myWorkouts.length === 0 ? (
               <button className="btn block" onClick={() => nav('/')}>
-                Go to Train
+                {tr("Go to Train")}
               </button>
             ) : (
               <div className="list-group">
@@ -209,8 +210,8 @@ export default function CoachTrainee() {
       {removing && (
         <Confirm
           title={`Remove ${removing.name}?`}
-          text="It leaves their plan. Workouts they already did stay in their history."
-          confirmLabel="Remove"
+          text={tr("It leaves their plan. Workouts they already did stay in their history.")}
+          confirmLabel={tr("Remove")}
           danger
           onClose={() => setRemoving(null)}
           onConfirm={async () => {
@@ -228,8 +229,8 @@ export default function CoachTrainee() {
       {ending && link && (
         <Confirm
           title={`Stop coaching ${link.name}?`}
-          text="You will no longer see their training. Workouts you added stay in their plan."
-          confirmLabel="Stop coaching"
+          text={tr("You will no longer see their training. Workouts you added stay in their plan.")}
+          confirmLabel={tr("Stop coaching")}
           danger
           onClose={() => setEnding(false)}
           onConfirm={async () => {
@@ -270,7 +271,7 @@ function Trend({ weeks }: { weeks: { start: Date; volume: number; sets: number; 
       </div>
       <div className="coach-trend-axis tiny muted" aria-hidden>
         <span>{weeks[0].start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
-        <span>This week</span>
+        <span>{tr("This week")}</span>
       </div>
     </section>
   )

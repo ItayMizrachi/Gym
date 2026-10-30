@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target, Wand2 } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -98,19 +99,19 @@ function Detail({ p }: { p: Program }) {
       <div className="pg-actions">
         {single && (
           <button className="btn primary pg-big" onClick={startNow} disabled={!!active}>
-            <Play size={20} aria-hidden /> Start now
+            <Play size={20} aria-hidden /> {tr("Start now")}
           </button>
         )}
         {added ? (
           <button className={`btn pg-big ${single ? '' : 'primary'}`} onClick={() => nav('/')}>
-            Go to Train <ChevronRight size={20} aria-hidden />
+            {tr("Go to Train")} <ChevronRight size={20} aria-hidden />
           </button>
         ) : (
           <button className={`btn pg-big ${single ? '' : 'primary'}`} onClick={add}>
             <Plus size={20} aria-hidden /> {single ? 'Save to my workouts' : 'Add program'}
           </button>
         )}
-        {single && active && <div className="small muted pg-center">Finish or leave your current workout first to start this one.</div>}
+        {single && active && <div className="small muted pg-center">{tr("Finish or leave your current workout first to start this one.")}</div>}
         {!single && !added && <div className="small muted pg-center">Adds {p.workouts.length} workouts to Train. You can change anything after.</div>}
       </div>
 
@@ -208,7 +209,7 @@ function Card({ p, have }: { p: Program; have: boolean }) {
         </span>
         {have && (
           <span className="small pg-have">
-            <Check size={14} aria-hidden /> Added
+            <Check size={14} aria-hidden /> {tr("Added")}
           </span>
         )}
         <ChevronRight size={20} aria-hidden className="pg-arrow" />
@@ -239,19 +240,19 @@ export default function Programs() {
 
   return (
     <div className="stack pg" style={{ gap: 16 }}>
-      <PageHeader title="Programs" sub="Pick a ready-made plan instead of building your own." back="/" />
+      <PageHeader title={tr("Programs")} sub={tr("Pick a ready-made plan instead of building your own.")} back="/" />
 
       <button className="pg-finder" onClick={() => setFinder(true)}>
         <Wand2 size={22} aria-hidden />
         <span className="grow">
-          <span className="pg-finder-t">Not sure where to start?</span>
-          <span className="pg-finder-d">Answer 4 quick questions and get the program that fits you.</span>
+          <span className="pg-finder-t">{tr("Not sure where to start?")}</span>
+          <span className="pg-finder-d">{tr("Answer 4 quick questions and get the program that fits you.")}</span>
         </span>
         <ChevronRight size={18} aria-hidden />
       </button>
       {finder && <FindProgram onDone={() => setFinder(false)} />}
 
-      <div className="pg-tabs" role="tablist" aria-label="Kind of plan">
+      <div className="pg-tabs" role="tablist" aria-label={tr("Kind of plan")}>
         {(['single', 'weekly'] as Kind[]).map((k) => (
           <button
             key={k}
@@ -267,9 +268,9 @@ export default function Programs() {
       </div>
 
       <div className="stack" style={{ gap: 6 }}>
-        <FilterRow<Level> label="Level" options={LEVELS.map((l) => ({ id: l, label: l }))} value={f.level} onChange={(v) => setF({ level: v })} />
+        <FilterRow<Level> label={tr("Level")} options={LEVELS.map((l) => ({ id: l, label: l }))} value={f.level} onChange={(v) => setF({ level: v })} />
         <FilterRow<Gear>
-          label="Equipment"
+          label={tr("Equipment")}
           options={(['gym', 'home', 'none'] as Gear[]).map((g) => ({ id: g, label: GEAR_LABEL[g] }))}
           value={f.gear}
           onChange={(v) => setF({ gear: v })}
@@ -288,7 +289,7 @@ export default function Programs() {
         </span>
         {filtered && (
           <button className="btn ghost sm" onClick={() => setF(NO_FILTER)}>
-            Clear filters
+            {tr("Clear filters")}
           </button>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useParams } from 'react-router-dom'
 import { Trash2, Trophy } from 'lucide-react'
 import { CoachNote, addNote, deleteNote, listNotes } from '../lib/coach'
@@ -35,17 +36,17 @@ export default function CoachSession() {
   if (error)
     return (
       <div className="stack coach" style={{ gap: 16 }}>
-        <PageHeader title="Workout" back={`/coach/${id}`} />
+        <PageHeader title={tr("Workout")} back={`/coach/${id}`} />
         <div className="card stack">
           <div className="small muted">{error}</div>
           <button className="btn" onClick={() => void reload()}>
-            Try again
+            {tr("Try again")}
           </button>
         </div>
       </div>
     )
   if (!db || !link) return <div className="card small muted">Loading…</div>
-  if (!s) return <div className="card small muted">This workout is no longer there.</div>
+  if (!s) return <div className="card small muted">{tr("This workout is no longer there.")}</div>
 
   const sum = summarizeSession(s)
   return (
@@ -54,19 +55,19 @@ export default function CoachSession() {
       <div className="coach-stats">
         <div>
           <div className="coach-n">{sum.minutes < 60 ? `${sum.minutes}m` : `${Math.floor(sum.minutes / 60)}h ${sum.minutes % 60}m`}</div>
-          <div className="tiny muted">Time</div>
+          <div className="tiny muted">{tr("Time")}</div>
         </div>
         <div>
           <div className="coach-n">{sum.sets}</div>
-          <div className="tiny muted">Sets</div>
+          <div className="tiny muted">{tr("Sets")}</div>
         </div>
         <div>
           <div className="coach-n">{sum.volume > 0 ? fmtVolume(sum.volume) : '–'}</div>
-          <div className="tiny muted">Volume</div>
+          <div className="tiny muted">{tr("Volume")}</div>
         </div>
         <div>
           <div className="coach-n">{prIds.size}</div>
-          <div className="tiny muted">Records</div>
+          <div className="tiny muted">{tr("Records")}</div>
         </div>
       </div>
 
@@ -79,12 +80,12 @@ export default function CoachSession() {
               <div className="grow" style={{ minWidth: 0 }}>
                 <div className="title">{ex?.name ?? e.name}</div>
                 {done.length === 0 ? (
-                  <div className="meta">Skipped</div>
+                  <div className="meta">{tr("Skipped")}</div>
                 ) : (
                   <div className="coach-sets">
                     {done.map((x) => (
                       <span key={x.id} className={prIds.has(x.id) ? 'pr' : undefined}>
-                        {prIds.has(x.id) && <Trophy size={12} aria-label="Record" />}
+                        {prIds.has(x.id) && <Trophy size={12} aria-label={tr("Record")} />}
                         {setLabel(x, trackingOf(ex))}
                       </span>
                     ))}
@@ -98,14 +99,14 @@ export default function CoachSession() {
       </div>
       {s.notes && <div className="small muted">Their note: “{s.notes}”</div>}
 
-      <section className="stack" style={{ gap: 8 }} aria-label="Your notes">
-        <h2 className="coach-h2">Your note</h2>
+      <section className="stack" style={{ gap: 8 }} aria-label={tr("Your notes")}>
+        <h2 className="coach-h2">{tr("Your note")}</h2>
         {notes?.map((n) => (
           <div key={n.id} className="card coach-note">
             <div className="grow">{n.text}</div>
             <button
               className="btn icon ghost"
-              aria-label="Delete note"
+              aria-label={tr("Delete note")}
               onClick={async () => {
                 try {
                   await deleteNote(n.id)
@@ -143,7 +144,7 @@ export default function CoachSession() {
             value={text}
             maxLength={1000}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Great depth on the squats. Add 2.5 kg next time."
+            placeholder={tr("Great depth on the squats. Add 2.5 kg next time.")}
             aria-label={`Note for ${link.name}`}
           />
           <button className="btn primary block" type="submit" disabled={!text.trim() || busy}>

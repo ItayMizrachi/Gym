@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import '../styles/workout-live.css'
 
 export interface CoachStep {
@@ -85,7 +86,7 @@ export function CoachMarks({ id, userId, steps, enabled = true }: { id: string; 
         <div className="cm-text">{s.text}</div>
         <div className="cm-actions">
           <button className="btn ghost sm" onClick={finish}>
-            Skip tips
+            {tr("Skip tips")}
           </button>
           <button className="btn primary sm" onClick={() => (last ? finish() : setStep(step + 1))}>
             {last ? 'Got it' : 'Next'}

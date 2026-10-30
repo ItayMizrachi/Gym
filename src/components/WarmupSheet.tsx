@@ -1,4 +1,5 @@
 import { Sheet } from './ui'
+import { t as tr } from '../lib/i18n'
 import { addWarmupSets } from '../lib/actions'
 import { Exercise, SessionExercise, trackingOf } from '../lib/types'
 import { fmtKg } from '../lib/format'
@@ -38,7 +39,7 @@ export function WarmupSheet({
             : `${fmtKg(work)} kg is light enough to start without warming up.`
 
   return (
-    <Sheet title="Warm up" onClose={onClose}>
+    <Sheet title={tr("Warm up")} onClose={onClose}>
       <div className="stack">
         {fresh.length > 0 ? (
           <>
@@ -65,7 +66,7 @@ export function WarmupSheet({
                 onClose()
               }}
             >
-              Add warm-up sets
+              {tr("Add warm-up sets")}
             </button>
           </>
         ) : (
@@ -78,7 +79,7 @@ export function WarmupSheet({
             onClose()
           }}
         >
-          Add one warm-up row
+          {tr("Add one warm-up row")}
         </button>
       </div>
     </Sheet>

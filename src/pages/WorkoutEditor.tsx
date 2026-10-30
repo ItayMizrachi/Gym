@@ -1,4 +1,5 @@
 import { ComponentProps, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Copy, Dumbbell, Folder, Info, Link2, Plus, Trash2 } from 'lucide-react'
 import '../styles/programs-nav.css'
@@ -35,7 +36,7 @@ function RestInput({ value, onChange }: { value: number; onChange: (n: number) =
         setFocus(false)
         onChange(parseRest(text))
       }}
-      aria-label="Rest (m:ss)"
+      aria-label={tr("Rest (m:ss)")}
     />
   )
 }
@@ -61,7 +62,7 @@ export default function WorkoutEditor() {
   if (!w)
     return (
       <div className="stack">
-        <PageHeader title="Workout not found" sub="It may have been deleted." back="/" />
+        <PageHeader title={tr("Workout not found")} sub={tr("It may have been deleted.")} back="/" />
       </div>
     )
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -159,10 +160,10 @@ export default function WorkoutEditor() {
           </button>
           {/* drag (hold the header) moves an exercise; these stay for keyboards and screen readers */}
           <div className="reorder sr-only">
-            <button className="btn ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">
+            <button className="btn ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label={tr("Move up")}>
               <ChevronUp size={22} />
             </button>
-            <button className="btn ghost" onClick={() => move(i, 1)} disabled={i === wes.length - 1} aria-label="Move down">
+            <button className="btn ghost" onClick={() => move(i, 1)} disabled={i === wes.length - 1} aria-label={tr("Move down")}>
               <ChevronDown size={22} />
             </button>
           </div>
@@ -170,25 +171,25 @@ export default function WorkoutEditor() {
         {open === we.id && (
           <div className="we-body">
             <button className="btn ghost sm we-help" onClick={() => setHelp(!help)} aria-expanded={help}>
-              <Info size={16} aria-hidden /> What do these mean?
+              <Info size={16} aria-hidden /> {tr("What do these mean?")}
             </button>
             {help && (
               <dl className="info-pop we-gloss">
-                <dt>Sets</dt>
-                <dd>How many times you do the exercise, with rest in between.</dd>
+                <dt>{tr("Sets")}</dt>
+                <dd>{tr("How many times you do the exercise, with rest in between.")}</dd>
                 <dt>{timed ? 'Secs from / to' : 'Reps from / to'}</dt>
                 <dd>{timed ? 'Seconds to hold or keep going, for example 30 to 60.' : 'Aim for this many reps. When you reach the top on every set, GymLog suggests more weight.'}</dd>
-                <dt>Rest</dt>
-                <dd>The timer that starts after you log a set, in minutes:seconds.</dd>
-                <dt>Drop set</dt>
-                <dd>One extra set right after the last one, with lighter weight and no rest.</dd>
-                <dt>Superset</dt>
-                <dd>Exercises with the same letter are done in turns: one set of each, then rest.</dd>
+                <dt>{tr("Rest")}</dt>
+                <dd>{tr("The timer that starts after you log a set, in minutes:seconds.")}</dd>
+                <dt>{tr("Drop set")}</dt>
+                <dd>{tr("One extra set right after the last one, with lighter weight and no rest.")}</dd>
+                <dt>{tr("Superset")}</dt>
+                <dd>{tr("Exercises with the same letter are done in turns: one set of each, then rest.")}</dd>
               </dl>
             )}
             <div className="we-grid">
               <label className="field">
-                Sets
+                {tr("Sets")}
                 <NumInput decimal={false} value={we.sets} onChange={(n) => patch(we, { sets: Math.max(0, Math.round(n ?? 0)) })} />
               </label>
               <label className="field">
@@ -206,16 +207,16 @@ export default function WorkoutEditor() {
             </div>
             <div className="row" style={{ gap: 'var(--s3)', alignItems: 'flex-end' }}>
               <label className="field" style={{ width: 96 }}>
-                Rest (m:ss)
+                {tr("Rest (m:ss)")}
                 <RestInput value={we.rest_sec} onChange={(n) => patch(we, { rest_sec: n })} />
               </label>
               <div className="grow">
-                <Toggle blue label="Drop set at the end" on={we.drop_last} onChange={(v) => patch(we, { drop_last: v })} />
+                <Toggle blue label={tr("Drop set at the end")} on={we.drop_last} onChange={(v) => patch(we, { drop_last: v })} />
               </div>
             </div>
             <div className="field">
               Superset with
-              <div className="group-pick" role="radiogroup" aria-label="Superset group">
+              <div className="group-pick" role="radiogroup" aria-label={tr("Superset group")}>
                 {(GROUPS.includes(we.superset) ? GROUPS : [...GROUPS, we.superset]).map((g) => (
                   <button
                     key={g || 'none'}
@@ -231,7 +232,7 @@ export default function WorkoutEditor() {
             </div>
             <input
               className="input"
-              placeholder="Note shown during the workout"
+              placeholder={tr("Note shown during the workout")}
               aria-label={`Note for ${ex?.name ?? 'this exercise'}, shown during the workout`}
               value={we.note}
               onChange={(e) => patch(we, { note: e.target.value })}
@@ -242,10 +243,10 @@ export default function WorkoutEditor() {
                 style={{ color: 'var(--danger)', marginLeft: -8 }}
                 onClick={() => useStore.getState().remove('workout_exercises', we.id)}
               >
-                <Trash2 size={16} /> Remove from workout
+                <Trash2 size={16} /> {tr("Remove from workout")}
               </button>
               <button className="btn sm" style={{ marginLeft: 'auto' }} onClick={() => setOpen(null)}>
-                Done
+                {tr("Done")}
               </button>
             </div>
           </div>
@@ -264,22 +265,22 @@ export default function WorkoutEditor() {
 
       <div className="card stack">
         <label className="field">
-          Name
+          {tr("Name")}
           <input className="input" value={w.name} onChange={(e) => save('workouts', { ...w, name: e.target.value }, { debounce: 400 })} />
         </label>
         <div className="field">
-          Folder
+          {tr("Folder")}
           <button className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => setMovingFolder(true)} aria-label={`Folder: ${folderOf(w) || NO_FOLDER}. Move to folder`}>
             <Folder size={16} aria-hidden />
             <span className="grow ellipsis" style={{ textAlign: 'left' }}>
               {folderOf(w) || `${NO_FOLDER} (no folder)`}
             </span>
-            <span className="small muted">Move</span>
+            <span className="small muted">{tr("Move")}</span>
           </button>
         </div>
         <div className="field">
-          Planned days
-          <div className="day-pick" role="group" aria-label="Planned days">
+          {tr("Planned days")}
+          <div className="day-pick" role="group" aria-label={tr("Planned days")}>
             {DAY_SHORT.map((l, d) => {
               const on = plannedDays(w).includes(d)
               return (
@@ -295,14 +296,14 @@ export default function WorkoutEditor() {
               )
             })}
           </div>
-          <span className="small muted">On these days the Train tab shows it as today's workout.</span>
+          <span className="small muted">{tr("On these days the Train tab shows it as today's workout.")}</span>
         </div>
         <label className="field">
-          Notes
+          {tr("Notes")}
           <textarea
             className="textarea"
             style={{ minHeight: 64 }}
-            placeholder="Focus, tempo, anything to remember"
+            placeholder={tr("Focus, tempo, anything to remember")}
             value={w.notes}
             onChange={(e) => save('workouts', { ...w, notes: e.target.value }, { debounce: 400 })}
           />
@@ -312,10 +313,10 @@ export default function WorkoutEditor() {
       {wes.length > 0 && (
         <div style={{ marginBottom: 0 }}>
           <div className="section-label" style={{ marginBottom: 2 }}>
-            <span>Exercises</span>
+            <span>{tr("Exercises")}</span>
             <span className="count">{wes.length}</span>
           </div>
-          <div className="small muted">Tap one to change or remove it. Hold and drag to move it.</div>
+          <div className="small muted">{tr("Tap one to change or remove it. Hold and drag to move it.")}</div>
         </div>
       )}
 
@@ -337,13 +338,13 @@ export default function WorkoutEditor() {
       {!wes.length && (
         <Empty
           icon={<Dumbbell size={24} />}
-          title="No exercises yet"
-          text="Add the exercises for this workout. You can set sets, reps, rest and supersets for each."
+          title={tr("No exercises yet")}
+          text={tr("Add the exercises for this workout. You can set sets, reps, rest and supersets for each.")}
         />
       )}
 
       <button className="btn primary block we-add" onClick={() => setPicking(true)}>
-        <Plus size={18} /> Add exercises
+        <Plus size={18} /> {tr("Add exercises")}
       </button>
 
       <div className="row" style={{ gap: 'var(--s2)', marginTop: 'var(--s3)' }}>
@@ -354,10 +355,10 @@ export default function WorkoutEditor() {
             nav('/')
           }}
         >
-          <Copy size={16} /> Duplicate
+          <Copy size={16} /> {tr("Duplicate")}
         </button>
         <button className="btn danger grow" onClick={() => setConfirmDel(true)}>
-          <Trash2 size={16} /> Delete
+          <Trash2 size={16} /> {tr("Delete")}
         </button>
       </div>
 
@@ -365,9 +366,9 @@ export default function WorkoutEditor() {
       {movingFolder && <MoveToFolderSheet workoutId={w.id} onClose={() => setMovingFolder(false)} />}
       {confirmDel && (
         <Confirm
-          title="Delete this workout?"
-          text="Past sessions stay in your history."
-          confirmLabel="Delete"
+          title={tr("Delete this workout?")}
+          text={tr("Past sessions stay in your history.")}
+          confirmLabel={tr("Delete")}
           danger
           onConfirm={() => {
             removeWorkout(w.id)

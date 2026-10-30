@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import '../styles/progress.css'
 
 /** Weekly bar chart. Tap a bar to read its value; the current week (last bar) is picked by default. */
@@ -33,7 +34,7 @@ export function WeekBars({
         <span className="kpi">{format(values[cur] ?? 0)}</span>
         <span className="small muted">{cur === n - 1 ? 'this week' : `week of ${label(starts[cur])}`}</span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Weekly totals">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={tr("Weekly totals")}>
         <line x1="0" x2={W} y1={top + chartH} y2={top + chartH} className="wbars-axis" />
         <line x1="0" x2={W} y1={top} y2={top} className="wbars-grid" />
         {values.map((v, i) => {

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ChevronDown, Info, Plus, Ruler } from 'lucide-react'
 import { Metric } from '../lib/types'
 import { LineChart } from './Chart'
@@ -58,7 +59,7 @@ export function MeasureFields({
     <div className="ms-section">
       <button type="button" className="ms-toggle" aria-expanded={open} onClick={onToggle}>
         <Ruler size={18} aria-hidden />
-        <span className="grow">Measurements</span>
+        <span className="grow">{tr("Measurements")}</span>
         <span className="small muted">{count ? `${count} filled` : 'Optional'}</span>
         <ChevronDown size={18} className={`ms-chev${open ? ' open' : ''}`} aria-hidden />
       </button>
@@ -93,7 +94,7 @@ export function MeasureFields({
               <span />
             )}
             <button type="button" className="btn sm ghost" onClick={() => setGuide(true)}>
-              <Info size={16} /> Where to measure
+              <Info size={16} /> {tr("Where to measure")}
             </button>
           </div>
         </div>
@@ -119,7 +120,7 @@ const SPOTS: { key: MeasureKey; lines: [number, number, number][] }[] = [
 
 export function BodySilhouette({ active }: { active: string | null }) {
   return (
-    <svg className="ms-body" viewBox="0 0 120 244" role="img" aria-label="Body outline with the places to measure">
+    <svg className="ms-body" viewBox="0 0 120 244" role="img" aria-label={tr("Body outline with the places to measure")}>
       <g className="ms-shape">
         <circle cx="60" cy="20" r="13" />
         <rect x="54" y="30" width="12" height="14" rx="4" />
@@ -144,9 +145,9 @@ export function BodySilhouette({ active }: { active: string | null }) {
 export function MeasureGuide({ onClose, initial = 'waist' }: { onClose: () => void; initial?: string }) {
   const [active, setActive] = useState<string>(initial)
   return (
-    <Sheet title="Where to measure" onClose={onClose}>
+    <Sheet title={tr("Where to measure")} onClose={onClose}>
       <div className="stack" style={{ gap: 'var(--s3)' }}>
-        <div className="small muted">Use a soft tape, snug but not tight. Measure in the morning before eating, once a month.</div>
+        <div className="small muted">{tr("Use a soft tape, snug but not tight. Measure in the morning before eating, once a month.")}</div>
         <div className="ms-guide">
           <BodySilhouette active={active} />
           <div className="ms-howlist" role="list">
@@ -182,13 +183,13 @@ export function MeasuresCard({ metrics, onLog }: { metrics: Metric[]; onLog: () 
   return (
     <div className="card stack">
       <div className="card-head">
-        <h2>Measurements</h2>
+        <h2>{tr("Measurements")}</h2>
         <div className="row" style={{ gap: 'var(--s2)' }}>
-          <button className="btn icon sm" onClick={() => setGuide(true)} aria-label="Where to measure">
+          <button className="btn icon sm" onClick={() => setGuide(true)} aria-label={tr("Where to measure")}>
             <Info size={18} />
           </button>
           <button className="btn sm" onClick={onLog}>
-            <Plus size={16} /> Add
+            <Plus size={16} /> {tr("Add")}
           </button>
         </div>
       </div>
@@ -197,15 +198,15 @@ export function MeasuresCard({ metrics, onLog }: { metrics: Metric[]; onLog: () 
         <div className="ms-empty">
           <Ruler size={22} aria-hidden />
           <div>
-            <div>Track waist, arms and more with a tape measure.</div>
-            <div className="small muted">Measure once a month, same time of day.</div>
+            <div>{tr("Track waist, arms and more with a tape measure.")}</div>
+            <div className="small muted">{tr("Measure once a month, same time of day.")}</div>
           </div>
         </div>
       ) : (
         <>
           {keys.length > 1 && (
             <div className="ms-seg-wrap">
-              <div className="seg ms-seg" role="tablist" aria-label="Measurement">
+              <div className="seg ms-seg" role="tablist" aria-label={tr("Measurement")}>
                 {keys.map((k) => (
                   <button key={k} role="tab" aria-selected={k === key} className={k === key ? 'on' : ''} onClick={() => setPicked(k)}>
                     {measureInfo(k)!.short}
@@ -228,7 +229,7 @@ export function MeasuresCard({ metrics, onLog }: { metrics: Metric[]; onLog: () 
           {points.length > 1 ? (
             <LineChart unit={` ${info.unit}`} digits={1} series={[{ name: info.label, color: 'var(--accent)', points, width: 2.4 }]} />
           ) : (
-            <div className="small muted">Log it again next month to see a trend.</div>
+            <div className="small muted">{tr("Log it again next month to see a trend.")}</div>
           )}
           <div className="delta-row ms-deltas">
             <div>

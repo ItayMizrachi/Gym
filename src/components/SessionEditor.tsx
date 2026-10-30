@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Session, SessionSet, SetKind, trackingOf } from '../lib/types'
@@ -32,7 +33,7 @@ function TimeInput({ value, onChange }: { value: number | null | undefined; onCh
       className="input"
       inputMode="numeric"
       placeholder="0:00"
-      aria-label="Time (minutes:seconds)"
+      aria-label={tr("Time (minutes:seconds)")}
       value={text}
       onChange={(e) => {
         const t = e.target.value.replace(/[^\d:]/g, '')
@@ -119,33 +120,33 @@ export function SessionEditor({ session, onDone }: { session: Session; onDone: (
   return (
     <div className="stack" style={{ gap: 14 }}>
       <div className="page-head">
-        <button className="btn icon ghost" onClick={onDone} aria-label="Cancel editing">
+        <button className="btn icon ghost" onClick={onDone} aria-label={tr("Cancel editing")}>
           <X size={22} />
         </button>
         <div className="grow">
-          <h1>Edit workout</h1>
-          <div className="sub">Changes are saved when you tap Save.</div>
+          <h1>{tr("Edit workout")}</h1>
+          <div className="sub">{tr("Changes are saved when you tap Save.")}</div>
         </div>
       </div>
 
       <div className="card stack">
         <label className="field">
-          Name
+          {tr("Name")}
           <input className="input" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
         </label>
         <div className="row" style={{ alignItems: 'flex-end' }}>
           <label className="field grow">
-            Started
+            {tr("Started")}
             <input className="input" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} />
           </label>
           <label className="field" style={{ width: 96 }}>
-            Minutes
+            {tr("Minutes")}
             <NumInput className="input" value={minutes} onChange={setMinutes} decimal={false} ariaLabel="Duration in minutes" />
           </label>
         </div>
         <label className="field">
-          Notes
-          <textarea className="textarea" rows={3} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} placeholder="How did it go?" />
+          {tr("Notes")}
+          <textarea className="textarea" rows={3} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} placeholder={tr("How did it go?")} />
         </label>
       </div>
 
@@ -171,8 +172,8 @@ export function SessionEditor({ session, onDone }: { session: Session; onDone: (
             </div>
             {sets.length > 0 && (
               <div className={`ed-head${one ? ' one' : ''}`}>
-                <span>Set</span>
-                {one ? <span>Time</span> : <><span>{tracking === 'reps' ? '+kg' : 'kg'}</span><span>Reps</span></>}
+                <span>{tr("Set")}</span>
+                {one ? <span>{tr("Time")}</span> : <><span>{tracking === 'reps' ? '+kg' : 'kg'}</span><span>{tr("Reps")}</span></>}
                 <span />
               </div>
             )}
@@ -196,27 +197,27 @@ export function SessionEditor({ session, onDone }: { session: Session; onDone: (
                       <NumInput className="input" value={x.reps} onChange={(v) => patchSet(i, x.id, { reps: v })} decimal={false} ariaLabel="Reps" placeholder="0" />
                     </>
                   )}
-                  <button className="btn icon sm ghost" aria-label="Remove set" onClick={() => patchEx(i, (all) => all.filter((y) => y.id !== x.id))}>
+                  <button className="btn icon sm ghost" aria-label={tr("Remove set")} onClick={() => patchEx(i, (all) => all.filter((y) => y.id !== x.id))}>
                     <X size={18} />
                   </button>
                 </div>
               )
             })}
             <button className="btn sm ghost" style={{ marginTop: 6 }} onClick={() => addSet(i)}>
-              <Plus size={16} /> Add set
+              <Plus size={16} /> {tr("Add set")}
             </button>
           </div>
         )
       })}
-      {draft.data.exercises.length === 0 && <div className="card small muted">No exercises left. Save to keep an empty workout, or Cancel.</div>}
-      <div className="tiny muted center">Tap a set number to switch between work, warm-up, drop and failure.</div>
+      {draft.data.exercises.length === 0 && <div className="card small muted">{tr("No exercises left. Save to keep an empty workout, or Cancel.")}</div>}
+      <div className="tiny muted center">{tr("Tap a set number to switch between work, warm-up, drop and failure.")}</div>
 
       <div className="ed-bar">
         <button className="btn" onClick={onDone}>
-          Cancel
+          {tr("Cancel")}
         </button>
         <button className="btn primary" onClick={commit}>
-          Save
+          {tr("Save")}
         </button>
       </div>
     </div>

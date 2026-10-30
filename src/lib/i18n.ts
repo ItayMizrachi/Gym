@@ -5,6 +5,8 @@
  * Placeholders: t('{n} sets', { n: 3 }).
  */
 
+import { HE_SCREENS } from './i18n-he'
+
 export type Lang = 'en' | 'he'
 const KEY = 'gymlog:lang'
 
@@ -45,6 +47,7 @@ export function t(s: string, vars?: Record<string, string | number>): string {
 export const t2 = (n: number, one: string, many: string) => t(n === 1 ? one : many, { n })
 
 const HE: Record<string, string> = {
+  ...HE_SCREENS,
   "Late session?": "אימון מאוחר?",
   "{a} of {b} sets": "{a} מתוך {b} סטים",
   "Pick a program to begin": "בחר תוכנית כדי להתחיל",

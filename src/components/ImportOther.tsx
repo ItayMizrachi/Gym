@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { FileUp } from 'lucide-react'
 import { Sheet, Toggle } from './ui'
 import { useStore } from '../lib/store'
@@ -86,7 +87,7 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
   const last = res?.workouts[res.workouts.length - 1]?.start
 
   return (
-    <Sheet title="Import from Hevy or Strong" onClose={onClose}>
+    <Sheet title={tr("Import from Hevy or Strong")} onClose={onClose}>
       <div className="stack">
         <div className="small muted">
           <b style={{ color: 'var(--text)' }}>Hevy:</b> Profile → Settings → Export &amp; import data → Export workouts, and Export
@@ -94,7 +95,7 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
           <br />
           <b style={{ color: 'var(--text)' }}>Strong:</b> Settings → Export Strong data.
           <br />
-          Then pick the CSV file here. Your history, sets and records come with you.
+          {tr("Then pick the CSV file here. Your history, sets and records come with you.")}
         </div>
         <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={(e) => onFile(e.target.files?.[0])} />
         <button className="btn" onClick={() => fileRef.current?.click()}>
@@ -128,8 +129,8 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
             {res.source === 'strong' && (
               <div className="row">
                 <div className="grow">
-                  <div>Weights are in pounds</div>
-                  <div className="small muted">Strong's file has no unit. Turn on if you log in lb.</div>
+                  <div>{tr("Weights are in pounds")}</div>
+                  <div className="small muted">{tr("Strong's file has no unit. Turn on if you log in lb.")}</div>
                 </div>
                 <Toggle
                   on={pounds}
@@ -141,14 +142,14 @@ export default function ImportOther({ onClose }: { onClose: () => void }) {
                 />
               </div>
             )}
-            {res.source === 'hevy' && res.pounds && <div className="small muted">Weights were in pounds and are converted to kg.</div>}
+            {res.source === 'hevy' && res.pounds && <div className="small muted">{tr("Weights were in pounds and are converted to kg.")}</div>}
           </div>
         )}
 
         <button className="btn primary block" disabled={body ? !body.length : !res || !res.workouts.length || busy} onClick={run}>
           {busy ? 'Importing…' : body ? `Import ${body.length} days` : res ? `Import ${res.workouts.length} workouts` : 'Import'}
         </button>
-        <div className="tiny muted">Importing the same file again is safe: workouts and days already in GymLog are skipped.</div>
+        <div className="tiny muted">{tr("Importing the same file again is safe: workouts and days already in GymLog are skipped.")}</div>
       </div>
     </Sheet>
   )

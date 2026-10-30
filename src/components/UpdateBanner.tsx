@@ -1,4 +1,5 @@
 import { useState, useSyncExternalStore } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useLocation } from 'react-router-dom'
 import { RefreshCw, X } from 'lucide-react'
 import { registerSW } from 'virtual:pwa-register'
@@ -64,13 +65,13 @@ export default function UpdateBanner() {
   return (
     <div className={`pwa-update ${hasRest ? 'above-rest' : ''}`} role="status">
       <div className="pwa-update-text">
-        <b>New version available</b>
-        <span>Reload to get the latest GymLog.</span>
+        <b>{tr("New version available")}</b>
+        <span>{tr("Reload to get the latest GymLog.")}</span>
       </div>
       <button className="btn primary sm" onClick={reload} disabled={busy}>
-        <RefreshCw size={16} className={busy ? 'pwa-spin' : ''} /> Reload
+        <RefreshCw size={16} className={busy ? 'pwa-spin' : ''} /> {tr("Reload")}
       </button>
-      <button className="pwa-update-close" onClick={() => setLater(true)} aria-label="Later">
+      <button className="pwa-update-close" onClick={() => setLater(true)} aria-label={tr("Later")}>
         <X size={18} />
       </button>
     </div>

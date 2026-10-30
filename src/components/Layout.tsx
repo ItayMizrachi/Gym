@@ -88,7 +88,7 @@ function RestBar({ inSession }: { inSession: boolean }) {
         <div className="rp-ctrl">
           {rest.finished ? (
             <button className="btn sm ok grow" onClick={clear}>
-              <Check size={16} /> Next set
+              <Check size={16} /> {tr("Next set")}
             </button>
           ) : (
             <>
@@ -99,7 +99,7 @@ function RestBar({ inSession }: { inSession: boolean }) {
                 +15s
               </button>
               <button className="btn sm grow" onClick={clear}>
-                <SkipForward size={16} /> Skip
+                <SkipForward size={16} /> {tr("Skip")}
               </button>
             </>
           )}
@@ -122,10 +122,10 @@ class ScreenBoundary extends Component<{ children: ReactNode; resetKey: string }
     if (!this.state.failed) return this.props.children
     return (
       <div className="card stack" role="alert" style={{ marginTop: 16 }}>
-        <h2>This screen didn't load</h2>
-        <div className="small muted">Check your connection and try again. Your workouts are safe on this device.</div>
+        <h2>{tr("This screen didn't load")}</h2>
+        <div className="small muted">{tr("Check your connection and try again. Your workouts are safe on this device.")}</div>
         <button className="btn primary block" onClick={() => location.reload()}>
-          Try again
+          {tr("Try again")}
         </button>
       </div>
     )
@@ -159,7 +159,7 @@ function Toasts({ inSession }: { inSession: boolean }) {
             key={t.id}
             className={`toast ${t.kind}${t.kind === 'pr' ? ' has-ico' : ''}${leaving.includes(t.id) ? ' leaving' : ''}`}
             onClick={() => tap(t.id)}
-            title="Tap to dismiss"
+            title={tr("Tap to dismiss")}
           >
             {t.kind === 'pr' ? (
               <>
@@ -223,7 +223,7 @@ function ResumeBar() {
         <b>{splitName(active.name)[0]}</b> <span className="muted">· {fmtClock(secs)}</span>
       </span>
       <span className="resume-go">
-        <Play size={16} /> Resume
+        <Play size={16} /> {tr("Resume")}
       </span>
     </button>
   )
@@ -357,7 +357,7 @@ export default function Layout() {
         <ScreenBoundary resetKey={loc.pathname}>
         <Suspense
           fallback={
-            <div className="stack" style={{ gap: 16, paddingTop: 8 }} aria-label="Loading">
+            <div className="stack" style={{ gap: 16, paddingTop: 8 }} aria-label={tr("Loading")}>
               <Skeleton w="45%" h={30} />
               <SkeletonList rows={4} />
             </div>
@@ -374,7 +374,7 @@ export default function Layout() {
       {!inSession && !rest && loc.pathname !== '/' && <ResumeBar />}
       {/* the live workout gets the whole screen; the nav comes back when you leave it */}
       {!inSession && (
-        <nav className="nav" aria-label="Main">
+        <nav className="nav" aria-label={tr("Main")}>
           <div className={`nav-inner${navDrag != null ? ' dragging' : ''}`} ref={navRef} {...navSwipe}>
             {/* one bubble for the whole bar: it slides to the active tab, and follows the finger while sliding */}
             {navW > 0 && centers.length === TABS.length && (activeTab >= 0 || bubbleX != null) && (

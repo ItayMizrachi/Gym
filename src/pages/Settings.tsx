@@ -122,8 +122,8 @@ export default function SettingsPage() {
     <button className={`btn set-link ${primary ? 'primary' : ''}`} onClick={onClick}>
       {icon}
       <span className="grow set-link-t">
-        {label}
-        {sub && <span className="tiny set-link-sub">{sub}</span>}
+        {t(label)}
+        {sub && <span className="tiny set-link-sub">{t(sub)}</span>}
       </span>
       <ChevronRight size={16} aria-hidden />
     </button>
@@ -141,11 +141,11 @@ export default function SettingsPage() {
 
   return (
     <div className="stack" style={{ gap: 14 }}>
-      <PageHeader title="Settings" sub="Workout options, plates, backups and your account." />
+      <PageHeader title={t("Settings")} sub={t("Workout options, plates, backups and your account.")} />
 
       {/* who you are, at a glance; signing out and deleting live at the very bottom */}
       {repo?.mode === 'cloud' ? (
-        <section className="card acct-card" aria-label="Account">
+        <section className="card acct-card" aria-label={t("Account")}>
           <div className="acct-avatar" aria-hidden>
             {(user?.email ?? '?').slice(0, 1).toUpperCase()}
           </div>
@@ -157,11 +157,11 @@ export default function SettingsPage() {
           </div>
         </section>
       ) : (
-        <section className="card stack" aria-label="Account">
-          <div className="small muted">Not signed in. Workouts are saved on this device only.</div>
+        <section className="card stack" aria-label={t("Account")}>
+          <div className="small muted">{t("Not signed in. Workouts are saved on this device only.")}</div>
           {cloudConfigured && (
             <button className="btn primary block" onClick={() => signOut()}>
-              <LogIn size={18} aria-hidden /> Sign in with Google
+              <LogIn size={18} aria-hidden /> {t("Sign in with Google")}
             </button>
           )}
         </section>
@@ -169,9 +169,9 @@ export default function SettingsPage() {
       {repo?.mode === 'cloud' && <CoachSettings />}
       {repo?.mode === 'cloud' && <SuggestedExercises />}
 
-      <section className="card stack" aria-label="Language">
+      <section className="card stack" aria-label={t("Language")}>
         <h2>{t('Language')}</h2>
-        <div className="seg block set-seg" role="group" aria-label="Language">
+        <div className="seg block set-seg" role="group" aria-label={t("Language")}>
           {(['en', 'he'] as const).map((l) => (
             <button key={l} className={lang === l ? 'on' : ''} aria-pressed={lang === l} onClick={() => lang !== l && setLang(l)}>
               {l === 'en' ? 'English' : 'עברית'}
@@ -218,8 +218,8 @@ export default function SettingsPage() {
           {toggleRow(t('Warm-up sets automatically'), t('Before the first heavy barbell or plate-loaded lift for each muscle'), prefs.autoWarmup, (v) => prefs.setPrefs({ autoWarmup: v }))}
           <div>
             <div>{t('Weight increase')}</div>
-            <div className="small muted">Suggested when you reach the top of the rep range on every work set</div>
-            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label="Weight increase">
+            <div className="small muted">{t("Suggested when you reach the top of the rep range on every work set")}</div>
+            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label={t("Weight increase")}>
               {INCREMENTS.map((v) => (
                 <button
                   key={v}
@@ -240,8 +240,8 @@ export default function SettingsPage() {
         'Weights are in kilograms. Set your bar and plates for the plate calculator.',
         <>
           <div>
-            <div>Bar</div>
-            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label="Bar weight">
+            <div>{t("Bar")}</div>
+            <div className="seg block set-seg" style={{ marginTop: 8 }} role="group" aria-label={t("Bar weight")}>
               {BARS.map((v) => (
                 <button
                   key={v}
@@ -255,9 +255,9 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <div>Plates in your gym</div>
-            <div className="small muted">Tap to switch a size on or off</div>
-            <div className="plate-pick" style={{ marginTop: 8 }} role="group" aria-label="Plates in your gym">
+            <div>{t("Plates in your gym")}</div>
+            <div className="small muted">{t("Tap to switch a size on or off")}</div>
+            <div className="plate-pick" style={{ marginTop: 8 }} role="group" aria-label={t("Plates in your gym")}>
               {ALL_PLATES.map((v) => {
                 const on = prefs.plates.includes(v)
                 return (
@@ -279,7 +279,7 @@ export default function SettingsPage() {
               })}
             </div>
           </div>
-          <div className="tiny muted">In a workout, tap the kg header or hold a weight to see the plates per side.</div>
+          <div className="tiny muted">{t("In a workout, tap the kg header or hold a weight to see the plates per side.")}</div>
         </>
       )}
 
@@ -293,7 +293,7 @@ export default function SettingsPage() {
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
           {link('Import backup', 'Restore from a GymLog JSON file', <Upload size={18} aria-hidden />, () => fileRef.current?.click())}
           {link('Import from Hevy or Strong', 'Bring your history from a CSV export', <ArrowRightLeft size={18} aria-hidden />, () => setImportOther(true))}
-          <div className="tiny muted">Backups include workouts, exercises, history and body weight. Photos stay in your account storage.</div>
+          <div className="tiny muted">{t("Backups include workouts, exercises, history and body weight. Photos stay in your account storage.")}</div>
         </>
       )}
 
@@ -304,19 +304,19 @@ export default function SettingsPage() {
           {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
           {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
           <div className="tiny muted">
-            <b>Install on your phone.</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
+            <b>{t("Install on your phone.")}</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
             opens full screen and keeps working with a weak signal.
           </div>
         </>
       )}
 
       {repo?.mode === 'cloud' && (
-        <section className="card set-danger" aria-label="Sign out or delete account">
+        <section className="card set-danger" aria-label={t("Sign out or delete account")}>
           <button className="set-row-btn" onClick={() => signOut()}>
-            <LogOut size={18} aria-hidden /> Sign out
+            <LogOut size={18} aria-hidden /> {t("Sign out")}
           </button>
           <button className="set-row-btn danger-text" onClick={() => setDeleting(true)}>
-            <Trash2 size={18} aria-hidden /> Delete account
+            <Trash2 size={18} aria-hidden /> {t("Delete account")}
           </button>
         </section>
       )}
@@ -326,9 +326,9 @@ export default function SettingsPage() {
       {deleting && <DeleteAccountSheet email={user?.email ?? 'your account'} onExport={exportJson} onClose={() => setDeleting(false)} />}
       {confirmImport && (
         <Confirm
-          title="Import backup?"
+          title={t("Import backup?")}
           text={`${confirmImport.workouts.length} workouts, ${confirmImport.exercises.length} exercises, ${confirmImport.sessions.length} sessions and ${confirmImport.metrics.length} weight entries will be added to your current data.`}
-          confirmLabel="Import"
+          confirmLabel={t("Import")}
           onConfirm={() => doImport(confirmImport)}
           onClose={() => setConfirmImport(null)}
         />

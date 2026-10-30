@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { WifiOff } from 'lucide-react'
 import { useStore } from '../lib/store'
 
@@ -53,7 +54,7 @@ export default function OfflineBanner() {
       <WifiOff size={full ? 16 : 12} />
       {full ? (
         <span>
-          <b>You're offline.</b> {cloud ? 'Keep logging, changes sync when you reconnect.' : 'Everything still works.'}
+          <b>{tr("You're offline.")}</b> {cloud ? 'Keep logging, changes sync when you reconnect.' : 'Everything still works.'}
         </span>
       ) : (
         'Offline'

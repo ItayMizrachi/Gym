@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { dayKey, intensityLevel, monthGrid, TrainingDay } from '../lib/stats'
 import '../styles/insights.css'
@@ -173,10 +174,10 @@ export function CalendarHeat({
             {count === 0 ? 'No training days' : `${count} training day${count === 1 ? '' : 's'}`}
           </div>
         </div>
-        <button className="btn icon sm ghost" disabled={!canBack || settle != null} onClick={() => slide(-1)} aria-label="Previous month">
+        <button className="btn icon sm ghost" disabled={!canBack || settle != null} onClick={() => slide(-1)} aria-label={tr("Previous month")}>
           <ChevronLeft size={18} />
         </button>
-        <button className="btn icon sm ghost" disabled={!canNext || settle != null} onClick={() => slide(1)} aria-label="Next month">
+        <button className="btn icon sm ghost" disabled={!canNext || settle != null} onClick={() => slide(1)} aria-label={tr("Next month")}>
           <ChevronRight size={18} />
         </button>
       </div>
@@ -200,11 +201,11 @@ export function CalendarHeat({
       </div>
       <div className="row cal-legend tiny muted">
         <span className="grow">Shade = sets that day</span>
-        <span>Less</span>
+        <span>{tr("Less")}</span>
         <i className="cal-key l1" />
         <i className="cal-key l2" />
         <i className="cal-key l3" />
-        <span>More</span>
+        <span>{tr("More")}</span>
       </div>
     </div>
   )

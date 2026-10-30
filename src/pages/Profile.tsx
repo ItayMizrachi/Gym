@@ -1,4 +1,5 @@
 import { plateaus } from '../lib/plateau'
+import { t as tr } from '../lib/i18n'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, ChevronRight, Flame, Moon, Trophy } from 'lucide-react'
@@ -71,24 +72,24 @@ export default function Profile() {
 
   return (
     <div className="stack" style={{ gap: 18 }}>
-      <PageHeader title="Progress" sub="Your training at a glance." />
+      <PageHeader title={tr("Progress")} sub={tr("Your training at a glance.")} />
 
       {sum.workouts === 0 ? (
-        <Empty title="Nothing here yet" text="Finish your first workout and your weekly chart, totals and calendar show up here." />
+        <Empty title={tr("Nothing here yet")} text={tr("Finish your first workout and your weekly chart, totals and calendar show up here.")} />
       ) : (
         <>
           <div className="card hv-card">
             <div className="hv-stats three">
               <div>
-                <div className="hv-l">Workouts</div>
+                <div className="hv-l">{tr("Workouts")}</div>
                 <div className="hv-v">{sum.workouts}</div>
               </div>
               <div>
-                <div className="hv-l">Total time</div>
+                <div className="hv-l">{tr("Total time")}</div>
                 <div className="hv-v">{hours(sum.minutes)}</div>
               </div>
               <div>
-                <div className="hv-l">Volume</div>
+                <div className="hv-l">{tr("Volume")}</div>
                 <div className="hv-v">{fmtVolume(sum.volume)}</div>
               </div>
             </div>
@@ -96,7 +97,7 @@ export default function Profile() {
 
           <div className="card">
             <div className="prof-seg">
-              <div className="seg block" role="tablist" aria-label="What to show">
+              <div className="seg block" role="tablist" aria-label={tr("What to show")}>
                 {METRICS.map((m) => (
                   <button key={m.id} className={metric === m.id ? 'on' : ''} onClick={() => setMetric(m.id)} aria-pressed={metric === m.id}>
                     {m.label}
@@ -106,7 +107,7 @@ export default function Profile() {
               {/* the range is secondary: a small control on its own line, not a second full-width bar */}
               <div className="prof-range">
                 <span className="small muted">{RANGES.find((r) => r.id === range)?.label}</span>
-                <div className="seg sm" role="tablist" aria-label="Time range">
+                <div className="seg sm" role="tablist" aria-label={tr("Time range")}>
                   {RANGES.map((r) => (
                     <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id} aria-label={r.label}>
                       {r.short}
@@ -123,19 +124,19 @@ export default function Profile() {
       <button className="list-group list-row rec-link" onClick={() => nav('/records')}>
         <Trophy size={22} aria-hidden className="accent-ico" />
         <span className="grow">
-          <span className="title">Records</span>
+          <span className="title">{tr("Records")}</span>
           <span className="meta" style={{ display: 'block' }}>
-            Best lifts for every exercise
+            {tr("Best lifts for every exercise")}
           </span>
         </span>
         <ChevronRight size={18} aria-hidden className="muted" />
       </button>
 
       {stalled.length > 0 && (
-        <section className="card stall" aria-label="Stalled lifts">
+        <section className="card stall" aria-label={tr("Stalled lifts")}>
           <div className="stall-head">
-            <h2>Stalled lifts</h2>
-            <span className="small muted">No new best lately</span>
+            <h2>{tr("Stalled lifts")}</h2>
+            <span className="small muted">{tr("No new best lately")}</span>
           </div>
           {stalled.slice(0, 3).map((p) => (
             <button key={p.exerciseId} className="stall-row" onClick={() => nav(`/exercise/${p.exerciseId}`)}>
@@ -149,18 +150,18 @@ export default function Profile() {
         </section>
       )}
 
-      <section className="card goal-streak" aria-label="Weekly goal">
+      <section className="card goal-streak" aria-label={tr("Weekly goal")}>
         <GoalRing done={week.done} goal={week.goal} size={56} />
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="goal-title">
-            {inRow > 0 ? `${inRow} week${inRow === 1 ? '' : 's'} in a row` : 'Weekly goal'}
+            {inRow > 0 ? tr(inRow === 1 ? '{n} week in a row' : '{n} weeks in a row', { n: inRow }) : tr('Weekly goal')}
           </div>
           <div className="small muted">
-            {week.done >= week.goal ? `Goal met: ${week.done} workouts this week` : `${week.done} of ${week.goal} workouts this week`}
+            {week.done >= week.goal ? tr('Goal met: {n} workouts this week', { n: week.done }) : tr('{a} of {b} workouts this week', { a: week.done, b: week.goal })}
           </div>
         </div>
-        <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label="Change weekly goal">
-          Change
+        <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label={tr("Change weekly goal")}>
+          {tr("Change")}
         </button>
       </section>
       {editGoal && <GoalSheet onClose={() => setEditGoal(false)} />}
@@ -171,9 +172,9 @@ export default function Profile() {
       <button className="list-group list-row rec-link" onClick={() => nav('/exercises')}>
         <BookOpen size={22} aria-hidden className="muted" />
         <span className="grow">
-          <span className="title">Exercises</span>
+          <span className="title">{tr("Exercises")}</span>
           <span className="meta" style={{ display: 'block' }}>
-            Your list, photos, setup notes and records per exercise
+            {tr("Your list, photos, setup notes and records per exercise")}
           </span>
         </span>
         <ChevronRight size={18} aria-hidden className="muted" />
@@ -186,7 +187,7 @@ export default function Profile() {
               <Flame size={13} /> {streak.current} week streak
             </span>
             <span className="chip">
-              <Moon size={13} /> {rest} rest day{rest === 1 ? '' : 's'} this week
+              <Moon size={13} /> {tr(rest === 1 ? '{n} rest day this week' : '{n} rest days this week', { n: rest })}
             </span>
           </div>
           <CalendarHeat days={days} names={names} onDay={(_, d) => nav(`/history/${d.sessionIds[d.sessionIds.length - 1]}`)} />

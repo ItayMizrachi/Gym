@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { LayoutGrid, Plus, Sparkles, Wand2 } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -92,7 +93,7 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
       className="wl"
       role="dialog"
       aria-modal="true"
-      aria-label="Welcome to GymLog"
+      aria-label={tr("Welcome to GymLog")}
       onPointerDown={(e) => (x0 = e.clientX)}
       onPointerUp={(e) => {
         const dx = e.clientX - x0
@@ -102,8 +103,8 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
     >
       <div className="wl-top">
         <span className="wl-brand">GymLog</span>
-        <button className="btn sm ghost" onClick={close} aria-label="Skip the tour">
-          Skip
+        <button className="btn sm ghost" onClick={close} aria-label={tr("Skip the tour")}>
+          {tr("Skip")}
         </button>
       </div>
       <div className="wl-card" key={step}>
@@ -128,7 +129,7 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
             {db.workouts.length === 0 && (
               <>
                 <button className="btn primary block" onClick={() => setFinder(true)}>
-                  <Wand2 size={18} /> Find my program
+                  <Wand2 size={18} /> {tr("Find my program")}
                 </button>
                 <button
                   className="btn block"
@@ -137,20 +138,20 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
                     nav('/programs')
                   }}
                 >
-                  <LayoutGrid size={18} /> Browse programs
+                  <LayoutGrid size={18} /> {tr("Browse programs")}
                 </button>
                 <button className="btn block" onClick={loadStarter}>
-                  <Sparkles size={18} /> Load the 4-day starter plan
+                  <Sparkles size={18} /> {tr("Load the 4-day starter plan")}
                 </button>
               </>
             )}
             <button className={`btn block ${db.workouts.length ? 'primary' : ''}`} onClick={close}>
-              {db.workouts.length ? "Let's go" : (<><Plus size={18} /> I'll build my own</>)}
+              {db.workouts.length ? "Let's go" : (<><Plus size={18} /> {tr("I'll build my own")}</>)}
             </button>
           </>
         ) : (
           <button className="btn primary block" onClick={() => setStep(step + 1)}>
-            Next
+            {tr("Next")}
           </button>
         )}
       </div>

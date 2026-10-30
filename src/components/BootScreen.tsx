@@ -1,3 +1,4 @@
+import { t as tr } from '../lib/i18n'
 /** The GymLog mark: a loaded barbell. Same drawing as public/icon.svg and the iOS launch screens. */
 export function BrandMark({ size = 160 }: { size?: number }) {
   return (
@@ -19,7 +20,7 @@ export function BrandMark({ size = 160 }: { size?: number }) {
  */
 export default function BootScreen() {
   return (
-    <div className="pwa-boot" role="status" aria-label="GymLog is loading">
+    <div className="pwa-boot" role="status" aria-label={tr("GymLog is loading")}>
       <BrandMark />
       <div className="pwa-boot-below">
         <div className="pwa-boot-name">GymLog</div>

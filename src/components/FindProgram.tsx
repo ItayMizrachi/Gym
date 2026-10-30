@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, Dumbbell, Home, Sparkles, X } from 'lucide-react'
 import { Answers, GOAL_LABEL, Recommendation, recommend } from '../lib/recommend'
@@ -83,16 +84,16 @@ export default function FindProgram({ onDone }: { onDone: () => void }) {
   )
 
   return (
-    <div ref={box} tabIndex={-1} className="wl fp" role="dialog" aria-modal="true" aria-label="Find my program">
+    <div ref={box} tabIndex={-1} className="wl fp" role="dialog" aria-modal="true" aria-label={tr("Find my program")}>
       <div className="wl-top">
         {step > 0 || result ? (
-          <button className="btn icon ghost" onClick={back} aria-label="Back">
+          <button className="btn icon ghost" onClick={back} aria-label={tr("Back")}>
             <ArrowLeft size={22} />
           </button>
         ) : (
-          <span className="wl-brand">Find my program</span>
+          <span className="wl-brand">{tr("Find my program")}</span>
         )}
-        <button className="btn icon ghost" onClick={onDone} aria-label="Close">
+        <button className="btn icon ghost" onClick={onDone} aria-label={tr("Close")}>
           <X size={22} />
         </button>
       </div>
@@ -113,7 +114,7 @@ export default function FindProgram({ onDone }: { onDone: () => void }) {
         </div>
       ) : (
         <div className="fp-body">
-          <div className="fp-eyebrow">Your best match</div>
+          <div className="fp-eyebrow">{tr("Your best match")}</div>
           {pick && <ProgramCard p={pick} best={pick.id === result.best.id} />}
           <button className="btn primary block" onClick={() => pick && add(pick)}>
             <Check size={18} aria-hidden /> {pick?.kind === 'weekly' ? 'Add this program' : 'Add this workout'}
@@ -121,7 +122,7 @@ export default function FindProgram({ onDone }: { onDone: () => void }) {
           {result.others.length > 0 && (
             <>
               <div className="fp-eyebrow" style={{ marginTop: 'var(--s5)' }}>
-                Also a good fit
+                {tr("Also a good fit")}
               </div>
               <div className="fp-opts">
                 {[result.best, ...result.others]
@@ -146,7 +147,7 @@ export default function FindProgram({ onDone }: { onDone: () => void }) {
               nav('/programs')
             }}
           >
-            Browse all programs
+            {tr("Browse all programs")}
           </button>
         </div>
       )}

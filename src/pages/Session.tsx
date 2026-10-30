@@ -43,7 +43,7 @@ function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionS
   return (
     <Sheet title={label} onClose={onClose}>
       <div className="stack" style={{ gap: 'var(--s2)' }}>
-        <div className="kind-list" role="radiogroup" aria-label="Set type">
+        <div className="kind-list" role="radiogroup" aria-label={t("Set type")}>
           {KIND_ORDER.map((k) => (
             <button key={k} role="radio" aria-checked={set.kind === k} className={`kind-opt${set.kind === k ? ' on' : ''}`} onClick={() => onPick(k)}>
               <span className={`kind ${k}`} aria-hidden>
@@ -58,7 +58,7 @@ function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionS
           ))}
         </div>
         <button className="btn danger block" onClick={onRemove}>
-          <Trash2 size={16} aria-hidden /> Remove set
+          <Trash2 size={16} aria-hidden /> {t("Remove set")}
         </button>
       </div>
     </Sheet>
@@ -102,7 +102,7 @@ const RPE_HELP: Record<number, string> = { 6: '4+ reps left', 7: '3 reps left', 
 
 function RpeSheet({ value, onPick, onClose }: { value: number | null | undefined; onPick: (v: number | null) => void; onClose: () => void }) {
   return (
-    <Sheet title="How hard was that set?" onClose={onClose}>
+    <Sheet title={t("How hard was that set?")} onClose={onClose}>
       <div className="stack">
         <div className="rpe-grid">
           {RPE_VALUES.map((v) => (
@@ -127,7 +127,7 @@ function RpeSheet({ value, onPick, onClose }: { value: number | null | undefined
               onClose()
             }}
           >
-            Clear RPE
+            {t("Clear RPE")}
           </button>
         )}
       </div>
@@ -209,7 +209,7 @@ function TimeInput({ value, onChange, placeholder, running }: { value: number | 
     <input
       className={`num time ${running ? 'running' : ''}`}
       inputMode="numeric"
-      aria-label="Time (minutes:seconds)"
+      aria-label={t("Time (minutes:seconds)")}
       placeholder={placeholder || '0:00'}
       value={text}
       readOnly={running}
@@ -290,13 +290,13 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
         <HowToBody exercise={ex} />
         {ex.setup && (
           <div className="card">
-            <div className="tiny muted">Setup</div>
+            <div className="tiny muted">{t("Setup")}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{ex.setup}</div>
           </div>
         )}
         {ex.notes && (
           <div className="card">
-            <div className="tiny muted">Notes</div>
+            <div className="tiny muted">{t("Notes")}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{ex.notes}</div>
           </div>
         )}
@@ -307,7 +307,7 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
           </div>
         )}
         <button className="btn" onClick={onOpen}>
-          Open exercise page
+          {t("Open exercise page")}
         </button>
       </div>
     </Sheet>
@@ -317,7 +317,7 @@ function InfoSheet({ ex, onClose, onOpen }: { ex: any; onClose: () => void; onOp
 const WORKOUT_TIPS: CoachStep[] = [
   { target: '.ex .set-row .kind', title: 'Set type', text: 'Tap the set number to make it a warm-up (W), drop (D) or failure (F) set, or to remove it.' },
   {
-    target: '.ex [data-kp$=":reps"], .ex [data-kp$=":time"], .ex input[aria-label="Reps"], .ex input[aria-label^="Time"]',
+    target: '.ex [data-kp$=":reps"], .ex [data-kp$=":time"], .ex input[aria-label={t("Reps")}], .ex input[aria-label^="Time"]',
     title: 'Enter what you did',
     text: 'Type your reps here. The weight is filled in from last time; tap it to change.'
   },
@@ -570,7 +570,7 @@ function ExerciseCard({
             ) : (
               <span className="ex-sum-t">{[plan, splitName(name)[1]].filter(Boolean).join(' · ')}</span>
             )}
-            {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label="Has notes" />}
+            {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label={t("Has notes")} />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
           </div>
         </div>
@@ -615,11 +615,11 @@ function ExerciseCard({
                 <Trophy size={14} color="var(--accent)" aria-hidden />
                 {tracking === 'reps' && !(rec.heaviest.weight > 0) ? (
                   <span>
-                    Best <b>{Math.max(...prior.map((p) => p.reps))} reps</b>
+                    {t("Best")} <b>{Math.max(...prior.map((p) => p.reps))} reps</b>
                   </span>
                 ) : (
                   <span>
-                    Best <b>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
+                    {t("Best")} <b>{fmtKg(rec.heaviest.weight)} kg × {rec.heaviest.reps}</b>
                     {tracking === 'weight_reps' && rec.bestE1rm && (
                       <> · best estimated 1-rep max <b>{fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)} kg</b></>
                     )}
@@ -629,7 +629,7 @@ function ExerciseCard({
             )}
             {ex && (
               <button className="btn sm ex-howto" onClick={() => setInfo(true)}>
-                <Info size={16} /> How to do it
+                <Info size={16} /> {t("How to do it")}
               </button>
             )}
           </div>
@@ -652,7 +652,7 @@ function ExerciseCard({
           <div className="hdr">{t('Set')}</div>
           <div className="hdr">{t('Previous')}</div>
           {tracking === 'time' ? (
-            <div className="hdr span2">Time</div>
+            <div className="hdr span2">{t("Time")}</div>
           ) : tracking === 'reps' ? (
             <div className="hdr span2">{t('Reps')}</div>
           ) : (
@@ -661,7 +661,7 @@ function ExerciseCard({
             <button
               className="hdr-btn"
               onClick={() => setPlateSet((se.sets.find((x) => !x.done) ?? se.sets[se.sets.length - 1])?.id ?? null)}
-              aria-label="Plate calculator"
+              aria-label={t("Plate calculator")}
             >
               {t('kg')} <Disc size={12} />
             </button>
@@ -962,7 +962,7 @@ export default function SessionPage() {
     if (session?.finished_at) nav(`/history/${session.id}`, { replace: true })
   }, [session?.finished_at])
 
-  if (!session) return <div className="card">Workout not found. <button className="btn sm" onClick={() => nav('/')}>Home</button></div>
+  if (!session) return <div className="card">{t("Workout not found.")} <button className="btn sm" onClick={() => nav('/')}>{t("Home")}</button></div>
 
   const muscles = muscleSets(session, db.exercises)
   // the set-type legend stays until the user has logged a handful of sets in total
@@ -1017,13 +1017,13 @@ export default function SessionPage() {
     <div className="stack" style={{ gap: 14 }}>
       <div className="sp-head">
         <div className="sp-row">
-          <button className="btn icon sm ghost" onClick={() => nav('/')} aria-label="Back to workouts (keeps this workout running)">
+          <button className="btn icon sm ghost" onClick={() => nav('/')} aria-label={t("Back to workouts (keeps this workout running)")}>
             <ChevronLeft size={22} />
           </button>
           <div className="grow" style={{ minWidth: 0 }}>
             <h1 className="sp-name ellipsis">{splitName(session.name)[0]}</h1>
           </div>
-          <button className="btn icon sm ghost" onClick={() => setTools(true)} aria-label="Tools: 1-rep max, percent of max, plates">
+          <button className="btn icon sm ghost" onClick={() => setTools(true)} aria-label={t("Tools: 1-rep max, percent of max, plates")}>
             <Calculator size={20} />
           </button>
           <button
@@ -1054,7 +1054,7 @@ export default function SessionPage() {
             </div>
             <div className="l">{t('Sets')}</div>
           </div>
-          <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label="Sets per muscle">
+          <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label={t("Sets per muscle")}>
             <BodyMap intensity={liveIntensity(muscles)} height={40} />
           </button>
         </div>
@@ -1146,7 +1146,7 @@ export default function SessionPage() {
 
       {replaceIdx != null && (
         <ExercisePicker
-          title="Replace exercise"
+          title={t("Replace exercise")}
           onClose={() => setReplaceIdx(null)}
           onPick={(ex) => {
             replaceExerciseInSession(session.id, replaceIdx, ex)
@@ -1161,10 +1161,10 @@ export default function SessionPage() {
 
       {confirmFinish && (
         <Confirm
-          title="Finish workout?"
+          title={t("Finish workout?")}
           text={`You logged ${doneSets} of ${totalSets} sets. The ${totalSets - doneSets} you skipped won't be saved. Skipping sets doesn't change your plan.`}
-          confirmLabel="Finish"
-          cancelLabel="Keep going"
+          confirmLabel={t("Finish")}
+          cancelLabel={t("Keep going")}
           onConfirm={() => {
             finishOrAsk()
           }}
@@ -1185,7 +1185,7 @@ export default function SessionPage() {
         <Sheet title={`Update ${splitName(planWorkout.name)[0]}?`} onClose={() => setPlanAsk(null)}>
           <div className="stack">
             <p className="confirm-text" style={{ margin: 0 }}>
-              You changed this workout today. Save the changes to the plan, so next time starts the same way?
+              {t("You changed this workout today. Save the changes to the plan, so next time starts the same way?")}
             </p>
             <ul className="plan-changes">
               {planAsk.slice(0, 6).map((c) => (
@@ -1194,12 +1194,12 @@ export default function SessionPage() {
               {planAsk.length > 6 && <li>and {planAsk.length - 6} more</li>}
             </ul>
             <button className="btn primary block" onClick={updatePlanAndFinish}>
-              Update the plan
+              {t("Update the plan")}
             </button>
             <button className="btn block" onClick={finishNow}>
-              Keep the plan as it is
+              {t("Keep the plan as it is")}
             </button>
-            <div className="tiny muted center">Either way, today's workout is saved as you did it.</div>
+            <div className="tiny muted center">{t("Either way, today's workout is saved as you did it.")}</div>
           </div>
         </Sheet>
       )}
@@ -1207,7 +1207,7 @@ export default function SessionPage() {
         <Confirm
           title={doneSets === 0 ? 'No sets logged yet' : 'Discard this workout?'}
           text={doneSets === 0 ? 'There is nothing to save. Tick a set to log it, or discard this workout.' : 'Nothing from this session will be saved.'}
-          confirmLabel="Discard"
+          confirmLabel={t("Discard")}
           cancelLabel={doneSets === 0 ? 'Keep going' : 'Cancel'}
           danger
           onConfirm={() => {
@@ -1225,13 +1225,13 @@ export default function SessionPage() {
 function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => void }) {
   const max = Math.max(1, ...rows.map((r) => r.planned))
   return (
-    <Sheet title="Muscles in this workout" onClose={onClose}>
+    <Sheet title={t("Muscles in this workout")} onClose={onClose}>
       <div className="stack">
         <div className="ls-map-lg">
           <BodyMap intensity={liveIntensity(rows)} height={190} />
         </div>
         <div className="tiny muted center">Bright = sets logged · dim = still to do</div>
-        {rows.length === 0 && <div className="small muted center">Add an exercise to see which muscles it works.</div>}
+        {rows.length === 0 && <div className="small muted center">{t("Add an exercise to see which muscles it works.")}</div>}
         <div className="ls-rows">
           {rows.map((r) => (
             <div key={r.muscle} className="ls-row">
@@ -1247,7 +1247,7 @@ function MusclesSheet({ rows, onClose }: { rows: MuscleRow[]; onClose: () => voi
             </div>
           ))}
         </div>
-        <div className="tiny muted">Warm-up sets are not counted.</div>
+        <div className="tiny muted">{t("Warm-up sets are not counted.")}</div>
       </div>
     </Sheet>
   )
@@ -1309,9 +1309,9 @@ function ReorderSheet({
       return n
     })
   return (
-    <Sheet title="Reorder exercises" onClose={onClose}>
+    <Sheet title={t("Reorder exercises")} onClose={onClose}>
       <div className="stack">
-        <div className="small muted">Press an exercise and drag it up or down.</div>
+        <div className="small muted">{t("Press an exercise and drag it up or down.")}</div>
         <div className="ro-list" style={{ height: order.length * ROW_H }}>
           {order.map((k, pos) => {
             const it = items[k]
@@ -1363,7 +1363,7 @@ function ReorderSheet({
           })}
         </div>
         <button className="btn primary block" onClick={() => onDone(order)}>
-          Done
+          {t("Done")}
         </button>
       </div>
     </Sheet>
@@ -1375,7 +1375,7 @@ function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => v
   const set = (v: number) => onSet(Math.min(600, Math.max(0, v)))
   return (
     <div className="stack" style={{ gap: 'var(--s3)' }}>
-      <div className="exo-step big" role="group" aria-label="Rest time">
+      <div className="exo-step big" role="group" aria-label={t("Rest time")}>
         <button className="btn icon" onClick={() => set(value - 15)} disabled={value <= 0} aria-label="15 seconds less">
           −
         </button>
@@ -1386,7 +1386,7 @@ function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => v
           +
         </button>
       </div>
-      <div className="chips exo-presets" role="group" aria-label="Rest presets">
+      <div className="chips exo-presets" role="group" aria-label={t("Rest presets")}>
         {[0, 60, 90, 120, 180].map((v) => (
           <button key={v} className={`chip${value === v ? ' active' : ''}`} aria-pressed={value === v} onClick={() => set(v)}>
             {v ? fmtRest(v) : 'Off'}
@@ -1399,7 +1399,7 @@ function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => v
 
 function RestSheet({ name, value, onSet, onClose }: { name: string; value: number; onSet: (sec: number) => void; onClose: () => void }) {
   return (
-    <Sheet title="Rest time" onClose={onClose}>
+    <Sheet title={t("Rest time")} onClose={onClose}>
       <div className="stack">
         <div className="small muted">
           After each set of <b style={{ color: 'var(--text)' }}>{name}</b> the rest timer starts with this time. Applies to this workout; save it
@@ -1407,7 +1407,7 @@ function RestSheet({ name, value, onSet, onClose }: { name: string; value: numbe
         </div>
         <RestEditor value={value} onSet={onSet} />
         <button className="btn primary block" onClick={onClose}>
-          Done
+          {t("Done")}
         </button>
       </div>
     </Sheet>
@@ -1437,24 +1437,24 @@ function MoreSheet({
     <Sheet title={se.name} onClose={onClose}>
       <div className="stack">
         <button className="btn block" onClick={onReplace}>
-          <Repeat size={16} aria-hidden /> Replace exercise
+          <Repeat size={16} aria-hidden /> {t("Replace exercise")}
         </button>
         <div className="small muted" style={{ marginTop: -4 }}>
-          Machine taken? Swap it for another one. Sets you already logged stay as they are.
+          {t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}
         </div>
 
         <label className="field">
-          Note for this workout
+          {t("Note for this workout")}
           <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
         </label>
         <button className="btn block" disabled={count < 2} onClick={onReorder}>
           <GripVertical size={16} aria-hidden /> {t('Reorder exercises')}
         </button>
         <div className="exo-sep">
-          <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label="Use the GymLog number pad (off = phone keyboard)" />
+          <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label={t("Use the GymLog number pad (off = phone keyboard)")} />
         </div>
         <button className="btn danger" onClick={onRemove}>
-          <Trash2 size={16} aria-hidden /> Remove exercise from workout
+          <Trash2 size={16} aria-hidden /> {t("Remove exercise from workout")}
         </button>
       </div>
     </Sheet>

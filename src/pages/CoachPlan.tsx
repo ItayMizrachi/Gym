@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Plus, Search, Trash2 } from 'lucide-react'
 import { deleteTraineeRow, saveTraineeRow, unassignWorkout } from '../lib/coach'
@@ -102,23 +103,23 @@ export default function CoachPlan() {
   if (error)
     return (
       <div className="stack coach" style={{ gap: 16 }}>
-        <PageHeader title="Workout" back={`/coach/${id}`} />
+        <PageHeader title={tr("Workout")} back={`/coach/${id}`} />
         <div className="card stack">
           <div className="small muted">{error}</div>
           <button className="btn" onClick={() => void reload()}>
-            Try again
+            {tr("Try again")}
           </button>
         </div>
       </div>
     )
   if (!db || !link) return <div className="card small muted">Loading…</div>
-  if (!w) return <div className="card small muted">This workout is no longer in the plan.</div>
+  if (!w) return <div className="card small muted">{tr("This workout is no longer in the plan.")}</div>
 
   return (
     <div className="stack coach" style={{ gap: 16 }}>
       <PageHeader title={w.name || 'Workout'} sub={`${link.name}'s plan · saved as you go`} back={`/coach/${id}`} />
       <label className="field">
-        Name
+        {tr("Name")}
         <input
           className="input"
           value={w.name}
@@ -129,7 +130,7 @@ export default function CoachPlan() {
         />
       </label>
 
-      {rows.length === 0 && <div className="small muted">No exercises yet.</div>}
+      {rows.length === 0 && <div className="small muted">{tr("No exercises yet.")}</div>}
       {rows.map((r, i) => {
         const ex = db.exercises.find((e) => e.id === r.exercise_id)
         const timed = trackingOf(ex) === 'time'
@@ -153,10 +154,10 @@ export default function CoachPlan() {
               <div className="grow title ellipsis" style={{ minWidth: 0 }}>
                 {ex?.name ?? 'Exercise'}
               </div>
-              <button className="btn icon ghost" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+              <button className="btn icon ghost" aria-label={tr("Move up")} disabled={i === 0} onClick={() => move(i, -1)}>
                 <ArrowUp size={18} aria-hidden />
               </button>
-              <button className="btn icon ghost" aria-label="Move down" disabled={i === rows.length - 1} onClick={() => move(i, 1)}>
+              <button className="btn icon ghost" aria-label={tr("Move down")} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>
                 <ArrowDown size={18} aria-hidden />
               </button>
               <button className="btn icon ghost" aria-label={`Remove ${ex?.name ?? 'exercise'}`} onClick={() => void removeRow(r)}>
@@ -174,7 +175,7 @@ export default function CoachPlan() {
               className="input"
               value={r.note}
               maxLength={200}
-              placeholder="Note for this exercise (optional)"
+              placeholder={tr("Note for this exercise (optional)")}
               aria-label={`Note for ${ex?.name ?? 'this exercise'}`}
               onChange={(e) => setRow(r, { note: e.target.value })}
               onBlur={() => void save('workout_exercises', db.workout_exercises.find((x) => x.id === r.id) ?? r)}
@@ -184,18 +185,18 @@ export default function CoachPlan() {
       })}
 
       <button className="btn primary block" onClick={() => setAdding(true)}>
-        <Plus size={18} aria-hidden /> Add exercise
+        <Plus size={18} aria-hidden /> {tr("Add exercise")}
       </button>
       <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={() => setDeleting(true)}>
-        Remove this workout from the plan
+        {tr("Remove this workout from the plan")}
       </button>
 
       {adding && <PickExercise trainee={db.exercises} mine={mine.exercises} userId={link.trainee_id ?? ''} onPick={(e) => void addExercise(e)} onClose={() => setAdding(false)} />}
       {deleting && (
         <Confirm
           title={`Remove ${w.name}?`}
-          text="It leaves their plan. Workouts they already did stay in their history."
-          confirmLabel="Remove"
+          text={tr("It leaves their plan. Workouts they already did stay in their history.")}
+          confirmLabel={tr("Remove")}
           danger
           onClose={() => setDeleting(false)}
           onConfirm={async () => {
@@ -234,11 +235,11 @@ function PickExercise({ trainee, mine, userId, onPick, onClose }: { trainee: Exe
   const ownNames = new Set(own.map((e) => e.name.trim().toLowerCase()))
   const fromLib = lib && needle ? searchLibrary(lib, { q }).filter((e) => !ownNames.has(e.name.toLowerCase())).slice(0, 30) : []
   return (
-    <Sheet title="Add exercise" onClose={onClose}>
+    <Sheet title={tr("Add exercise")} onClose={onClose}>
       <div className="stack" style={{ gap: 8 }}>
         <div className="search">
           <Search size={18} />
-          <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search exercises" aria-label="Search exercises" enterKeyHint="search" />
+          <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Search exercises")} aria-label={tr("Search exercises")} enterKeyHint="search" />
         </div>
         <div className="list-group">
           {own.map((e) => (
@@ -259,7 +260,7 @@ function PickExercise({ trainee, mine, userId, onPick, onClose }: { trainee: Exe
             </button>
           ))}
         </div>
-        {!needle && <div className="small muted">Type to search the whole library.</div>}
+        {!needle && <div className="small muted">{tr("Type to search the whole library.")}</div>}
       </div>
     </Sheet>
   )

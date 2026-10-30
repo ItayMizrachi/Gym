@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { Trophy, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -15,9 +16,9 @@ export function WeeklyRecap() {
   if (!r || hidden) return null
   const best = r.best ? db.exercises.find((e) => e.id === r.best!.exerciseId)?.name : null
   return (
-    <section className="card recap" aria-label="Last week">
+    <section className="card recap" aria-label={tr("Last week")}>
       <button className="recap-main" onClick={() => nav('/profile')}>
-        <span className="recap-t">Last week</span>
+        <span className="recap-t">{tr("Last week")}</span>
         <span className="recap-nums">
           <span>
             <b>{r.workouts}</b> {r.workouts === 1 ? 'workout' : 'workouts'}
@@ -41,7 +42,7 @@ export function WeeklyRecap() {
       </button>
       <button
         className="btn icon ghost recap-x"
-        aria-label="Hide until next week"
+        aria-label={tr("Hide until next week")}
         onClick={() => {
           dismissRecap(r.week)
           setHidden(true)

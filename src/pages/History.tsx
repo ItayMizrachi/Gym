@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -122,16 +123,16 @@ export default function HistoryPage() {
     <div className="stack" style={{ gap: 14 }}>
       <div className="page-head">
         <div className="grow">
-          <h1>History</h1>
+          <h1>{tr("History")}</h1>
           {all.length > 0 && (
             <div className="sub">
-              {all.length} workout{all.length === 1 ? '' : 's'} · this week {fmtVolume(thisWeek)}
+              {tr(all.length === 1 ? '{n} workout' : '{n} workouts', { n: all.length })} · {tr('this week {v}', { v: fmtVolume(thisWeek) })}
               {avg > 0 && ` · avg ${fmtVolume(avg)}`}
             </div>
           )}
         </div>
         {canFilter && (
-          <button className={`btn icon${filter !== 'all' ? ' primary' : ''}`} onClick={() => setPicking(true)} aria-label="Filter by workout">
+          <button className={`btn icon${filter !== 'all' ? ' primary' : ''}`} onClick={() => setPicking(true)} aria-label={tr("Filter by workout")}>
             <SlidersHorizontal size={20} aria-hidden />
           </button>
         )}
@@ -144,7 +145,7 @@ export default function HistoryPage() {
       )}
 
       {all.length === 0 ? (
-        <Empty title="No finished workouts yet" text="Complete a workout and it shows up here, with your volume and records." />
+        <Empty title={tr("No finished workouts yet")} text={tr("Complete a workout and it shows up here, with your volume and records.")} />
       ) : (
         <div>
           {months.map((g, idx) => (
@@ -156,7 +157,7 @@ export default function HistoryPage() {
               )}
               {idx === 1 || (idx === 0 && g.key !== thisMonthKey) ? (
                 <div className="month-head">
-                  <h2>Earlier</h2>
+                  <h2>{tr("Earlier")}</h2>
                 </div>
               ) : null}
               {(() => {
@@ -214,7 +215,7 @@ export default function HistoryPage() {
                             requestAnimationFrame(() => card?.scrollIntoView({ block: 'nearest' }))
                           }}
                         >
-                          Show less
+                          {tr("Show less")}
                           <ChevronDown size={18} aria-hidden className="hweek-caret up" />
                         </button>
                       </div>
@@ -224,13 +225,13 @@ export default function HistoryPage() {
               })()}
             </section>
           ))}
-          {items.length === 0 && <div className="card small muted">No workouts of this type yet.</div>}
+          {items.length === 0 && <div className="card small muted">{tr("No workouts of this type yet.")}</div>}
         </div>
       )}
 
       {picking && (
-        <Sheet title="Show workouts" onClose={() => setPicking(false)}>
-          <div className="kind-list" role="radiogroup" aria-label="Filter by workout">
+        <Sheet title={tr("Show workouts")} onClose={() => setPicking(false)}>
+          <div className="kind-list" role="radiogroup" aria-label={tr("Filter by workout")}>
             {options.map(([k, label]) => (
               <button
                 key={k}

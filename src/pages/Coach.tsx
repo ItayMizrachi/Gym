@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Copy, Share2, Sparkles, UserPlus } from 'lucide-react'
 import { COACH_FREE_LIMIT, CoachLink, createInvite, listTrainees, removeTrainee } from '../lib/coach'
@@ -37,14 +38,14 @@ export default function Coach() {
 
   return (
     <div className="stack coach" style={{ gap: 16 }}>
-      <PageHeader title="Coaching" sub="Your trainees, their plans and progress." back="/" />
+      <PageHeader title={tr("Coaching")} sub={tr("Your trainees, their plans and progress.")} back="/" />
       {!cloud ? (
-        <div className="card small muted">Sign in with Google to coach other people.</div>
+        <div className="card small muted">{tr("Sign in with Google to coach other people.")}</div>
       ) : error ? (
         <div className="card stack">
           <div className="small muted">{error}</div>
           <button className="btn" onClick={() => void load()}>
-            Try again
+            {tr("Try again")}
           </button>
         </div>
       ) : list == null ? (
@@ -70,7 +71,7 @@ export default function Coach() {
             </div>
           ) : (
             <div className="card stack coach-empty">
-              <div className="title">Add your first trainee</div>
+              <div className="title">{tr("Add your first trainee")}</div>
               <div className="small muted">You get a short code. Your trainee enters it in GymLog under Settings → My coach, and you see their training.</div>
             </div>
           )}
@@ -79,15 +80,15 @@ export default function Coach() {
             className="btn primary block"
             onClick={() => (COACH_FREE_LIMIT != null && (list?.length ?? 0) >= COACH_FREE_LIMIT ? setPro(true) : setAdding(true))}
           >
-            <UserPlus size={18} aria-hidden /> Add trainee
+            <UserPlus size={18} aria-hidden /> {tr("Add trainee")}
           </button>
           <button className="btn ghost block coach-pro-link" onClick={() => setPro(true)}>
-            <Sparkles size={16} aria-hidden /> Coaching is free during the preview
+            <Sparkles size={16} aria-hidden /> {tr("Coaching is free during the preview")}
           </button>
 
           {waiting.length > 0 && (
-            <section className="stack" style={{ gap: 8 }} aria-label="Waiting for a code">
-              <h2 className="coach-h2">Waiting for their code</h2>
+            <section className="stack" style={{ gap: 8 }} aria-label={tr("Waiting for a code")}>
+              <h2 className="coach-h2">{tr("Waiting for their code")}</h2>
               <div className="list-group">
                 {waiting.map((l) => (
                   <button key={l.id} className="list-row" onClick={() => setInvite(l)}>
@@ -121,9 +122,9 @@ export default function Coach() {
       {cancel && (
         <Confirm
           title={`Cancel the invite for ${cancel.name}?`}
-          text="The code stops working."
-          confirmLabel="Cancel invite"
-          cancelLabel="Keep"
+          text={tr("The code stops working.")}
+          confirmLabel={tr("Cancel invite")}
+          cancelLabel={tr("Keep")}
           danger
           onClose={() => setCancel(null)}
           onConfirm={async () => {
@@ -148,7 +149,7 @@ function AddTrainee({ onClose, onCreated }: { onClose: () => void; onCreated: (l
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   return (
-    <Sheet title="Add trainee" onClose={onClose}>
+    <Sheet title={tr("Add trainee")} onClose={onClose}>
       <form
         className="stack"
         onSubmit={async (e) => {
@@ -164,12 +165,12 @@ function AddTrainee({ onClose, onCreated }: { onClose: () => void; onCreated: (l
         }}
       >
         <label className="field">
-          Their name
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Dana" autoFocus enterKeyHint="done" maxLength={60} />
+          {tr("Their name")}
+          <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={tr("Dana")} autoFocus enterKeyHint="done" maxLength={60} />
         </label>
         {error && <div className="small" style={{ color: 'var(--danger-text)' }}>{error}</div>}
         <button className="btn primary block" type="submit" disabled={!name.trim() || busy}>
-          Get a code
+          {tr("Get a code")}
         </button>
       </form>
     </Sheet>
@@ -189,7 +190,7 @@ function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: ()
         </div>
         {canShare ? (
           <button className="btn primary block" onClick={() => navigator.share({ text }).catch(() => {})}>
-            <Share2 size={18} aria-hidden /> Send the code
+            <Share2 size={18} aria-hidden /> {tr("Send the code")}
           </button>
         ) : null}
         <button
@@ -204,7 +205,7 @@ function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: ()
           <Copy size={18} aria-hidden /> {copied ? 'Code copied' : 'Copy the code'}
         </button>
         <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={onCancel}>
-          Cancel invite
+          {tr("Cancel invite")}
         </button>
       </div>
     </Sheet>
@@ -228,7 +229,7 @@ function GlanceLine({ g, fallback }: { g: TraineeGlance | undefined; fallback: s
 function ProSheet({ onClose }: { onClose: () => void }) {
   const limited = COACH_FREE_LIMIT != null
   return (
-    <Sheet title="GymLog Pro for coaches" onClose={onClose}>
+    <Sheet title={tr("GymLog Pro for coaches")} onClose={onClose}>
       <div className="stack">
         <div className="small muted">
           {limited
@@ -236,9 +237,9 @@ function ProSheet({ onClose }: { onClose: () => void }) {
             : 'Coaching is free while it is new. Later it becomes part of GymLog Pro; your trainees and their plans stay as they are.'}
         </div>
         <ul className="coach-pro-list">
-          <li>Unlimited trainees</li>
-          <li>Plans, notes and progress for each of them</li>
-          <li>Alerts when someone stops training or breaks a record</li>
+          <li>{tr("Unlimited trainees")}</li>
+          <li>{tr("Plans, notes and progress for each of them")}</li>
+          <li>{tr("Alerts when someone stops training or breaks a record")}</li>
         </ul>
         <button className="btn primary block" onClick={onClose}>
           {limited ? 'Coming soon' : 'Got it'}

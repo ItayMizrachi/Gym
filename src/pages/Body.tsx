@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Camera, Plus, Ruler, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -93,18 +94,18 @@ export function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Me
           <span className="weigh-unit">kg</span>
         </div>
         <label className="field">
-          Date
+          {tr("Date")}
           <input className="input" type="date" value={date} max={todayStr()} onChange={(e) => setDate(e.target.value || todayStr())} />
         </label>
         <label className="field">
-          Note
+          {tr("Note")}
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="morning, after breakfast, flexed…" />
         </label>
         <ImageField path={photo} folder="body" onChange={(p) => {
           // a photo uploaded earlier in this same sheet is replaced: remove it now, the saved one stays until Save
           if (photo && photo !== original) void repo?.deleteImage(photo)
           setPhoto(p)
-        }} label="Add progress photo" autoDelete={false} />
+        }} label={tr("Add progress photo")} autoDelete={false} />
         <MeasureFields
           metrics={metrics}
           date={date}
@@ -114,18 +115,18 @@ export function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Me
           onToggle={() => setShowMeasures(!showMeasures)}
         />
         <button className="btn primary block" disabled={weight == null && !photo && !cleaned} onClick={commit}>
-          Save
+          {tr("Save")}
         </button>
         {entry && (
           <button className="btn danger" onClick={() => setConfirm(true)}>
-            <Trash2 size={16} /> Delete entry
+            <Trash2 size={16} /> {tr("Delete entry")}
           </button>
         )}
       </div>
       {confirm && entry && (
         <Confirm
-          title="Delete this entry?"
-          confirmLabel="Delete"
+          title={tr("Delete this entry?")}
+          confirmLabel={tr("Delete")}
           danger
           onConfirm={() => {
             remove('metrics', entry.id)
@@ -208,11 +209,11 @@ export default function Body() {
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>
       <PageHeader
-        title="Body"
-        sub="Weight, measurements and progress photos."
+        title={tr("Body")}
+        sub={tr("Weight, measurements and progress photos.")}
         action={
           <button className="btn primary" onClick={() => setEditing('new')}>
-            <Plus size={18} aria-hidden /> Log weight
+            <Plus size={18} aria-hidden /> {tr("Log weight")}
           </button>
         }
       />
@@ -220,11 +221,11 @@ export default function Body() {
       {!entries.length ? (
         <Empty
           icon={<Scale size={24} />}
-          title="Track your weight"
-          text="Log your weight every day. The chart smooths it with a 7-day average so one salty dinner does not scare you."
+          title={tr("Track your weight")}
+          text={tr("Log your weight every day. The chart smooths it with a 7-day average so one salty dinner does not scare you.")}
         >
           <button className="btn primary" onClick={() => setEditing('new')}>
-            <Plus size={18} /> Log first entry
+            <Plus size={18} /> {tr("Log first entry")}
           </button>
         </Empty>
       ) : (
@@ -276,7 +277,7 @@ export default function Body() {
 
           <div className="card stack">
             <div className="card-head">
-              <h2>Trend</h2>
+              <h2>{tr("Trend")}</h2>
               <div className="seg">
                 {(['30', '90', 'all'] as const).map((r) => (
                   <button key={r} className={range === r ? 'on' : ''} onClick={() => setRange(r)}>
@@ -309,7 +310,7 @@ export default function Body() {
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">
-            <span>Photos</span>
+            <span>{tr("Photos")}</span>
             <span className="count">{withPhotos.length}</span>
           </div>
           <div className="ph-grid preview">
@@ -328,7 +329,7 @@ export default function Body() {
       {all.length > 0 && (
         <section>
           <div className="section-label">
-            <span>Entries</span>
+            <span>{tr("Entries")}</span>
             <span className="count">{all.length}</span>
           </div>
           <div className="list-group">
@@ -347,9 +348,9 @@ export default function Body() {
                       {m.weight_kg != null ? (
                         fmtKg(m.weight_kg)
                       ) : m.photo_path ? (
-                        <Camera size={18} className="muted" aria-label="Photo only" />
+                        <Camera size={18} className="muted" aria-label={tr("Photo only")} />
                       ) : (
-                        <Ruler size={18} className="muted" aria-label="Measurements only" />
+                        <Ruler size={18} className="muted" aria-label={tr("Measurements only")} />
                       )}
                       {m.weight_kg != null && <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>kg</span>}
                     </div>

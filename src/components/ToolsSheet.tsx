@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { NumInput, Sheet } from './ui'
 import { PlateCalc } from './PlateCalc'
 import { e1rm } from '../lib/pr'
@@ -31,9 +32,9 @@ export function ToolsSheet({ onClose, weight = 0 }: { onClose: () => void; weigh
   if (tab === 'plates') return <PlateCalc weight={weight || barKg} onClose={onClose} />
 
   return (
-    <Sheet title="Tools" onClose={onClose}>
+    <Sheet title={tr("Tools")} onClose={onClose}>
       <div className="stack">
-        <div className="seg block" role="tablist" aria-label="Tool">
+        <div className="seg block" role="tablist" aria-label={tr("Tool")}>
           {TABS.map((t) => (
             <button key={t.id} role="tab" className={tab === t.id ? 'on' : ''} aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
               {t.label}
@@ -70,7 +71,7 @@ export function ToolsSheet({ onClose, weight = 0 }: { onClose: () => void; weigh
             </p>
 
             {est > 0 && (
-              <div className="tl-table" role="table" aria-label="Weight for each rep count at the same effort">
+              <div className="tl-table" role="table" aria-label={tr("Weight for each rep count at the same effort")}>
                 <div className="tl-tr head" role="row">
                   <span role="columnheader">Reps</span>
                   <span role="columnheader">Weight</span>
@@ -95,7 +96,7 @@ export function ToolsSheet({ onClose, weight = 0 }: { onClose: () => void; weigh
             </label>
             <p className="small muted">Programs often say “5 × 5 at 80%”. This shows that weight, rounded to what you can load on a {fmtKg(barKg)} kg bar.</p>
             {pctMax != null && pctMax > 0 && (
-              <div className="tl-table three" role="table" aria-label="Percent of max">
+              <div className="tl-table three" role="table" aria-label={tr("Percent of max")}>
                 <div className="tl-tr head" role="row">
                   <span role="columnheader">Percent</span>
                   <span role="columnheader">Exact</span>

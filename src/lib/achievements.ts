@@ -7,6 +7,7 @@
  * - Weeks follow stats.ts (start on Sunday). The weekly goal counts finished workouts.
  */
 import { DB, Session } from './types'
+import { t } from './i18n'
 import { sessionDate } from './pr'
 import { History, scanHistory } from './records'
 import { addDays, dayKey, finishedSessions, startOfWeek, summarizeSession } from './stats'
@@ -165,15 +166,15 @@ export function achievements(db: DB, opts: { weeklyGoal?: number; now?: Date; hi
 
   // workout counts
   const counts: [string, number, string][] = [
-    ['first-workout', 1, 'First workout'],
-    ['workouts-10', 10, '10 workouts'],
-    ['workouts-50', 50, '50 workouts'],
-    ['workouts-100', 100, '100 workouts']
+    ['first-workout', 1, t('First workout')],
+    ['workouts-10', 10, t('{n} workouts', { n: 10 })],
+    ['workouts-50', 50, t('{n} workouts', { n: 50 })],
+    ['workouts-100', 100, t('{n} workouts', { n: 100 })]
   ]
   for (const [id, n, title] of counts) {
     const s = nth(done, n)
     add(
-      { id, title, desc: n === 1 ? 'Finish your first workout.' : `Finish ${n} workouts.`, icon: n === 1 ? 'start' : 'count', unit: 'workouts', target: n },
+      { id, title, desc: n === 1 ? t('Finish your first workout.') : t('Finish {n} workouts.', { n }), icon: n === 1 ? 'start' : 'count', unit: 'workouts', target: n },
       done.length,
       s ? sessionDate(s) : null
     )
@@ -183,18 +184,18 @@ export function achievements(db: DB, opts: { weeklyGoal?: number; now?: Date; hi
   const firstOf = (list: Session[]) => (list.length ? sessionDate(list[0]) : null)
   for (const n of [4, 12]) {
     const r = weekRun(w, firstOf, n)
-    add({ id: `streak-${n}`, title: `${n}-week streak`, desc: `Train at least once a week, ${n} weeks in a row.`, icon: 'streak', unit: 'weeks', target: n }, r.best, r.date)
+    add({ id: `streak-${n}`, title: t('{n}-week streak', { n }), desc: t('Train at least once a week, {n} weeks in a row.', { n }), icon: 'streak', unit: 'weeks', target: n }, r.best, r.date)
   }
 
   // records
   for (const [id, n, title] of [
-    ['first-pr', 1, 'First record'],
-    ['prs-10', 10, '10 records'],
-    ['prs-50', 50, '50 records']
+    ['first-pr', 1, t('First record')],
+    ['prs-10', 10, t('{n} records', { n: 10 })],
+    ['prs-50', 50, t('{n} records', { n: 50 })]
   ] as [string, number, string][]) {
     const p = nth(hist.prs, n)
     add(
-      { id, title, desc: n === 1 ? 'Beat one of your own bests.' : `Beat your own bests ${n} times.`, icon: 'record', unit: 'records', target: n },
+      { id, title, desc: n === 1 ? t('Beat one of your own bests.') : t('Beat your own bests {n} times.', { n }), icon: 'record', unit: 'records', target: n },
       hist.prs.length,
       p?.date ?? null
     )
@@ -218,7 +219,7 @@ export function achievements(db: DB, opts: { weeklyGoal?: number; now?: Date; hi
   })
   const bestBench = Math.max(0, ...bench.map((s) => s.weight))
   add(
-    { id: 'bw-bench', title: 'Body-weight bench', desc: 'Bench press your own body weight for at least one rep.', icon: 'lift', unit: 'kg', target: latestBw ?? 1 },
+    { id: 'bw-bench', title: t('Body-weight bench'), desc: t('Bench press your own body weight for at least one rep.'), icon: 'lift', unit: 'kg', target: latestBw ?? 1 },
     latestBw ? bestBench : 0,
     bwHit?.date ?? null,
     latestBw ? undefined : 'Log your body weight on the Body tab to track this.'
@@ -248,17 +249,17 @@ export function achievements(db: DB, opts: { weeklyGoal?: number; now?: Date; hi
     }
     bestWeek = Math.max(bestWeek, sum)
   }
-  add({ id: 'week-10t', title: '10 tonnes in a week', desc: 'Lift 10,000 kg in total (weight × reps) in one week.', icon: 'volume', unit: 'kg', target: 10_000 }, bestWeek, tonDate)
+  add({ id: 'week-10t', title: t('10 tonnes in a week'), desc: t('Lift 10,000 kg in total (weight × reps) in one week.'), icon: 'volume', unit: 'kg', target: 10_000 }, bestWeek, tonDate)
 
   // early bird: started before 7:00 local time
   const early = done.find((s) => new Date(s.started_at).getHours() < 7)
-  add({ id: 'early-bird', title: 'Early bird', desc: 'Start a workout before 7:00 in the morning.', icon: 'sun', unit: 'workouts', target: 1 }, early ? 1 : 0, early ? sessionDate(early) : null)
+  add({ id: 'early-bird', title: t('Early bird'), desc: t('Start a workout before 7:00 in the morning.'), icon: 'sun', unit: 'workouts', target: 1 }, early ? 1 : 0, early ? sessionDate(early) : null)
 
   // consistency: weekly goal reached 3 weeks in a row
   const goalDay = (list: Session[]) => (list.length >= goal ? sessionDate(list[goal - 1]) : null)
   const c = weekRun(w, goalDay, 3)
   add(
-    { id: 'goal-3', title: 'Consistent', desc: `Reach your weekly goal (${goal} workout${goal === 1 ? '' : 's'}) 3 weeks in a row.`, icon: 'goal', unit: 'weeks', target: 3 },
+    { id: 'goal-3', title: t('Consistent'), desc: t('Reach your weekly goal ({n}) 3 weeks in a row.', { n: goal }), icon: 'goal', unit: 'weeks', target: 3 },
     c.best,
     c.date
   )

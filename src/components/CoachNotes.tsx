@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { MessageSquare } from 'lucide-react'
 import { CoachNote, notesForMySession } from '../lib/coach'
 
@@ -14,9 +15,9 @@ export function CoachNotes({ sessionId }: { sessionId: string }) {
   }, [sessionId])
   if (!notes.length) return null
   return (
-    <section className="card stack coach-notes" style={{ gap: 6 }} aria-label="From your coach">
+    <section className="card stack coach-notes" style={{ gap: 6 }} aria-label={tr("From your coach")}>
       <div className="row tiny muted" style={{ gap: 6 }}>
-        <MessageSquare size={14} aria-hidden /> From your coach
+        <MessageSquare size={14} aria-hidden /> {tr("From your coach")}
       </div>
       {notes.map((n) => (
         <div key={n.id} style={{ whiteSpace: 'pre-wrap' }}>

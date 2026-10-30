@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { fmtDate } from '../lib/format'
 
 export interface Pt {
@@ -109,7 +110,7 @@ export function LineChart({ series, unit = '', digits = 1 }: { series: Series[];
   const dataKey = `${series.map((s) => s.name).join('|')}:${all.length}:${all[0]?.t ?? 0}`
   useEffect(() => setHover(null), [dataKey])
 
-  if (!geo) return <div className="muted small center" style={{ padding: 20 }}>No data yet</div>
+  if (!geo) return <div className="muted small center" style={{ padding: 20 }}>{tr("No data yet")}</div>
   const { x, y, ticks, tMin, tMax } = geo
 
   function scrub(clientX: number) {

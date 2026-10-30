@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, RotateCw, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -117,12 +118,12 @@ export default function Exercises() {
     <div className="stack xl-page" style={{ gap: 'var(--s3)' }}>
       <div className="page-head" style={{ marginBottom: 0 }}>
         <div className="grow">
-          <h1>Exercises</h1>
+          <h1>{tr("Exercises")}</h1>
           <div className="small muted" style={{ marginTop: 2 }}>
             Your exercises and a library of {lib ? lib.length : '870+'} with photos.
           </div>
         </div>
-        <button className="btn primary icon" onClick={() => setCreating(true)} aria-label="Create your own exercise">
+        <button className="btn primary icon" onClick={() => setCreating(true)} aria-label={tr("Create your own exercise")}>
           <Plus size={22} />
         </button>
       </div>
@@ -133,19 +134,19 @@ export default function Exercises() {
           className="input"
           type="search"
           enterKeyHint="search"
-          placeholder="Search exercises"
-          aria-label="Search exercises"
+          placeholder={tr("Search exercises")}
+          aria-label={tr("Search exercises")}
           value={q}
           onChange={(e) => set('q', e.target.value, '')}
         />
         {q && (
-          <button className="clear" onClick={() => set('q', '', '')} aria-label="Clear search">
+          <button className="clear" onClick={() => set('q', '', '')} aria-label={tr("Clear search")}>
             <X size={18} />
           </button>
         )}
       </div>
 
-      <div className="seg lib-seg" role="group" aria-label="Which exercises">
+      <div className="seg lib-seg" role="group" aria-label={tr("Which exercises")}>
         {TABS.map((t) => (
           <button key={t.id} aria-pressed={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, 'all')} style={{ flex: 1 }}>
             {t.label}
@@ -153,10 +154,10 @@ export default function Exercises() {
         ))}
       </div>
 
-      <div className="lib-filter-row" role="group" aria-label="Filters">
-        <FilterPill label="Muscle" allLabel="All muscles" value={muscle} options={MUSCLES} onChange={(v) => set('muscle', v, 'All')} />
-        <FilterPill label="Equipment" allLabel="All equipment" value={eq} options={EQUIPMENT} onChange={(v) => set('eq', v, 'All')} />
-        {showLib && <FilterPill label="Level" allLabel="All levels" value={level} options={LIB_LEVELS} onChange={(v) => set('level', v, 'All')} />}
+      <div className="lib-filter-row" role="group" aria-label={tr("Filters")}>
+        <FilterPill label={tr("Muscle")} allLabel="All muscles" value={muscle} options={MUSCLES} onChange={(v) => set('muscle', v, 'All')} />
+        <FilterPill label={tr("Equipment")} allLabel="All equipment" value={eq} options={EQUIPMENT} onChange={(v) => set('eq', v, 'All')} />
+        {showLib && <FilterPill label={tr("Level")} allLabel="All levels" value={level} options={LIB_LEVELS} onChange={(v) => set('level', v, 'All')} />}
         {(muscle !== 'All' || eq !== 'All' || level !== 'All') && (
           <button
             className="lib-pill"
@@ -171,7 +172,7 @@ export default function Exercises() {
               )
             }
           >
-            <X size={16} aria-hidden /> Clear
+            <X size={16} aria-hidden /> {tr("Clear")}
           </button>
         )}
       </div>
@@ -180,28 +181,28 @@ export default function Exercises() {
         <>
           {tab === 'all' && (
             <div className="section-label" style={{ marginBottom: 0 }}>
-              <span>My exercises</span>
+              <span>{tr("My exercises")}</span>
               <span className="count lib-count">{mine.length}</span>
             </div>
           )}
           {!db.exercises.length ? (
             filtering ? null : tab === 'all' ? (
               <div className="row small muted" style={{ justifyContent: 'space-between', padding: '0 2px' }}>
-                <span>None yet. Tap Add on any exercise below.</span>
+                <span>{tr("None yet. Tap Add on any exercise below.")}</span>
                 <button className="btn sm" onClick={() => setCreating(true)}>
-                  <Plus size={16} /> Create your own
+                  <Plus size={16} /> {tr("Create your own")}
                 </button>
               </div>
             ) : (
               <div className="empty">
-                <div style={{ fontWeight: 600 }}>No exercises of your own yet</div>
-                <div className="small muted">Add any exercise from the library, or create your own with a photo of the machine.</div>
+                <div style={{ fontWeight: 600 }}>{tr("No exercises of your own yet")}</div>
+                <div className="small muted">{tr("Add any exercise from the library, or create your own with a photo of the machine.")}</div>
                 <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
                   <button className="btn primary" onClick={() => set('tab', 'library', 'all')}>
-                    Browse the library
+                    {tr("Browse the library")}
                   </button>
                   <button className="btn" onClick={() => setCreating(true)}>
-                    <Plus size={18} /> Create your own
+                    <Plus size={18} /> {tr("Create your own")}
                   </button>
                 </div>
               </div>
@@ -211,7 +212,7 @@ export default function Exercises() {
               {recent.length > 0 && (
                 <section>
                   <div className="section-label">
-                    <span>Recent</span>
+                    <span>{tr("Recent")}</span>
                   </div>
                   <div className="list-group" style={{ ['--inset' as string]: '74px' }}>
                     {recent.map((e) => row(e, true))}
@@ -237,22 +238,22 @@ export default function Exercises() {
               </div>
             )
           )}
-          {tab === 'all' && db.exercises.length > 0 && !mine.length && !nothing && <div className="small muted" style={{ padding: '0 2px' }}>None of yours match.</div>}
+          {tab === 'all' && db.exercises.length > 0 && !mine.length && !nothing && <div className="small muted" style={{ padding: '0 2px' }}>{tr("None of yours match.")}</div>}
         </>
       )}
 
       {showLib && (
         <section>
           <div className="section-label" style={{ marginTop: tab === 'all' ? 'var(--s3)' : undefined }}>
-            <span>Library</span>
+            <span>{tr("Library")}</span>
             {lib && <span className="count lib-count">{libMatches.length}</span>}
           </div>
           {libError ? (
             <div className="empty">
-              <div style={{ fontWeight: 600 }}>The library could not load</div>
-              <div className="small muted">Check your connection and try again.</div>
+              <div style={{ fontWeight: 600 }}>{tr("The library could not load")}</div>
+              <div className="small muted">{tr("Check your connection and try again.")}</div>
               <button className="btn" onClick={retry}>
-                <RotateCw size={16} /> Try again
+                <RotateCw size={16} /> {tr("Try again")}
               </button>
             </div>
           ) : !lib ? (
@@ -295,7 +296,7 @@ export default function Exercises() {
       {nothing && (
         <div className="empty">
           <div style={{ fontWeight: 600 }}>No exercise matches{q.trim() ? ` “${q.trim()}”` : ' these filters'}</div>
-          <div className="small muted">Try fewer words or clear a filter, or create it yourself.</div>
+          <div className="small muted">{tr("Try fewer words or clear a filter, or create it yourself.")}</div>
           <button className="btn primary" onClick={() => setCreating(true)}>
             <Plus size={18} /> {q.trim() ? `Create “${q.trim()}”` : 'Create your own'}
           </button>
@@ -303,7 +304,7 @@ export default function Exercises() {
       )}
 
       {creating && (
-        <Sheet title="New exercise" onClose={() => setCreating(false)}>
+        <Sheet title={tr("New exercise")} onClose={() => setCreating(false)}>
           <NewExerciseForm
             initialName={q}
             onCreated={(e) => {

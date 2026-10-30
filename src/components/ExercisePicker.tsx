@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ArrowLeft, Check, Plus, RotateCw, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, Exercise, MUSCLES, Tracking } from '../lib/types'
@@ -64,11 +65,11 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
       }}
     >
       <label className="field">
-        Name
+        {tr("Name")}
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Incline Dumbbell Press" autoFocus enterKeyHint="done" />
       </label>
       <div className="field">
-        Muscle group
+        {tr("Muscle group")}
         <div className="chips wrap">
           {MUSCLES.map((m) => (
             <button type="button" key={m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(m)}>
@@ -78,7 +79,7 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
         </div>
       </div>
       <div className="field">
-        Equipment
+        {tr("Equipment")}
         <div className="chips wrap">
           {EQUIPMENT.map((m) => (
             <button
@@ -98,8 +99,8 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
         </div>
       </div>
       <div className="field">
-        What do you record?
-        <div className="seg" role="radiogroup" aria-label="What do you record">
+        {tr("What do you record?")}
+        <div className="seg" role="radiogroup" aria-label={tr("What do you record")}>
           {(['weight_reps', 'reps', 'time'] as Tracking[]).map((t) => (
             <button
               type="button"
@@ -132,9 +133,9 @@ export function NewExerciseForm({ onCreated, initialName = '' }: { onCreated: (e
         <ImageField path={photo} folder="exercises" onChange={setPhoto} label={match ? 'Or use my own photo' : 'Add a photo of the machine'} quiet={!!match} />
       </div>
       <button className="btn primary" type="submit" disabled={!name.trim()}>
-        <Plus size={18} /> Create exercise
+        <Plus size={18} /> {tr("Create exercise")}
       </button>
-      {cloud && <div className="small muted" style={{ textAlign: 'center' }}>New exercises join everyone's library after a quick review.</div>}
+      {cloud && <div className="small muted" style={{ textAlign: 'center' }}>{tr("New exercises join everyone's library after a quick review.")}</div>}
     </form>
   )
 }
@@ -158,7 +159,7 @@ export function FilterChips({
   return (
     <div className="xp-filters">
       {muscles.length > 1 && (
-        <div className="chips" role="group" aria-label="Muscle group">
+        <div className="chips" role="group" aria-label={tr("Muscle group")}>
           {['All', ...muscles].map((m) => (
             <button key={m} aria-pressed={muscle === m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(muscle === m && m !== 'All' ? 'All' : m)}>
               {m === 'All' ? 'All muscles' : m}
@@ -167,7 +168,7 @@ export function FilterChips({
         </div>
       )}
       {equipment.length > 1 && (
-        <div className="chips" role="group" aria-label="Equipment">
+        <div className="chips" role="group" aria-label={tr("Equipment")}>
           {['All', ...equipment].map((m) => (
             <button key={m} aria-pressed={eq === m} className={`chip ${eq === m ? 'active' : ''}`} onClick={() => setEq(eq === m && m !== 'All' ? 'All' : m)}>
               {m === 'All' ? 'All equipment' : m}
@@ -297,7 +298,7 @@ export function ExercisePicker({
       {creating ? (
         <div className="stack">
           <button className="btn ghost sm" style={{ alignSelf: 'flex-start', marginLeft: -8 }} onClick={() => setCreating(false)}>
-            <ArrowLeft size={16} /> Back to list
+            <ArrowLeft size={16} /> {tr("Back to list")}
           </button>
           <NewExerciseForm
             initialName={q}
@@ -320,13 +321,13 @@ export function ExercisePicker({
               className="input"
               type="search"
               enterKeyHint="search"
-              placeholder="Search exercises"
-              aria-label="Search exercises"
+              placeholder={tr("Search exercises")}
+              aria-label={tr("Search exercises")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             {q && (
-              <button className="clear" onClick={() => setQ('')} aria-label="Clear search">
+              <button className="clear" onClick={() => setQ('')} aria-label={tr("Clear search")}>
                 <X size={18} />
               </button>
             )}
@@ -342,7 +343,7 @@ export function ExercisePicker({
           )}
           {recent.length > 0 && (
             <>
-              <div className="picker-sec">Recent</div>
+              <div className="picker-sec">{tr("Recent")}</div>
               <div className="list-group" style={{ ['--inset' as string]: '74px' }}>{recent.map(row)}</div>
             </>
           )}
@@ -356,9 +357,9 @@ export function ExercisePicker({
           <div className="picker-sec">{lib ? `Library · ${libMatches.length}` : 'Library'}</div>
           {libError ? (
             <div className="row small muted" style={{ justifyContent: 'space-between', padding: 'var(--s2) 2px' }}>
-              The library could not load.
+              {tr("The library could not load.")}
               <button className="btn sm" onClick={retry}>
-                <RotateCw size={14} /> Try again
+                <RotateCw size={14} /> {tr("Try again")}
               </button>
             </div>
           ) : !lib ? (
@@ -381,7 +382,7 @@ export function ExercisePicker({
           {multi && picked.length > 0 && (
             <div className="xp-foot">
               <button className="btn ghost" onClick={() => setPicked([])}>
-                Clear
+                {tr("Clear")}
               </button>
               <button className="btn primary grow" onClick={addPicked}>
                 <Check size={18} /> Add {picked.length} exercise{picked.length === 1 ? '' : 's'}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Target } from 'lucide-react'
 import { Goal, goalView, removeGoal, setGoal, useGoals } from '../lib/goals'
 import { HistoryPoint } from '../lib/pr'
@@ -16,7 +17,7 @@ export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: Histo
   return (
     <>
       {goal && view ? (
-        <section className="card stack xgoal" style={{ gap: 8 }} aria-label="Goal">
+        <section className="card stack xgoal" style={{ gap: 8 }} aria-label={tr("Goal")}>
           <div className="goal-head">
             <div className="goal-name">
               <Target size={18} aria-hidden />
@@ -26,10 +27,10 @@ export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: Histo
               </span>
             </div>
             <button className="btn sm ghost" onClick={() => setEditing(true)}>
-              Edit
+              {tr("Edit")}
             </button>
           </div>
-          <div className="goal-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(view.pct * 100)} aria-label="Of the way to your goal">
+          <div className="goal-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(view.pct * 100)} aria-label={tr("Of the way to your goal")}>
             <span style={{ width: `${Math.round(view.pct * 100)}%` }} className={view.reached ? 'done' : undefined} />
           </div>
           <div className="small muted">
@@ -44,7 +45,7 @@ export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: Histo
         </section>
       ) : (
         <button className="btn block goal-add" onClick={() => setEditing(true)}>
-          <Target size={18} aria-hidden /> Set a goal
+          <Target size={18} aria-hidden /> {tr("Set a goal")}
         </button>
       )}
       {editing && <GoalSheet exerciseId={exerciseId} goal={goal} onClose={() => setEditing(false)} />}
@@ -72,20 +73,20 @@ function GoalSheet({ exerciseId, goal, onClose }: { exerciseId: string; goal?: G
       >
         <div className="row" style={{ gap: 8 }}>
           <label className="field grow">
-            Weight (kg)
+            {tr("Weight (kg)")}
             <input className="input" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="100" autoFocus />
           </label>
           <label className="field grow">
-            Reps
+            {tr("Reps")}
             <input className="input" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value.replace(/\D/g, ''))} />
           </label>
         </div>
         <label className="field">
-          By (optional)
+          {tr("By (optional)")}
           <input className="input" type="date" value={by} onChange={(e) => setBy(e.target.value)} />
         </label>
         <button className="btn primary block" type="submit" disabled={!ok}>
-          Save goal
+          {tr("Save goal")}
         </button>
         {goal && (
           <button
@@ -97,7 +98,7 @@ function GoalSheet({ exerciseId, goal, onClose }: { exerciseId: string; goal?: G
               onClose()
             }}
           >
-            Remove goal
+            {tr("Remove goal")}
           </button>
         )}
       </form>

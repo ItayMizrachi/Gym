@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { Search, Trophy, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -46,12 +47,12 @@ export default function Records() {
 
   return (
     <div className="stack" style={{ gap: 16 }}>
-      <PageHeader title="Records" sub="Newest record first. Est. max = the most you could likely lift once." back="/profile" />
+      <PageHeader title={tr("Records")} sub={tr("Newest record first. Est. max = the most you could likely lift once.")} back="/profile" />
 
       {all.length === 0 ? (
-        <Empty icon={<Trophy size={28} />} title="No records yet" text="Finish a workout with weights and reps, and your best lifts show up here.">
+        <Empty icon={<Trophy size={28} />} title={tr("No records yet")} text={tr("Finish a workout with weights and reps, and your best lifts show up here.")}>
           <button className="btn primary block" onClick={() => nav('/')}>
-            Go to Train
+            {tr("Go to Train")}
           </button>
         </Empty>
       ) : (
@@ -62,13 +63,13 @@ export default function Records() {
               className="input"
               type="search"
               enterKeyHint="search"
-              placeholder="Search by exercise or muscle"
-              aria-label="Search records"
+              placeholder={tr("Search by exercise or muscle")}
+              aria-label={tr("Search records")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             {q && (
-              <button className="clear" onClick={() => setQ('')} aria-label="Clear search">
+              <button className="clear" onClick={() => setQ('')} aria-label={tr("Clear search")}>
                 <X size={18} />
               </button>
             )}

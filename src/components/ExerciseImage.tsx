@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Exercise } from '../lib/types'
 import { libIdForExercise, libIdOf, libImageUrl } from '../lib/libraryLinks'
 import { scheduleAutoMatch } from '../lib/autoMatch'
@@ -85,7 +86,7 @@ export function LibPhoto({ id, name, frames = 2 }: { id: string; name: string; f
     return (
       <div className="lib-photo failed">
         <Thumb path={null} name={name} size={96} className="round" />
-        <div className="small muted">Photo not available offline.</div>
+        <div className="small muted">{tr("Photo not available offline.")}</div>
       </div>
     )
   const two = frames > 1
@@ -101,9 +102,9 @@ export function LibPhoto({ id, name, frames = 2 }: { id: string; name: string; f
       <img src={libImageUrl(id, frame)} alt="" onError={() => setFailed(true)} />
       {two && (
         <span className="lib-frames" aria-hidden>
-          <span className={frame === 0 ? 'on' : ''}>Start</span>
-          <span className={frame === 1 ? 'on' : ''}>End</span>
-          {!playing && <span className="lib-paused">Paused</span>}
+          <span className={frame === 0 ? 'on' : ''}>{tr("Start")}</span>
+          <span className={frame === 1 ? 'on' : ''}>{tr("End")}</span>
+          {!playing && <span className="lib-paused">{tr("Paused")}</span>}
         </span>
       )}
     </button>

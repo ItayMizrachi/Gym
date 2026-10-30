@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ShieldCheck, Zap, Images, Trophy } from 'lucide-react'
 import '../styles/workout-flow.css'
 import { useStore } from '../lib/store'
@@ -42,21 +43,21 @@ export default function Login() {
       <div className="login-brand">
         <img className="logo" src="icon.svg" alt="" width={72} height={72} />
         <h1>
-          Gym<span>Log</span>
+          {tr("Gym")}<span>{tr("Log")}</span>
         </h1>
-        <div className="tag">Every set, every record, every weigh-in. Your training logbook, always with you.</div>
+        <div className="tag">{tr("Every set, every record, every weigh-in. Your training logbook, always with you.")}</div>
         <ul className="login-perks">
           <li>
             <span className="perk-ico" aria-hidden><Zap size={18} /></span>
-            <span><b>Log a set in one tap.</b> Weights fill in from last time and the rest timer starts by itself.</span>
+            <span><b>{tr("Log a set in one tap.")}</b> {tr("Weights fill in from last time and the rest timer starts by itself.")}</span>
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Images size={18} /></span>
-            <span><b>870+ exercises with photos.</b> Plus 30 ready-made plans, so you never start from a blank page.</span>
+            <span><b>870+ exercises with photos.</b> {tr("Plus 30 ready-made plans, so you never start from a blank page.")}</span>
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Trophy size={18} /></span>
-            <span><b>See yourself get stronger.</b> Records, streaks and a nudge when a new best is one rep away.</span>
+            <span><b>{tr("See yourself get stronger.")}</b> {tr("Records, streaks and a nudge when a new best is one rep away.")}</span>
           </li>
         </ul>
       </div>
@@ -64,7 +65,7 @@ export default function Login() {
       <div className="login-actions">
         {bootError && <div className="msg err">{bootError}</div>}
 
-        <p className="login-lead">Sign in with your Google account to save your workouts and sync them across devices.</p>
+        <p className="login-lead">{tr("Sign in with your Google account to save your workouts and sync them across devices.")}</p>
 
         {gsi !== 'off' && <div ref={gsiRef} className="gsi-btn" aria-busy={gsi === 'loading'} />}
 
@@ -84,7 +85,7 @@ export default function Login() {
 
         <div className="login-privacy">
           <ShieldCheck size={16} aria-hidden />
-          <span>We only use your name and email to sign you in. Your workouts are private to your account and never shared.</span>
+          <span>{tr("We only use your name and email to sign you in. Your workouts are private to your account and never shared.")}</span>
         </div>
 
         {import.meta.env.DEV && (

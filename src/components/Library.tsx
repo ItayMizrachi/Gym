@@ -1,4 +1,5 @@
 import { ReactNode, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, ChevronRight, Dumbbell, Play, Plus } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -22,11 +23,11 @@ export function LibRow({ e, added, onOpen, onAdd }: { e: LibraryExercise; added:
       </button>
       {added ? (
         <span className="lib-add done">
-          <Check size={16} aria-hidden /> Added
+          <Check size={16} aria-hidden /> {tr("Added")}
         </span>
       ) : (
         <button className="lib-add" onClick={onAdd} aria-label={`Add ${e.name} to my exercises`}>
-          <Plus size={16} /> Add
+          <Plus size={16} /> {tr("Add")}
         </button>
       )}
     </div>
@@ -36,7 +37,7 @@ export function LibRow({ e, added, onOpen, onAdd }: { e: LibraryExercise; added:
 export function LibSkeleton({ rows = 6 }: { rows?: number }) {
   return (
     <div className="list-group" role="status" aria-busy="true">
-      <span className="lib-sr">Loading the exercise library</span>
+      <span className="lib-sr">{tr("Loading the exercise library")}</span>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="lib-skel">
           <div className="c" />
@@ -139,7 +140,7 @@ export function AddToWorkoutSheet({ name, getExercise, onClose }: { name: string
         {sorted.length ? (
           <>
             <div className="section-label" style={{ margin: 0 }}>
-              <span>My workouts</span>
+              <span>{tr("My workouts")}</span>
             </div>
             <div className="list-group" style={{ ['--inset' as string]: '66px' }}>
               {sorted.map((w) =>
@@ -155,9 +156,9 @@ export function AddToWorkoutSheet({ name, getExercise, onClose }: { name: string
           !live && (
             <div className="empty">
               <div className="title" style={{ fontWeight: 600 }}>
-                No workouts yet
+                {tr("No workouts yet")}
               </div>
-              <div className="small muted">Create a workout or pick a ready-made one first, then add exercises to it.</div>
+              <div className="small muted">{tr("Create a workout or pick a ready-made one first, then add exercises to it.")}</div>
               <button
                 className="btn primary"
                 onClick={() => {
@@ -165,7 +166,7 @@ export function AddToWorkoutSheet({ name, getExercise, onClose }: { name: string
                   nav('/programs')
                 }}
               >
-                Browse workouts
+                {tr("Browse workouts")}
               </button>
             </div>
           )

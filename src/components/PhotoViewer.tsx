@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { ChevronLeft, ChevronRight, Pencil, X } from 'lucide-react'
 import { Metric } from '../lib/types'
 import { fmtDateLong, fmtKg } from '../lib/format'
@@ -25,7 +26,7 @@ function Slide({ m, offset, dx, zoom }: { m: ViewerPhoto | undefined; offset: nu
   return (
     <div className="pv-slide" style={{ transform: `translateX(calc(${offset * 100}% + ${offset * 16}px + ${dx}px))` }} aria-hidden={offset !== 0}>
       {failed ? (
-        <div className="pv-fail">This photo cannot load right now. Check your connection and try again.</div>
+        <div className="pv-fail">{tr("This photo cannot load right now. Check your connection and try again.")}</div>
       ) : url ? (
         <img
           src={url}
@@ -225,16 +226,16 @@ export function PhotoViewer<T extends ViewerPhoto>({
   const kgShown = kgOf ? kgOf(m) : m.weight_kg ?? null
 
   return (
-    <div className="pv" role="dialog" aria-modal="true" aria-label="Photo viewer" tabIndex={-1} ref={root} style={{ background: `rgba(0,0,0,${fade})` }}>
+    <div className="pv" role="dialog" aria-modal="true" aria-label={tr("Photo viewer")} tabIndex={-1} ref={root} style={{ background: `rgba(0,0,0,${fade})` }}>
       <div className="pv-top">
-        <button className="pv-btn" onClick={onClose} aria-label="Close">
+        <button className="pv-btn" onClick={onClose} aria-label={tr("Close")}>
           <X size={22} aria-hidden />
         </button>
         <div className="pv-count" aria-live="polite">
           {photos.length > 1 ? `${i + 1} of ${photos.length}` : ''}
         </div>
         {onEdit ? (
-          <button className="pv-btn" onClick={() => onEdit(m)} aria-label="Edit entry">
+          <button className="pv-btn" onClick={() => onEdit(m)} aria-label={tr("Edit entry")}>
             <Pencil size={19} aria-hidden />
           </button>
         ) : (
@@ -257,10 +258,10 @@ export function PhotoViewer<T extends ViewerPhoto>({
 
       {photos.length > 1 && (
         <>
-          <button className="pv-btn pv-prev" onClick={() => go(-1)} disabled={i === 0} aria-label="Previous photo">
+          <button className="pv-btn pv-prev" onClick={() => go(-1)} disabled={i === 0} aria-label={tr("Previous photo")}>
             <ChevronLeft size={24} aria-hidden />
           </button>
-          <button className="pv-btn pv-next" onClick={() => go(1)} disabled={i === photos.length - 1} aria-label="Next photo">
+          <button className="pv-btn pv-next" onClick={() => go(1)} disabled={i === photos.length - 1} aria-label={tr("Next photo")}>
             <ChevronRight size={24} aria-hidden />
           </button>
         </>

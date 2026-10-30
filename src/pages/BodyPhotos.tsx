@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -36,7 +37,7 @@ export default function BodyPhotos() {
   return (
     <div className="stack" style={{ gap: 'var(--s5)', paddingBottom: picking ? 72 : 0 }}>
       <PageHeader
-        title="Photos"
+        title={tr("Photos")}
         sub={picking ? 'Pick two photos to compare' : `${photos.length} progress photo${photos.length === 1 ? '' : 's'}`}
         back="/body"
         action={
@@ -54,7 +55,7 @@ export default function BodyPhotos() {
           )
         }
       />
-      {photos.length === 0 && <Empty icon={<Camera size={28} />} title="No photos yet" text="Add a progress photo when you log your weight." />}
+      {photos.length === 0 && <Empty icon={<Camera size={28} />} title={tr("No photos yet")} text={tr("Add a progress photo when you log your weight.")} />}
       {months.map((g) => (
         <section key={g.label}>
           <div className="section-label">

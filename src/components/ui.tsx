@@ -1,4 +1,5 @@
 import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { X, Camera, ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -140,10 +141,10 @@ export function ImageField({
       {input}
       {url && (
         <div className={`photo-field${large ? ' lg' : ''}`}>
-          <button type="button" className="photo-open" onClick={() => setViewing(true)} aria-label="Open photo full screen">
+          <button type="button" className="photo-open" onClick={() => setViewing(true)} aria-label={tr("Open photo full screen")}>
             <img src={url} alt="" />
           </button>
-          <button type="button" className="photo-x" onClick={remove} aria-label="Remove photo">
+          <button type="button" className="photo-x" onClick={remove} aria-label={tr("Remove photo")}>
             <X size={16} aria-hidden />
           </button>
         </div>
@@ -293,7 +294,7 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
         <div className="sheet-handle" onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />
         <div className="sheet-head">
           <h2>{title}</h2>
-          <button className="btn icon sm ghost" onClick={requestClose} aria-label="Close">
+          <button className="btn icon sm ghost" onClick={requestClose} aria-label={tr("Close")}>
             <X size={20} />
           </button>
         </div>
@@ -506,7 +507,7 @@ export function PageHeader({
       {back && (
         <button
           className="btn icon ghost ph-back"
-          aria-label="Back"
+          aria-label={tr("Back")}
           onClick={() => (back === true ? nav(-1) : nav(back))}
         >
           <ChevronLeft size={26} />

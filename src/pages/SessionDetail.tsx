@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Plus, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -137,7 +138,7 @@ export default function SessionDetail() {
   const split = useMemo(() => (s ? muscleSplit(db, s) : []), [db, s])
   const bodyKg = useMemo(() => latestBodyWeight(db), [db])
   const prev = useMemo(() => (s ? previousOfTemplate(db, s) : null), [db, s])
-  if (!s) return <div className="card">Session not found. <button className="btn sm" onClick={() => nav('/history')}>History</button></div>
+  if (!s) return <div className="card">{tr("Session not found.")} <button className="btn sm" onClick={() => nav('/history')}>{tr("History")}</button></div>
 
   if (editing) return <SessionEditor session={s} onDone={() => setEditing(false)} />
 
@@ -178,19 +179,19 @@ export default function SessionDetail() {
     <div className="card hv-card">
       <div className="hv-stats">
         <div>
-          <div className="hv-l">Time</div>
+          <div className="hv-l">{tr("Time")}</div>
           <div className="hv-v">{m.minutes < 60 ? `${m.minutes} min` : `${Math.floor(m.minutes / 60)}h ${m.minutes % 60}m`}</div>
         </div>
         <div>
-          <div className="hv-l">Volume</div>
+          <div className="hv-l">{tr("Volume")}</div>
           <div className="hv-v">{vol}</div>
         </div>
         <div>
-          <div className="hv-l">Sets</div>
+          <div className="hv-l">{tr("Sets")}</div>
           <div className="hv-v">{m.sets}</div>
         </div>
         <div>
-          <div className="hv-l">Records</div>
+          <div className="hv-l">{tr("Records")}</div>
           <div className={`hv-v${prs.length ? ' pr' : ''}`}>
             {prs.length > 0 && <Trophy size={16} />} {prs.length}
           </div>
@@ -207,7 +208,7 @@ export default function SessionDetail() {
   const muscles = split.length > 0 && (
     <div className="card">
       <div className="ins-title" style={{ marginBottom: 6 }}>
-        Muscle split
+        {tr("Muscle split")}
       </div>
       {shownSplit.map((x) => (
         <div key={x.muscle} className="split-row">
@@ -237,7 +238,7 @@ export default function SessionDetail() {
         folder="sessions"
         // no photo yet: one plain button, not a big dashed box; a photo shows large
         large={!!s.data.photo_path}
-        label="Add a workout photo"
+        label={tr("Add a workout photo")}
         onChange={(p) => save('sessions', { ...s, data: { ...s.data, photo_path: p } })}
       />
     </div>
@@ -247,7 +248,7 @@ export default function SessionDetail() {
     <div className="card cmp">
       <div className="row">
         <div className="grow">
-          <div className="ins-title">Compared with last time</div>
+          <div className="ins-title">{tr("Compared with last time")}</div>
           <div className="small muted">{prevLabel}</div>
         </div>
       </div>
@@ -281,7 +282,7 @@ export default function SessionDetail() {
   return (
     <div className="stack" style={{ gap: 18 }}>
       <div className="page-head">
-        <button className="btn icon ghost" onClick={() => nav(fresh ? '/history' : (-1 as any))} aria-label="Back">
+        <button className="btn icon ghost" onClick={() => nav(fresh ? '/history' : (-1 as any))} aria-label={tr("Back")}>
           <ChevronLeft size={26} />
         </button>
         <div className="grow">
@@ -289,7 +290,7 @@ export default function SessionDetail() {
           {!fresh && <div className="sub">{fmtDateLong(sessionDate(s))}</div>}
         </div>
         {!fresh && (
-          <button className="btn icon sm" onClick={share} disabled={sharing} aria-label="Share summary">
+          <button className="btn icon sm" onClick={share} disabled={sharing} aria-label={tr("Share summary")}>
             <Share2 size={18} />
           </button>
         )}
@@ -300,7 +301,7 @@ export default function SessionDetail() {
           <div className="done-badge">
             <Check size={34} strokeWidth={3} />
           </div>
-          <div className="done-title">Workout complete</div>
+          <div className="done-title">{tr("Workout complete")}</div>
           <div className="done-sub">
             {splitName(s.name)[0]} · {fmtDateLong(sessionDate(s))}
           </div>
@@ -352,7 +353,7 @@ export default function SessionDetail() {
             <Share2 size={18} /> {sharing ? 'Preparing…' : 'Share'}
           </button>
           <button className="btn primary grow" onClick={() => nav('/', { replace: true })}>
-            Done
+            {tr("Done")}
           </button>
         </div>
       )}
@@ -384,7 +385,7 @@ export default function SessionDetail() {
               </div>
               {hasPr && (
                 <span className="chip pr">
-                  <Trophy size={12} /> PR
+                  <Trophy size={12} /> {tr("PR")}
                 </span>
               )}
             </div>
@@ -400,7 +401,7 @@ export default function SessionDetail() {
                     </span>
                     {x.rpe != null && <span className="small muted">RPE {x.rpe}</span>}
                     {pr && (
-                      <span className="chip pr" aria-label="Record set">
+                      <span className="chip pr" aria-label={tr("Record set")}>
                         <Trophy size={12} />
                       </span>
                     )}
@@ -414,7 +415,7 @@ export default function SessionDetail() {
 
       {s.notes && (
         <div className="card">
-          <div className="small muted">Notes</div>
+          <div className="small muted">{tr("Notes")}</div>
           <div style={{ whiteSpace: 'pre-wrap' }}>{s.notes}</div>
         </div>
       )}
@@ -422,20 +423,20 @@ export default function SessionDetail() {
       {/* an imported or quick workout has no plan yet: one tap makes it a workout on Train */}
       {!(s.workout_id && db.workouts.some((w) => w.id === s.workout_id)) && s.data.exercises.some((e) => e.sets.some((x) => x.kind !== 'warmup')) && (
         <button className="btn primary block" onClick={saveAsWorkout}>
-          <Plus size={16} aria-hidden /> Save as a workout
+          <Plus size={16} aria-hidden /> {tr("Save as a workout")}
         </button>
       )}
       <button className="btn" onClick={() => setEditing(true)}>
-        <Pencil size={16} /> Edit workout
+        <Pencil size={16} /> {tr("Edit workout")}
       </button>
       <button className="btn danger" onClick={() => setConfirm(true)}>
-        <Trash2 size={16} /> Delete this workout
+        <Trash2 size={16} /> {tr("Delete this workout")}
       </button>
       {confirm && (
         <Confirm
-          title="Delete this workout from history?"
-          text="Records are recalculated without it."
-          confirmLabel="Delete"
+          title={tr("Delete this workout from history?")}
+          text={tr("Records are recalculated without it.")}
+          confirmLabel={tr("Delete")}
           danger
           onConfirm={() => {
             remove('sessions', s.id)

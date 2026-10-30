@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Users } from 'lucide-react'
 import { MyCoach, acceptInvite, leaveCoach, myCoaches, setCoachRole, useCoachRole } from '../lib/coach'
@@ -28,32 +29,32 @@ export function CoachSettings() {
   }, [])
 
   return (
-    <section className="card stack" aria-label="Coaching">
-      <h2>Coaching</h2>
+    <section className="card stack" aria-label={tr("Coaching")}>
+      <h2>{tr("Coaching")}</h2>
       <div className="row set-tog">
         <div className="grow" onClick={() => setCoachRole(!coach)} style={{ cursor: 'pointer' }}>
-          <div>I coach other people</div>
-          <div className="small muted">Plans and progress for your trainees. Free for now.</div>
+          <div>{tr("I coach other people")}</div>
+          <div className="small muted">{tr("Plans and progress for your trainees. Free for now.")}</div>
         </div>
         <Toggle on={coach} onChange={setCoachRole} ariaLabel="I coach other people" />
       </div>
       {coach && (
         <button className="btn set-link" onClick={() => nav('/coach')}>
           <Users size={18} aria-hidden />
-          <span className="grow set-link-t">My trainees</span>
+          <span className="grow set-link-t">{tr("My trainees")}</span>
           <ChevronRight size={16} aria-hidden />
         </button>
       )}
 
       <div className="stack" style={{ gap: 8 }}>
-        <div>My coach</div>
+        <div>{tr("My coach")}</div>
         {coaches?.map((c) => (
           <div key={c.id} className="row" style={{ gap: 8 }}>
             <div className="grow small ellipsis" style={{ minWidth: 0 }}>
               {c.coach_email} sees your training and can add workouts.
             </div>
             <button className="btn sm" onClick={() => setLeaving(c)}>
-              Remove
+              {tr("Remove")}
             </button>
           </div>
         ))}
@@ -81,14 +82,14 @@ export function CoachSettings() {
             className="input grow"
             value={code}
             onChange={(e) => setCode(cleanCode(e.target.value))}
-            placeholder="Code from your coach"
-            aria-label="Code from your coach"
+            placeholder={tr("Code from your coach")}
+            aria-label={tr("Code from your coach")}
             autoCapitalize="characters"
             autoComplete="off"
             enterKeyHint="go"
           />
           <button className="btn primary" type="submit" disabled={code.length < 4 || busy}>
-            Connect
+            {tr("Connect")}
           </button>
         </form>
         {error && <div className="small" style={{ color: 'var(--danger-text)' }}>{error}</div>}
@@ -96,9 +97,9 @@ export function CoachSettings() {
 
       {leaving && (
         <Confirm
-          title="Remove your coach?"
+          title={tr("Remove your coach?")}
           text={`${leaving.coach_email} will no longer see your training. Workouts they added stay in your plan.`}
-          confirmLabel="Remove"
+          confirmLabel={tr("Remove")}
           danger
           onClose={() => setLeaving(null)}
           onConfirm={async () => {

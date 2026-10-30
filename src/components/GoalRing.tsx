@@ -50,10 +50,10 @@ export function GoalSheet({ onClose }: { onClose: () => void }) {
   const setPrefs = usePrefs((s) => s.setPrefs)
   const options = Array.from({ length: GOAL_MAX - GOAL_MIN + 1 }, (_, i) => GOAL_MIN + i)
   return (
-    <Sheet title="Weekly goal" onClose={onClose}>
+    <Sheet title={t("Weekly goal")} onClose={onClose}>
       <div className="stack" style={{ gap: 16 }}>
-        <div className="muted">How many workouts a week do you aim for? Pick a number you can reach most weeks.</div>
-        <div className="goal-pick" role="radiogroup" aria-label="Workouts per week">
+        <div className="muted">{t("How many workouts a week do you aim for? Pick a number you can reach most weeks.")}</div>
+        <div className="goal-pick" role="radiogroup" aria-label={t("Workouts per week")}>
           {options.map((n) => (
             <button
               key={n}
@@ -70,7 +70,7 @@ export function GoalSheet({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
-        <div className="small muted">Workouts a week. You can change this any time.</div>
+        <div className="small muted">{t("Workouts a week. You can change this any time.")}</div>
       </div>
     </Sheet>
   )

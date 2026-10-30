@@ -35,7 +35,7 @@ export function StartChecklist() {
   const doneN = steps.length - left
 
   return (
-    <section className="card hm-start" aria-label="Getting started">
+    <section className="card hm-start" aria-label={t("Getting started")}>
       <button className="hm-start-head" aria-expanded={open} onClick={() => setOpen(!open)}>
         <span className="hm-start-n" aria-hidden>
           {doneN}/{steps.length}
@@ -67,7 +67,7 @@ export function StartChecklist() {
             </button>
           ))}
           <button className="btn ghost sm hm-start-hide" onClick={close}>
-            Hide this list
+            {t("Hide this list")}
           </button>
         </div>
       )}

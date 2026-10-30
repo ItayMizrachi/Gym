@@ -191,7 +191,7 @@ export default function Home() {
           <div className="sub">{now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         {coachRole && (
-          <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label="Coaching: your trainees">
+          <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label={t("Coaching: your trainees")}>
             <Users size={16} aria-hidden /> {t('Coaching')}
           </button>
         )}
@@ -296,7 +296,7 @@ export default function Home() {
       {workouts.length > 0 && <StartChecklist />}
 
       {workouts.length > 0 && (
-        <section className="stack" style={{ gap: 8 }} aria-label="Your workouts">
+        <section className="stack" style={{ gap: 8 }} aria-label={t("Your workouts")}>
           <div className="sec-head hm-sec">
             <h2>{t('Your workouts')}</h2>
             <button className="btn sm secondary hm-new" onClick={() => setAdding(true)} aria-haspopup="dialog">
@@ -361,7 +361,7 @@ export default function Home() {
       )}
       {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
-        <Sheet title="Add a workout" onClose={() => setAdding(false)}>
+        <Sheet title={t("Add a workout")} onClose={() => setAdding(false)}>
           <div className="list-group home-links">
             <button
               className="list-row"
@@ -373,7 +373,7 @@ export default function Home() {
             >
               <Zap size={20} aria-hidden />
               <span className="grow">
-                <span className="home-link-t">Start an empty workout</span>
+                <span className="home-link-t">{t("Start an empty workout")}</span>
                 <span className="tiny muted">{active ? 'Finish the workout in progress first' : 'Add exercises as you go'}</span>
               </span>
               <ChevronRight size={18} aria-hidden />
@@ -381,16 +381,16 @@ export default function Home() {
             <button className="list-row" onClick={newWorkout}>
               <PencilLine size={20} aria-hidden />
               <span className="grow">
-                <span className="home-link-t">Build a new workout</span>
-                <span className="tiny muted">Pick exercises, sets and rest, then save it</span>
+                <span className="home-link-t">{t("Build a new workout")}</span>
+                <span className="tiny muted">{t("Pick exercises, sets and rest, then save it")}</span>
               </span>
               <ChevronRight size={18} aria-hidden />
             </button>
             <button className="list-row" onClick={() => nav('/programs')}>
               <LayoutGrid size={20} aria-hidden />
               <span className="grow">
-                <span className="home-link-t">Browse programs</span>
-                <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
+                <span className="home-link-t">{t("Browse programs")}</span>
+                <span className="tiny muted">{t("Single workouts and weekly plans, ready to go")}</span>
               </span>
               <ChevronRight size={18} aria-hidden />
             </button>
@@ -400,9 +400,9 @@ export default function Home() {
 
       {finished.length > 0 && (
         <>
-          <section className="stack" style={{ gap: 10 }} aria-label="This week">
+          <section className="stack" style={{ gap: 10 }} aria-label={t("This week")}>
             <div className="sec-head">
-              <h2>This week</h2>
+              <h2>{t("This week")}</h2>
               <span className="small muted">
                 {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())}
               </span>
@@ -434,13 +434,13 @@ export default function Home() {
           <section className="card stack" style={{ gap: 12 }}>
             <div>
               <div className="row">
-                <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>Sets per muscle</div>
+                <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>{t("Sets per muscle")}</div>
                 <div className="seg sm">
                   <button className={muscleWeek === 'this' ? 'on' : ''} onClick={() => setMuscleWeek('this')}>
-                    This wk
+                    {t("This wk")}
                   </button>
                   <button className={muscleWeek === 'last' ? 'on' : ''} onClick={() => setMuscleWeek('last')}>
-                    Last wk
+                    {t("Last wk")}
                   </button>
                 </div>
               </div>
@@ -449,7 +449,7 @@ export default function Home() {
               </div>
             </div>
             {muscles.length === 0 ? (
-              <div className="small muted">No sets logged yet.</div>
+              <div className="small muted">{t("No sets logged yet.")}</div>
             ) : (
               <div className="mbars">
                 {muscles.map((m) => (
@@ -481,8 +481,8 @@ export default function Home() {
           <button className="list-row" onClick={() => nav('/programs')}>
             <LayoutGrid size={20} aria-hidden />
             <span className="grow">
-              <span className="home-link-t">Browse programs</span>
-              <span className="tiny muted">Single workouts and weekly plans, ready to go</span>
+              <span className="home-link-t">{t("Browse programs")}</span>
+              <span className="tiny muted">{t("Single workouts and weekly plans, ready to go")}</span>
             </span>
             <ChevronRight size={18} aria-hidden />
           </button>
@@ -491,8 +491,8 @@ export default function Home() {
           <button className="list-row" onClick={() => nav('/records')}>
             <Trophy size={20} aria-hidden />
             <span className="grow">
-              <span className="home-link-t">Records</span>
-              <span className="tiny muted">Your best lifts for every exercise</span>
+              <span className="home-link-t">{t("Records")}</span>
+              <span className="tiny muted">{t("Your best lifts for every exercise")}</span>
             </span>
             <ChevronRight size={18} aria-hidden />
           </button>
@@ -500,16 +500,16 @@ export default function Home() {
         <button className="list-row" onClick={() => nav('/exercises')}>
           <BookOpen size={20} aria-hidden />
           <span className="grow">
-            <span className="home-link-t">Exercises</span>
-            <span className="tiny muted">Your exercise list, photos, setup notes and records</span>
+            <span className="home-link-t">{t("Exercises")}</span>
+            <span className="tiny muted">{t("Your exercise list, photos, setup notes and records")}</span>
           </span>
           <ChevronRight size={18} aria-hidden />
         </button>
         <button className="list-row" onClick={() => nav('/help')}>
           <HelpCircle size={20} aria-hidden />
           <span className="grow">
-            <span className="home-link-t">How it works</span>
-            <span className="tiny muted">Short answers about every part of GymLog</span>
+            <span className="home-link-t">{t("How it works")}</span>
+            <span className="tiny muted">{t("Short answers about every part of GymLog")}</span>
           </span>
           <ChevronRight size={18} aria-hidden />
         </button>

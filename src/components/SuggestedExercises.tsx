@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Check, X } from 'lucide-react'
 import { SharedExercise, isExerciseAdmin, pendingSuggestions, reviewSuggestion } from '../lib/community'
 import { useStore } from '../lib/store'
@@ -41,12 +42,12 @@ export function SuggestedExercises() {
   }
 
   return (
-    <section className="card stack" aria-label="Suggested exercises">
-      <h2>Suggested exercises</h2>
+    <section className="card stack" aria-label={tr("Suggested exercises")}>
+      <h2>{tr("Suggested exercises")}</h2>
       {list == null ? (
         <div className="small muted">Loading…</div>
       ) : list.length === 0 ? (
-        <div className="small muted">Nothing waiting. New exercises people create show up here.</div>
+        <div className="small muted">{tr("Nothing waiting. New exercises people create show up here.")}</div>
       ) : (
         <div className="sx-list">
           {list.map((x) => (
@@ -59,7 +60,7 @@ export function SuggestedExercises() {
                 <X size={16} aria-hidden />
               </button>
               <button className="btn sm primary" disabled={busy === x.id} onClick={() => review(x, 'approved')} aria-label={`Add ${x.name} for everyone`}>
-                <Check size={16} aria-hidden /> Add
+                <Check size={16} aria-hidden /> {tr("Add")}
               </button>
             </div>
           ))}

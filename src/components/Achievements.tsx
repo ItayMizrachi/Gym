@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { t as tr } from '../lib/i18n'
 import { Dumbbell, Flame, Layers, Lock, Sparkles, Sunrise, Target, Trophy, Weight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { usePrefs } from '../lib/prefs'
@@ -32,8 +33,8 @@ const num = (n: number, unit: string) => (unit === 'kg' ? (n >= 1000 ? `${(Math.
 /** "2 of 4 weeks", "85 of 100 kg", "4.2 of 10 t" */
 export function progressText(a: Achievement): string {
   if (a.hint) return a.hint
-  if (a.unit === 'kg') return `${num(a.current, 'kg')} of ${num(a.target, 'kg')}`
-  return `${Math.round(a.current)} of ${a.target} ${a.target === 1 ? a.unit.replace(/s$/, '') : a.unit}`
+  if (a.unit === 'kg') return tr('{a} of {b}', { a: num(a.current, 'kg'), b: num(a.target, 'kg') })
+  return tr('{a} of {b} ' + (a.target === 1 ? a.unit.replace(/s$/, '') : a.unit), { a: Math.round(a.current), b: a.target })
 }
 
 function Bar({ value, label }: { value: number; label: string }) {
@@ -62,15 +63,15 @@ export function AchievementsSection() {
   return (
     <section className="stack" style={{ gap: 12 }} aria-labelledby="ach-h">
       <div className="sec-head">
-        <h2 id="ach-h">Achievements</h2>
+        <h2 id="ach-h">{tr("Achievements")}</h2>
         <span className="small muted">
-          {earned} of {list.length} earned
+          {tr('{a} of {b} earned', { a: earned, b: list.length })}
         </span>
       </div>
 
       {next.length > 0 && (
         <div className="card stack ach-next" style={{ gap: 14 }}>
-          <div className="ins-title">Next to earn</div>
+          <div className="ins-title">{tr("Next to earn")}</div>
           {next.map((a) => (
             <button key={a.id} className="ach-next-row" onClick={() => setOpen(a)}>
               <AchievementIconBadge a={a} size={40} />
