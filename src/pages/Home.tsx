@@ -312,7 +312,7 @@ export default function Home() {
                     <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
                       <ChevronDown size={18} className="fold-caret" aria-hidden />
                       {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
-                      <h3 className="ellipsis">{g.label}</h3>
+                      <h3 className="ellipsis">{t(g.label)}</h3>
                       <span className="small muted">{g.workouts.length}</span>
                     </button>
                     {g.folder && (
