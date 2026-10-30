@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Copy, Share2, Sparkles, UserPlus } from 'lucide-react'
+import { ChevronRight, Copy, Send, Share2, Sparkles, UserPlus } from 'lucide-react'
 import { COACH_FREE_LIMIT, CoachLink, createInvite, createManagedTrainee, listTrainees, removeTrainee } from '../lib/coach'
 import { TraineeGlance, prefetchTrainees } from '../lib/coachData'
 import { useStore } from '../lib/store'
@@ -55,18 +55,26 @@ export default function Coach() {
           {active.length > 0 ? (
             <div className="list-group">
               {active.map((l) => (
-                <button key={l.id} className="list-row" onClick={() => nav(`/coach/${l.id}`)}>
-                  <span className="coach-avatar" aria-hidden>
-                    {l.name.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className="grow" style={{ minWidth: 0 }}>
-                    <span className="title ellipsis" style={{ display: 'block' }}>
-                      {l.name}
+                <div key={l.id} className="list-row coach-row">
+                  <button className="coach-row-main" onClick={() => nav(`/coach/${l.id}`)}>
+                    <span className="coach-avatar" aria-hidden>
+                      {l.name.slice(0, 1).toUpperCase()}
                     </span>
-                    <GlanceLine g={glances.get(l.id)} fallback={l.trainee_email ?? ''} />
-                  </span>
-                  <ChevronRight size={18} aria-hidden />
-                </button>
+                    <span className="grow" style={{ minWidth: 0 }}>
+                      <span className="title ellipsis" style={{ display: 'block' }}>
+                        {l.name}
+                      </span>
+                      <GlanceLine g={glances.get(l.id)} fallback={l.managed ? tr('Without the app') : l.trainee_email ?? ''} />
+                    </span>
+                  </button>
+                  {needsNudge(glances.get(l.id)) ? (
+                    <button className="btn sm coach-nudge" onClick={() => void nudge(l.name)} aria-label={tr('Send {name} a reminder', { name: l.name })}>
+                      <Send size={15} aria-hidden /> {tr('Nudge')}
+                    </button>
+                  ) : (
+                    <ChevronRight size={18} aria-hidden />
+                  )}
+                </div>
               ))}
             </div>
           ) : (
@@ -234,15 +242,40 @@ export function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onCl
   )
 }
 
+/** worth a nudge: 5 days or more without a workout (or none yet, once they have had a few days) */
+const needsNudge = (g: TraineeGlance | undefined) => !!g && g.daysSince != null && g.daysSince >= 5
+
+/** a friendly reminder through the phone's share sheet (WhatsApp, SMS…); copied when sharing is not available */
+async function nudge(name: string) {
+  const first = name.trim().split(/\s+/)[0]
+  const text = tr("Hi {name}! I haven't seen a workout from you for a few days. Shall we get back to it this week? 💪", { name: first })
+  try {
+    if (navigator.share) await navigator.share({ text })
+    else {
+      await navigator.clipboard?.writeText(text)
+      useStore.getState().toast({ kind: 'info', text: 'Message copied', sub: 'Paste it in WhatsApp or a text message.' })
+    }
+  } catch {
+    /* the share sheet was closed */
+  }
+}
+
 /** "Trained 2 days ago · 3 new records", or a warning after a week without training */
 function GlanceLine({ g, fallback }: { g: TraineeGlance | undefined; fallback: string }) {
   if (!g) return <span className="meta ellipsis" style={{ display: 'block' }}>{fallback}</span>
-  const when = g.daysSince == null ? 'No workouts yet' : g.daysSince === 0 ? 'Trained today' : g.daysSince === 1 ? 'Trained yesterday' : `${g.daysSince >= 7 ? 'No workout for' : 'Trained'} ${g.daysSince} days${g.daysSince >= 7 ? '' : ' ago'}`
-  const idle = g.daysSince == null || g.daysSince >= 7
+  const when =
+    g.daysSince == null
+      ? tr('No workouts yet')
+      : g.daysSince === 0
+      ? tr('Trained today')
+      : g.daysSince === 1
+      ? tr('Trained yesterday')
+      : tr(g.daysSince >= 7 ? 'No workout for {n} days' : 'Trained {n} days ago', { n: g.daysSince })
+  const idle = g.daysSince != null && g.daysSince >= 7
   return (
     <span className="meta ellipsis" style={{ display: 'block' }}>
       <span className={idle ? 'coach-idle' : undefined}>{when}</span>
-      {g.newPRs > 0 && <span className="coach-pr-inline"> · {g.newPRs} new {g.newPRs === 1 ? 'record' : 'records'}</span>}
+      {g.newPRs > 0 && <span className="coach-pr-inline"> · {tr(g.newPRs === 1 ? '{n} new record' : '{n} new records', { n: g.newPRs })}</span>}
     </span>
   )
 }

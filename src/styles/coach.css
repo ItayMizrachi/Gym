@@ -81,3 +81,7 @@
 .coach-log-n { text-align: center; font-weight: 700; color: var(--muted); }
 .coach-log-row .check { height: 44px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--card2); color: var(--muted); display: flex; align-items: center; justify-content: center; }
 .coach-log-row.done .check { background: var(--ok); border-color: var(--ok); color: var(--ok-ink); }
+/* trainee row: open on the left, a nudge on the right when they have gone quiet */
+.coach-row { padding-block: 0; }
+.coach-row-main { display: flex; align-items: center; gap: var(--s3); flex: 1; min-width: 0; min-height: 64px; padding: 12px 0; background: none; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.coach-nudge { flex: none; gap: 6px; }
