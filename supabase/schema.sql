@@ -512,10 +512,18 @@ begin
     update public.workout_exercises set user_id = me where user_id = placeholder;
     update public.sessions set user_id = me where user_id = placeholder;
     update public.metrics set user_id = me where user_id = placeholder;
-    update public.coach_links
-       set trainee_id = me, managed = false, accepted_at = now(), trainee_email = (select email from auth.users where id = me)
-     where id = l.id;
+    if exists (select 1 from public.coach_links where coach_id = l.coach_id and trainee_id = me and status = 'active' and id <> l.id) then
+      -- already coached by this coach: one link is enough
+      delete from public.coach_links where id = l.id;
+    else
+      update public.coach_links
+         set trainee_id = me, managed = false, accepted_at = now(), trainee_email = (select email from auth.users where id = me)
+       where id = l.id;
+    end if;
     delete from auth.users where id = placeholder and raw_app_meta_data ->> 'provider' = 'managed';
+  elsif exists (select 1 from public.coach_links where coach_id = l.coach_id and trainee_id = me and status = 'active') then
+    -- already coached by this coach: the extra invite is not needed
+    delete from public.coach_links where id = l.id;
   else
     update public.coach_links
        set trainee_id = me, status = 'active', accepted_at = now(), trainee_email = (select email from auth.users where id = me)

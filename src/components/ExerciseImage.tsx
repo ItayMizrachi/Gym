@@ -41,17 +41,26 @@ export function ExerciseThumb({ exercise, name, size = 44 }: { exercise: ExLike;
 
 /** Round thumbnail of a library exercise. Falls back to the initials plate when the photo cannot load (offline, not cached). */
 export function LibThumb({ id, name, muscle, size = 44 }: { id: string; name?: string; muscle?: string; size?: number }) {
-  const [failed, setFailed] = useState(false)
-  const [loaded, setLoaded] = useState(false)
-  useEffect(() => {
-    setFailed(false)
-    setLoaded(false)
-  }, [id])
-  if (failed) return <Thumb path={null} name={name} muscle={muscle} size={size} className="round" />
+  // which id the state belongs to: a new id starts over, without an effect that could run after a cached
+  // photo already reported it had loaded (that left the thumb hidden as "loading" for good)
+  const [state, setState] = useState<{ id: string; loaded: boolean; failed: boolean }>({ id, loaded: false, failed: false })
+  const cur = state.id === id ? state : { id, loaded: false, failed: false }
+  if (cur.failed) return <Thumb path={null} name={name} muscle={muscle} size={size} className="round" />
   // until the photo arrives the disc breathes on graphite, instead of sitting there as an empty grey circle
   return (
-    <div className={`thumb round lib-thumb${loaded ? '' : ' loading'}`} style={{ width: size, height: size }}>
-      <img src={libImageUrl(id)} alt="" loading="lazy" decoding="async" onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
+    <div className={`thumb round lib-thumb${cur.loaded ? '' : ' loading'}`} style={{ width: size, height: size }}>
+      <img
+        // a photo straight from the cache may be complete before React listens for onLoad
+        ref={(el) => {
+          if (el && el.complete && el.naturalWidth > 0 && !cur.loaded) setState({ id, loaded: true, failed: false })
+        }}
+        src={libImageUrl(id)}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setState({ id, loaded: true, failed: false })}
+        onError={() => setState({ id, loaded: false, failed: true })}
+      />
     </div>
   )
 }

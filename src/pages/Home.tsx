@@ -272,7 +272,7 @@ export default function Home() {
             </div>
             <div className="hm-meta">
               <span>
-                <b>{hero.wes.length}</b> {t('exercises')}
+                <b>{hero.wes.length}</b> {t(hero.wes.length === 1 ? 'exercise' : 'exercises')}
               </span>
               <span>
                 <b>{hero.sets}</b> {t('sets')}
@@ -336,7 +336,7 @@ export default function Home() {
                               {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
                               {splitName(w.name)[1] && <span className="trow-days">{t(splitName(w.name)[1])} · </span>}
                               {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
-                              {info.wes.length} {t('exercises')}
+                              {t(info.wes.length === 1 ? '{n} exercise' : '{n} exercises', { n: info.wes.length })}
                               {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
                             </div>
                           </button>

@@ -149,7 +149,7 @@ export default function CoachTrainee() {
               </div>
             )}
             <div className="row" style={{ gap: 8 }}>
-              <button className="btn primary grow" onClick={() => void newWorkout()}>
+              <button className={`btn grow${link.managed ? '' : ' primary'}`} onClick={() => void newWorkout()}>
                 <Plus size={18} aria-hidden /> {tr("New workout")}
               </button>
               <button className="btn grow" onClick={() => setPicking(true)}>

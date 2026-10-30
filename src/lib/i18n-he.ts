@@ -613,4 +613,5 @@ export const HE_SCREENS: Record<string, string> = {
   "Everything you logged for them is deleted. This cannot be undone.": "כל מה שרשמת עבורו יימחק. אי אפשר לבטל.",
   "Add a workout to their plan first, then log it here.": "קודם הוסף אימון לתוכנית שלו, ואז רשום אותו כאן.",
   "870+ exercises with photos.": "יותר מ-870 תרגילים עם תמונות.",
+  "exercise": "תרגיל",
 }
