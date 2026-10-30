@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { t as tr } from './i18n'
 import { DB, TableName, emptyDB } from './types'
 import { LocalRepo, Repo, SupabaseRepo } from './db'
 import { cloudConfigured, supabase } from './supabase'
@@ -242,7 +243,9 @@ export const useStore = create<State>((set, get) => {
 
     toast(t) {
       const id = uid()
-      set((s) => ({ toasts: [...s.toasts.slice(-3), { ...t, id }] }))
+      // fixed messages are translated here (Hebrew); ones built from data pass through unchanged
+      const msg = { ...t, text: tr(t.text), sub: t.sub ? tr(t.sub) : t.sub }
+      set((s) => ({ toasts: [...s.toasts.slice(-3), { ...msg, id }] }))
       setTimeout(() => get().dismissToast(id), t.kind === 'pr' ? 7000 : 4500)
     },
     dismissToast(id) {
