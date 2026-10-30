@@ -483,11 +483,11 @@ function ExerciseCard({
       const res = evaluateSet(runningPrior(s.id), s.weight, s.reps)
       if (res.types.length) {
         isPR = true
-        const label = res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Best estimated 1-rep max' : 'Rep record'
+        const label = t(res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Best estimated 1-rep max' : 'Rep record')
         toast({
           kind: 'pr',
-          text: `🏆 New PR! ${ex?.name ?? se.name}`,
-          sub: `${setLabel(s, tracking, false)} · ${label} · est. 1-rep max ${fmtKg(Math.round(res.e1rm * 10) / 10)}`
+          text: t('🏆 New PR! {name}', { name: ex?.name ?? se.name }),
+          sub: t('{set} · {label} · est. 1-rep max {m}', { set: setLabel(s, tracking, false), label, m: fmtKg(Math.round(res.e1rm * 10) / 10) })
         })
         try {
           navigator.vibrate?.([80, 60, 80, 60, 160])
@@ -497,8 +497,8 @@ function ExerciseCard({
       } else if (res.nearPct) {
         toast({
           kind: 'near',
-          text: `So close! ${res.nearPct}% of your best`,
-          sub: `${setLabel(s, tracking, false)} on ${ex?.name ?? se.name}`
+          text: t('So close! {p}% of your best', { p: res.nearPct }),
+          sub: t('{set} on {name}', { set: setLabel(s, tracking, false), name: ex?.name ?? se.name })
         })
       }
     }
