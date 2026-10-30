@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronRight, Copy, Plus, Trash2 } from 'lucide-react'
-import { COACH_FOLDER, assignWorkout, removeTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
+import { ChevronRight, Copy, Play, Plus, Scale, Smartphone, Trash2 } from 'lucide-react'
+import { COACH_FOLDER, assignWorkout, deleteManagedTrainee, removeTrainee, saveForTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
+import { InviteSheet } from './Coach'
 import { forgetTrainee, useTraineeData } from '../lib/coachData'
 import { nowIso, uid } from '../lib/uid'
-import { Workout } from '../lib/types'
+import { Metric, Workout } from '../lib/types'
 import { useStore } from '../lib/store'
 import { compareWeeks, weeklyTrend, finishedSessions, fmtVolume, latestBodyWeight, prSetIds, relativeDay, summarizeSession, weeklyStreak } from '../lib/stats'
 import { fmtKg } from '../lib/format'
@@ -23,6 +24,9 @@ export default function CoachTrainee() {
   const [busy, setBusy] = useState<string | null>(null)
   const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null)
   const [ending, setEnding] = useState(false)
+  const [logging, setLogging] = useState(false)
+  const [weighing, setWeighing] = useState(false)
+  const [inviting, setInviting] = useState(false)
 
   const load = reload
   /** an empty workout in the trainee's plan, opened in the editor */
@@ -65,7 +69,7 @@ export default function CoachTrainee() {
 
   return (
     <div className="stack coach" style={{ gap: 16 }}>
-      <PageHeader title={link?.name ?? 'Trainee'} sub={link?.trainee_email ?? undefined} back="/coach" />
+      <PageHeader title={link?.name ?? tr('Trainee')} sub={link?.managed ? tr('Without the app · you log for them') : link?.trainee_email ?? undefined} back="/coach" />
       {error ? (
         <div className="card stack">
           <div className="small muted">{error}</div>
@@ -97,6 +101,22 @@ export default function CoachTrainee() {
               </div>
             )}
           </div>
+
+          {link.managed && (
+            <div className="stack" style={{ gap: 8 }}>
+              <button className="btn primary block" onClick={() => setLogging(true)}>
+                <Play size={18} aria-hidden /> {tr('Log a workout')}
+              </button>
+              <div className="row" style={{ gap: 8 }}>
+                <button className="btn grow" onClick={() => setWeighing(true)}>
+                  <Scale size={18} aria-hidden /> {tr('Log body weight')}
+                </button>
+                <button className="btn grow" onClick={() => setInviting(true)}>
+                  <Smartphone size={18} aria-hidden /> {tr('Invite to the app')}
+                </button>
+              </div>
+            </div>
+          )}
 
           <Trend weeks={view.trend} />
 
@@ -163,7 +183,7 @@ export default function CoachTrainee() {
           </section>
 
           <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={() => setEnding(true)}>
-            Stop coaching {link.name}
+            {tr(link.managed ? 'Delete {name}' : 'Stop coaching {name}', { name: link.name })}
           </button>
         </>
       )}
@@ -226,17 +246,38 @@ export default function CoachTrainee() {
           }}
         />
       )}
+      {logging && view && (
+        <Sheet title={tr('Log a workout')} onClose={() => setLogging(false)}>
+          <div className="stack" style={{ gap: 8 }}>
+            {view.plan.length === 0 ? (
+              <div className="small muted">{tr('Add a workout to their plan first, then log it here.')}</div>
+            ) : (
+              <div className="list-group">
+                {view.plan.map((w) => (
+                  <button key={w.id} className="list-row" onClick={() => nav(`/coach/${id}/log/${w.id}`)}>
+                    <span className="grow title ellipsis">{w.name}</span>
+                    <ChevronRight size={18} aria-hidden />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </Sheet>
+      )}
+      {weighing && link?.trainee_id && <WeighSheet traineeId={link.trainee_id} onClose={() => setWeighing(false)} onSaved={() => void reload()} />}
+      {inviting && link && <InviteSheet link={link} onClose={() => setInviting(false)} />}
       {ending && link && (
         <Confirm
-          title={`Stop coaching ${link.name}?`}
-          text={tr("You will no longer see their training. Workouts you added stay in their plan.")}
-          confirmLabel={tr("Stop coaching")}
+          title={tr(link.managed ? 'Delete {name} and their training?' : 'Stop coaching {name}?', { name: link.name })}
+          text={tr(link.managed ? 'Everything you logged for them is deleted. This cannot be undone.' : 'You will no longer see their training. Workouts you added stay in their plan.')}
+          confirmLabel={tr(link.managed ? 'Delete' : 'Stop coaching')}
           danger
           onClose={() => setEnding(false)}
           onConfirm={async () => {
             setEnding(false)
             try {
-              await removeTrainee(link)
+              if (link.managed) await deleteManagedTrainee(link.id)
+              else await removeTrainee(link)
               forgetTrainee(link.id)
               nav('/coach', { replace: true })
             } catch (e) {
@@ -274,5 +315,52 @@ function Trend({ weeks }: { weeks: { start: Date; volume: number; sets: number; 
         <span>{tr("This week")}</span>
       </div>
     </section>
+  )
+}
+
+/** log a weigh-in for a trainee without the app */
+function WeighSheet({ traineeId, onClose, onSaved }: { traineeId: string; onClose: () => void; onSaved: () => void }) {
+  const toast = useStore((s) => s.toast)
+  const [kg, setKg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const w = parseFloat(kg.replace(',', '.'))
+  const ok = w > 20 && w < 400
+  return (
+    <Sheet title={tr('Log body weight')} onClose={onClose}>
+      <form
+        className="stack"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          if (!ok || busy) return
+          setBusy(true)
+          const d = new Date()
+          const row: Metric = {
+            id: uid(),
+            user_id: traineeId,
+            date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+            weight_kg: Math.round(w * 10) / 10,
+            note: '',
+            photo_path: null,
+            created_at: nowIso()
+          }
+          try {
+            await saveForTrainee('metrics', row)
+            onSaved()
+            onClose()
+          } catch (err) {
+            toast({ kind: 'error', text: (err as Error).message })
+            setBusy(false)
+          }
+        }}
+      >
+        <label className="field">
+          {tr('Weight (kg)')}
+          <input className="input" inputMode="decimal" value={kg} onChange={(e) => setKg(e.target.value)} placeholder="72.5" autoFocus />
+        </label>
+        <button className="btn primary block" type="submit" disabled={!ok || busy}>
+          {tr('Save')}
+        </button>
+      </form>
+    </Sheet>
   )
 }

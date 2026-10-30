@@ -69,6 +69,8 @@ export function CoachSettings() {
             try {
               await acceptInvite(code)
               setCode('')
+              // a coach who logged for you before you joined: that training is now yours, load it
+              window.setTimeout(() => location.reload(), 1500)
               toast({ kind: 'info', text: 'Connected to your coach', sub: 'Their workouts appear on your Train tab.' })
               await load()
             } catch (err) {

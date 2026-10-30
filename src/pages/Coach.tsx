@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Copy, Share2, Sparkles, UserPlus } from 'lucide-react'
-import { COACH_FREE_LIMIT, CoachLink, createInvite, listTrainees, removeTrainee } from '../lib/coach'
+import { COACH_FREE_LIMIT, CoachLink, createInvite, createManagedTrainee, listTrainees, removeTrainee } from '../lib/coach'
 import { TraineeGlance, prefetchTrainees } from '../lib/coachData'
 import { useStore } from '../lib/store'
 import { Confirm, PageHeader, Sheet } from '../components/ui'
@@ -115,6 +115,10 @@ export default function Coach() {
             setList((x) => [...(x ?? []), l])
             setInvite(l)
           }}
+          onManaged={(linkId) => {
+            setAdding(false)
+            nav(`/coach/${linkId}`)
+          }}
         />
       )}
       {pro && <ProSheet onClose={() => setPro(false)} />}
@@ -144,8 +148,10 @@ export default function Coach() {
   )
 }
 
-function AddTrainee({ onClose, onCreated }: { onClose: () => void; onCreated: (l: CoachLink) => void }) {
+function AddTrainee({ onClose, onCreated, onManaged }: { onClose: () => void; onCreated: (l: CoachLink) => void; onManaged: (linkId: string) => void }) {
   const [name, setName] = useState('')
+  // app = they use GymLog themselves (a code to enter); none = you log for them, they never need the app
+  const [mode, setMode] = useState<'app' | 'none'>('app')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   return (
@@ -157,7 +163,8 @@ function AddTrainee({ onClose, onCreated }: { onClose: () => void; onCreated: (l
           if (!name.trim() || busy) return
           setBusy(true)
           try {
-            onCreated(await createInvite(name))
+            if (mode === 'app') onCreated(await createInvite(name))
+            else onManaged(await createManagedTrainee(name))
           } catch (err) {
             setError((err as Error).message)
             setBusy(false)
@@ -168,23 +175,36 @@ function AddTrainee({ onClose, onCreated }: { onClose: () => void; onCreated: (l
           {tr("Their name")}
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={tr("Dana")} autoFocus enterKeyHint="done" maxLength={60} />
         </label>
+        <div className="coach-mode" role="radiogroup" aria-label={tr('How they train with you')}>
+          <button type="button" role="radio" aria-checked={mode === 'app'} className={mode === 'app' ? 'on' : ''} onClick={() => setMode('app')}>
+            <span className="coach-mode-t">{tr('They use GymLog')}</span>
+            <span className="small muted">{tr('They log their own workouts. You get a code to send them.')}</span>
+          </button>
+          <button type="button" role="radio" aria-checked={mode === 'none'} className={mode === 'none' ? 'on' : ''} onClick={() => setMode('none')}>
+            <span className="coach-mode-t">{tr('Without the app')}</span>
+            <span className="small muted">{tr('You log their workouts and weight. They can join the app later and keep everything.')}</span>
+          </button>
+        </div>
         {error && <div className="small" style={{ color: 'var(--danger-text)' }}>{error}</div>}
         <button className="btn primary block" type="submit" disabled={!name.trim() || busy}>
-          {tr("Get a code")}
+          {tr(mode === 'app' ? 'Get a code' : 'Add {name}', { name: name.trim() || tr('trainee') })}
         </button>
       </form>
     </Sheet>
   )
 }
 
-function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: () => void; onCancel: () => void }) {
+export function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: () => void; onCancel?: () => void }) {
   const [copied, setCopied] = useState(false)
-  const text = `Join me on GymLog so I can coach you: open https://itaymizrachi.github.io/Gym/, go to Settings → My coach and enter the code ${link.code}`
+  const text = tr('Join me on GymLog so I can coach you: open https://itaymizrachi.github.io/Gym/, sign in with Google, go to Settings → My coach and enter the code {code}', { code: link.code })
   const canShare = typeof navigator !== 'undefined' && !!navigator.share
   return (
-    <Sheet title={`Invite ${link.name}`} onClose={onClose}>
+    <Sheet title={tr('Invite {name}', { name: link.name })} onClose={onClose}>
       <div className="stack">
-        <div className="small muted">They enter this code in GymLog under Settings → My coach.</div>
+        <div className="small muted">
+          {tr('They enter this code in GymLog under Settings → My coach.')}
+          {link.managed && ' ' + tr('Everything you logged for them moves to their own account.')}
+        </div>
         <div className="coach-code" aria-label={`Code ${link.code.split('').join(' ')}`}>
           {link.code}
         </div>
@@ -202,11 +222,13 @@ function InviteSheet({ link, onClose, onCancel }: { link: CoachLink; onClose: ()
             )
           }
         >
-          <Copy size={18} aria-hidden /> {copied ? 'Code copied' : 'Copy the code'}
+          <Copy size={18} aria-hidden /> {tr(copied ? 'Code copied' : 'Copy the code')}
         </button>
-        <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={onCancel}>
-          {tr("Cancel invite")}
-        </button>
+        {onCancel && (
+          <button className="btn ghost block" style={{ color: 'var(--danger-text)' }} onClick={onCancel}>
+            {tr("Cancel invite")}
+          </button>
+        )}
       </div>
     </Sheet>
   )

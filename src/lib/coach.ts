@@ -19,6 +19,8 @@ export interface CoachLink {
   trainee_email: string | null
   created_at: string
   accepted_at: string | null
+  /** coached without the app: the coach logs for them (placeholder account) */
+  managed?: boolean
 }
 
 export interface MyCoach {
@@ -243,4 +245,25 @@ export async function saveTraineeRow(table: PlanTable, row: { id: string; user_i
 export async function deleteTraineeRow(table: 'workouts' | 'workout_exercises', id: string) {
   const { error } = await sb().from(table).delete().eq('id', id)
   if (error) throw friendly(error, 'Could not remove. Check the connection.')
+}
+
+/* ------------------------------------------------- trainees without the app ("managed") */
+
+/** coach: someone who will not use GymLog; you build their plan and log for them. Returns the link id. */
+export async function createManagedTrainee(name: string): Promise<string> {
+  const { data, error } = await sb().rpc('create_managed_trainee', { p_name: name.trim() })
+  if (error) throw friendly(error, 'Could not add them. Check the connection.')
+  return data as string
+}
+
+/** coach: remove a managed trainee and everything logged for them */
+export async function deleteManagedTrainee(linkId: string) {
+  const { error } = await sb().rpc('delete_managed_trainee', { p_link: linkId })
+  if (error) throw friendly(error, 'Could not delete. Check the connection.')
+}
+
+/** coach: save a workout or weigh-in you logged for a managed trainee */
+export async function saveForTrainee(table: 'sessions' | 'metrics', row: { id: string; user_id: string }) {
+  const { error } = await sb().from(table).upsert(row)
+  if (error) throw friendly(error, 'Could not save. Check the connection.')
 }

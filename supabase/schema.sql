@@ -162,6 +162,11 @@ begin
   perform set_config('storage.allow_delete_query', 'true', true);
   delete from storage.objects where bucket_id = 'gymlog' and (storage.foldername(name))[1] = me::text;
 
+  -- trainees this person coached without the app (placeholder accounts) go too, with their training
+  delete from auth.users
+   where id in (select trainee_id from public.coach_links where coach_id = me and managed)
+     and raw_app_meta_data ->> 'provider' = 'managed';
+
   delete from auth.users where id = me;
 end;
 $$;
@@ -408,5 +413,166 @@ create trigger coach_links_guard before update on public.coach_links for each ro
 drop policy if exists "coach edits notes" on public.coach_notes;
 create policy "coach edits notes" on public.coach_notes for update to authenticated
   using (coach_id = auth.uid()) with check (coach_id = auth.uid() and public.is_coach_of(trainee_id));
+
+notify pgrst, 'reload schema';
+
+-- Trainees without the app ("managed") ---------------------------------------------------------------------------
+-- A coach can coach someone who never installs GymLog: create_managed_trainee() makes a placeholder account that
+-- cannot sign in, linked to the coach. The coach builds their plan and logs their workouts and weight. If the
+-- person later signs in with Google and enters the link's code (Settings -> My coach), accept_coach_invite() moves
+-- everything onto their own account and removes the placeholder.
+alter table public.coach_links add column if not exists managed boolean not null default false;
+
+create or replace function public.create_managed_trainee(p_name text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := auth.uid();
+  person uuid := gen_random_uuid();
+  link uuid;
+begin
+  if me is null then
+    raise exception 'Not signed in' using errcode = '42501';
+  end if;
+  if char_length(trim(coalesce(p_name, ''))) not between 1 and 60 then
+    raise exception 'Give them a name' using errcode = '22023';
+  end if;
+  insert into auth.users (instance_id, id, aud, role, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values ('00000000-0000-0000-0000-000000000000', person, 'authenticated', 'authenticated',
+          jsonb_build_object('provider', 'managed'), jsonb_build_object('managed_by', me, 'name', trim(p_name)), now(), now());
+  insert into public.coach_links (coach_id, trainee_id, name, status, managed, accepted_at)
+  values (me, person, trim(p_name), 'active', true, now())
+  returning id into link;
+  return link;
+end;
+$$;
+revoke all on function public.create_managed_trainee(text) from public;
+revoke all on function public.create_managed_trainee(text) from anon;
+grant execute on function public.create_managed_trainee(text) to authenticated;
+
+-- true when the signed-in coach logs for this (app-less) person
+create or replace function public.is_managing(p_user uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.coach_links
+     where coach_id = auth.uid() and trainee_id = p_user and status = 'active' and managed
+  )
+$$;
+revoke all on function public.is_managing(uuid) from public;
+revoke all on function public.is_managing(uuid) from anon;
+grant execute on function public.is_managing(uuid) to authenticated;
+
+-- the coach logs workouts and weigh-ins for a managed trainee
+do $$
+declare t text;
+begin
+  foreach t in array array['sessions', 'metrics'] loop
+    execute format('drop policy if exists "coach logs" on public.%I', t);
+    execute format('create policy "coach logs" on public.%I for insert to authenticated with check (public.is_managing(user_id))', t);
+    execute format('drop policy if exists "coach fixes logs" on public.%I', t);
+    execute format('create policy "coach fixes logs" on public.%I for update to authenticated using (public.is_managing(user_id)) with check (public.is_managing(user_id))', t);
+    execute format('drop policy if exists "coach removes logs" on public.%I', t);
+    execute format('create policy "coach removes logs" on public.%I for delete to authenticated using (public.is_managing(user_id))', t);
+  end loop;
+end $$;
+
+-- the invite code now also claims a managed trainee: their training moves onto the signed-in account
+create or replace function public.accept_coach_invite(p_code text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := auth.uid();
+  l public.coach_links%rowtype;
+  placeholder uuid;
+begin
+  if me is null then
+    raise exception 'Not signed in' using errcode = '42501';
+  end if;
+  select * into l from public.coach_links
+   where code = upper(trim(p_code)) and coach_id <> me and (status = 'invited' or (status = 'active' and managed))
+   for update;
+  if not found then
+    raise exception 'No invite with that code' using errcode = 'P0002';
+  end if;
+  if l.managed then
+    placeholder := l.trainee_id;
+    update public.exercises set user_id = me where user_id = placeholder;
+    update public.workouts set user_id = me where user_id = placeholder;
+    update public.workout_exercises set user_id = me where user_id = placeholder;
+    update public.sessions set user_id = me where user_id = placeholder;
+    update public.metrics set user_id = me where user_id = placeholder;
+    update public.coach_links
+       set trainee_id = me, managed = false, accepted_at = now(), trainee_email = (select email from auth.users where id = me)
+     where id = l.id;
+    delete from auth.users where id = placeholder and raw_app_meta_data ->> 'provider' = 'managed';
+  else
+    update public.coach_links
+       set trainee_id = me, status = 'active', accepted_at = now(), trainee_email = (select email from auth.users where id = me)
+     where id = l.id;
+  end if;
+  return l.id;
+end;
+$$;
+revoke all on function public.accept_coach_invite(text) from public;
+revoke all on function public.accept_coach_invite(text) from anon;
+grant execute on function public.accept_coach_invite(text) to authenticated;
+
+-- the coach removes a managed trainee and everything logged for them
+create or replace function public.delete_managed_trainee(p_link uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  person uuid;
+begin
+  select trainee_id into person from public.coach_links where id = p_link and coach_id = auth.uid() and managed;
+  if person is null then
+    raise exception 'Not found' using errcode = 'P0002';
+  end if;
+  -- their rows and the link go with the placeholder account (on delete cascade)
+  delete from auth.users where id = person and raw_app_meta_data ->> 'provider' = 'managed';
+end;
+$$;
+revoke all on function public.delete_managed_trainee(uuid) from public;
+revoke all on function public.delete_managed_trainee(uuid) from anon;
+grant execute on function public.delete_managed_trainee(uuid) to authenticated;
+
+-- the guard also keeps `managed` out of reach of plain updates
+create or replace function public.coach_links_guard()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if current_user in ('authenticated', 'anon') then
+    if new.coach_id <> old.coach_id
+       or new.trainee_id is distinct from old.trainee_id
+       or new.code <> old.code
+       or new.trainee_email is distinct from old.trainee_email
+       or new.accepted_at is distinct from old.accepted_at
+       or new.created_at <> old.created_at
+       or new.managed <> old.managed then
+      raise exception 'Not allowed' using errcode = '42501';
+    end if;
+    if new.status <> old.status and new.status <> 'ended' then
+      raise exception 'Not allowed' using errcode = '42501';
+    end if;
+  end if;
+  return new;
+end;
+$$;
 
 notify pgrst, 'reload schema';
