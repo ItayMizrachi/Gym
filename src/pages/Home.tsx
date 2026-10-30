@@ -73,12 +73,13 @@ function startedText(iso: string): string {
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
   // nothing last week: "↑ 17 vs last wk" says nothing new, so say it plainly
-  if (before === 0) return now > 0 ? <div className="delta muted">none last wk</div> : null
-  if (Math.abs(d) < 0.5) return <div className="delta muted">same as last wk</div>
+  if (before === 0) return now > 0 ? <div className="delta muted">{t('none last wk')}</div> : null
+  if (Math.abs(d) < 0.5) return <div className="delta muted">{t('same as last wk')}</div>
+  // the header says "vs last week" once; each box only shows how much. Less is grey, not red (red means failure)
   return (
-    <div className={`delta ${d > 0 ? 'up' : 'down'}`}>
-      {d > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-      {fmt(Math.abs(d))} vs last wk
+    <div className={`delta ${d > 0 ? 'up' : 'muted'}`} aria-label={t(d > 0 ? '{v} more than last week' : '{v} less than last week', { v: fmt(Math.abs(d)) })}>
+      {d > 0 ? <ArrowUp size={12} aria-hidden /> : <ArrowDown size={12} aria-hidden />}
+      {fmt(Math.abs(d))}
     </div>
   )
 }
@@ -406,23 +407,23 @@ export default function Home() {
             <div className="sec-head">
               <h2>{t("This week")}</h2>
               <span className="small muted">
-                {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())}
+                {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())} · {t('vs last week')}
               </span>
             </div>
             <div className="stat-grid">
               <div className="stat">
                 <div className="v">{tw.workouts}</div>
-                <div className="l">workouts</div>
+                <div className="l">{t('workouts')}</div>
                 <Delta now={tw.workouts} before={lw.workouts} fmt={String} />
               </div>
               <div className="stat">
                 <div className="v">{tw.sets}</div>
-                <div className="l">sets</div>
+                <div className="l">{t('sets')}</div>
                 <Delta now={tw.sets} before={lw.sets} fmt={String} />
               </div>
               <div className="stat">
                 <div className="v">{fmtVolume(tw.volume).replace(/ (kg|t)$/, '')}</div>
-                <div className="l">{tw.volume >= 1000 ? 'tonnes' : 'kg'} lifted</div>
+                <div className="l">{t(tw.volume >= 1000 ? 'tonnes lifted' : 'kg lifted')}</div>
                 <Delta now={tw.volume} before={lw.volume} fmt={fmtVolume} />
               </div>
             </div>

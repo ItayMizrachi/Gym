@@ -630,4 +630,11 @@ export const HE_SCREENS: Record<string, string> = {
   "workouts": "אימונים",
   "volume": "נפח",
   "{p}% volume vs last month": "{p}% נפח לעומת החודש הקודם",
+  "none last wk": "לא היה בשבוע שעבר",
+  "same as last wk": "כמו בשבוע שעבר",
+  "{v} more than last week": "{v} יותר מבשבוע שעבר",
+  "{v} less than last week": "{v} פחות מבשבוע שעבר",
+  "vs last week": "לעומת שבוע שעבר",
+  "tonnes lifted": "טון הורמו",
+  "kg lifted": "ק\"ג הורמו",
 }
