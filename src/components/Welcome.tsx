@@ -109,8 +109,8 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
       </div>
       <div className="wl-card" key={step}>
         <Art step={step} />
-        <h1>{CARDS[step].t}</h1>
-        <p>{CARDS[step].d}</p>
+        <h1>{tr(CARDS[step].t)}</h1>
+        <p>{tr(CARDS[step].d)}</p>
       </div>
       <div className="wl-dots">
         {CARDS.map((_, i) => (

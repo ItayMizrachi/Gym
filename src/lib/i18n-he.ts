@@ -576,4 +576,10 @@ export const HE_SCREENS: Record<string, string> = {
   "You've earned {n} achievements": "השגת {n} הישגים",
   "See all your achievements on the Progress tab.": "כל ההישגים במסך ההתקדמות.",
   "See them on the Progress tab.": "אפשר לראות אותם במסך ההתקדמות.",
+  "Pick a program": "בחר תוכנית",
+  "Choose a ready-made program, or build your own workouts. You can change everything later.": "בחר תוכנית מוכנה, או בנה אימונים משלך. אפשר לשנות הכל אחר כך.",
+  "Log as you lift": "רושמים תוך כדי",
+  "Weights fill in from last time. Tick the check to log a set. The rest timer starts by itself.": "המשקלים מתמלאים מהפעם הקודמת. מסמנים ✓ כדי לרשום סט. טיימר המנוחה מתחיל לבד.",
+  "Watch progress": "רואים התקדמות",
+  "GymLog remembers your records, keeps your history and tracks your body weight.": "GymLog זוכר את השיאים, שומר את ההיסטוריה ועוקב אחרי משקל הגוף.",
 }
