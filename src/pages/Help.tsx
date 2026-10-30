@@ -195,6 +195,14 @@ export default function Help() {
       </Sec>
 
 
+      <Sec title="Coaching">
+        <p>
+          In Settings, turn on <b>I coach other people</b>. Train then shows a <b>Coaching</b> button: add a trainee, get a code and send it.
+          They enter it in Settings under <b>My coach</b>. From then on you see their training, build their plan and send notes. Either side can
+          end it at any time.
+        </p>
+      </Sec>
+
       <Sec title={tr("Saving and offline")}>
         <div>
           <span className="help-dot">
