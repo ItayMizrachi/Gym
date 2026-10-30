@@ -625,4 +625,9 @@ export const HE_SCREENS: Record<string, string> = {
   "Trained {n} days ago": "התאמן לפני {n} ימים",
   "{n} new record": "שיא חדש {n}",
   "{n} new records": "{n} שיאים חדשים",
+  "Send this month’s report": "שלח את הדוח החודשי",
+  "Monthly report": "דוח חודשי",
+  "workouts": "אימונים",
+  "volume": "נפח",
+  "{p}% volume vs last month": "{p}% נפח לעומת החודש הקודם",
 }

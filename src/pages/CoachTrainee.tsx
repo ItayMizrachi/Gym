@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { lang, t as tr } from '../lib/i18n'
+import { monthReport } from '../lib/monthReport'
+import { renderShareCard, shareOrDownload } from '../lib/shareCard'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronRight, Copy, Play, Plus, Scale, Smartphone, Trash2 } from 'lucide-react'
+import { ChevronRight, Copy, Play, Plus, Scale, Share2, Smartphone, Trash2 } from 'lucide-react'
 import { COACH_FOLDER, assignWorkout, deleteManagedTrainee, removeTrainee, saveForTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
 import { InviteSheet } from './Coach'
 import { forgetTrainee, useTraineeData } from '../lib/coachData'
@@ -27,6 +29,35 @@ export default function CoachTrainee() {
   const [logging, setLogging] = useState(false)
   const [weighing, setWeighing] = useState(false)
   const [inviting, setInviting] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  /** this month as an image (workouts, sets, volume, records) through the share sheet */
+  async function shareMonth() {
+    if (!db || !link) return
+    setSharing(true)
+    try {
+      const r = monthReport(db)
+      const monthName = r.month.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { month: 'long', year: 'numeric' })
+      const nameOf = (id: string) => db.exercises.find((e) => e.id === id)?.name ?? ''
+      const blob = await renderShareCard({
+        heading: tr('Monthly report'),
+        title: link.name,
+        date: monthName,
+        duration: String(r.workouts),
+        sets: String(r.sets),
+        volume: r.volume > 0 ? fmtVolume(r.volume) : '–',
+        labels: [tr('workouts'), tr('sets'), tr('volume')],
+        prs: r.records.map((p) => ({ name: nameOf(p.exerciseId), detail: `${fmtKg(p.weight)} kg × ${p.reps}` })),
+        comparison: r.change != null && r.change !== 0 ? tr('{p}% volume vs last month', { p: (r.change > 0 ? '+' : '') + r.change }) : null,
+        comparisonUp: r.change != null ? r.change > 0 : null
+      })
+      const res = await shareOrDownload(blob, `gymlog-${link.name.replace(/\W+/g, '-')}-${r.month.getFullYear()}-${r.month.getMonth() + 1}.png`, `${link.name} · ${monthName}`)
+      if (res === 'downloaded') toast({ kind: 'info', text: 'Summary image saved' })
+    } catch (e) {
+      toast({ kind: 'error', text: 'Could not create the image', sub: String((e as Error)?.message ?? e) })
+    } finally {
+      setSharing(false)
+    }
+  }
 
   const load = reload
   /** an empty workout in the trainee's plan, opened in the editor */
@@ -119,6 +150,11 @@ export default function CoachTrainee() {
           )}
 
           <Trend weeks={view.trend} />
+          {view.recent.length > 0 && (
+            <button className="btn block" disabled={sharing} onClick={() => void shareMonth()}>
+              <Share2 size={18} aria-hidden /> {tr('Send this month’s report')}
+            </button>
+          )}
 
           <section className="stack" style={{ gap: 8 }} aria-label={tr("Plan")}>
             <h2 className="coach-h2">{tr("Plan")}</h2>

@@ -9,6 +9,10 @@ export interface ShareCardData {
   prs: { name: string; detail: string }[]
   comparison: string | null // e.g. "+1.2 t vs last Upper A"
   comparisonUp: boolean | null
+  /** the line above the title (default "Workout complete") */
+  heading?: string
+  /** labels under the three numbers (default duration, sets, volume) */
+  labels?: [string, string, string]
 }
 
 const W = 1080
@@ -38,7 +42,8 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
     line: token('--line', '#34383f'),
     text: token('--text', '#eceae4'),
     muted: token('--muted', '#9b9a94'),
-    accent: token('--accent', '#f0b92a'),
+    // the shared image always carries the brand yellow, also when made from a coach screen (sky blue there)
+    accent: document.documentElement.hasAttribute('data-coach') ? '#f0b92a' : token('--accent', '#f0b92a'),
     ok: token('--ok', '#5fcf8f'),
     danger: token('--danger', '#f0594f')
   }
@@ -99,7 +104,7 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
   ctx.fillStyle = C.ok
   ctx.font = `600 40px ${body}`
   ctx.textBaseline = 'alphabetic'
-  ctx.fillText('Workout complete', L + 90, y)
+  ctx.fillText(d.heading ?? 'Workout complete', L + 90, y)
 
   y += 150
   ctx.fillStyle = C.text
@@ -114,9 +119,9 @@ export async function renderShareCard(d: ShareCardData): Promise<Blob> {
   y += 70
   const boxW = (W - L * 2 - 2 * 24) / 3
   const stats: [string, string][] = [
-    [d.duration, 'duration'],
-    [d.sets, 'sets'],
-    [d.volume, 'volume']
+    [d.duration, d.labels?.[0] ?? 'duration'],
+    [d.sets, d.labels?.[1] ?? 'sets'],
+    [d.volume, d.labels?.[2] ?? 'volume']
   ]
   stats.forEach(([v, l], i) => {
     const x = L + i * (boxW + 24)
