@@ -375,3 +375,38 @@ create policy "coach deletes notes" on public.coach_notes for delete to authenti
   using (coach_id = auth.uid());
 
 notify pgrst, 'reload schema';
+
+-- Guard on coach_links: only accept_coach_invite() (which runs as the owner) may set who the trainee is or make a
+-- link active. Signed-in users may rename a link or end it, nothing else; so a coach can never point a link at
+-- someone who did not enter the code, or re-open a link the trainee ended.
+create or replace function public.coach_links_guard()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if current_user in ('authenticated', 'anon') then
+    if new.coach_id <> old.coach_id
+       or new.trainee_id is distinct from old.trainee_id
+       or new.code <> old.code
+       or new.trainee_email is distinct from old.trainee_email
+       or new.accepted_at is distinct from old.accepted_at
+       or new.created_at <> old.created_at then
+      raise exception 'Not allowed' using errcode = '42501';
+    end if;
+    if new.status <> old.status and new.status <> 'ended' then
+      raise exception 'Not allowed' using errcode = '42501';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists coach_links_guard on public.coach_links;
+create trigger coach_links_guard before update on public.coach_links for each row execute function public.coach_links_guard();
+
+-- a coach's note can only be moved to (or stay with) one of their own trainees
+drop policy if exists "coach edits notes" on public.coach_notes;
+create policy "coach edits notes" on public.coach_notes for update to authenticated
+  using (coach_id = auth.uid()) with check (coach_id = auth.uid() and public.is_coach_of(trainee_id));
+
+notify pgrst, 'reload schema';
