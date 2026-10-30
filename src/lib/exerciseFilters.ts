@@ -1,5 +1,6 @@
 import { EQUIPMENT, Exercise, MUSCLES, Session } from './types'
 import { tm } from './i18n'
+import { englishQuery } from './hebrewSearch'
 
 export interface ExerciseFilter {
   q?: string
@@ -12,17 +13,18 @@ const any = (v: string | undefined) => !v || v === 'All'
 
 /** Search by name, muscle or equipment; names that start with the query rank first, then A–Z. */
 export function filterExercises(list: Exercise[], f: ExerciseFilter): Exercise[] {
-  const needle = (f.q ?? '').trim().toLowerCase()
+  const raw = (f.q ?? '').trim().toLowerCase()
+  // Hebrew is turned into the English words exercise names use (src/lib/hebrewSearch.ts)
+  const needle = englishQuery(raw).toLowerCase()
+  const words = needle.split(/\s+/).filter(Boolean)
   return list
-    .filter(
-      (e) =>
-        (any(f.muscle) || e.muscle === f.muscle) &&
-        (any(f.equipment) || (e.equipment || 'Other') === f.equipment) &&
-        (!needle ||
-          e.name.toLowerCase().includes(needle) ||
-          e.muscle.toLowerCase().includes(needle) ||
-          (e.equipment ?? '').toLowerCase().includes(needle))
-    )
+    .filter((e) => {
+      if (!(any(f.muscle) || e.muscle === f.muscle) || !(any(f.equipment) || (e.equipment || 'Other') === f.equipment)) return false
+      if (!needle) return true
+      const hay = `${e.name} ${e.muscle} ${e.equipment ?? ''}`.toLowerCase()
+      // the name as typed (any language), or every word of the translated query
+      return hay.includes(raw) || words.every((w) => hay.includes(w))
+    })
     .sort((a, b) => {
       if (needle) {
         const sa = a.name.toLowerCase().startsWith(needle) ? 0 : 1

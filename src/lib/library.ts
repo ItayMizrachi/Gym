@@ -4,6 +4,7 @@ import { Exercise, Tracking } from './types'
 import { nowIso, uid } from './uid'
 import { NAME_TO_LIB, PHOTO_OF, libIdForExercise, libPath } from './libraryLinks'
 import { LIBRARY_EXTRA } from '../data/libraryExtra'
+import { englishQuery } from './hebrewSearch'
 
 export * from './libraryLinks'
 
@@ -145,7 +146,7 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
  * Names that start with the query rank first, then names containing it, then A–Z.
  */
 export function searchLibrary(list: LibraryExercise[], f: LibraryFilter): LibraryExercise[] {
-  const q = norm(f.q ?? '')
+  const q = norm(englishQuery(f.q ?? ''))
   const words = q ? q.split(' ').map((w) => SHORT[w] ?? w) : []
   const out = list.filter((e) => {
     if (!any(f.muscle) && !e.muscles.includes(f.muscle!)) return false
