@@ -44,6 +44,7 @@ import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
 import '../styles/programs-nav.css'
 import '../styles/home.css'
+import '../styles/coach.css'
 
 function templateInfo(db: DB, w: Workout) {
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
@@ -191,8 +192,9 @@ export default function Home() {
           <div className="sub">{now.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
         </div>
         {coachRole && (
-          <button className="btn sm coach-entry" onClick={() => nav('/coach')} aria-label={t("Coaching: your trainees")}>
-            <Users size={16} aria-hidden /> {t('Coaching')}
+          // a round icon next to the streak pill: the greeting and date keep the room they need
+          <button className="coach-entry" onClick={() => nav('/coach')} aria-label={t('Coaching: your trainees')} title={t('Coaching')}>
+            <Users size={18} aria-hidden />
           </button>
         )}
         {streak.current > 0 && (
