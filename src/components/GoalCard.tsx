@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { lang, t as tr } from '../lib/i18n'
 import { Target } from 'lucide-react'
 import { Goal, goalView, removeGoal, setGoal, useGoals } from '../lib/goals'
-import { HistoryPoint } from '../lib/pr'
+import { HistoryPoint, exerciseHistory } from '../lib/pr'
 import { fmtKg, fmtDate } from '../lib/format'
 import { Sheet } from './ui'
 
-const short = (d: Date | string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+const short = (d: Date | string) => new Date(d).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short' })
 
 /** Exercise page: a weight goal, how close you are, and when the trend gets you there. */
 export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: HistoryPoint[] }) {
@@ -23,7 +23,7 @@ export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: Histo
               <Target size={18} aria-hidden />
               <span className="goal-t ellipsis">
                 {fmtKg(goal.weight)} kg × {goal.reps}
-                {goal.by && <span className="muted"> · by {fmtDate(goal.by)}</span>}
+                {goal.by && <span className="muted"> · {tr('by {d}', { d: fmtDate(goal.by) })}</span>}
               </span>
             </div>
             <button className="btn sm ghost" onClick={() => setEditing(true)}>
@@ -35,12 +35,12 @@ export function GoalCard({ exerciseId, hist }: { exerciseId: string; hist: Histo
           </div>
           <div className="small muted">
             {view.current === 0
-              ? 'Log this exercise in a workout to start tracking it.'
+              ? tr('Log this exercise in a workout to start tracking it.')
               : view.reached
-              ? 'Reached. Time for a new goal?'
+              ? tr('Reached. Time for a new goal?')
               : view.eta
-              ? `${Math.round(view.pct * 100)}% there · at this pace around ${short(view.eta)}${view.onTrack === false ? ', later than planned' : ''}`
-              : `${Math.round(view.pct * 100)}% there · log a few more workouts to see when you get there`}
+              ? tr(view.onTrack === false ? '{p}% there · at this pace around {d}, later than planned' : '{p}% there · at this pace around {d}', { p: Math.round(view.pct * 100), d: short(view.eta) })
+              : tr('{p}% there · log a few more workouts to see when you get there', { p: Math.round(view.pct * 100) })}
           </div>
         </section>
       ) : (
@@ -61,7 +61,7 @@ function GoalSheet({ exerciseId, goal, onClose }: { exerciseId: string; goal?: G
   const r = parseInt(reps, 10)
   const ok = w > 0 && w < 1000 && r > 0 && r <= 30
   return (
-    <Sheet title={goal ? 'Your goal' : 'Set a goal'} onClose={onClose}>
+    <Sheet title={tr(goal ? 'Your goal' : 'Set a goal')} onClose={onClose}>
       <form
         className="stack"
         onSubmit={(e) => {
@@ -103,5 +103,41 @@ function GoalSheet({ exerciseId, goal, onClose }: { exerciseId: string; goal?: G
         )}
       </form>
     </Sheet>
+  )
+}
+
+/** Progress page: every goal in one quiet list (nothing when there are none). Tap one for its exercise. */
+export function GoalsList({ db, onOpen }: { db: import('../lib/types').DB; onOpen: (exerciseId: string) => void }) {
+  const goals = useGoals()
+  const rows = useMemo(
+    () =>
+      goals
+        .map((g) => ({ g, ex: db.exercises.find((e) => e.id === g.exerciseId), v: goalView(g, exerciseHistory(db, g.exerciseId)) }))
+        .filter((r) => r.ex),
+    [goals, db]
+  )
+  if (!rows.length) return null
+  return (
+    <section className="stack" style={{ gap: 8 }} aria-label={tr('Goals')}>
+      <h2>{tr('Goals')}</h2>
+      <div className="list-group">
+        {rows.map(({ g, ex, v }) => (
+          <button key={g.exerciseId} className="list-row goal-row" onClick={() => onOpen(g.exerciseId)}>
+            <span className="grow" style={{ minWidth: 0 }}>
+              <span className="title ellipsis" style={{ display: 'block' }}>
+                {ex!.name}
+              </span>
+              <span className="goal-bar" aria-hidden>
+                <span style={{ width: `${Math.round(v.pct * 100)}%` }} className={v.reached ? 'done' : undefined} />
+              </span>
+              <span className="meta" style={{ display: 'block' }}>
+                {fmtKg(g.weight)} kg × {g.reps} ·{' '}
+                {v.reached ? tr('Reached') : v.eta ? tr('around {d}', { d: short(v.eta) }) : tr('{p}% there', { p: Math.round(v.pct * 100) })}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
   )
 }

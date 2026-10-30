@@ -1,4 +1,6 @@
 import { plateaus } from '../lib/plateau'
+import { GoalsList } from '../components/GoalCard'
+import '../styles/records.css'
 import { t as tr } from '../lib/i18n'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -131,6 +133,8 @@ export default function Profile() {
         </span>
         <ChevronRight size={18} aria-hidden className="muted" />
       </button>
+
+      <GoalsList db={db} onOpen={(id) => nav(`/exercise/${id}`)} />
 
       {stalled.length > 0 && (
         <section className="card stall" aria-label={tr("Stalled lifts")}>
