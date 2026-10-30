@@ -637,4 +637,11 @@ export const HE_SCREENS: Record<string, string> = {
   "vs last week": "לעומת שבוע שעבר",
   "tonnes lifted": "טון הורמו",
   "kg lifted": "ק\"ג הורמו",
+  "Pick a workout, or copy a whole program. It goes into {name}’s plan.": "בחר אימון, או העתק תוכנית שלמה. היא תיכנס לתוכנית של {name}.",
+  "Adding…": "מוסיף…",
+  "Copy all {n}": "העתק את כל {n}",
+  "{n} ex": "{n} תרגילים",
+  "{w} added": "{w} נוסף",
+  "{n} workouts added": "{n} אימונים נוספו",
+  "{name} sees it on their Train tab.": "{name} יראה את זה במסך האימון.",
 }

@@ -123,10 +123,11 @@ export async function loadTrainee(traineeId: string): Promise<DB> {
 }
 
 /**
- * Copy one of the coach's workouts into the trainee's plan (folder "From your coach"). Exercises are matched by
+ * Copy one of the coach's workouts into the trainee's plan (folder "From your coach", or the program's own folder
+ * when a whole program is copied). Exercises are matched by
  * name to the trainee's own; missing ones are created for them, with the same library picture.
  */
-export async function assignWorkout(traineeId: string, trainee: DB, mine: DB, workoutId: string): Promise<Workout> {
+export async function assignWorkout(traineeId: string, trainee: DB, mine: DB, workoutId: string, folder = COACH_FOLDER): Promise<Workout> {
   const src = mine.workouts.find((w) => w.id === workoutId)
   if (!src) throw new Error('Workout not found.')
   const rows = mine.workout_exercises.filter((r) => r.workout_id === workoutId).sort((a, b) => a.position - b.position)
@@ -148,7 +149,7 @@ export async function assignWorkout(traineeId: string, trainee: DB, mine: DB, wo
     idFor.set(ex.id, copy.id)
   }
   const position = trainee.workouts.reduce((m, w) => Math.max(m, w.position), -1) + 1
-  const workout: Workout = { ...src, id: uid(), user_id: traineeId, position, created_at: nowIso(), folder: COACH_FOLDER }
+  const workout: Workout = { ...src, id: uid(), user_id: traineeId, position, created_at: nowIso(), folder }
   const wes: WorkoutExercise[] = rows
     .filter((r) => idFor.has(r.exercise_id))
     .map((r) => ({ ...r, id: uid(), user_id: traineeId, workout_id: workout.id, exercise_id: idFor.get(r.exercise_id)! }))

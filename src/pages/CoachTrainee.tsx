@@ -4,7 +4,7 @@ import { monthReport } from '../lib/monthReport'
 import { renderShareCard, shareOrDownload } from '../lib/shareCard'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronRight, Copy, Play, Plus, Scale, Share2, Smartphone, Trash2 } from 'lucide-react'
-import { COACH_FOLDER, assignWorkout, deleteManagedTrainee, removeTrainee, saveForTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
+import { COACH_FOLDER, assignWorkout, loadTrainee, deleteManagedTrainee, removeTrainee, saveForTrainee, saveTraineeRow, unassignWorkout } from '../lib/coach'
 import { InviteSheet } from './Coach'
 import { forgetTrainee, useTraineeData } from '../lib/coachData'
 import { nowIso, uid } from '../lib/uid'
@@ -97,6 +97,30 @@ export default function CoachTrainee() {
   }, [db])
 
   const myWorkouts = [...mine.workouts].sort((a, b) => a.position - b.position)
+
+  /** copy one workout, or every workout of a program folder, into the trainee's plan */
+  async function copyMany(list: Workout[], folder: string, busyKey: string = folder) {
+    if (!link?.trainee_id) return
+    setBusy(busyKey)
+    try {
+      for (const w of list) {
+        // fresh each time, so exercises made for the first workout are reused by the next
+        const current = await loadTrainee(link.trainee_id)
+        await assignWorkout(link.trainee_id, current, mine, w.id, folder)
+      }
+      setPicking(false)
+      toast({
+        kind: 'info',
+        text: list.length === 1 ? tr('{w} added', { w: list[0].name }) : tr('{n} workouts added', { n: list.length }),
+        sub: tr('{name} sees it on their Train tab.', { name: link.name })
+      })
+      await load()
+    } catch (e) {
+      toast({ kind: 'error', text: (e as Error).message })
+    } finally {
+      setBusy(null)
+    }
+  }
 
   return (
     <div className="stack coach" style={{ gap: 16 }}>
@@ -227,38 +251,32 @@ export default function CoachTrainee() {
       {picking && (
         <Sheet title={tr("Copy one of your workouts")} onClose={() => setPicking(false)}>
           <div className="stack" style={{ gap: 8 }}>
-            <div className="small muted">Pick one of your workouts. It is copied into {link?.name}'s plan, in "{COACH_FOLDER}". Build new ones on your Train tab first.</div>
+            <div className="small muted">{tr('Pick a workout, or copy a whole program. It goes into {name}’s plan.', { name: link?.name ?? '' })}</div>
             {myWorkouts.length === 0 ? (
               <button className="btn block" onClick={() => nav('/')}>
                 {tr("Go to Train")}
               </button>
             ) : (
-              <div className="list-group">
-                {myWorkouts.map((w) => (
-                  <button
-                    key={w.id}
-                    className="list-row"
-                    disabled={busy != null}
-                    onClick={async () => {
-                      if (!link?.trainee_id || !db) return
-                      setBusy(w.id)
-                      try {
-                        await assignWorkout(link.trainee_id, db, mine, w.id)
-                        setPicking(false)
-                        toast({ kind: 'info', text: `${w.name} added`, sub: `${link.name} sees it on their Train tab.` })
-                        await load()
-                      } catch (e) {
-                        toast({ kind: 'error', text: (e as Error).message })
-                      } finally {
-                        setBusy(null)
-                      }
-                    }}
-                  >
-                    <span className="grow title ellipsis">{w.name}</span>
-                    <span className="meta">{busy === w.id ? 'Adding…' : `${mine.workout_exercises.filter((r) => r.workout_id === w.id).length} ex`}</span>
-                  </button>
-                ))}
-              </div>
+              groupsOf(myWorkouts).map(([folder, list]) => (
+                <section key={folder || '-'} className="stack" style={{ gap: 6 }}>
+                  <div className="row" style={{ justifyContent: 'space-between', gap: 8 }}>
+                    <span className="tiny muted">{folder || tr('My workouts')}</span>
+                    {list.length > 1 && (
+                      <button className="btn sm" disabled={busy != null} onClick={() => void copyMany(list, folder || COACH_FOLDER)}>
+                        {busy === (folder || COACH_FOLDER) ? tr('Adding…') : tr('Copy all {n}', { n: list.length })}
+                      </button>
+                    )}
+                  </div>
+                  <div className="list-group">
+                    {list.map((w) => (
+                      <button key={w.id} className="list-row" disabled={busy != null} onClick={() => void copyMany([w], COACH_FOLDER, w.id)}>
+                        <span className="grow title ellipsis">{w.name}</span>
+                        <span className="meta">{busy === w.id ? tr('Adding…') : tr('{n} ex', { n: mine.workout_exercises.filter((r) => r.workout_id === w.id).length })}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))
             )}
           </div>
         </Sheet>
@@ -399,4 +417,14 @@ function WeighSheet({ traineeId, onClose, onSaved }: { traineeId: string; onClos
       </form>
     </Sheet>
   )
+}
+
+/** the coach's workouts by folder, in Train's order; workouts without a folder first */
+function groupsOf(list: Workout[]): [string, Workout[]][] {
+  const map = new Map<string, Workout[]>()
+  for (const w of list) {
+    const f = (w.folder ?? '').trim()
+    map.set(f, [...(map.get(f) ?? []), w])
+  }
+  return [...map.entries()].sort((a, b) => (a[0] === '' ? -1 : b[0] === '' ? 1 : 0))
 }
