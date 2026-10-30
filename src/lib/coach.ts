@@ -140,7 +140,7 @@ export async function assignWorkout(traineeId: string, trainee: DB, mine: DB, wo
       continue
     }
     // own photos are private to the coach; a library picture (lib:…) carries over
-    const copy: Exercise = { ...ex, id: uid(), user_id: traineeId, notes: '', image_path: ex.image_path?.startsWith('lib:') ? ex.image_path : null, created_at: nowIso() }
+    const copy: Exercise = { ...ex, id: uid(), user_id: traineeId, notes: '', goal: null, image_path: ex.image_path?.startsWith('lib:') ? ex.image_path : null, created_at: nowIso() }
     newExercises.push(copy)
     byName.set(copy.name.trim().toLowerCase(), copy)
     idFor.set(ex.id, copy.id)

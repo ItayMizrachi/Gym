@@ -125,6 +125,8 @@ create policy "gymlog own files delete" on storage.objects for delete to authent
 --   alter table public.exercises add column if not exists equipment text not null default '';
 alter table public.exercises add column if not exists equipment text not null default '';
 alter table public.exercises add column if not exists tracking text not null default 'weight_reps';
+-- a weight goal for the exercise: { weight, reps, by?, created } (src/lib/goals.ts)
+alter table public.exercises add column if not exists goal jsonb;
 alter table public.workouts add column if not exists folder text not null default '';
 alter table public.metrics add column if not exists measures jsonb;
 alter table public.workouts add column if not exists days smallint[] not null default '{}';

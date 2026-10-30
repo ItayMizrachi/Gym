@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useStore } from './store'
 import { HistoryPoint, e1rm } from './pr'
+import { Exercise } from './types'
 
 /*
- * Personal goals: "Bench Press 100 kg × 1 by 31 Dec". Kept on this device for now (per signed-in user).
+ * Personal goals: "Bench Press 100 kg × 1 by 31 Dec", stored on the exercise (synced with the account).
  * Progress is measured in estimated 1-rep max, so a goal of 90 × 5 and your 95 × 3 compare fairly.
  * The forecast is a straight line through your best e1RM per workout over the last 10 weeks.
  */
@@ -29,39 +30,50 @@ export interface GoalView {
   onTrack: boolean | null
 }
 
-const key = () => `gymlog:goals:${useStore.getState().user?.id ?? 'local'}`
-const EVENT = 'gymlog:goals'
+/** goals saved on the device before they synced with the account (moved onto the exercise on first use) */
+const legacyKey = () => `gymlog:goals:${useStore.getState().user?.id ?? 'local'}`
 
-export function loadGoals(): Goal[] {
-  try {
-    const v = JSON.parse(localStorage.getItem(key()) ?? '[]')
-    return Array.isArray(v) ? v : []
-  } catch {
-    return []
-  }
+function goalOf(e: Exercise): Goal | null {
+  const g = e.goal
+  return g && g.weight > 0 && g.reps > 0 ? { exerciseId: e.id, weight: g.weight, reps: g.reps, by: g.by, created: g.created } : null
 }
-function store(list: Goal[]) {
+
+/** move device-only goals onto their exercises once (they then sync with the account) */
+function migrateLegacy() {
+  let old: Goal[] = []
   try {
-    localStorage.setItem(key(), JSON.stringify(list))
+    old = JSON.parse(localStorage.getItem(legacyKey()) ?? '[]')
+  } catch {
+    return
+  }
+  if (!Array.isArray(old) || !old.length) return
+  const { db, save } = useStore.getState()
+  for (const g of old) {
+    const e = db.exercises.find((x) => x.id === g.exerciseId)
+    if (e && !e.goal) save('exercises', { ...e, goal: { weight: g.weight, reps: g.reps, by: g.by, created: g.created } })
+  }
+  try {
+    localStorage.removeItem(legacyKey())
   } catch {
     /* ignore */
   }
-  window.dispatchEvent(new Event(EVENT))
 }
+
 export function setGoal(g: Goal) {
-  store([...loadGoals().filter((x) => x.exerciseId !== g.exerciseId), g])
+  const { db, save } = useStore.getState()
+  const e = db.exercises.find((x) => x.id === g.exerciseId)
+  if (e) save('exercises', { ...e, goal: { weight: g.weight, reps: g.reps, by: g.by, created: g.created } })
 }
 export function removeGoal(exerciseId: string) {
-  store(loadGoals().filter((x) => x.exerciseId !== exerciseId))
+  const { db, save } = useStore.getState()
+  const e = db.exercises.find((x) => x.id === exerciseId)
+  if (e) save('exercises', { ...e, goal: null })
 }
+/** every goal, from the exercises (kept with the account) */
 export function useGoals(): Goal[] {
-  const [list, setList] = useState(loadGoals)
-  useEffect(() => {
-    const f = () => setList(loadGoals())
-    window.addEventListener(EVENT, f)
-    return () => window.removeEventListener(EVENT, f)
-  }, [])
-  return list
+  const exercises = useStore((s) => s.db.exercises)
+  useEffect(() => migrateLegacy(), [])
+  return useMemo(() => exercises.map(goalOf).filter((g): g is Goal => g != null), [exercises])
 }
 
 const DAY = 86400000

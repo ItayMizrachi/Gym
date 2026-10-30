@@ -76,7 +76,7 @@ export default function CoachPlan() {
     setAdding(false)
     let ex = db.exercises.find((e) => e.name.trim().toLowerCase() === src.name.trim().toLowerCase())
     if (!ex) {
-      ex = { ...src, id: uid(), user_id: link.trainee_id, notes: '', image_path: src.image_path?.startsWith('lib:') ? src.image_path : null, created_at: nowIso() }
+      ex = { ...src, id: uid(), user_id: link.trainee_id, notes: '', goal: null, image_path: src.image_path?.startsWith('lib:') ? src.image_path : null, created_at: nowIso() }
       const made = ex
       patch((d) => ({ ...d, exercises: [...d.exercises, made] }))
       await save('exercises', made)

@@ -16,6 +16,8 @@ export interface Exercise {
   equipment?: string
   /** what a set records; missing on old rows = 'weight_reps' (use trackingOf) */
   tracking?: Tracking
+  /** a weight goal (src/lib/goals.ts); missing/null = none */
+  goal?: { weight: number; reps: number; by?: string; created: string } | null
 }
 
 export type Tracking = 'weight_reps' | 'reps' | 'time'
