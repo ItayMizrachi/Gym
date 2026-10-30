@@ -151,9 +151,11 @@ export const useStore = create<State>((set, get) => {
       if (data.session?.user) {
         const u = data.session.user
         await initRepo(new SupabaseRepo(supabase, u.id), { id: u.id, email: u.email ?? null })
-      } else if (localStorage.getItem(LOCAL_FLAG) === 'local') {
+      } else if (localStorage.getItem(LOCAL_FLAG) === 'local' && import.meta.env.DEV) {
         await get().enterLocal()
       } else {
+        // production is Google sign-in only: a "this device only" flag left by an old build is dropped
+        localStorage.removeItem(LOCAL_FLAG)
         set({ phase: 'login' })
       }
     },

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { lang, setLang, t as tr } from '../lib/i18n'
 import { ShieldCheck, Zap, Images, Trophy } from 'lucide-react'
 import '../styles/workout-flow.css'
 import { useStore } from '../lib/store'
@@ -40,6 +40,10 @@ export default function Login() {
 
   return (
     <div className="login">
+      {/* before signing in, so someone who reads only Hebrew can switch first */}
+      <button className="login-lang" onClick={() => setLang(lang === 'he' ? 'en' : 'he')} lang={lang === 'he' ? 'en' : 'he'}>
+        {lang === 'he' ? 'English' : 'עברית'}
+      </button>
       <div className="login-brand">
         <img className="logo" src="icon.svg" alt="" width={72} height={72} />
         <h1>
@@ -53,7 +57,7 @@ export default function Login() {
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Images size={18} /></span>
-            <span><b>870+ exercises with photos.</b> {tr("Plus 30 ready-made plans, so you never start from a blank page.")}</span>
+            <span><b>{tr("870+ exercises with photos.")}</b> {tr("Plus 30 ready-made plans, so you never start from a blank page.")}</span>
           </li>
           <li>
             <span className="perk-ico" aria-hidden><Trophy size={18} /></span>

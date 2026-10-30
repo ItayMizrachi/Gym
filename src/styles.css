@@ -2350,3 +2350,21 @@ input[type='search']::-webkit-search-decoration {
 [dir='rtl'] .ex-sum-t,
 [dir='rtl'] .hm-preview,
 [dir='rtl'] .ls-stat .v { unicode-bidi: plaintext; }
+
+/* login: language switch in the top corner */
+.login { position: relative; }
+.login-lang {
+  position: absolute;
+  top: calc(var(--safe-t) + 12px);
+  inset-inline-end: 16px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
