@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { lang, t as tr } from '../lib/i18n'
+import { HelpHe } from './HelpHe'
 import { Calculator, Check, ChevronDown, Disc, MoreHorizontal, Play, TrendingUp } from 'lucide-react'
 import { PageHeader } from '../components/ui'
 import '../styles/onboarding.css'
@@ -7,7 +8,8 @@ import '../styles/onboarding.css'
 /** One question: a row you tap to open, so the whole list fits on a couple of screens. */
 function Sec({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
-  const id = 'help-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  // from the title's characters, so Hebrew titles get distinct ids too
+  const id = 'help-' + [...title].map((c) => c.charCodeAt(0).toString(36)).join('').slice(0, 40)
   return (
     <div className={`help-sec${open ? ' open' : ''}`}>
       <h2>
@@ -31,6 +33,7 @@ export default function Help() {
       <PageHeader title={tr("How it works")} sub={tr("Short answers about every part of GymLog.")} back={true} />
 
       <div className="help-list">
+      {lang === 'he' ? <HelpHe Sec={Sec} /> : <>
       <Sec title={tr("Getting started")}>
         <p>
           {tr("On")} <b>{tr("Train")}</b>, tap <b>{tr("Browse programs")}</b>. Pick a single workout and tap <b>{tr("Start now")}</b>, or add a weekly program. Its workouts
@@ -214,6 +217,7 @@ export default function Help() {
           <b>Android (Chrome):</b> ⋮ menu → Install app.
         </p>
       </Sec>
+      </>}
       </div>
     </div>
   )

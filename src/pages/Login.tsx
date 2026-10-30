@@ -43,7 +43,7 @@ export default function Login() {
       <div className="login-brand">
         <img className="logo" src="icon.svg" alt="" width={72} height={72} />
         <h1>
-          {tr("Gym")}<span>{tr("Log")}</span>
+          Gym<span>Log</span>
         </h1>
         <div className="tag">{tr("Every set, every record, every weigh-in. Your training logbook, always with you.")}</div>
         <ul className="login-perks">
