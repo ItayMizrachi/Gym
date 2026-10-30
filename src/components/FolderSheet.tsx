@@ -32,7 +32,7 @@ export function MoveToFolderSheet({ workoutId, onClose }: { workoutId: string; o
       <div className="stack" style={{ gap: 12 }}>
         <div className="small muted">{tr("Folders group workouts on the Train tab, for example one folder per program.")}</div>
         <div className="list-group">
-          {row('', `${NO_FOLDER} (no folder)`, <Inbox size={18} aria-hidden />)}
+          {row('', tr('{f} (no folder)', { f: tr(NO_FOLDER) }), <Inbox size={18} aria-hidden />)}
           {listFolders(workouts).map((f) => row(f, f, <Folder size={18} aria-hidden />))}
         </div>
         <form

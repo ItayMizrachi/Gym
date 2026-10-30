@@ -550,4 +550,8 @@ export const HE_SCREENS: Record<string, string> = {
   "4 workouts are on the Train tab.": "4 אימונים במסך האימון.",
   "Summary image saved": "תמונת הסיכום נשמרה",
   "Workout updated": "האימון עודכן",
+  "rest {t}": "מנוחה {t}",
+  "{e} · {s} sets. Changes save by themselves.": "{e} · {s} סטים. השינויים נשמרים לבד.",
+  "{n} exercise": "תרגיל {n}",
+  "{f} (no folder)": "{f} (בלי תיקייה)",
 }

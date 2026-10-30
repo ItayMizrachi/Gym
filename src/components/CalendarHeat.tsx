@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { lang, t as tr } from '../lib/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { dayKey, intensityLevel, monthGrid, TrainingDay } from '../lib/stats'
 import '../styles/insights.css'
 
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const WEEKDAYS = lang === 'he' ? ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 /**
  * Month calendar with training days shaded by how many sets were done that day.

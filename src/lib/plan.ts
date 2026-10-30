@@ -1,11 +1,12 @@
 import type { DB, Workout } from './types'
+import { lang } from './i18n'
 
 /*
  * Weekly plan: each workout can be planned on days of the week (0 = Sunday … 6 = Saturday).
  * Home shows "Today's workout" when one is planned for today and not done yet.
  */
 
-export const DAY_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+export const DAY_SHORT = lang === 'he' ? ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 export const DAY_NAME = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 /** Training days for N days a week, spread out with rest days in between (weeks start on Sunday). */

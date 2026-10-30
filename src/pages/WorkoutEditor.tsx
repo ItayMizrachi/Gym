@@ -146,9 +146,9 @@ export default function WorkoutEditor() {
                 {ex?.name ?? 'Deleted exercise'}
               </div>
               <div className="we-sum">
-                {we.sets} × {reps}
-                {we.weight ? ` · ${fmtKg(we.weight)} kg` : ''} · rest {fmtRest(we.rest_sec)}
-                {we.drop_last ? ' · drop' : ''}
+                <bdi dir="ltr">{we.sets} × {reps}</bdi>
+                {we.weight ? ` · ${fmtKg(we.weight)} ${tr('kg')}` : ''} · {tr('rest {t}', { t: fmtRest(we.rest_sec) })}
+                {we.drop_last ? ` · ${tr('drop')}` : ''}
               </div>
               {we.note && open !== we.id && (
                 <div className="tiny muted ellipsis" style={{ marginTop: 2 }}>
@@ -259,7 +259,7 @@ export default function WorkoutEditor() {
     <div className="stack" style={{ gap: 'var(--s3)' }}>
       <PageHeader
         title={w.name || 'Untitled workout'}
-        sub={`${wes.length} exercise${wes.length === 1 ? '' : 's'} · ${totalSets} sets. Changes save by themselves.`}
+        sub={tr('{e} · {s} sets. Changes save by themselves.', { e: tr(wes.length === 1 ? '{n} exercise' : '{n} exercises', { n: wes.length }), s: totalSets })}
         back="/"
       />
 
@@ -273,7 +273,7 @@ export default function WorkoutEditor() {
           <button className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => setMovingFolder(true)} aria-label={`Folder: ${folderOf(w) || NO_FOLDER}. Move to folder`}>
             <Folder size={16} aria-hidden />
             <span className="grow ellipsis" style={{ textAlign: 'left' }}>
-              {folderOf(w) || `${NO_FOLDER} (no folder)`}
+              {folderOf(w) || tr('{f} (no folder)', { f: tr(NO_FOLDER) })}
             </span>
             <span className="small muted">{tr("Move")}</span>
           </button>
