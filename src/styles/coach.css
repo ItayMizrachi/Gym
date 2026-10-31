@@ -97,3 +97,47 @@
 .coach-row { padding-block: 0; }
 .coach-row-main { display: flex; align-items: center; gap: var(--s3); flex: 1; min-width: 0; min-height: 64px; padding: 12px 0; background: none; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; }
 .coach-nudge { flex: none; gap: 6px; }
+
+/* coach mode: a thin bar on top of every screen, whose training this is */
+.coach-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 calc(-1 * var(--s4)) 8px;
+  padding: calc(var(--safe-t) + 6px) var(--s4) 6px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--accent-line);
+}
+.coach-bar-who {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+.coach-bar-exit {
+  flex: none;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}

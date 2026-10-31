@@ -1,7 +1,8 @@
 import { Component, ReactNode, Suspense, useEffect, useRef, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play, Trophy } from 'lucide-react'
+import { Dumbbell, TrendingUp, History, Scale, Settings, Check, SkipForward, Play, Trophy, Users, ChevronDown } from 'lucide-react'
+import '../styles/coach.css'
 import { useStore } from '../lib/store'
 import { Skeleton, SkeletonList } from './ui'
 import { fmtClock, splitName } from '../lib/format'
@@ -234,7 +235,9 @@ export default function Layout() {
   const loc = useLocation()
   const inSession = loc.pathname.startsWith('/session')
   // coach screens swap the yellow for sky blue, so it is always clear which side you are on (styles/coach.css)
-  const coaching = loc.pathname.startsWith('/coach')
+  // coach mode (a trainee's data in the whole app) and the coach screens swap the yellow for sky blue
+  const coachingAs = useStore((s) => s.coaching)
+  const coaching = coachingAs != null || loc.pathname.startsWith('/coach')
   useEffect(() => {
     if (coaching) document.documentElement.dataset.coach = ''
     else delete document.documentElement.dataset.coach
@@ -353,6 +356,7 @@ export default function Layout() {
     <>
       <SyncDot />
       <main className={`app ${rest ? 'has-rest' : ''} ${inSession ? 'in-session' : ''}`}>
+        {coachingAs && !inSession && <CoachBar name={coachingAs.name} />}
         <div className="screen" ref={screen}>
         <ScreenBoundary resetKey={loc.pathname}>
         <Suspense
@@ -401,5 +405,29 @@ export default function Layout() {
         </nav>
       )}
     </>
+  )
+}
+
+/** coach mode: whose training the app shows; tap the name to switch trainee, Exit for your own */
+function CoachBar({ name }: { name: string }) {
+  const nav = useNavigate()
+  const stop = useStore((s) => s.stopCoaching)
+  return (
+    <div className="coach-bar" role="status">
+      <button className="coach-bar-who" onClick={() => nav('/coach')} aria-label={tr('Coaching {name}. Switch trainee', { name })}>
+        <Users size={16} aria-hidden />
+        <span className="ellipsis">{tr('Coaching {name}', { name })}</span>
+        <ChevronDown size={16} aria-hidden />
+      </button>
+      <button
+        className="coach-bar-exit"
+        onClick={async () => {
+          await stop()
+          nav('/')
+        }}
+      >
+        {tr('Exit')}
+      </button>
+    </div>
   )
 }

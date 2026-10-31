@@ -79,7 +79,8 @@ const friendly = (e: { message?: string } | null | undefined, fallback: string) 
 /* ------------------------------------------------------------------ coach side */
 
 export async function listTrainees(): Promise<CoachLink[]> {
-  const me = useStore.getState().user?.id
+  // the signed-in coach (while coaching, `user` is the trainee)
+  const me = useStore.getState().self?.id
   const { data, error } = await sb().from('coach_links').select('*').eq('coach_id', me).neq('status', 'ended').order('created_at')
   if (error) throw friendly(error, 'Could not load your trainees. Check the connection.')
   return (data ?? []) as CoachLink[]

@@ -24,6 +24,10 @@ interface State {
   phase: 'booting' | 'login' | 'ready'
   repo: Repo | null
   user: { id: string; email: string | null } | null
+  /** the signed-in account; differs from `user` while coaching someone (the app then shows their data) */
+  self: { id: string; email: string | null } | null
+  /** coach mode: whose data the app shows and saves, null = your own */
+  coaching: Coaching | null
   db: DB
   bootError: string | null
   toasts: ToastMsg[]
@@ -35,6 +39,10 @@ interface State {
   enterLocal: () => Promise<void>
   leaveLocal: () => void
   signOut: () => Promise<void>
+  /** coach mode: show and log a trainee's training in the whole app (same screens, sky blue) */
+  coachAs: (c: Coaching) => Promise<void>
+  /** back to your own training */
+  stopCoaching: () => Promise<void>
   save: <T extends { id: string }>(table: TableName, row: T, opts?: { debounce?: number }) => void
   saveMany: (table: TableName, rows: { id: string }[]) => void
   remove: (table: TableName, id: string) => void
@@ -56,6 +64,30 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   return run
 }
 const LOCAL_FLAG = 'gymlog:mode'
+
+/** coach mode: the trainee whose data the app shows (src/pages/Coach.tsx picks them) */
+export interface Coaching {
+  linkId: string
+  traineeId: string
+  name: string
+}
+const COACHING_KEY = 'gymlog:coaching'
+function readCoaching(): Coaching | null {
+  try {
+    const c = JSON.parse(localStorage.getItem(COACHING_KEY) ?? 'null')
+    return c && c.linkId && c.traineeId ? c : null
+  } catch {
+    return null
+  }
+}
+function storeCoaching(c: Coaching | null) {
+  try {
+    if (c) localStorage.setItem(COACHING_KEY, JSON.stringify(c))
+    else localStorage.removeItem(COACHING_KEY)
+  } catch {
+    /* ignore */
+  }
+}
 const REST_KEY = 'gymlog:rest'
 let bootStarted = false
 
@@ -117,6 +149,8 @@ export const useStore = create<State>((set, get) => {
     phase: 'booting',
     repo: null,
     user: null,
+    self: null,
+    coaching: null,
     db: emptyDB(),
     bootError: null,
     toasts: [],
@@ -133,24 +167,31 @@ export const useStore = create<State>((set, get) => {
       }
       supabase.auth.onAuthStateChange((event, session) => {
         const cur = get()
-        if (event === 'SIGNED_IN' && session?.user && cur.user?.id !== session.user.id) {
+        // compared with the signed-in account (not `user`, which is the trainee while coaching)
+        if (event === 'SIGNED_IN' && session?.user && cur.self?.id !== session.user.id) {
           localStorage.removeItem(LOCAL_FLAG)
           // defer: calling supabase inside this callback can deadlock
           setTimeout(() => {
-            void initRepo(new SupabaseRepo(supabase!, session.user.id), {
-              id: session.user.id,
-              email: session.user.email ?? null
-            })
+            const me = { id: session.user.id, email: session.user.email ?? null }
+            storeCoaching(null)
+            set({ self: me, coaching: null })
+            void initRepo(new SupabaseRepo(supabase!, me.id), me)
           }, 0)
         }
         if (event === 'SIGNED_OUT') {
-          set({ phase: 'login', repo: null, user: null, db: emptyDB() })
+          storeCoaching(null)
+          set({ phase: 'login', repo: null, user: null, self: null, coaching: null, db: emptyDB() })
         }
       })
       const { data } = await supabase.auth.getSession()
       if (data.session?.user) {
         const u = data.session.user
-        await initRepo(new SupabaseRepo(supabase, u.id), { id: u.id, email: u.email ?? null })
+        const me = { id: u.id, email: u.email ?? null }
+        set({ self: me })
+        // back in the trainee's data if the app was closed while coaching them
+        const c = readCoaching()
+        if (c) await get().coachAs(c)
+        else await initRepo(new SupabaseRepo(supabase, u.id), me)
       } else if (localStorage.getItem(LOCAL_FLAG) === 'local' && import.meta.env.DEV) {
         await get().enterLocal()
       } else {
@@ -170,8 +211,33 @@ export const useStore = create<State>((set, get) => {
       set({ phase: 'login', repo: null, user: null, db: emptyDB() })
     },
 
+    async coachAs(c) {
+      if (!supabase || !get().self) return
+      await get().flush()
+      storeCoaching(c)
+      set({ coaching: c })
+      // the same offline-first repo, for the trainee's rows (the database lets a coach read and log for them)
+      await initRepo(new SupabaseRepo(supabase, c.traineeId), { id: c.traineeId, email: c.name })
+      if (get().phase !== 'ready') {
+        // their data could not load (the link ended?): back to your own
+        await get().stopCoaching()
+        get().toast({ kind: 'error', text: 'Could not open their training', sub: 'Check the connection and try again.' })
+      }
+    },
+
+    async stopCoaching() {
+      const me = get().self
+      if (!supabase || !me) return
+      await get().flush()
+      storeCoaching(null)
+      set({ coaching: null })
+      await initRepo(new SupabaseRepo(supabase, me.id), me)
+    },
+
     async signOut() {
       await get().flush()
+      storeCoaching(null)
+      set({ coaching: null })
       if (get().repo?.mode === 'cloud' && supabase) {
         try {
           // 'local' signs out this device even when there is no network
@@ -179,7 +245,7 @@ export const useStore = create<State>((set, get) => {
         } catch {
           /* ignore */
         }
-        set({ phase: 'login', repo: null, user: null, db: emptyDB(), queued: 0 })
+        set({ phase: 'login', repo: null, user: null, self: null, db: emptyDB(), queued: 0 })
       } else {
         get().leaveLocal()
       }

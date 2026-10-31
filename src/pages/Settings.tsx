@@ -59,6 +59,7 @@ function remap(raw: any, userId: string): DB {
 
 export default function SettingsPage() {
   const user = useStore((s) => s.user)
+  const coaching = useStore((s) => s.coaching)
   const repo = useStore((s) => s.repo)
   const db = useStore((s) => s.db)
   const save = useStore((s) => s.save)
@@ -166,8 +167,8 @@ export default function SettingsPage() {
           )}
         </section>
       )}
-      {repo?.mode === 'cloud' && <CoachSettings />}
-      {repo?.mode === 'cloud' && <SuggestedExercises />}
+      {repo?.mode === 'cloud' && !coaching && <CoachSettings />}
+      {repo?.mode === 'cloud' && !coaching && <SuggestedExercises />}
 
       <section className="card stack" aria-label={t("Language")}>
         <h2>{t('Language')}</h2>

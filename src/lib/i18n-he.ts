@@ -644,4 +644,11 @@ export const HE_SCREENS: Record<string, string> = {
   "{w} added": "{w} נוסף",
   "{n} workouts added": "{n} אימונים נוספו",
   "{name} sees it on their Train tab.": "{name} יראה את זה במסך האימון.",
+  "Manage {name}": "ניהול {name}",
+  "Tap a trainee to see the app as theirs: their plan, workouts and body weight.": "לחץ על מתאמן כדי לראות את האפליקציה שלו: התוכנית, האימונים ומשקל הגוף.",
+  "Back to my own training": "חזרה לאימונים שלי",
+  "Coaching {name}. Switch trainee": "מאמן את {name}. החלפת מתאמן",
+  "Coaching {name}": "מאמן את {name}",
+  "Exit": "יציאה",
+  "Could not open their training": "לא הצלחנו לפתוח את האימונים שלו",
 }

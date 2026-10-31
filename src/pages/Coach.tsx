@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Copy, Send, Share2, Sparkles, UserPlus } from 'lucide-react'
+import { ChevronRight, Copy, MoreHorizontal, Send, Share2, Sparkles, UserPlus } from 'lucide-react'
 import { COACH_FREE_LIMIT, CoachLink, createInvite, createManagedTrainee, listTrainees, removeTrainee } from '../lib/coach'
 import { TraineeGlance, prefetchTrainees } from '../lib/coachData'
 import { useStore } from '../lib/store'
@@ -18,6 +18,15 @@ export default function Coach() {
   const [invite, setInvite] = useState<CoachLink | null>(null)
   const [cancel, setCancel] = useState<CoachLink | null>(null)
   const [pro, setPro] = useState(false)
+  const coachAs = useStore((s) => s.coachAs)
+  const stopCoaching = useStore((s) => s.stopCoaching)
+  const current = useStore((s) => s.coaching)
+  /** coach mode: the whole app shows this trainee's training */
+  async function open(l: CoachLink) {
+    if (!l.trainee_id) return
+    await coachAs({ linkId: l.id, traineeId: l.trainee_id, name: l.name })
+    nav('/')
+  }
   const [glances, setGlances] = useState<Map<string, TraineeGlance>>(new Map())
 
   const load = () =>
@@ -38,7 +47,18 @@ export default function Coach() {
 
   return (
     <div className="stack coach" style={{ gap: 16 }}>
-      <PageHeader title={tr("Coaching")} sub={tr("Your trainees, their plans and progress.")} back="/" />
+      <PageHeader title={tr("Coaching")} sub={tr('Tap a trainee to see the app as theirs: their plan, workouts and body weight.')} back="/" />
+      {current && (
+        <button
+          className="btn block"
+          onClick={async () => {
+            await stopCoaching()
+            nav('/')
+          }}
+        >
+          {tr('Back to my own training')}
+        </button>
+      )}
       {!cloud ? (
         <div className="card small muted">{tr("Sign in with Google to coach other people.")}</div>
       ) : error ? (
@@ -56,7 +76,7 @@ export default function Coach() {
             <div className="list-group">
               {active.map((l) => (
                 <div key={l.id} className="list-row coach-row">
-                  <button className="coach-row-main" onClick={() => nav(`/coach/${l.id}`)}>
+                  <button className="coach-row-main" onClick={() => void open(l)} aria-current={current?.linkId === l.id ? 'true' : undefined}>
                     <span className="coach-avatar" aria-hidden>
                       {l.name.slice(0, 1).toUpperCase()}
                     </span>
@@ -67,13 +87,14 @@ export default function Coach() {
                       <GlanceLine g={glances.get(l.id)} fallback={l.managed ? tr('Without the app') : l.trainee_email ?? ''} />
                     </span>
                   </button>
-                  {needsNudge(glances.get(l.id)) ? (
+                  {needsNudge(glances.get(l.id)) && (
                     <button className="btn sm coach-nudge" onClick={() => void nudge(l.name)} aria-label={tr('Send {name} a reminder', { name: l.name })}>
                       <Send size={15} aria-hidden /> {tr('Nudge')}
                     </button>
-                  ) : (
-                    <ChevronRight size={18} aria-hidden />
                   )}
+                  <button className="btn icon ghost" onClick={() => nav(`/coach/${l.id}`)} aria-label={tr('Manage {name}', { name: l.name })}>
+                    <MoreHorizontal size={18} aria-hidden />
+                  </button>
                 </div>
               ))}
             </div>

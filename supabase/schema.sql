@@ -584,3 +584,23 @@ end;
 $$;
 
 notify pgrst, 'reload schema';
+
+-- Coach mode (2026-10-31): the coach opens a trainee's training in the whole app and logs for them, whether or
+-- not the trainee uses GymLog themselves. So a coach may log, fix and remove workouts and weigh-ins for every active
+-- trainee, and remove exercises from their list (not only for trainees without the app).
+do $$
+declare t text;
+begin
+  foreach t in array array['sessions', 'metrics'] loop
+    execute format('drop policy if exists "coach logs" on public.%I', t);
+    execute format('create policy "coach logs" on public.%I for insert to authenticated with check (public.is_coach_of(user_id))', t);
+    execute format('drop policy if exists "coach fixes logs" on public.%I', t);
+    execute format('create policy "coach fixes logs" on public.%I for update to authenticated using (public.is_coach_of(user_id)) with check (public.is_coach_of(user_id))', t);
+    execute format('drop policy if exists "coach removes logs" on public.%I', t);
+    execute format('create policy "coach removes logs" on public.%I for delete to authenticated using (public.is_coach_of(user_id))', t);
+  end loop;
+  execute 'drop policy if exists "coach removes" on public.exercises';
+  execute 'create policy "coach removes" on public.exercises for delete to authenticated using (public.is_coach_of(user_id))';
+end $$;
+
+notify pgrst, 'reload schema';

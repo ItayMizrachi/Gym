@@ -81,9 +81,11 @@ export default function App() {
   useLaunchShortcut(phase === 'ready')
   const userId = useStore((s) => s.user?.id ?? 'local')
   const [welcome, setWelcome] = useState(false)
+  const coaching = useStore((s) => s.coaching != null)
   useEffect(() => {
-    if (phase === 'ready') setWelcome(!seen('welcome'))
-  }, [phase, userId])
+    // no welcome tour when a coach opens a trainee's (empty) training
+    if (phase === 'ready') setWelcome(!coaching && !seen('welcome'))
+  }, [phase, userId, coaching])
   useEffect(() => {
     const open = () => setWelcome(true)
     window.addEventListener('gymlog:welcome', open)
