@@ -202,11 +202,10 @@ export default function Home() {
               <h3 className="ellipsis">{t(g.label)}</h3>
               <span className="small muted">{g.workouts.length}</span>
             </button>
-            {g.folder && (
-              <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
-                <MoreHorizontal size={18} />
-              </button>
-            )}
+            {/* every group has a menu, "My workouts" too: it can be the current program like any folder */}
+            <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={t('Folder options: {f}', { f: t(g.label) })}>
+              <MoreHorizontal size={18} />
+            </button>
           </div>
         )}
         {!shut && (
@@ -379,7 +378,7 @@ export default function Home() {
           )}
         </section>
       )}
-      {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
+      {renaming !== null && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
         <Sheet title={t("Add a workout")} onClose={() => setAdding(false)}>
           <div className="list-group home-links">

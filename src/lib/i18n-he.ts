@@ -187,6 +187,8 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  'Put them in a folder': 'העבר אותם לתיקייה',
+  'Folder options: {f}': 'אפשרויות תיקייה: {f}',
   'Other programs': 'תוכניות אחרות',
   'Remove from workout': 'הסר מהאימון',
   'Remove goal': 'הסר יעד',

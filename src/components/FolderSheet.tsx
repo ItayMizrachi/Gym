@@ -72,7 +72,7 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
   // already the only program on Train
   const isCurrent = anyShelved && workouts.every((w) => !!w.shelved === (folderOf(w) !== folder))
   return (
-    <Sheet title={tr("Folder")} onClose={onClose}>
+    <Sheet title={folder ? tr("Folder") : tr(NO_FOLDER)} onClose={onClose}>
       <div className="list-group" style={{ marginBottom: 16 }}>
         {!isCurrent && (
           <button
@@ -115,14 +115,17 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
       >
         <label className="field">
           {tr("Folder name")}
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus enterKeyHint="done" />
+          {/* "My workouts" is not a folder yet: naming it puts these workouts in one */}
+          <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus={!!folder} enterKeyHint="done" />
         </label>
         <button className="btn primary" type="submit" disabled={!name.trim() || name.trim() === folder}>
-          {tr("Rename")}
+          {folder ? tr("Rename") : tr("Put them in a folder")}
         </button>
-        <button className="btn" type="button" onClick={() => apply('')}>
-          {tr("Remove folder (keeps the workouts)")}
-        </button>
+        {folder && (
+          <button className="btn" type="button" onClick={() => apply('')}>
+            {tr("Remove folder (keeps the workouts)")}
+          </button>
+        )}
       </form>
     </Sheet>
   )
