@@ -23,6 +23,8 @@ export const HE_PROGRAMS: Record<string, string> = {
     'שלושה אימונים: דחיפה (חזה, כתפיים, יד אחורית), משיכה (גב, יד קדמית) ורגליים. כל שריר מקבל יום קשה אחד בשבוע.',
   'Upper body, lower body, rest, then upper and lower again. Day A is heavier with fewer reps, day B is lighter with more reps. Good once you have trained for a few months.':
     'פלג גוף עליון, תחתון, מנוחה, ושוב עליון ותחתון. יום A כבד יותר עם פחות חזרות, יום B קל יותר עם יותר חזרות. מתאים אחרי כמה חודשי אימון.',
+  'Upper / lower on Sunday, Monday, Wednesday and Thursday. Only 2 hard working sets per lift, so every day fits in 75 minutes with warm-ups. Drop sets and supersets on the small muscles, forearms twice a week.':
+    'עליון / תחתון בימים ראשון, שני, רביעי וחמישי. רק 2 סטים קשים לכל תרגיל, כך שכל אימון נכנס ב-75 דקות כולל חימום. סטים יורדים וסופרסטים לשרירים הקטנים, ואמות פעמיים בשבוע.',
   'Two glute days and two upper-body days a week. Most of the work goes to glutes and hamstrings.':
     'שני ימי ישבן ושני ימי פלג גוף עליון בשבוע. רוב העבודה הולכת לישבן ולמיתרי הברך.',
   'One muscle group a day, five days a week: chest, back, shoulders, legs and arms. Lots of sets for each muscle once a week.':

@@ -114,7 +114,12 @@ export const NAME_TO_LIB: Record<string, string> = {
   burpee: 'Freehand_Jump_Squat',
   'jumping jack': 'Star_Jump',
   'rowing (machine)': 'Rowing_Stationary',
-  "world's greatest stretch": 'Worlds_Greatest_Stretch'
+  "world's greatest stretch": 'Worlds_Greatest_Stretch',
+  'seated cable row (close grip)': 'Seated_Cable_Rows',
+  'cable pullover (straight arm)': 'Straight-Arm_Pulldown',
+  'standing leg curl (machine)': 'Standing_Leg_Curl',
+  'wrist curl (cable)': 'Cable_Wrist_Curl',
+  'reverse wrist curl (cable)': 'Palms-Down_Wrist_Curl_Over_A_Bench'
 }
 
 /** Library id an exercise shows: its own `lib:` link, else the built-in name match. */

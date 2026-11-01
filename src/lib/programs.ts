@@ -16,6 +16,8 @@ export interface ProgramExercise {
   rest_sec: number
   superset: string
   note: string
+  /** a drop set after the last set */
+  drop?: boolean
 }
 
 export interface ProgramWorkout {
@@ -201,7 +203,7 @@ export function buildProgram(p: Program, userId: string, existingExercises: Exer
         weight: 0,
         rest_sec: pe.rest_sec,
         superset: pe.superset,
-        drop_last: false,
+        drop_last: pe.drop ?? false,
         note: pe.note
       })
     )
