@@ -183,6 +183,11 @@ export const HE_SCREENS: Record<string, string> = {
   'Reload to get the latest GymLog.': 'טען מחדש כדי לקבל את הגרסה החדשה.',
   'Remove exercise from workout': 'הסר תרגיל מהאימון',
   'Remove folder (keeps the workouts)': 'הסר תיקייה (האימונים נשארים)',
+  'Make this my current program': 'הפוך לתוכנית הנוכחית שלי',
+  'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
+    'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
+  'Show all programs': 'הצג את כל התוכניות',
+  'Other programs': 'תוכניות אחרות',
   'Remove from workout': 'הסר מהאימון',
   'Remove goal': 'הסר יעד',
   'Remove set': 'הסר סט',

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { t as tr } from '../lib/i18n'
-import { Check, Folder, FolderPlus, Inbox } from 'lucide-react'
+import { Check, Folder, FolderPlus, Inbox, Pin, Layers } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { folderOf, listFolders, NO_FOLDER } from '../lib/folders'
+import { folderOf, listFolders, makeCurrent, NO_FOLDER, unshelveAll } from '../lib/folders'
 import { Sheet } from './ui'
 import '../styles/programs-nav.css'
 
@@ -68,8 +68,44 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
     for (const w of workouts) if (folderOf(w) === folder) save('workouts', { ...w, folder: next })
     onClose()
   }
+  const anyShelved = workouts.some((w) => w.shelved)
+  // already the only program on Train
+  const isCurrent = anyShelved && workouts.every((w) => !!w.shelved === (folderOf(w) !== folder))
   return (
     <Sheet title={tr("Folder")} onClose={onClose}>
+      <div className="list-group" style={{ marginBottom: 16 }}>
+        {!isCurrent && (
+          <button
+            className="list-row"
+            onClick={() => {
+              for (const w of makeCurrent(workouts, folder)) save('workouts', w)
+              onClose()
+            }}
+          >
+            <Pin size={18} aria-hidden />
+            <span className="grow" style={{ textAlign: 'start' }}>
+              {tr('Make this my current program')}
+              <span className="small muted" style={{ display: 'block' }}>
+                {tr('Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.')}
+              </span>
+            </span>
+          </button>
+        )}
+        {anyShelved && (
+          <button
+            className="list-row"
+            onClick={() => {
+              for (const w of unshelveAll(workouts)) save('workouts', w)
+              onClose()
+            }}
+          >
+            <Layers size={18} aria-hidden />
+            <span className="grow" style={{ textAlign: 'start' }}>
+              {tr('Show all programs')}
+            </span>
+          </button>
+        )}
+      </div>
       <form
         className="stack"
         onSubmit={(e) => {

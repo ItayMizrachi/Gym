@@ -2,6 +2,7 @@ import { DB, Workout } from './types'
 import { NextWorkout, suggestNextWorkout } from './stats'
 import { recoveryLoad } from './recovery'
 import { todaysWorkout } from './plan'
+import { inUse } from './folders'
 
 /*
  * Up next on the Train tab (and the home-screen shortcut):
@@ -36,7 +37,9 @@ export function workoutFatigue(db: DB, w: Workout, load: Record<string, number>)
 const TIRED = 0.5
 const RESTED = 0.25
 
-export function upNext(db: DB, now = new Date()): UpNext | null {
+export function upNext(all: DB, now = new Date()): UpNext | null {
+  // only the current program; programs folded away under "Other programs" are never suggested
+  const db = inUse(all)
   const base = suggestNextWorkout(db)
   const planned = todaysWorkout(db, now)
   if (planned) return { workout: planned, lastDone: base && base.workout.id === planned.id ? base.lastDone : null, reason: 'today' }

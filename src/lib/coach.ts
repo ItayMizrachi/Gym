@@ -150,7 +150,7 @@ export async function assignWorkout(traineeId: string, trainee: DB, mine: DB, wo
     idFor.set(ex.id, copy.id)
   }
   const position = trainee.workouts.reduce((m, w) => Math.max(m, w.position), -1) + 1
-  const workout: Workout = { ...src, id: uid(), user_id: traineeId, position, created_at: nowIso(), folder }
+  const workout: Workout = { ...src, id: uid(), user_id: traineeId, position, created_at: nowIso(), folder, shelved: false }
   const wes: WorkoutExercise[] = rows
     .filter((r) => idFor.has(r.exercise_id))
     .map((r) => ({ ...r, id: uid(), user_id: traineeId, workout_id: workout.id, exercise_id: idFor.get(r.exercise_id)! }))

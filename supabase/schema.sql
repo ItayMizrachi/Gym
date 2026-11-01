@@ -604,3 +604,9 @@ begin
 end $$;
 
 notify pgrst, 'reload schema';
+
+-- Current program (2026-11-01): workouts of other programs fold away under "Other programs" on Train and are
+-- never suggested by Up next; nothing is deleted.
+alter table public.workouts add column if not exists shelved boolean not null default false;
+
+notify pgrst, 'reload schema';

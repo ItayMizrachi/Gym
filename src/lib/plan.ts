@@ -54,7 +54,7 @@ export function todaysWorkout(db: DB, now = new Date()): Workout | null {
   return (
     [...db.workouts]
       .sort((a, b) => a.position - b.position)
-      .find((w) => withEx.has(w.id) && plannedDays(w).includes(today) && !doneToday.has(w.id)) ?? null
+      .find((w) => withEx.has(w.id) && !w.shelved && plannedDays(w).includes(today) && !doneToday.has(w.id)) ?? null
   )
 }
 

@@ -34,6 +34,8 @@ export interface Workout {
   folder?: string
   /** planned days of the week, 0 = Sunday … 6 = Saturday; missing = not planned */
   days?: number[]
+  /** folded away under "Other programs" because another program is the current one; kept, never suggested */
+  shelved?: boolean
 }
 
 export interface WorkoutExercise {

@@ -35,7 +35,7 @@ import {
 } from '../lib/stats'
 import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
-import { groupByFolder } from '../lib/folders'
+import { FolderGroup, groupByFolder } from '../lib/folders'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
 import { Sheet } from '../components/ui'
@@ -86,6 +86,8 @@ function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: num
 
 /** collapsed folder headers on the Train tab (this device only) */
 const FOLDS_KEY = 'gymlog:folds'
+/** "Other programs" starts shut; this key in the fold list means it is open (folder names never start with a space) */
+const OTHERS = ' others'
 function loadFolds(): string[] {
   try {
     const v = JSON.parse(localStorage.getItem(FOLDS_KEY) ?? '[]')
@@ -128,7 +130,10 @@ export default function Home() {
 
   const now = useMemo(() => new Date(), [db])
   const workouts = useMemo(() => [...db.workouts].sort((a, b) => a.position - b.position), [db.workouts])
-  const groups = useMemo(() => groupByFolder(db.workouts), [db.workouts])
+  // the current program on top; the rest fold away under "Other programs" (Folder ⋯ → Make this my current program)
+  const groups = useMemo(() => groupByFolder(db.workouts.filter((w) => !w.shelved)), [db.workouts])
+  const shelvedGroups = useMemo(() => groupByFolder(db.workouts.filter((w) => w.shelved)), [db.workouts])
+  const shelvedCount = shelvedGroups.reduce((n, g) => n + g.workouts.length, 0)
   const active = db.sessions.find((s) => !s.finished_at)
   const activeDone = active ? active.data.exercises.reduce((a, e) => a + e.sets.filter((x) => x.done).length, 0) : 0
   const activeTotal = active ? active.data.exercises.reduce((a, e) => a + e.sets.length, 0) : 0
@@ -184,6 +189,61 @@ export default function Home() {
       <RecoveryLine />
     </div>
   )
+
+  function folderBlock(g: FolderGroup, withHead: boolean) {
+    const shut = folded.includes(g.label)
+    return (
+      <div key={g.label} className="fold">
+        {withHead && (
+          <div className="row" style={{ gap: 4 }}>
+            <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
+              <ChevronDown size={18} className="fold-caret" aria-hidden />
+              {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
+              <h3 className="ellipsis">{t(g.label)}</h3>
+              <span className="small muted">{g.workouts.length}</span>
+            </button>
+            {g.folder && (
+              <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
+                <MoreHorizontal size={18} />
+              </button>
+            )}
+          </div>
+        )}
+        {!shut && (
+          // hold a workout and drag it to a new place in its folder
+          <DragList className="tlist" items={g.workouts} onReorder={(list) => reorderWorkouts(list)}>
+            {(w, _i, drag, lifted) => {
+              const info = templateInfo(db, w)
+              const isNext = next?.workout.id === w.id
+              return (
+                <div key={w.id} {...drag} className={`trow${isNext ? ' next' : ''}${lifted ? ' lifted' : ''}`}>
+                  <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
+                    <div className="trow-name ellipsis">{splitName(w.name)[0]}</div>
+                    <div className="small muted ellipsis">
+                      {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
+                      {splitName(w.name)[1] && <span className="trow-days">{t(splitName(w.name)[1])} · </span>}
+                      {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
+                      {t(info.wes.length === 1 ? '{n} exercise' : '{n} exercises', { n: info.wes.length })}
+                      {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
+                    </div>
+                  </button>
+                  {/* moving to a folder lives in the workout editor (Folder → Move), not on every row */}
+                  <button
+                    className="btn sm trow-start"
+                    disabled={!!active || info.wes.length === 0}
+                    onClick={() => start(w)}
+                    aria-label={`Start ${w.name}`}
+                  >
+                    <Play size={14} aria-hidden /> {t('Start')}
+                  </button>
+                </div>
+              )
+            }}
+          </DragList>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="stack ins-home hm" style={{ gap: 16 }}>
@@ -306,60 +366,17 @@ export default function Home() {
               <Plus size={16} aria-hidden /> {t('New')}
             </button>
           </div>
-          {groups.map((g) => {
-            const shut = folded.includes(g.label)
-            return (
-              <div key={g.label} className="fold">
-                {groups.length > 1 && (
-                  <div className="row" style={{ gap: 4 }}>
-                    <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
-                      <ChevronDown size={18} className="fold-caret" aria-hidden />
-                      {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
-                      <h3 className="ellipsis">{t(g.label)}</h3>
-                      <span className="small muted">{g.workouts.length}</span>
-                    </button>
-                    {g.folder && (
-                      <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={`Rename folder ${g.folder}`}>
-                        <MoreHorizontal size={18} />
-                      </button>
-                    )}
-                  </div>
-                )}
-                {!shut && (
-                  // hold a workout and drag it to a new place in its folder
-                  <DragList className="tlist" items={g.workouts} onReorder={(list) => reorderWorkouts(list)}>
-                    {(w, _i, drag, lifted) => {
-                      const info = templateInfo(db, w)
-                      const isNext = next?.workout.id === w.id
-                      return (
-                        <div key={w.id} {...drag} className={`trow${isNext ? ' next' : ''}${lifted ? ' lifted' : ''}`}>
-                          <button className="trow-main" onClick={() => nav(`/workout/${w.id}`)} aria-label={`Edit ${w.name}`}>
-                            <div className="trow-name ellipsis">{splitName(w.name)[0]}</div>
-                            <div className="small muted ellipsis">
-                              {/* "Lower B (Wednesday)": the day goes on this line so the name is never cut */}
-                              {splitName(w.name)[1] && <span className="trow-days">{t(splitName(w.name)[1])} · </span>}
-                              {plannedDays(w).length > 0 && !daysFromName(w.name).length && <span className="trow-days">{daysLabel(plannedDays(w))} · </span>}
-                              {t(info.wes.length === 1 ? '{n} exercise' : '{n} exercises', { n: info.wes.length })}
-                              {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
-                            </div>
-                          </button>
-                          {/* moving to a folder lives in the workout editor (Folder → Move), not on every row */}
-                          <button
-                            className="btn sm trow-start"
-                            disabled={!!active || info.wes.length === 0}
-                            onClick={() => start(w)}
-                            aria-label={`Start ${w.name}`}
-                          >
-                            <Play size={14} aria-hidden /> {t('Start')}
-                          </button>
-                        </div>
-                      )
-                    }}
-                  </DragList>
-                )}
-              </div>
-            )
-          })}
+          {groups.map((g) => folderBlock(g, groups.length > 1 || shelvedCount > 0))}
+          {shelvedCount > 0 && (
+            <div className="fold hm-others">
+              <button className="fold-head" aria-expanded={folded.includes(OTHERS)} onClick={() => toggleFold(OTHERS)}>
+                <ChevronDown size={18} className="fold-caret" aria-hidden />
+                <h3 className="ellipsis grow">{t('Other programs')}</h3>
+                <span className="small muted">{shelvedCount}</span>
+              </button>
+              {folded.includes(OTHERS) && shelvedGroups.map((g) => folderBlock(g, true))}
+            </div>
+          )}
         </section>
       )}
       {renaming && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
