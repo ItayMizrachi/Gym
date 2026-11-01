@@ -106,7 +106,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 calc(-1 * var(--s4)) 8px;
+  /* pulled up over .app's own top padding, so the safe area is counted once */
+  margin: calc(-1 * (var(--safe-t) + var(--s3))) calc(-1 * var(--s4)) 8px;
   padding: calc(var(--safe-t) + 6px) var(--s4) 6px;
   background: var(--bg);
   border-bottom: 1px solid var(--accent-line);
