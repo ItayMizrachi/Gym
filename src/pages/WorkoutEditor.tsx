@@ -1,4 +1,5 @@
 import { SupersetPicker } from '../components/SupersetPicker'
+import { fmtTime } from '../lib/tracking'
 import { linkSuperset, unlinkSuperset } from '../lib/superset'
 import { ComponentProps, useState } from 'react'
 import { t as tr } from '../lib/i18n'
@@ -52,6 +53,8 @@ export default function WorkoutEditor() {
   const [confirmDel, setConfirmDel] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
   const [movingFolder, setMovingFolder] = useState(false)
+  /** details card: open by hand, else open only while the workout has no exercises yet */
+  const [detailsPick, setDetailsPick] = useState<boolean | null>(null)
   const [help, setHelp] = useState(false)
   // hold an exercise's header and drag it to a new place; positions are renumbered 0, 1, 2…
   const dl = useDragReorder((a, b) => {
@@ -135,7 +138,9 @@ export default function WorkoutEditor() {
   const row = (we: WorkoutExercise, i: number) => {
     const ex = db.exercises.find((e) => e.id === we.exercise_id)
     const timed = trackingOf(ex) === 'time'
-    const reps = (we.rep_min === we.rep_max ? `${we.rep_min}` : `${we.rep_min}–${we.rep_max}`) + (timed ? ' s' : '')
+    const reps = timed
+      ? we.rep_min === we.rep_max ? fmtTime(we.rep_min) : `${fmtTime(we.rep_min)}–${fmtTime(we.rep_max)}`
+      : we.rep_min === we.rep_max ? `${we.rep_min}` : `${we.rep_min}–${we.rep_max}`
     return (
       <div
         key={we.id}
@@ -152,7 +157,7 @@ export default function WorkoutEditor() {
               </div>
               <div className="we-sum">
                 <bdi dir="ltr">{we.sets} × {reps}</bdi>
-                {we.weight ? ` · ${fmtKg(we.weight)} ${tr('kg')}` : ''} · {tr('rest {t}', { t: fmtRest(we.rest_sec) })}
+                {we.weight ? ` · ${fmtKg(we.weight)} ${tr('kg')}` : ''}{we.rest_sec ? ` · ${tr('rest {t}', { t: fmtRest(we.rest_sec) })}` : ''}
                 {we.drop_last ? ` · ${tr('drop')}` : ''}
                 {we.warmup ? ` · ${tr('warm-up')}` : ''}
               </div>
@@ -256,6 +261,7 @@ export default function WorkoutEditor() {
     )
   }
 
+  const detailsOpen = detailsPick ?? wes.length === 0
   return (
     <div className="stack" style={{ gap: 'var(--s3)' }}>
       <PageHeader
@@ -264,51 +270,65 @@ export default function WorkoutEditor() {
         back="/"
       />
 
+      {/* name, folder, days and notes fold into one line: the exercises are what you come here for */}
       <div className="card stack">
-        <label className="field">
-          {tr("Name")}
-          <input className="input" value={w.name} onChange={(e) => save('workouts', { ...w, name: e.target.value }, { debounce: 400 })} />
-        </label>
-        <div className="field">
-          {tr("Folder")}
-          <button className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => setMovingFolder(true)} aria-label={`Folder: ${folderOf(w) || NO_FOLDER}. Move to folder`}>
-            <Folder size={16} aria-hidden />
-            <span className="grow ellipsis" style={{ textAlign: 'left' }}>
-              {folderOf(w) || tr('{f} (no folder)', { f: tr(NO_FOLDER) })}
+        <button className="set-fold" aria-expanded={detailsOpen} onClick={() => setDetailsPick(!detailsOpen)}>
+          <span className="grow" style={{ minWidth: 0 }}>
+            <span className="set-fold-t">{tr('Details')}</span>
+            <span className="small muted ellipsis" style={{ display: 'block' }}>
+              {[folderOf(w) || tr(NO_FOLDER), plannedDays(w).length ? plannedDays(w).map((d) => DAY_SHORT[d]).join(' ') : '', w.notes].filter(Boolean).join(' · ')}
             </span>
-            <span className="small muted">{tr("Move")}</span>
-          </button>
-        </div>
-        <div className="field">
-          {tr("Planned days")}
-          <div className="day-pick" role="group" aria-label={tr("Planned days")}>
-            {DAY_SHORT.map((l, d) => {
-              const on = plannedDays(w).includes(d)
-              return (
-                <button
-                  key={d}
-                  className={`day-chip ${on ? 'on' : ''}`}
-                  aria-pressed={on}
-                  aria-label={DAY_NAME[d]}
-                  onClick={() => save('workouts', { ...w, days: on ? plannedDays(w).filter((x) => x !== d) : [...plannedDays(w), d].sort((a, b) => a - b) })}
-                >
-                  {l}
-                </button>
-              )
-            })}
-          </div>
-          <span className="small muted">{tr("On these days the Train tab shows it as today's workout.")}</span>
-        </div>
-        <label className="field">
-          {tr("Notes")}
-          <textarea
-            className="textarea"
-            style={{ minHeight: 64 }}
-            placeholder={tr("Focus, tempo, anything to remember")}
-            value={w.notes}
-            onChange={(e) => save('workouts', { ...w, notes: e.target.value }, { debounce: 400 })}
-          />
-        </label>
+          </span>
+          <ChevronDown size={18} aria-hidden className="muted" style={{ transform: detailsOpen ? 'rotate(180deg)' : undefined }} />
+        </button>
+        {detailsOpen && (
+          <>
+            <label className="field">
+              {tr("Name")}
+              <input className="input" value={w.name} onChange={(e) => save('workouts', { ...w, name: e.target.value }, { debounce: 400 })} />
+            </label>
+            <div className="field">
+              {tr("Folder")}
+              <button className="btn" style={{ justifyContent: 'flex-start' }} onClick={() => setMovingFolder(true)} aria-label={`Folder: ${folderOf(w) || NO_FOLDER}. Move to folder`}>
+                <Folder size={16} aria-hidden />
+                <span className="grow ellipsis" style={{ textAlign: 'left' }}>
+                  {folderOf(w) || tr('{f} (no folder)', { f: tr(NO_FOLDER) })}
+                </span>
+                <span className="small muted">{tr("Move")}</span>
+              </button>
+            </div>
+            <div className="field">
+              {tr("Planned days")}
+              <div className="day-pick" role="group" aria-label={tr("Planned days")}>
+                {DAY_SHORT.map((l, d) => {
+                  const on = plannedDays(w).includes(d)
+                  return (
+                    <button
+                      key={d}
+                      className={`day-chip ${on ? 'on' : ''}`}
+                      aria-pressed={on}
+                      aria-label={DAY_NAME[d]}
+                      onClick={() => save('workouts', { ...w, days: on ? plannedDays(w).filter((x) => x !== d) : [...plannedDays(w), d].sort((a, b) => a - b) })}
+                    >
+                      {l}
+                    </button>
+                  )
+                })}
+              </div>
+              <span className="small muted">{tr("On these days the Train tab shows it as today's workout.")}</span>
+            </div>
+            <label className="field">
+              {tr("Notes")}
+              <textarea
+                className="textarea"
+                style={{ minHeight: 64 }}
+                placeholder={tr("Focus, tempo, anything to remember")}
+                value={w.notes}
+                onChange={(e) => save('workouts', { ...w, notes: e.target.value }, { debounce: 400 })}
+              />
+            </label>
+          </>
+        )}
       </div>
 
       {wes.length > 0 && (
