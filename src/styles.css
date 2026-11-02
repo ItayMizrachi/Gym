@@ -2435,3 +2435,8 @@ input[type='search']::-webkit-search-decoration {
 .set-fold { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: start; cursor: pointer; }
 .set-fold-t { display: block; font-size: var(--fs-lg, 18px); font-weight: 650; }
 .ex-edit-h { margin: 8px 0 0; font-size: 15px; font-weight: 600; }
+.ico-tile { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; }
+.ico-tile.y { background: var(--accent-soft); color: var(--accent); }
+.ico-tile.b { background: var(--blue-soft); color: var(--blue-text); }
+.ico-tile.g { background: var(--ok-soft); color: var(--ok); }
+.ico-tile.r { background: var(--danger-soft); color: var(--danger-text); }

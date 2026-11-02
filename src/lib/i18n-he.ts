@@ -187,6 +187,10 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  'Know when rest is over': 'לדעת מתי המנוחה נגמרת',
+  'GymLog can tell you when your rest is over, even with the phone locked.': 'GymLog יכולה להודיע לך כשהמנוחה נגמרת, גם כשהטלפון נעול.',
+  'Allow notifications': 'אפשר התראות',
+  'Not now': 'לא עכשיו',
   'Sign out?': 'להתנתק?',
   'Your workouts stay in your account. Sign in with Google to see them again.': 'האימונים שלך נשמרים בחשבון. התחבר עם Google כדי לראות אותם שוב.',
   'Setup & cues': 'כיוונון ודגשים',

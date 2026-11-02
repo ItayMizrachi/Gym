@@ -10,6 +10,7 @@ import Login from './pages/Login'
 import Home from './pages/Home'
 import SessionPage from './pages/Session'
 import Welcome, { seen } from './components/Welcome'
+import { NotifyAsk, shouldAskNotify } from './components/NotifyAsk'
 
 // Secondary screens load on first visit (the service worker still caches them for offline use).
 // After a deploy, an app opened earlier may ask for a chunk name that no longer exists on the server; reload once
@@ -82,10 +83,16 @@ export default function App() {
   useLaunchShortcut(phase === 'ready')
   const userId = useStore((s) => s.user?.id ?? 'local')
   const [welcome, setWelcome] = useState(false)
+  // right after the welcome tour (or on the first visit without it): ask once for rest-over alerts
+  const [askNotify, setAskNotify] = useState(false)
   const coaching = useStore((s) => s.coaching != null)
   useEffect(() => {
     // no welcome tour when a coach opens a trainee's (empty) training
-    if (phase === 'ready') setWelcome(!coaching && !seen('welcome'))
+    if (phase === 'ready') {
+      const tour = !coaching && !seen('welcome')
+      setWelcome(tour)
+      if (!tour && !coaching) setAskNotify(shouldAskNotify())
+    }
   }, [phase, userId, coaching])
   useEffect(() => {
     const open = () => setWelcome(true)
@@ -129,7 +136,15 @@ export default function App() {
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
-          {welcome && <Welcome onDone={() => setWelcome(false)} />}
+          {welcome && (
+            <Welcome
+              onDone={() => {
+                setWelcome(false)
+                setAskNotify(shouldAskNotify())
+              }}
+            />
+          )}
+          {askNotify && !welcome && <NotifyAsk onDone={() => setAskNotify(false)} />}
         </div>
       )}
       <UpdateBanner />
