@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, Flame } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronDown, Flame } from 'lucide-react'
 import { t } from '../lib/i18n'
 import { useStore } from '../lib/store'
 import { RecoveryLine } from './RecoveryCard'
@@ -37,7 +37,10 @@ export function WeekSummary() {
   const lw = weeks.lastWeekToDate
   const scaleMax = Math.max(MUSCLE_SETS_MAX + 4, ...muscles.map((m) => m.sets + 1))
   // only muscles with sets; the rest would be a column of dashes
+  const [allMuscles, setAllMuscles] = useState(false)
   const trained = muscles.filter((m) => m.sets > 0)
+  const untrained = muscles.length - trained.length
+  const shown = allMuscles ? muscles : trained
   const pct = (n: number) => `${(n / scaleMax) * 100}%`
   return (
     <>
@@ -85,11 +88,11 @@ export function WeekSummary() {
             {t('Shaded: {a}–{b} sets a week', { a: MUSCLE_SETS_MIN, b: MUSCLE_SETS_MAX })}
           </div>
         </div>
-        {trained.length === 0 ? (
+        {shown.length === 0 ? (
           <div className="small muted">{t("No sets logged yet.")}</div>
         ) : (
           <div className="mbars">
-            {trained.map((m) => (
+            {shown.map((m) => (
               <div key={m.muscle} className={`mbar ${guidelineZone(m.sets)}`}>
                 <div className="mbar-name">{m.muscle}</div>
                 <div className="mbar-track">
@@ -108,6 +111,12 @@ export function WeekSummary() {
               <div />
             </div>
           </div>
+        )}
+        {untrained > 0 && (
+          <button className="btn ghost sm" style={{ alignSelf: 'flex-start' }} aria-expanded={allMuscles} onClick={() => setAllMuscles((v) => !v)}>
+            <ChevronDown size={16} aria-hidden style={{ transform: allMuscles ? 'rotate(180deg)' : undefined }} />
+            {allMuscles ? t('Only muscles you trained') : t('All muscles (+{n} not trained)', { n: untrained })}
+          </button>
         )}
       </section>
 

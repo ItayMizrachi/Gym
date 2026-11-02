@@ -678,3 +678,8 @@ section + section > .month-head:first-child { margin-top: 28px; }
 .cal-track.settling { transition: transform 0.32s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .cal-pane { width: 33.3333%; flex: none; padding: 0 2px; }
 
+
+/* Train: add a workout at the foot of a program, and the ⋯ on each row */
+.fold-add { align-self: flex-start; color: var(--muted); min-height: 40px; padding-inline: var(--s2); }
+.trow .btn.trow-more { min-width: 36px; min-height: 40px; color: var(--muted); }
+.list-row.danger { color: var(--danger); }

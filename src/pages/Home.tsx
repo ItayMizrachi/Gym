@@ -2,7 +2,7 @@ import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan
 import { lang, t, tm } from '../lib/i18n'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users, Copy, Trash2 } from 'lucide-react'
 import { useCoachRole } from '../lib/coach'
 import { upNext } from '../lib/upNext'
 import { WeeklyRecap } from '../components/WeeklyRecap'
@@ -11,7 +11,7 @@ import { WeeklyRecap } from '../components/WeeklyRecap'
 const listMuscles = (m: string[]) => (m.length <= 1 ? tm(m[0] ?? '') : t('{a} and {b}', { a: tm(m[0]), b: tm(m[1]) }))
 import { useStore } from '../lib/store'
 import { buildStarterPlan } from '../lib/seed'
-import { startEmptySession, startSessionFromWorkout } from '../lib/actions'
+import { duplicateWorkout, removeWorkout, startEmptySession, startSessionFromWorkout } from '../lib/actions'
 import { primeAudio } from '../lib/beep'
 import { fmtDate, splitName } from '../lib/format'
 import { nowIso, uid } from '../lib/uid'
@@ -37,7 +37,7 @@ import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
 import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
 import { FolderGroup, groupByFolder } from '../lib/folders'
-import { Sheet } from '../components/ui'
+import { Confirm, Sheet } from '../components/ui'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
 import { StartChecklist } from '../components/StartChecklist'
@@ -103,6 +103,9 @@ export default function Home() {
   const user = useStore((s) => s.user)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  /** the workout whose ⋯ menu is open, and one waiting for 'Delete?' */
+  const [menuFor, setMenuFor] = useState<Workout | null>(null)
+  const [deleting, setDeleting] = useState<Workout | null>(null)
   const [folded, setFolded] = useState<string[]>(loadFolds)
   useAchievementToasts()
   function toggleFold(label: string) {
@@ -138,9 +141,9 @@ export default function Home() {
     plan.workout_exercises.forEach((w) => save('workout_exercises', w))
   }
 
-  function newWorkout() {
+  function newWorkout(folder = '') {
     const id = uid()
-    save('workouts', { id, user_id: user?.id ?? 'local', name: 'New workout', notes: '', position: db.workouts.length, created_at: nowIso() })
+    save('workouts', { id, user_id: user?.id ?? 'local', name: 'New workout', notes: '', position: db.workouts.length, created_at: nowIso(), ...(folder ? { folder } : {}) })
     nav(`/workout/${id}`)
   }
 
@@ -205,7 +208,10 @@ export default function Home() {
                       {info.last ? ` · ${relativeDay(sessionDate(info.last), now)}` : ` · ${t('new')}`}
                     </div>
                   </button>
-                  {/* moving to a folder lives in the workout editor (Folder → Move), not on every row */}
+                  {/* edit, duplicate, delete: one menu per workout (tapping the name edits too) */}
+                  <button className="btn icon sm ghost trow-more" onClick={() => setMenuFor(w)} aria-label={t('Options for {name}', { name: w.name })}>
+                    <MoreHorizontal size={18} aria-hidden />
+                  </button>
                   <button
                     className="btn sm trow-start"
                     disabled={!!active || info.wes.length === 0}
@@ -218,6 +224,11 @@ export default function Home() {
               )
             }}
           </DragList>
+        )}
+        {!shut && (
+          <button className="btn ghost sm fold-add" onClick={() => newWorkout(g.folder)}>
+            <Plus size={16} aria-hidden /> {t(g.folder ? 'Add a workout to {f}' : 'Add a workout', { f: g.folder })}
+          </button>
         )}
       </div>
     )
@@ -284,7 +295,7 @@ export default function Home() {
             <Sparkles size={18} aria-hidden /> {t('Load my starter plan (4 days)')}
           </button>
           <div className="hm-welcome-more">
-            <button className="btn ghost" onClick={newWorkout}>
+            <button className="btn ghost" onClick={() => newWorkout()}>
               {t('Build your own')}
             </button>
             <button className="btn ghost" disabled={!!active} onClick={emptyWorkout}>
@@ -357,6 +368,49 @@ export default function Home() {
           )}
         </section>
       )}
+      {menuFor && (
+        <Sheet title={menuFor.name} onClose={() => setMenuFor(null)}>
+          <div className="list-group home-links">
+            <button className="list-row" onClick={() => nav(`/workout/${menuFor.id}`)}>
+              <PencilLine size={20} aria-hidden />
+              <span className="grow">
+                <span className="home-link-t">{t('Edit workout')}</span>
+                <span className="tiny muted">{t('Exercises, sets, rest, days and folder')}</span>
+              </span>
+            </button>
+            <button
+              className="list-row"
+              onClick={() => {
+                duplicateWorkout(menuFor.id)
+                setMenuFor(null)
+              }}
+            >
+              <Copy size={20} aria-hidden />
+              <span className="grow home-link-t">{t('Duplicate')}</span>
+            </button>
+            <button
+              className="list-row danger"
+              onClick={() => {
+                setDeleting(menuFor)
+                setMenuFor(null)
+              }}
+            >
+              <Trash2 size={20} aria-hidden />
+              <span className="grow home-link-t">{t('Delete')}</span>
+            </button>
+          </div>
+        </Sheet>
+      )}
+      {deleting && (
+        <Confirm
+          title={t('Delete this workout?')}
+          text={t('Past sessions stay in your history.')}
+          confirmLabel={t('Delete')}
+          danger
+          onConfirm={() => removeWorkout(deleting.id)}
+          onClose={() => setDeleting(null)}
+        />
+      )}
       {renaming !== null && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
         <Sheet title={t("Add a workout")} onClose={() => setAdding(false)}>
@@ -376,7 +430,7 @@ export default function Home() {
               </span>
               <ChevronRight size={18} aria-hidden />
             </button>
-            <button className="list-row" onClick={newWorkout}>
+            <button className="list-row" onClick={() => newWorkout()}>
               <PencilLine size={20} aria-hidden />
               <span className="grow">
                 <span className="home-link-t">{t("Build a new workout")}</span>
