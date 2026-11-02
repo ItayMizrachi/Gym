@@ -72,7 +72,7 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
   // already the only program on Train
   const isCurrent = anyShelved && workouts.every((w) => !!w.shelved === (folderOf(w) !== folder))
   return (
-    <Sheet title={folder ? tr("Folder") : tr(NO_FOLDER)} onClose={onClose}>
+    <Sheet title={folder || tr("Single workouts")} onClose={onClose}>
       <div className="list-group" style={{ marginBottom: 16 }}>
         {!isCurrent && (
           <button

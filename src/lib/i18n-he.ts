@@ -187,6 +187,10 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  'Program options: {f}': 'אפשרויות תוכנית: {f}',
+  'Make one current to see it on Train and in Up next. Nothing is deleted.': 'הפוך אחת לנוכחית כדי לראות אותה במסך האימון וב"הבא בתור". שום דבר לא נמחק.',
+  'Make current': 'הפוך לנוכחית',
+  'Show all programs on Train': 'הצג את כל התוכניות במסך האימון',
   'Only muscles you trained': 'רק שרירים שאימנת',
   'All muscles (+{n} not trained)': 'כל השרירים (+{n} שלא אומנו)',
   'Options for {name}': 'אפשרויות ל{name}',

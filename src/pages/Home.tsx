@@ -2,7 +2,7 @@ import { daysFromName, daysLabel, plannedDays, todaysWorkout } from '../lib/plan
 import { lang, t, tm } from '../lib/i18n'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users, Copy, Trash2 } from 'lucide-react'
+import { Play, Plus, Zap, ChevronRight, Sparkles, Flame, ArrowUp, ArrowDown, Dumbbell, Trophy, LayoutGrid, ChevronDown, Folder, MoreHorizontal, HelpCircle, BookOpen, PencilLine, Users, Copy, Trash2, Layers } from 'lucide-react'
 import { useCoachRole } from '../lib/coach'
 import { upNext } from '../lib/upNext'
 import { WeeklyRecap } from '../components/WeeklyRecap'
@@ -36,7 +36,7 @@ import {
 import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
 import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
-import { FolderGroup, groupByFolder } from '../lib/folders'
+import { FolderGroup, groupByFolder, makeCurrent, unshelveAll } from '../lib/folders'
 import { Confirm, Sheet } from '../components/ui'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
@@ -103,6 +103,9 @@ export default function Home() {
   const user = useStore((s) => s.user)
   const [renaming, setRenaming] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  /** the program 'Add a workout' was tapped in ('' = single workouts) */
+  const [addTo, setAddTo] = useState('')
+  const [othersOpen, setOthersOpen] = useState(false)
   /** the workout whose ⋯ menu is open, and one waiting for 'Delete?' */
   const [menuFor, setMenuFor] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
@@ -172,21 +175,19 @@ export default function Home() {
     </div>
   )
 
+  /** "My workouts" (no folder) reads as single workouts next to programs */
+  const groupName = (g: FolderGroup) => (g.folder ? g.folder : t('Single workouts'))
+
   function folderBlock(g: FolderGroup, withHead: boolean) {
-    const shut = folded.includes(g.label)
+    const shut = false
     return (
-      <div key={g.label} className="fold">
+      <div key={g.label} className="prog-block">
         {withHead && (
-          <div className="row" style={{ gap: 4 }}>
-            <button className="fold-head grow" aria-expanded={!shut} onClick={() => toggleFold(g.label)}>
-              <ChevronDown size={18} className="fold-caret" aria-hidden />
-              {g.folder ? <Folder size={16} className="fold-icon" aria-hidden /> : null}
-              <h3 className="ellipsis">{t(g.label)}</h3>
-              <span className="small muted">{g.workouts.length}</span>
-            </button>
-            {/* every group has a menu, "My workouts" too: it can be the current program like any folder */}
-            <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={t('Folder options: {f}', { f: t(g.label) })}>
-              <MoreHorizontal size={18} />
+          <div className="prog-head">
+            <h2 className="ellipsis grow">{groupName(g)}</h2>
+            {/* rename, switch program, put away: everything about the program in one menu */}
+            <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={t('Program options: {f}', { f: groupName(g) })}>
+              <MoreHorizontal size={20} />
             </button>
           </div>
         )}
@@ -225,11 +226,15 @@ export default function Home() {
             }}
           </DragList>
         )}
-        {!shut && (
-          <button className="btn ghost sm fold-add" onClick={() => newWorkout(g.folder)}>
-            <Plus size={16} aria-hidden /> {t(g.folder ? 'Add a workout to {f}' : 'Add a workout', { f: g.folder })}
-          </button>
-        )}
+        <button
+          className="btn ghost sm fold-add"
+          onClick={() => {
+            setAddTo(g.folder)
+            setAdding(true)
+          }}
+        >
+          <Plus size={16} aria-hidden /> {t('Add a workout')}
+        </button>
       </div>
     )
   }
@@ -348,23 +353,15 @@ export default function Home() {
       {workouts.length > 0 && <StartChecklist />}
 
       {workouts.length > 0 && (
-        <section className="stack" style={{ gap: 8 }} aria-label={t("Your workouts")}>
-          <div className="sec-head hm-sec">
-            <h2>{t('Your workouts')}</h2>
-            <button className="btn sm secondary hm-new" onClick={() => setAdding(true)} aria-haspopup="dialog">
-              <Plus size={16} aria-hidden /> {t('New')}
+        <section className="stack" style={{ gap: 20 }} aria-label={t("Your workouts")}>
+          {groups.map((g) => folderBlock(g, true))}
+          {shelvedGroups.length > 0 && (
+            <button className="list-group list-row prog-others" onClick={() => setOthersOpen(true)}>
+              <Layers size={20} aria-hidden className="muted" />
+              <span className="grow">{t('Other programs')}</span>
+              <span className="small muted">{shelvedGroups.length}</span>
+              <ChevronRight size={18} aria-hidden className="muted" />
             </button>
-          </div>
-          {groups.map((g) => folderBlock(g, groups.length > 1 || shelvedCount > 0))}
-          {shelvedCount > 0 && (
-            <div className="fold hm-others">
-              <button className="fold-head" aria-expanded={folded.includes(OTHERS)} onClick={() => toggleFold(OTHERS)}>
-                <ChevronDown size={18} className="fold-caret" aria-hidden />
-                <h3 className="ellipsis grow">{t('Other programs')}</h3>
-                <span className="small muted">{shelvedCount}</span>
-              </button>
-              {folded.includes(OTHERS) && shelvedGroups.map((g) => folderBlock(g, true))}
-            </div>
           )}
         </section>
       )}
@@ -411,6 +408,39 @@ export default function Home() {
           onClose={() => setDeleting(null)}
         />
       )}
+      {othersOpen && (
+        <Sheet title={t('Other programs')} onClose={() => setOthersOpen(false)}>
+          <div className="stack" style={{ gap: 12 }}>
+            <div className="small muted">{t('Make one current to see it on Train and in Up next. Nothing is deleted.')}</div>
+            {shelvedGroups.map((g) => (
+              <div key={g.label} className="card prog-card">
+                <div className="grow" style={{ minWidth: 0 }}>
+                  <div className="prog-card-t ellipsis">{groupName(g)}</div>
+                  <div className="small muted ellipsis">{g.workouts.map((w) => splitName(w.name)[0]).join(' · ')}</div>
+                </div>
+                <button
+                  className="btn sm secondary"
+                  onClick={() => {
+                    for (const w of makeCurrent(db.workouts, g.folder)) save('workouts', w)
+                    setOthersOpen(false)
+                  }}
+                >
+                  {t('Make current')}
+                </button>
+              </div>
+            ))}
+            <button
+              className="btn ghost block"
+              onClick={() => {
+                for (const w of unshelveAll(db.workouts)) save('workouts', w)
+                setOthersOpen(false)
+              }}
+            >
+              {t('Show all programs on Train')}
+            </button>
+          </div>
+        </Sheet>
+      )}
       {renaming !== null && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
         <Sheet title={t("Add a workout")} onClose={() => setAdding(false)}>
@@ -430,7 +460,7 @@ export default function Home() {
               </span>
               <ChevronRight size={18} aria-hidden />
             </button>
-            <button className="list-row" onClick={() => newWorkout()}>
+            <button className="list-row" onClick={() => newWorkout(addTo)}>
               <PencilLine size={20} aria-hidden />
               <span className="grow">
                 <span className="home-link-t">{t("Build a new workout")}</span>

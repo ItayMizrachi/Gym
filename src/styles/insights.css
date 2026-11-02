@@ -683,3 +683,11 @@ section + section > .month-head:first-child { margin-top: 28px; }
 .fold-add { align-self: flex-start; color: var(--muted); min-height: 40px; padding-inline: var(--s2); }
 .trow .btn.trow-more { min-width: 36px; min-height: 40px; color: var(--muted); }
 .list-row.danger { color: var(--danger); }
+
+/* Train: programs instead of nested folders */
+.prog-block { display: flex; flex-direction: column; gap: 8px; }
+.prog-head { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.prog-head h2 { margin: 0; font-size: var(--fs-xl, 20px); font-weight: 650; }
+.prog-others { min-height: 56px; }
+.prog-card { display: flex; align-items: center; gap: 12px; padding: 14px var(--s4); }
+.prog-card-t { font-weight: 600; }
