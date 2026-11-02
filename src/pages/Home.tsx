@@ -357,7 +357,7 @@ export default function Home() {
           {groups.map((g) => folderBlock(g, true))}
           {shelvedGroups.length > 0 && (
             <button className="list-group list-row prog-others" onClick={() => setOthersOpen(true)}>
-              <Layers size={20} aria-hidden className="muted" />
+              <span className="ico-tile y"><Layers size={18} aria-hidden /></span>
               <span className="grow">{t('Other programs')}</span>
               <span className="small muted">{shelvedGroups.length}</span>
               <ChevronRight size={18} aria-hidden className="muted" />
@@ -369,7 +369,7 @@ export default function Home() {
         <Sheet title={menuFor.name} onClose={() => setMenuFor(null)}>
           <div className="list-group home-links">
             <button className="list-row" onClick={() => nav(`/workout/${menuFor.id}`)}>
-              <PencilLine size={20} aria-hidden />
+              <span className="ico-tile b"><PencilLine size={18} aria-hidden /></span>
               <span className="grow">
                 <span className="home-link-t">{t('Edit workout')}</span>
                 <span className="tiny muted">{t('Exercises, sets, rest, days and folder')}</span>
@@ -382,7 +382,7 @@ export default function Home() {
                 setMenuFor(null)
               }}
             >
-              <Copy size={20} aria-hidden />
+              <span className="ico-tile g"><Copy size={18} aria-hidden /></span>
               <span className="grow home-link-t">{t('Duplicate')}</span>
             </button>
             <button
@@ -392,7 +392,7 @@ export default function Home() {
                 setMenuFor(null)
               }}
             >
-              <Trash2 size={20} aria-hidden />
+              <span className="ico-tile r"><Trash2 size={18} aria-hidden /></span>
               <span className="grow home-link-t">{t('Delete')}</span>
             </button>
           </div>
@@ -414,12 +414,15 @@ export default function Home() {
             <div className="small muted">{t('Make one current to see it on Train and in Up next. Nothing is deleted.')}</div>
             {shelvedGroups.map((g) => (
               <div key={g.label} className="card prog-card">
+                <span className="ico-tile y">
+                  <Dumbbell size={18} aria-hidden />
+                </span>
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="prog-card-t ellipsis">{groupName(g)}</div>
                   <div className="small muted ellipsis">{g.workouts.map((w) => splitName(w.name)[0]).join(' · ')}</div>
                 </div>
                 <button
-                  className="btn sm secondary"
+                  className="btn sm accent-soft"
                   onClick={() => {
                     for (const w of makeCurrent(db.workouts, g.folder)) save('workouts', w)
                     setOthersOpen(false)
@@ -453,7 +456,7 @@ export default function Home() {
                 emptyWorkout()
               }}
             >
-              <Zap size={20} aria-hidden />
+              <span className="ico-tile y"><Zap size={18} aria-hidden /></span>
               <span className="grow">
                 <span className="home-link-t">{t("Start an empty workout")}</span>
                 <span className="tiny muted">{active ? 'Finish the workout in progress first' : 'Add exercises as you go'}</span>
@@ -461,7 +464,7 @@ export default function Home() {
               <ChevronRight size={18} aria-hidden />
             </button>
             <button className="list-row" onClick={() => newWorkout(addTo)}>
-              <PencilLine size={20} aria-hidden />
+              <span className="ico-tile b"><PencilLine size={18} aria-hidden /></span>
               <span className="grow">
                 <span className="home-link-t">{t("Build a new workout")}</span>
                 <span className="tiny muted">{t("Pick exercises, sets and rest, then save it")}</span>
@@ -469,7 +472,7 @@ export default function Home() {
               <ChevronRight size={18} aria-hidden />
             </button>
             <button className="list-row" onClick={() => nav('/programs')}>
-              <LayoutGrid size={20} aria-hidden />
+              <span className="ico-tile g"><LayoutGrid size={18} aria-hidden /></span>
               <span className="grow">
                 <span className="home-link-t">{t("Browse programs")}</span>
                 <span className="tiny muted">{t("Single workouts and weekly plans, ready to go")}</span>

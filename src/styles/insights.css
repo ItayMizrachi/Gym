@@ -691,3 +691,11 @@ section + section > .month-head:first-child { margin-top: 28px; }
 .prog-others { min-height: 56px; }
 .prog-card { display: flex; align-items: center; gap: 12px; padding: 14px var(--s4); }
 .prog-card-t { font-weight: 600; }
+
+/* a soft plate-colour tile behind a list icon: yellow = do now, blue = edit, green = add / copy, red = delete */
+.ico-tile { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; }
+.ico-tile.y { background: var(--accent-soft); color: var(--accent); }
+.ico-tile.b { background: var(--blue-soft); color: var(--blue-text); }
+.ico-tile.g { background: var(--ok-soft); color: var(--ok); }
+.ico-tile.r { background: var(--danger-soft); color: var(--danger-text); }
+.btn.accent-soft { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
