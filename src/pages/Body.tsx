@@ -306,7 +306,8 @@ export default function Body() {
 
       <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
 
-      {withPhotos.length >= 2 && <PhotoCompare photos={withPhotos} all={metrics} initial={compareIds} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
+      {/* before / after opens from the gallery's Compare; Body itself stays short */}
+      {withPhotos.length >= 2 && compareIds && <PhotoCompare photos={withPhotos} all={metrics} initial={compareIds} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">
@@ -333,7 +334,7 @@ export default function Body() {
             <span className="count">{all.length}</span>
           </div>
           <div className="list-group">
-            {(allEntries ? all : all.slice(0, 10)).map((m) => {
+            {(allEntries ? all : all.slice(0, 5)).map((m) => {
               const p = m.weight_kg != null ? prevOf(m) : null
               const d = p ? delta(m.weight_kg, p.weight_kg) : null
               return (
@@ -360,7 +361,7 @@ export default function Body() {
               )
             })}
           </div>
-          {all.length > 10 && (
+          {all.length > 5 && (
             <button className="btn ghost block" style={{ marginTop: 'var(--s2)' }} aria-expanded={allEntries} onClick={() => setAllEntries(!allEntries)}>
               {allEntries ? tr('Show fewer') : tr('Show all {n} entries', { n: all.length })}
             </button>

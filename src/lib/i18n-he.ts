@@ -315,7 +315,7 @@ export const HE_SCREENS: Record<string, string> = {
   'Add a workout': 'הוסף אימון',
   'Add a workout photo': 'הוסף תמונה לאימון',
   'Add progress photo': 'הוסף תמונת התקדמות',
-  'Add ready-made workouts, or save and restore everything.': 'הוסף אימונים מוכנים, או שמור ושחזר הכל.',
+  'Save and restore everything, or bring it from another app.': 'שמור ושחזר הכל, או ייבא מאפליקציה אחרת.',
   'Add the exercises for this workout. You can set sets, reps, rest and supersets for each.': 'הוסף את התרגילים לאימון. אפשר לקבוע סטים, חזרות, מנוחה וסופרסטים לכל אחד.',
   'Add the starter plan': 'הוסף את תוכנית ההתחלה',
   After: 'אחרי',

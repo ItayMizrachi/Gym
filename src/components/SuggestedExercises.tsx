@@ -41,6 +41,8 @@ export function SuggestedExercises() {
     }
   }
 
+  // nothing to review: no card at all (it shows up when someone suggests an exercise)
+  if (list != null && list.length === 0) return null
   return (
     <section className="card stack" aria-label={tr("Suggested exercises")}>
       <h2>{tr("Suggested exercises")}</h2>

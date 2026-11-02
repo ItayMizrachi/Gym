@@ -286,15 +286,12 @@ export default function SettingsPage() {
 
       {group(
         'Data & backup',
-        'Add ready-made workouts, or save and restore everything.',
+        'Save and restore everything, or bring it from another app.',
         <>
-          {link('Browse programs', '20 single workouts and 10 weekly plans', <LayoutGrid size={18} aria-hidden />, () => nav('/programs'))}
-          {link('Add the starter plan', '4 workouts, Upper / Lower twice a week', <Sparkles size={18} aria-hidden />, loadStarter)}
           {link('Export backup', 'Everything as one JSON file', <Download size={18} aria-hidden />, exportJson)}
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => onFile(e.target.files?.[0])} />
           {link('Import backup', 'Restore from a GymLog JSON file', <Upload size={18} aria-hidden />, () => fileRef.current?.click())}
           {link('Import from Hevy or Strong', 'Bring your history from a CSV export', <ArrowRightLeft size={18} aria-hidden />, () => setImportOther(true))}
-          <div className="tiny muted">{t("Backups include workouts, exercises, history and body weight. Photos stay in your account storage.")}</div>
         </>
       )}
 
