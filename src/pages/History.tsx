@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, SlidersHorizontal, X } from 'lucide-react'
+import { BarChart3, ChevronDown, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { sessionDate, sessionPRs } from '../lib/pr'
 import { Session } from '../lib/types'
 import { Empty, Sheet, Thumb } from '../components/ui'
 import { finishedSessions, fmtMinutes, fmtVolume, summarizeSession, SessionSummary, weeklyTrend } from '../lib/stats'
 import { splitName } from '../lib/format'
+import { fullMonthReport, monthKey } from '../lib/monthReport'
+import { lang } from '../lib/i18n'
 import '../styles/insights.css'
+import '../styles/report.css'
 
 interface Item {
   s: Session
@@ -27,6 +30,15 @@ export default function HistoryPage() {
   const [picking, setPicking] = useState(false)
   // months opened by hand (and "the rest of this month")
   const [toggled, setToggled] = useState<Set<string>>(new Set())
+
+  // the report on top: last month's in the first week of a month, this month's so far otherwise
+  const reportMonth = useMemo(() => {
+    const n = new Date()
+    return n.getDate() <= 7 ? new Date(n.getFullYear(), n.getMonth() - 1, 1) : new Date(n.getFullYear(), n.getMonth(), 1)
+  }, [])
+  const report = useMemo(() => fullMonthReport(db, reportMonth), [db, reportMonth])
+  const reportDone = reportMonth.getMonth() !== new Date().getMonth()
+  const reportName = reportMonth.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { month: 'long' })
 
   const all = useMemo<Item[]>(
     () =>
@@ -138,6 +150,31 @@ export default function HistoryPage() {
         )}
       </div>
 
+      {report.now.workouts > 0 && filter === 'all' && (
+        <button className="card hist-report" onClick={() => nav(`/report/${monthKey(reportMonth)}`)}>
+          <span className="ico-tile y">
+            <BarChart3 size={18} aria-hidden />
+          </span>
+          <span className="grow" style={{ minWidth: 0 }}>
+            <span className="hist-report-t">{reportDone ? tr('Your {m} report is ready', { m: reportName }) : tr('{m} so far', { m: reportName })}</span>
+            <span className="hist-report-nums">
+              <span>
+                <b>{report.now.workouts}</b> {tr('workouts')}
+              </span>
+              <span>
+                <b>{report.days.length}</b> {tr('days')}
+              </span>
+              {report.records.length > 0 && (
+                <span>
+                  <b>{report.records.length}</b> {tr('records')}
+                </span>
+              )}
+            </span>
+          </span>
+          <ChevronRight size={18} aria-hidden className="muted" />
+        </button>
+      )}
+
       {filterLabel && (
         <button className="hist-filter" onClick={() => setFilter('all')} aria-label={`Showing ${filterLabel} only. Show all`}>
           {filterLabel} <X size={14} aria-hidden />
@@ -199,6 +236,17 @@ export default function HistoryPage() {
                             {g.volume > 0 && ` · ${fmtVolume(g.volume)}`}
                           </span>
                         </span>
+                      </span>
+                      <span
+                        role="link"
+                        tabIndex={0}
+                        className="hmonth-report"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          nav(`/report/${monthKey(new Date(sessionDate(g.items[0].s)))}`)
+                        }}
+                      >
+                        {tr('Report')}
                       </span>
                       <ChevronDown size={18} aria-hidden className={`hweek-caret${open ? ' up' : ''}`} />
                     </button>

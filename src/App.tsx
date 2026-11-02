@@ -47,6 +47,7 @@ const WorkoutEditor = lazyPage(() => import('./pages/WorkoutEditor'))
 const Exercises = lazyPage(() => import('./pages/Exercises'))
 const ExerciseDetail = lazyPage(() => import('./pages/ExerciseDetail'))
 const HistoryPage = lazyPage(() => import('./pages/History'))
+const MonthReport = lazyPage(() => import('./pages/MonthReport'))
 const SessionDetail = lazyPage(() => import('./pages/SessionDetail'))
 const Body = lazyPage(() => import('./pages/Body'))
 const BodyPhotos = lazyPage(() => import('./pages/BodyPhotos'))
@@ -112,6 +113,7 @@ export default function App() {
               <Route path="/exercise/:id" element={<ExerciseDetail />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/history/:id" element={<SessionDetail />} />
+              <Route path="/report/:ym" element={<MonthReport />} />
               <Route path="/body" element={<Body />} />
               <Route path="/body/photos" element={<BodyPhotos />} />
               <Route path="/settings" element={<SettingsPage />} />
