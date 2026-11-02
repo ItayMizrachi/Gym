@@ -206,7 +206,7 @@ table.t,
   display: flex;
   align-items: flex-start;
   gap: var(--s3);
-  margin: var(--s1) 0 var(--s3);
+  margin: var(--s4) 0 var(--s5);
   min-height: var(--tap);
 }
 .page-head h1 {
