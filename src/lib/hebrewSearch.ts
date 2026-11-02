@@ -28,6 +28,7 @@ const PHRASES: [string, string][] = [
   ['גוד מורנינג', 'good morning'],
   ['פרפר הפוך', 'rear delt'],
   ['מקבילים', 'dips'],
+  ['דיפס', 'dip'],
   ['פיסוק בולגרי', 'split squat'],
   ['סקוואט בולגרי', 'split squat'],
   ['רגל אחת', 'single']

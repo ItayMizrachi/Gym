@@ -41,6 +41,8 @@ export const LIBRARY_EXTRA: ExtraEntry[] = [
   x('Incline Bench Press (Smith Machine)', 'Chest', ['Shoulders', 'Triceps'], 'Smith', 'Smith_Machine_Incline_Bench_Press'),
   x('Pec Deck (Machine)', 'Chest', [], 'Machine', 'Butterfly'),
   x('Cable Fly Crossover', 'Chest', ['Shoulders'], 'Cable', 'Cable_Crossover'),
+  x('Standing Chest Fly (Machine)', 'Chest', ['Shoulders'], 'Machine', 'Cable_Crossover'),
+  x('Seated Dip (Machine)', 'Triceps', ['Chest', 'Shoulders'], 'Machine', 'Dip_Machine'),
   // back
   x('Hex Bar Deadlift', 'Back', ['Quads', 'Glutes', 'Hamstrings'], 'Barbell', 'Trap_Bar_Deadlift', 'weight_reps', 'Intermediate'),
   x('Close Grip Lat Pulldown (Cable)', 'Back', ['Biceps'], 'Cable', 'Close-Grip_Front_Lat_Pulldown'),
