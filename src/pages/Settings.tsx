@@ -301,10 +301,13 @@ export default function SettingsPage() {
         <>
           {link('How GymLog works', 'Short answers about every screen', <HelpCircle size={18} aria-hidden />, () => nav('/help'))}
           {link('Show the welcome tour', '', <PlayCircle size={18} aria-hidden />, reopenWelcome)}
+          {/* only worth saying while it is not installed yet */}
+          {!matchMedia('(display-mode: standalone)').matches && !(navigator as Navigator & { standalone?: boolean }).standalone && (
           <div className="tiny muted">
             <b>{t("Install on your phone.")}</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
             opens full screen and keeps working with a weak signal.
           </div>
+          )}
         </>
       )}
 

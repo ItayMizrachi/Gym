@@ -2391,3 +2391,7 @@ input[type='search']::-webkit-search-decoration {
 .stat-grid.two { grid-template-columns: repeat(2, 1fr); }
 .ssp-toggle { justify-content: flex-start; gap: 10px; }
 .list-row.ssp-row { min-height: 46px; padding-block: 8px; }
+
+/* Settings: a card folded to one line (Coaching) */
+.set-fold { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: start; cursor: pointer; }
+.set-fold-t { display: block; font-size: var(--fs-lg, 18px); font-weight: 650; }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Users } from 'lucide-react'
+import { ChevronDown, ChevronRight, Users } from 'lucide-react'
 import { MyCoach, acceptInvite, leaveCoach, myCoaches, setCoachRole, useCoachRole } from '../lib/coach'
 import { useStore } from '../lib/store'
 import { Confirm, Toggle } from './ui'
@@ -22,6 +22,8 @@ export function CoachSettings() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [leaving, setLeaving] = useState<MyCoach | null>(null)
+  // folded to one line: most people neither coach nor have a coach
+  const [open, setOpen] = useState(false)
 
   const load = () => myCoaches().then(setCoaches, () => setCoaches([]))
   useEffect(() => {
@@ -30,14 +32,15 @@ export function CoachSettings() {
 
   return (
     <section className="card stack" aria-label={tr("Coaching")}>
-      <h2>{tr("Coaching")}</h2>
-      <div className="row set-tog">
-        <div className="grow" onClick={() => setCoachRole(!coach)} style={{ cursor: 'pointer' }}>
-          <div>{tr("I coach other people")}</div>
-          <div className="small muted">{tr("Plans and progress for your trainees. Free for now.")}</div>
-        </div>
-        <Toggle on={coach} onChange={setCoachRole} ariaLabel="I coach other people" />
-      </div>
+      <button className="set-fold" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <span className="grow" style={{ minWidth: 0 }}>
+          <span className="set-fold-t">{tr("Coaching")}</span>
+          <span className="small muted ellipsis" style={{ display: 'block' }}>
+            {coach ? tr('You coach other people') : coaches?.length ? tr('Coached by {e}', { e: coaches[0].coach_email }) : tr('Coach others, or connect to your coach')}
+          </span>
+        </span>
+        <ChevronDown size={18} aria-hidden className="muted" style={{ transform: open ? 'rotate(180deg)' : undefined }} />
+      </button>
       {coach && (
         <button className="btn set-link" onClick={() => nav('/coach')}>
           <Users size={18} aria-hidden />
@@ -45,6 +48,15 @@ export function CoachSettings() {
           <ChevronRight size={16} aria-hidden />
         </button>
       )}
+      {open && (
+      <>
+      <div className="row set-tog">
+        <div className="grow" onClick={() => setCoachRole(!coach)} style={{ cursor: 'pointer' }}>
+          <div>{tr("I coach other people")}</div>
+          <div className="small muted">{tr("Plans and progress for your trainees. Free for now.")}</div>
+        </div>
+        <Toggle on={coach} onChange={setCoachRole} ariaLabel="I coach other people" />
+      </div>
 
       <div className="stack" style={{ gap: 8 }}>
         <div>{tr("My coach")}</div>
@@ -96,6 +108,8 @@ export function CoachSettings() {
         </form>
         {error && <div className="small" style={{ color: 'var(--danger-text)' }}>{error}</div>}
       </div>
+      </>
+      )}
 
       {leaving && (
         <Confirm
