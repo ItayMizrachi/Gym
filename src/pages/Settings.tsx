@@ -70,6 +70,7 @@ export default function SettingsPage() {
   const [awake, setAwake] = useState(flag('gymlog:awake'))
   const [importOther, setImportOther] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [leaving, setLeaving] = useState(false)
   const [confirmImport, setConfirmImport] = useState<DB | null>(null)
   const prefs = usePrefs()
   const nav = useNavigate()
@@ -313,7 +314,7 @@ export default function SettingsPage() {
 
       {repo?.mode === 'cloud' && (
         <section className="card set-danger" aria-label={t("Sign out or delete account")}>
-          <button className="set-row-btn" onClick={() => signOut()}>
+          <button className="set-row-btn" onClick={() => setLeaving(true)}>
             <LogOut size={18} aria-hidden /> {t("Sign out")}
           </button>
           <button className="set-row-btn danger-text" onClick={() => setDeleting(true)}>
@@ -324,6 +325,18 @@ export default function SettingsPage() {
       <ScreenInfo />
 
       {importOther && <ImportOther onClose={() => setImportOther(false)} />}
+      {leaving && (
+        <Confirm
+          title={t('Sign out?')}
+          text={t('Your workouts stay in your account. Sign in with Google to see them again.')}
+          confirmLabel={t('Sign out')}
+          onConfirm={() => {
+            setLeaving(false)
+            void signOut()
+          }}
+          onClose={() => setLeaving(false)}
+        />
+      )}
       {deleting && <DeleteAccountSheet email={user?.email ?? 'your account'} onExport={exportJson} onClose={() => setDeleting(false)} />}
       {confirmImport && (
         <Confirm
