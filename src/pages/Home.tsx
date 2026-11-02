@@ -38,6 +38,8 @@ import { DragList } from '../components/DragList'
 import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
 import { FolderGroup, groupByFolder } from '../lib/folders'
 import { Sheet } from '../components/ui'
+import { WeekLine } from '../components/GoalRing'
+import { RecoveryLine } from '../components/RecoveryCard'
 import { StartChecklist } from '../components/StartChecklist'
 import { useAchievementToasts } from '../components/Achievements'
 import '../styles/insights.css'
@@ -159,6 +161,14 @@ export default function Home() {
 
   const [heroName, heroWhen] = next ? splitName(next.workout.name) : ['', '']
 
+  // this week against the goal + muscle recovery: two short lines at the foot of the hero
+  const weekRows = workouts.length > 0 && (
+    <div className="hm-foot">
+      <WeekLine />
+      <RecoveryLine />
+    </div>
+  )
+
   function folderBlock(g: FolderGroup, withHead: boolean) {
     const shut = folded.includes(g.label)
     return (
@@ -256,6 +266,7 @@ export default function Home() {
           >
             <Play size={18} aria-hidden /> {t('Resume workout')}
           </button>
+          {weekRows}
         </div>
       )}
 
@@ -316,6 +327,7 @@ export default function Home() {
             <button className="btn primary block hm-go" onClick={() => start(next.workout)} disabled={hero.wes.length === 0}>
               <Play size={18} aria-hidden /> {t('Start {name}', { name: heroName })}
             </button>
+            {weekRows}
             </div>
         )
       )}
