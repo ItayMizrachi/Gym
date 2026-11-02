@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target, Wand2 } from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target, Wand2, ChevronDown } from 'lucide-react'
 import { useStore } from '../lib/store'
 import {
   GEAR_LABEL,
@@ -168,19 +168,21 @@ function FilterRow<T extends string>({
   value: T | null
   onChange: (v: T | null) => void
 }) {
+  // one chip per filter that opens the phone's own picker, so the three filters fit on one line
+  const any = tr(label === tr('Level') ? 'Any level' : label === tr('Equipment') ? 'Any equipment' : label === tr('Length') ? 'Any length' : 'Any days')
   return (
-    <div className="pg-filter" role="group" aria-label={label}>
-      <div className="chips">
-        <button className={`chip any ${value == null ? 'active' : ''}`} aria-pressed={value == null} onClick={() => onChange(null)}>
-          {tr(label === tr('Level') ? 'Any level' : label === tr('Equipment') ? 'Any equipment' : label === tr('Length') ? 'Any length' : 'Any days')}
-        </button>
+    <label className={`chip pg-sel${value != null ? ' active' : ''}`}>
+      <span className="ellipsis">{value != null ? tr(options.find((o) => o.id === value)?.label ?? '') : label}</span>
+      <ChevronDown size={14} aria-hidden />
+      <select aria-label={label} value={value ?? ''} onChange={(e) => onChange((e.target.value || null) as T | null)}>
+        <option value="">{any}</option>
         {options.map((o) => (
-          <button key={o.id} className={`chip ${value === o.id ? 'active' : ''}`} aria-pressed={value === o.id} onClick={() => onChange(value === o.id ? null : o.id)}>
+          <option key={o.id} value={o.id}>
             {tr(o.label)}
-          </button>
+          </option>
         ))}
-      </div>
-    </div>
+      </select>
+    </label>
   )
 }
 
@@ -262,12 +264,11 @@ export default function Programs() {
             onClick={() => setParams(k === 'weekly' ? { tab: 'weekly' } : {}, { replace: true })}
           >
             {tr(k === 'single' ? 'Single workouts' : 'Weekly programs')}
-            <span className="pg-tab-sub">{tr(k === 'single' ? 'One session, start now' : 'A plan for the whole week')}</span>
           </button>
         ))}
       </div>
 
-      <div className="stack" style={{ gap: 6 }}>
+      <div className="pg-sels">
         <FilterRow<Level> label={tr("Level")} options={LEVELS.map((l) => ({ id: l, label: tr(l) }))} value={f.level} onChange={(v) => setF({ level: v })} />
         <FilterRow<Gear>
           label={tr("Equipment")}
