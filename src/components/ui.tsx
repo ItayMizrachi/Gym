@@ -2,6 +2,7 @@ import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { X, Camera, ChevronLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { createPortal } from 'react-dom'
 import { useStore } from '../lib/store'
 import { resizeImage } from '../lib/images'
 import { DUR, exitDelay } from '../lib/motion'
@@ -280,7 +281,8 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
     }
   }
 
-  return (
+  // drawn at the top of the page (portal), so a card or a stacking context around it can never put it under the tab bar
+  return createPortal(
     <div className={`overlay${closing ? ' closing' : ''}`} onClick={requestClose}>
       <div
         ref={ref}
@@ -300,7 +302,8 @@ export function Sheet({ title, onClose, children }: { title?: string; onClose: (
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
