@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { lang, setLang, t as tr } from '../lib/i18n'
-import { ShieldCheck, Zap, Images, Trophy } from 'lucide-react'
+import { ShieldCheck, Zap, Images, Trophy, Languages, Check } from 'lucide-react'
 import '../styles/workout-flow.css'
 import { useStore } from '../lib/store'
 import { redirectUrl, supabase } from '../lib/supabase'
@@ -41,9 +41,7 @@ export default function Login() {
   return (
     <div className="login">
       {/* before signing in, so someone who reads only Hebrew can switch first */}
-      <button className="login-lang" onClick={() => setLang(lang === 'he' ? 'en' : 'he')} lang={lang === 'he' ? 'en' : 'he'}>
-        {lang === 'he' ? 'English' : 'עברית'}
-      </button>
+      <LangMenu />
       <div className="login-brand">
         <img className="logo" src="icon.svg" alt="" width={72} height={72} />
         <h1>
@@ -98,6 +96,38 @@ export default function Login() {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+/** a language icon in the corner; tap for a small menu with each language in its own script */
+function LangMenu() {
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    // a tap anywhere else closes it (after this tap has finished)
+    const id = setTimeout(() => document.addEventListener('click', close), 0)
+    return () => {
+      clearTimeout(id)
+      document.removeEventListener('click', close)
+    }
+  }, [open])
+  return (
+    <div className="login-lang-wrap">
+      <button className="login-lang" onClick={() => setOpen((v) => !v)} aria-haspopup="menu" aria-expanded={open} aria-label="Language / שפה">
+        <Languages size={20} aria-hidden />
+      </button>
+      {open && (
+        <div className="login-lang-menu" role="menu">
+          {(['en', 'he'] as const).map((l) => (
+            <button key={l} role="menuitemradio" aria-checked={lang === l} lang={l} onClick={() => lang !== l && setLang(l)}>
+              <span className="grow">{l === 'en' ? 'English' : 'עברית'}</span>
+              {lang === l && <Check size={16} aria-hidden />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
