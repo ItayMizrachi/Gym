@@ -30,11 +30,18 @@ export function buildSessionExercise(
     superset: string
     drop_last: boolean
     note: string
+    warmup?: boolean
   },
   excludeSessionId?: string,
   increment = getPrefs().increment
 ): SessionExercise {
   const last = lastPerformance(db, exercise.id, excludeSessionId)
+  if (cfg.warmup) {
+    // a warm-up-only exercise (e.g. light lat pulldowns before pull ups): warm-up rows, last time's weights, no progression
+    const lastWarm = last?.sets.filter((s) => s.kind === 'warmup') ?? []
+    const rows = Array.from({ length: cfg.sets }, (_, i) => newSet('warmup', (lastWarm[i] ?? lastWarm[lastWarm.length - 1])?.weight ?? cfg.weight))
+    return { exercise_id: exercise.id, name: exercise.name, rest_sec: cfg.rest_sec, superset: cfg.superset, note: cfg.note, rep_min: cfg.rep_min, rep_max: cfg.rep_max, sets: rows }
+  }
   const progression = suggestProgression(last, cfg.rep_min, cfg.rep_max, increment)
   const bump = progression?.kind === 'increase' ? progression.delta : 0
   const lastWork = last?.sets.filter((s) => s.kind === 'work' || s.kind === 'failure') ?? []

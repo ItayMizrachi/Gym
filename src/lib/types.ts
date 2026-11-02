@@ -36,6 +36,9 @@ export interface Workout {
   days?: number[]
   /** folded away under "Other programs" because another program is the current one; kept, never suggested */
   shelved?: boolean
+  /** ready-made program this workout was saved from (src/lib/programData.ts id) and its version then */
+  program?: string
+  program_version?: number
 }
 
 export interface WorkoutExercise {
@@ -52,6 +55,8 @@ export interface WorkoutExercise {
   superset: string // '' = none, otherwise a group label such as "A"
   drop_last: boolean
   note: string
+  /** warm-up only: every set is a warm-up set (not counted for records, volume or progression) */
+  warmup?: boolean
 }
 
 export interface SessionSet {

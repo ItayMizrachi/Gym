@@ -119,6 +119,8 @@ export const NAME_TO_LIB: Record<string, string> = {
   'cable pullover (straight arm)': 'Straight-Arm_Pulldown',
   'standing leg curl (machine)': 'Standing_Leg_Curl',
   'wrist curl (cable)': 'Cable_Wrist_Curl',
+  'bayesian curl (cable)': 'Standing_One-Arm_Cable_Curl',
+  'woodchop (cable)': 'Standing_Cable_Wood_Chop',
   'reverse wrist curl (cable)': 'Palms-Down_Wrist_Curl_Over_A_Bench'
 }
 

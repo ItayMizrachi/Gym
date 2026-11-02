@@ -173,3 +173,10 @@
 .recap-nums .down { color: var(--muted); }
 .recap-pr { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--accent); font-weight: 600; }
 .recap-x { position: absolute; top: 6px; right: 6px; }
+
+/* a saved program has a newer version (components/ProgramUpdateCard.tsx) */
+.prog-upd { display: flex; align-items: center; gap: 12px; }
+.prog-upd-icon { color: var(--accent); flex: none; }
+.prog-upd-t { font-weight: 600; }
+.prog-upd-w { margin: 0; font-size: 16px; font-weight: 600; }
+.prog-upd-list { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--text-2); font-size: 14px; }

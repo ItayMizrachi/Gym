@@ -18,6 +18,8 @@ export interface ProgramExercise {
   note: string
   /** a drop set after the last set */
   drop?: boolean
+  /** warm-up only (sets not counted) */
+  warmup?: boolean
 }
 
 export interface ProgramWorkout {
@@ -39,6 +41,8 @@ export interface Program {
   goal: string
   /** days a week (1 for single workouts) */
   days: number
+  /** raise it when the program changes: people who saved an older version are told and can update (programUpdates.ts) */
+  version?: number
   workouts: ProgramWorkout[]
 }
 
@@ -188,7 +192,18 @@ export function buildProgram(p: Program, userId: string, existingExercises: Exer
 
   const plan = p.kind === 'weekly' ? programDays(p.workouts.length, p.days) : []
   p.workouts.forEach((pw, i) => {
-    const w: Workout = { id: uid(), user_id: userId, name: pw.name, notes: pw.notes, position: start + i, created_at: nowIso(), folder, ...(plan[i]?.length ? { days: plan[i] } : {}) }
+    const w: Workout = {
+      id: uid(),
+      user_id: userId,
+      name: pw.name,
+      notes: pw.notes,
+      position: start + i,
+      created_at: nowIso(),
+      folder,
+      ...(plan[i]?.length ? { days: plan[i] } : {}),
+      program: p.id,
+      program_version: p.version ?? 1
+    }
     workouts.push(w)
     pw.exercises.forEach((pe, j) =>
       workout_exercises.push({
@@ -204,6 +219,7 @@ export function buildProgram(p: Program, userId: string, existingExercises: Exer
         rest_sec: pe.rest_sec,
         superset: pe.superset,
         drop_last: pe.drop ?? false,
+        ...(pe.warmup ? { warmup: true } : {}),
         note: pe.note
       })
     )

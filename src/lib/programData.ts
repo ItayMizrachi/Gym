@@ -2,16 +2,17 @@ import type { Program, ProgramExercise, ProgramWorkout } from './programs'
 import { CatalogExercise, X } from './programCatalog'
 
 /** s(X.bench, 3, '6-8', 150, { ss: 'A' }). For timed exercises the range is seconds. `drop` adds a drop set after the last set. */
-function s(ex: CatalogExercise, sets: number, range: string, rest: number, o: { ss?: string; note?: string; drop?: boolean } = {}): ProgramExercise {
+function s(ex: CatalogExercise, sets: number, range: string, rest: number, o: { ss?: string; note?: string; drop?: boolean; warmup?: boolean } = {}): ProgramExercise {
   const [a, b] = range.split('-').map(Number)
-  return { ...ex, sets, rep_min: a, rep_max: b ?? a, rest_sec: rest, superset: o.ss ?? '', note: o.note ?? '', ...(o.drop ? { drop: true } : {}) }
+  return { ...ex, sets, rep_min: a, rep_max: b ?? a, rest_sec: rest, superset: o.ss ?? '', note: o.note ?? '', ...(o.drop ? { drop: true } : {}), ...(o.warmup ? { warmup: true } : {}) }
 }
 const wo = (name: string, notes: string, exercises: ProgramExercise[]): ProgramWorkout => ({ name, notes, exercises })
 const PLANK = (sets = 2) => s(X.plank, sets, '30-60', 60, { note: 'Keep a straight line from head to heels.' })
 // shared parts of the Ultimate 4-Day Plan
-const ULT_LATERAL = (ss: string) =>
-  s(X.oneArmLateral, 3, '10-15', 30, { ss, drop: true, note: 'Superset with the reverse fly; do the 3rd set alone after it. Drop set on the last set.' })
-const ULT_REAR_FLY = (ss: string) => s(X.oneArmRearFly, 2, '12-15', 90, { ss, drop: true })
+const ULT_WARMUP = () =>
+  s(X.latPd, 3, '6-15', 15, { warmup: true, note: 'Warm-up, wide grip: 15 / 10 / 6 reps, light to moderate, not to failure. Not counted as working sets.' })
+const ULT_LATERAL = () => s(X.oneArmLateral, 3, '10-15', 60, { note: 'Strict form, controlled tempo.' })
+const ULT_REAR_FLY = () => s(X.oneArmRearFly, 2, '12-15', 60)
 const ULT_LEG_PRESS = (range: string, rest: number) =>
   s(X.legPress, 2, range, rest, { note: 'Natural stance (about shoulder width), as deep as you can without the pelvis lifting; knees over toes, no knee pain.' })
 const ULT_CALF = () => s(X.calf, 3, '10-15', 90, { drop: true, note: 'Pause 1-2 s at the bottom; full stretch. Drop set on the last set.' })
@@ -182,14 +183,19 @@ const W = {
   // parts of weekly programs only
   // The Ultimate 4-Day Plan: 2 hard sets per lift, under 75 minutes a day
   ultUpperA: wo('Upper A', 'Back and chest focus. 2 working sets per lift; under 75 min.', [
+    ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 180),
     s(X.inclineMachine, 2, '6-10', 180),
-    s(X.isoRow, 2, '8-10', 150, { note: 'Or a chest-supported T-bar row.' }),
-    s(X.wDip, 2, '6-10', 150),
+    s(X.isoRow, 2, '8-10', 150, {
+      note: 'Or a chest-supported T-bar row, whichever is free (iso-lateral preferred). After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
+    }),
+    s(X.wDip, 2, '6-10', 150, {
+      note: 'Parallel bars preferred (more chest stretch, better overload); the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
+    }),
     s(X.plateOhp, 2, '8-10', 150),
-    ULT_LATERAL('A'),
-    ULT_REAR_FLY('A'),
-    s(X.cableCurl, 2, '10-12', 30, { ss: 'B', drop: true }),
+    ULT_LATERAL(),
+    ULT_REAR_FLY(),
+    s(X.bayesianCurl, 2, '10-12', 30, { ss: 'B', drop: true, note: 'Face away from the cable, arm behind the body: long-head stretch. One arm at a time.' }),
     s(X.pushdown, 2, '10-12', 90, { ss: 'B', drop: true })
   ]),
   ultLowerA: wo('Lower A', 'Quad focus. 2 working sets per lift; under 75 min.', [
@@ -198,27 +204,30 @@ const W = {
     s(X.legExt, 2, '10-15', 90, { drop: true }),
     s(X.standingCurl, 2, '10-12', 90, { drop: true, note: 'Lean forward on the pad for more hamstring stretch; slow on the way down.' }),
     ULT_CALF(),
-    s(X.cableCrunch, 3, '10-15', 60, { note: 'Last set: crunch with a twist to each side (obliques).' }),
+    s(X.cableCrunch, 3, '10-15', 60, { note: 'Straight crunch; the woodchop covers the obliques.' }),
+    s(X.woodchop, 2, '10-12', 60, { note: 'Reps per side, high to low. Same cable station as the crunch; rotate through the torso, hips stable, controlled return.' }),
     ...ULT_WRISTS()
   ]),
   ultUpperB: wo('Upper B', 'Chest and back, arms. 2 working sets per lift; under 75 min.', [
     s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine.' }),
-    s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week.' }),
+    ULT_WARMUP(),
     s(X.wPullUp, 2, '6-10', 180),
+    s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
     s(X.closeRow, 2, '8-12', 150),
     s(X.straightArm, 2, '12-15', 90, { drop: true, note: 'Lats in the stretch; elbows soft and fixed.' }),
-    s(X.chestFly, 2, '10-15', 120, { drop: true }),
-    ULT_LATERAL('A'),
-    ULT_REAR_FLY('A'),
+    s(X.chestFly, 2, '10-15', 90, { drop: true }),
+    ULT_LATERAL(),
+    ULT_REAR_FLY(),
     s(X.hammer, 2, '10-12', 30, { ss: 'B', drop: true }),
-    s(X.pushdown, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Or an overhead cable extension for more long-head stretch.' })
+    s(X.ohExt, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Long-head focus: full stretch behind the head, elbows stay pointed forward.' })
   ]),
   ultLowerB: wo('Lower B', 'Glute and hamstring focus. 2 working sets per lift; under 75 min.', [
-    s(X.hipThrust, 2, '8-12', 150),
+    s(X.hipThrust, 3, '8-12', 150, { note: 'Pause 1-2 s at the top; full lockout with the glutes.' }),
     ULT_LEG_PRESS('10-12', 150),
     s(X.standingCurl, 2, '10-12', 90, { drop: true }),
     s(X.legExt, 2, '12-15', 90, { drop: true }),
     ULT_CALF(),
+    s(X.cableLateral, 2, '12-15', 90, { note: 'Cable or dumbbell. Extra side-delt volume (3rd session of the week).' }),
     s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' }),
     ...ULT_WRISTS()
   ]),
@@ -460,6 +469,8 @@ const weekly = (p: Omit<Program, 'kind'>): Program => ({ ...p, kind: 'weekly' })
 export const WEEKLY_PROGRAMS: Program[] = [
   weekly({
     id: 'ultimate-4',
+    // 2 (2026-11-02): lat pulldown warm-ups, Bayesian curl, woodchop, 3rd lateral day, straight sets for delts
+    version: 2,
     name: 'The Ultimate 4-Day Plan',
     description:
       'Upper / lower on Sunday, Monday, Wednesday and Thursday. Only 2 hard working sets per lift, so every day fits in 75 minutes with warm-ups. Drop sets and supersets on the small muscles, forearms twice a week.',

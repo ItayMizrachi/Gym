@@ -149,6 +149,7 @@ export default function WorkoutEditor() {
                 <bdi dir="ltr">{we.sets} × {reps}</bdi>
                 {we.weight ? ` · ${fmtKg(we.weight)} ${tr('kg')}` : ''} · {tr('rest {t}', { t: fmtRest(we.rest_sec) })}
                 {we.drop_last ? ` · ${tr('drop')}` : ''}
+                {we.warmup ? ` · ${tr('warm-up')}` : ''}
               </div>
               {we.note && open !== we.id && (
                 <div className="tiny muted ellipsis" style={{ marginTop: 2 }}>
@@ -214,6 +215,7 @@ export default function WorkoutEditor() {
                 <Toggle blue label={tr("Drop set at the end")} on={we.drop_last} onChange={(v) => patch(we, { drop_last: v })} />
               </div>
             </div>
+            <Toggle label={tr('Warm-up only (not counted)')} on={!!we.warmup} onChange={(v) => patch(we, { warmup: v })} />
             <div className="field">
               Superset with
               <div className="group-pick" role="radiogroup" aria-label={tr("Superset group")}>

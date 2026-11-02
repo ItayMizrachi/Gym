@@ -35,6 +35,7 @@ import {
 } from '../lib/stats'
 import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
+import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
 import { FolderGroup, groupByFolder } from '../lib/folders'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
@@ -355,6 +356,7 @@ export default function Home() {
       )}
 
       {!active && <WeeklyRecap />}
+      {!active && <ProgramUpdateCard />}
       {workouts.length > 0 && <StartChecklist />}
 
       {workouts.length > 0 && (

@@ -11,6 +11,8 @@ import { uid } from './uid'
 
 const mainSets = (e: SessionExercise) => e.sets.filter((s) => s.kind === 'work' || s.kind === 'failure').length
 const hasDrop = (e: SessionExercise) => e.sets.some((s) => s.kind === 'drop')
+/** sets that match the plan row's count: warm-ups for a warm-up-only row, work sets otherwise */
+const planSets = (e: SessionExercise, we: Pick<WorkoutExercise, 'warmup'> | null) => (we?.warmup ? e.sets.filter((s) => s.kind === 'warmup').length : mainSets(e))
 
 /** Pair each session exercise with a plan row of the same exercise (in order, each row used once). */
 function match(session: Session, wes: WorkoutExercise[]) {
@@ -35,7 +37,7 @@ export function planChanges(session: Session, wes: WorkoutExercise[], nameOf: (e
       out.push(`Added ${e.name}`)
       continue
     }
-    const n = Math.max(1, mainSets(e))
+    const n = Math.max(1, planSets(e, we))
     if (n !== we.sets) out.push(`${e.name}: ${n} sets instead of ${we.sets}`)
     if (hasDrop(e) !== we.drop_last) out.push(`${e.name}: ${hasDrop(e) ? 'drop set added' : 'no drop set'}`)
     if (e.rest_sec !== we.rest_sec) out.push(`${e.name}: rest ${fmtRest(e.rest_sec)} instead of ${fmtRest(we.rest_sec)}`)
@@ -66,7 +68,7 @@ export function planUpdate(session: Session, wes: WorkoutExercise[], workoutId: 
         note: ''
       }),
       position,
-      sets: Math.max(1, mainSets(e)),
+      sets: Math.max(1, planSets(e, we)),
       drop_last: hasDrop(e),
       rest_sec: e.rest_sec,
       superset: e.superset || ''

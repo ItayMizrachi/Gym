@@ -610,3 +610,11 @@ notify pgrst, 'reload schema';
 alter table public.workouts add column if not exists shelved boolean not null default false;
 
 notify pgrst, 'reload schema';
+
+-- 2026-11-02: warm-up-only plan rows; workouts remember the ready-made program (and its version) they came from,
+-- so a newer version can be offered without changing anyone's copy.
+alter table public.workout_exercises add column if not exists warmup boolean not null default false;
+alter table public.workouts add column if not exists program text;
+alter table public.workouts add column if not exists program_version integer;
+
+notify pgrst, 'reload schema';
