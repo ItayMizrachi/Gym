@@ -187,6 +187,10 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  Superset: 'סופרסט',
+  'Superset with {names}': 'בסופרסט עם {names}',
+  'Add another exercise to it': 'הוסף אליו עוד תרגיל',
+  'Superset with…': 'סופרסט עם…',
   'Program updated': 'התוכנית עודכנה',
   '{name} was updated': '{name} עודכנה',
   'Your copy has not changed. See what is new and decide.': 'התוכנית שלך לא השתנתה. אפשר לראות מה חדש ולהחליט.',
@@ -234,7 +238,6 @@ export const HE_SCREENS: Record<string, string> = {
   Started: 'התחיל',
   "Strong's file has no unit. Turn on if you log in lb.": 'בקובץ של Strong אין יחידות. הפעל אם אתה רושם בליברות.',
   'Suggested when you reach the top of the rep range on every work set': 'מוצע כשמגיעים לראש טווח החזרות בכל סטי העבודה',
-  Superset: 'סופרסט',
   'Tap a set number to switch between work, warm-up, drop and failure.': 'לחץ על מספר הסט כדי להחליף בין עבודה, חימום, דרופ וכשל.',
   'Tap one to change or remove it. Hold and drag to move it.': 'לחץ כדי לשנות או להסיר. החזק וגרור כדי להזיז.',
   'Tap the set number to change its type or remove the set.': 'לחץ על מספר הסט כדי לשנות את הסוג או להסיר אותו.',

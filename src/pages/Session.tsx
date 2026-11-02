@@ -1,3 +1,5 @@
+import { SupersetPicker } from '../components/SupersetPicker'
+import { linkSuperset, unlinkSuperset } from '../lib/superset'
 import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -1126,6 +1128,12 @@ export default function SessionPage() {
           count={session.data.exercises.length}
           onClose={() => setMoreIdx(null)}
           onChange={(fn) => mutateEx(moreIdx, fn)}
+          index={moreIdx}
+          all={session.data.exercises}
+          onGroups={(next) => {
+            const cur = useStore.getState().db.sessions.find((x) => x.id === session.id)!
+            save('sessions', { ...cur, data: { ...cur.data, exercises: cur.data.exercises.map((e, k) => ({ ...e, superset: next[k]?.superset ?? e.superset })) } })
+          }}
           onReorder={() => {
             setMoreIdx(null)
             setReordering(true)
@@ -1419,9 +1427,15 @@ function MoreSheet({
   onChange,
   onReorder,
   onRemove,
-  onReplace
+  onReplace,
+  index,
+  all,
+  onGroups
 }: {
   se: SessionExercise
+  index: number
+  all: SessionExercise[]
+  onGroups: (next: SessionExercise[]) => void
   count: number
   onClose: () => void
   onChange: (fn: (e: SessionExercise) => SessionExercise) => void
@@ -1445,6 +1459,18 @@ function MoreSheet({
           {t("Note for this workout")}
           <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
         </label>
+        {count > 1 && (
+          <div className="field">
+            {t('Superset')}
+            <SupersetPicker
+              names={all.map((e) => e.name)}
+              groups={all.map((e) => e.superset)}
+              index={index}
+              onLink={(k) => onGroups(linkSuperset(all, index, k))}
+              onUnlink={() => onGroups(unlinkSuperset(all, index))}
+            />
+          </div>
+        )}
         <button className="btn block" disabled={count < 2} onClick={onReorder}>
           <GripVertical size={16} aria-hidden /> {t('Reorder exercises')}
         </button>

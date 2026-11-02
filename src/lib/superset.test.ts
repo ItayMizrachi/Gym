@@ -24,3 +24,20 @@ describe('nextInSuperset', () => {
     expect(nextInSuperset(session([ex('', [true]), ex('', [false])]), 0)).toBeNull()
   })
 })
+
+import { linkSuperset as link, unlinkSuperset as unlink, partnersOf as partners } from './superset'
+
+describe('superset by pairing', () => {
+  const g = (...s: string[]) => s.map((superset) => ({ superset }))
+  it('pairs two exercises with a free letter', () => {
+    expect(link(g('', '', 'A', 'A'), 0, 1).map((x) => x.superset)).toEqual(['B', 'B', 'A', 'A'])
+  })
+  it('joins the partner group; a group left with one exercise is dissolved', () => {
+    expect(link(g('A', 'A', ''), 2, 0).map((x) => x.superset)).toEqual(['A', 'A', 'A'])
+    expect(link(g('A', 'A', 'B', 'B'), 1, 2).map((x) => x.superset)).toEqual(['', 'B', 'B', 'B'])
+  })
+  it('removing one of a pair frees both', () => {
+    expect(unlink(g('A', 'A', ''), 0).map((x) => x.superset)).toEqual(['', '', ''])
+    expect(partners(g('A', '', 'A'), 0)).toEqual([2])
+  })
+})

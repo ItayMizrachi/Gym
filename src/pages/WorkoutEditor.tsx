@@ -1,3 +1,5 @@
+import { SupersetPicker } from '../components/SupersetPicker'
+import { linkSuperset, unlinkSuperset } from '../lib/superset'
 import { ComponentProps, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,7 +18,6 @@ import { fmtKg, fmtRest, parseRest } from '../lib/format'
 import { uid } from '../lib/uid'
 import { Exercise, WorkoutExercise, trackingOf } from '../lib/types'
 
-const GROUPS = ['', 'A', 'B', 'C', 'D']
 
 function RestInput({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const [text, setText] = useState(fmtRest(value))
@@ -67,6 +68,10 @@ export default function WorkoutEditor() {
     )
   const wes = db.workout_exercises.filter((x) => x.workout_id === w.id).sort((a, b) => a.position - b.position)
 
+  /** superset changes touch two rows (or more): save the ones whose group changed */
+  function saveGroups(next: WorkoutExercise[]) {
+    next.forEach((x, k) => x.superset !== wes[k].superset && save('workout_exercises', x))
+  }
   function patch(we: WorkoutExercise, p: Partial<WorkoutExercise>) {
     save('workout_exercises', { ...we, ...p }, { debounce: 400 })
   }
@@ -217,20 +222,14 @@ export default function WorkoutEditor() {
             </div>
             <Toggle label={tr('Warm-up only (not counted)')} on={!!we.warmup} onChange={(v) => patch(we, { warmup: v })} />
             <div className="field">
-              Superset with
-              <div className="group-pick" role="radiogroup" aria-label={tr("Superset group")}>
-                {(GROUPS.includes(we.superset) ? GROUPS : [...GROUPS, we.superset]).map((g) => (
-                  <button
-                    key={g || 'none'}
-                    role="radio"
-                    aria-checked={we.superset === g}
-                    className={`${g ? '' : 'none'} ${we.superset === g ? 'on' : ''}`}
-                    onClick={() => patch(we, { superset: g })}
-                  >
-                    {g || 'None'}
-                  </button>
-                ))}
-              </div>
+              {tr('Superset')}
+              <SupersetPicker
+                names={wes.map((x) => db.exercises.find((e) => e.id === x.exercise_id)?.name ?? '')}
+                groups={wes.map((x) => x.superset)}
+                index={i}
+                onLink={(k) => saveGroups(linkSuperset(wes, i, k))}
+                onUnlink={() => saveGroups(unlinkSuperset(wes, i))}
+              />
             </div>
             <input
               className="input"
