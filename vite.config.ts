@@ -60,6 +60,8 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // rest-over alerts pushed by the server (public/push-sw.js, supabase/functions/rest-push)
+        importScripts: ['push-sw.js'],
         navigateFallback: 'index.html',
         // App shell only. Launch screens are read by iOS at install time and the large PNG icons by the
         // OS installer, so precaching them would only cost download on every update.

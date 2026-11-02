@@ -8,7 +8,8 @@ import { Skeleton, SkeletonList } from './ui'
 import { fmtClock, splitName } from '../lib/format'
 import { beep } from '../lib/beep'
 import { usePrefs } from '../lib/prefs'
-import { cancelRestNotification, scheduleRestNotification } from '../lib/notify'
+import { cancelRestNotification, notifyPermission, scheduleRestNotification } from '../lib/notify'
+import { cancelPush, ensurePush } from '../lib/push'
 import { DUR, EASE, exitDelay, reducedMotion } from '../lib/motion'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
@@ -33,12 +34,26 @@ function RestBar({ inSession }: { inSession: boolean }) {
   const adjust = useStore((s) => s.adjustRest)
   const restNotify = usePrefs((s) => s.restNotify)
   const [, tick] = useState(0)
+  const serverOff = useRef(false)
+  // each new rest may get a server alert again
+  useEffect(() => {
+    serverOff.current = false
+  }, [rest?.endsAt])
+  // this device can get alerts from the server once notifications are allowed
+  useEffect(() => {
+    if (restNotify && notifyPermission() === 'granted') void ensurePush()
+  }, [restNotify])
 
   useEffect(() => {
     if (!rest) return
     const id = setInterval(() => {
       tick((n) => n + 1)
       const r = useStore.getState().rest
+      // open on screen near the end: the app beeps itself, so the server alert is called off
+      if (r && !r.finished && !serverOff.current && r.endsAt - Date.now() < 4000 && document.visibilityState === 'visible') {
+        serverOff.current = true
+        void cancelPush()
+      }
       if (r && !r.finished && Date.now() >= r.endsAt) {
         const done = { ...r, finished: true }
         try {

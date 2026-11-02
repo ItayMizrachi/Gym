@@ -624,3 +624,35 @@ notify pgrst, 'reload schema';
 alter table public.exercises add column if not exists machines boolean not null default false;
 
 notify pgrst, 'reload schema';
+
+-- 2026-11-02: rest-over alerts from the server (Web Push), so they arrive while the phone keeps the app asleep.
+-- The app saves this device's push subscription and, at each rest, when it ends; supabase/functions/rest-push sends
+-- the due ones (pg_cron looks every 5 seconds and calls it only when something is due).
+create table if not exists public.push_subs (
+  endpoint text primary key,
+  user_id uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.push_subs enable row level security;
+drop policy if exists "own rows" on public.push_subs;
+create policy "own rows" on public.push_subs for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- one pending alert per person: a new rest replaces it, Skip deletes it
+create table if not exists public.rest_pushes (
+  user_id uuid primary key references auth.users (id) on delete cascade default auth.uid(),
+  send_at timestamptz not null,
+  title text not null,
+  body text not null default ''
+);
+alter table public.rest_pushes enable row level security;
+drop policy if exists "own rows" on public.rest_pushes;
+create policy "own rows" on public.rest_pushes for all to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create extension if not exists pg_net;
+create extension if not exists pg_cron;
+-- the cron job itself (with the function URL and its secret) is created from the dashboard / API, not kept here
+
+grant select, insert, update, delete on public.push_subs, public.rest_pushes to authenticated, service_role;
+notify pgrst, 'reload schema';

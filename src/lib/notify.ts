@@ -5,6 +5,8 @@
  * exists (iOS Safari tab), it quietly does nothing and the in-app beep/vibrate remains.
  */
 
+import { cancelPush, pushReady, schedulePush } from './push'
+
 export const notifySupported = () => typeof window !== 'undefined' && 'Notification' in window
 
 export const notifyPermission = (): NotificationPermission | 'unsupported' =>
@@ -52,8 +54,16 @@ async function show(title: string, body: string) {
 
 /** Schedule (or reschedule) the alert for `endsAt`. Only fires if the page is hidden at that moment. */
 export function scheduleRestNotification(endsAt: number, label: string) {
-  cancelRestNotification()
+  // not cancelRestNotification(): its server delete could land after the new alert below (the upsert replaces it)
+  if (timer) clearTimeout(timer)
+  timer = null
   if (notifyPermission() !== 'granted') return
+  // the server sends it (arrives even while the phone keeps the app asleep, src/lib/push.ts); the timer below is
+  // only for devices without push
+  if (pushReady()) {
+    void schedulePush(endsAt, 'Rest over', label ? `Next set: ${label}` : 'Time for the next set')
+    return
+  }
   timer = setTimeout(() => {
     timer = null
     if (document.visibilityState === 'visible') return // the in-app beep covers this
@@ -64,6 +74,7 @@ export function scheduleRestNotification(endsAt: number, label: string) {
 export function cancelRestNotification() {
   if (timer) clearTimeout(timer)
   timer = null
+  void cancelPush()
   void navigator.serviceWorker
     ?.getRegistration()
     .then((reg) => reg?.getNotifications({ tag: TAG }))
