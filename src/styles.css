@@ -2381,3 +2381,6 @@ input[type='search']::-webkit-search-decoration {
 .ssp { display: flex; flex-direction: column; gap: 8px; }
 .ssp-now { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); background: var(--blue-soft); color: var(--text); }
 .ssp-ico { color: var(--blue-text); flex: none; }
+
+/* which of two machines (live workout card) */
+.ex-mach { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 10px; font-size: 13px; cursor: pointer; }

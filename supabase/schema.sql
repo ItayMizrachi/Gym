@@ -618,3 +618,9 @@ alter table public.workouts add column if not exists program text;
 alter table public.workouts add column if not exists program_version integer;
 
 notify pgrst, 'reload schema';
+
+-- 2026-11-02: an exercise done on two machines with different stacks (each keeps its own last time and records;
+-- which one is stored per workout in sessions.data)
+alter table public.exercises add column if not exists machines boolean not null default false;
+
+notify pgrst, 'reload schema';

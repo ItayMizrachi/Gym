@@ -13,7 +13,7 @@
  */
 import { DB, Session, SessionSet, Workout } from './types'
 import { t } from './i18n'
-import { evaluateSet, priorSets, sessionDate } from './pr'
+import { evaluateSet, priorSets, sessionDate, machineOf } from './pr'
 
 const DAY = 86_400_000
 
@@ -417,7 +417,7 @@ export function prSetIds(db: DB, s: Session): Set<string> {
   const out = new Set<string>()
   const d = sessionDate(s)
   for (const ex of s.data.exercises) {
-    const running = priorSets(db, ex.exercise_id, s.id).filter((p) => p.date < d)
+    const running = priorSets(db, ex.exercise_id, s.id, machineOf(ex)).filter((p) => p.date < d)
     const done = ex.sets
       .filter((x) => x.done && x.reps != null && x.reps > 0 && (x.kind === 'work' || x.kind === 'failure'))
       .sort((a, b) => (a.done_at ?? '').localeCompare(b.done_at ?? ''))

@@ -4,7 +4,7 @@ import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
+import { ArrowLeftRight, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
@@ -406,8 +406,9 @@ function ExerciseCard({
   const hasRunning = se.sets.some((x) => watches.has(x.id))
   useTick(hasRunning)
 
-  const prior = useMemo(() => priorSets(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
-  const last = useMemo(() => lastPerformance(db, se.exercise_id, session.id), [db.sessions, se.exercise_id, session.id])
+  const machine = ex?.machines ? se.machine ?? '' : undefined
+  const prior = useMemo(() => priorSets(db, se.exercise_id, session.id, machine), [db.sessions, se.exercise_id, session.id, machine])
+  const last = useMemo(() => lastPerformance(db, se.exercise_id, session.id, machine), [db.sessions, se.exercise_id, session.id, machine])
   // the note you left on this exercise last time ("raise the seat"), if it differs from today's
   const lastNote = useMemo(() => {
     const prev = db.sessions
@@ -510,6 +511,23 @@ function ExerciseCard({
     setTimeout(revealNextSet, 300)
   }
 
+  function switchMachine() {
+    const next = se.machine === '2' ? '' : '2'
+    const lastThere = lastPerformance(db, se.exercise_id, session.id, next)
+    const work = lastThere?.sets.filter((x) => x.kind === 'work' || x.kind === 'failure') ?? []
+    let w = 0
+    mutate(
+      (x) => ({
+        ...x,
+        machine: next,
+        // the other machine's numbers mean something else: its own last weights, nothing if it was never used
+        progression: null,
+        sets: x.sets.map((st) => (st.done || (st.kind !== 'work' && st.kind !== 'failure') ? st : { ...st, weight: (work[w++] ?? work[work.length - 1])?.weight ?? st.weight }))
+      }),
+      true
+    )
+  }
+
   const workNo = (i: number) => se.sets.slice(0, i + 1).filter((x) => x.kind === 'work').length
   const lastDesc = last ? last.sets.map((x) => setLabel(x, tracking)).join(' · ') : null
 
@@ -553,6 +571,19 @@ function ExerciseCard({
               <span className="chip blue ex-ss" aria-label={`Superset ${se.superset}`}>
                 <Link2 size={13} aria-hidden /> {se.superset}
               </span>
+            )}
+            {ex?.machines && (
+              // two machines with different stacks: tap to switch; last time and records follow the machine
+              <button
+                className="chip ex-mach"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  switchMachine()
+                }}
+                aria-label={t('On machine {n}. Switch machine', { n: se.machine === '2' ? 2 : 1 })}
+              >
+                <ArrowLeftRight size={13} aria-hidden /> {t('Machine {n}', { n: se.machine === '2' ? 2 : 1 })}
+              </button>
             )}
             <button
               className="ex-rest"
@@ -1444,6 +1475,8 @@ function MoreSheet({
   onReplace: () => void
 }) {
   const [kpMode, setKpMode] = useKeypadMode()
+  const exercise = useStore((s) => s.db.exercises.find((e) => e.id === se.exercise_id))
+  const saveRow = useStore((s) => s.save)
   // most used first (swap a taken machine), settings in the middle, the destructive one last
   return (
     <Sheet title={se.name} onClose={onClose}>
@@ -1455,6 +1488,13 @@ function MoreSheet({
           {t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}
         </div>
 
+        {exercise && (
+          <Toggle
+            on={!!exercise.machines}
+            onChange={(v) => saveRow('exercises', { ...exercise, machines: v })}
+            label={t('Two machines (different stacks), tracked apart')}
+          />
+        )}
         <label className="field">
           {t("Note for this workout")}
           <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />

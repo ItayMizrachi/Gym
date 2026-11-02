@@ -18,6 +18,8 @@ export interface Exercise {
   tracking?: Tracking
   /** a weight goal (src/lib/goals.ts); missing/null = none */
   goal?: { weight: number; reps: number; by?: string; created: string } | null
+  /** the gym has two of this machine with different stacks: each one keeps its own last time and records */
+  machines?: boolean
 }
 
 export type Tracking = 'weight_reps' | 'reps' | 'time'
@@ -83,6 +85,8 @@ export interface SessionExercise {
   sets: SessionSet[]
   /** double-progression hint computed when the workout was started */
   progression?: Progression | null
+  /** which of two machines (Exercise.machines): '' or missing = machine 1, '2' = machine 2 */
+  machine?: string
 }
 
 export interface Session {

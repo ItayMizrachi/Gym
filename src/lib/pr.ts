@@ -24,14 +24,21 @@ export const e1rm = (w: number, r: number) => (w > 0 && r > 0 ? w * (1 + Math.mi
 
 export const sessionDate = (s: Session) => s.finished_at ?? s.started_at
 
-/** All completed, record-eligible sets for one exercise from every session except `excludeSessionId`. */
-export function priorSets(db: DB, exerciseId: string, excludeSessionId?: string): SetRec[] {
+/** Which machine a logged exercise was on ('' = the first or only one). */
+export const machineOf = (e: { machine?: string }) => e.machine ?? ''
+
+/**
+ * All completed, record-eligible sets for one exercise from every session except `excludeSessionId`.
+ * With `machine`, only sets done on that machine (two machines with different stacks are tracked apart).
+ */
+export function priorSets(db: DB, exerciseId: string, excludeSessionId?: string, machine?: string): SetRec[] {
   const out: SetRec[] = []
   for (const s of db.sessions) {
     if (s.id === excludeSessionId) continue
     if (!s.finished_at) continue // an abandoned, unfinished workout is not a baseline
     for (const ex of s.data.exercises) {
       if (ex.exercise_id !== exerciseId) continue
+      if (machine != null && machineOf(ex) !== machine) continue
       for (const st of ex.sets) {
         if (!countsForRecords(st)) continue
         out.push({
@@ -129,12 +136,12 @@ export interface LastPerformance {
 }
 
 /** The most recent finished session that contains completed sets of this exercise. */
-export function lastPerformance(db: DB, exerciseId: string, excludeSessionId?: string): LastPerformance | null {
+export function lastPerformance(db: DB, exerciseId: string, excludeSessionId?: string, machine?: string): LastPerformance | null {
   const sessions = db.sessions
     .filter((s) => s.id !== excludeSessionId && s.finished_at)
     .sort((a, b) => (sessionDate(b) > sessionDate(a) ? 1 : -1))
   for (const s of sessions) {
-    const ex = s.data.exercises.find((e) => e.exercise_id === exerciseId)
+    const ex = s.data.exercises.find((e) => e.exercise_id === exerciseId && (machine == null || machineOf(e) === machine))
     if (!ex) continue
     // time sets have no reps but still count as "last time"
     const done = ex.sets.filter((x) => x.done && (x.reps != null || isTimeSet(x)))
@@ -155,7 +162,7 @@ export function sessionPRs(db: DB, session: Session): PREvent[] {
   const events: PREvent[] = []
   for (const ex of session.data.exercises) {
     // only compare with what came BEFORE this session, so a later, better workout does not erase this record
-    const prior = priorSets(db, ex.exercise_id, session.id).filter((p) => p.date < sessionDate(session))
+    const prior = priorSets(db, ex.exercise_id, session.id, machineOf(ex)).filter((p) => p.date < sessionDate(session))
     const running = [...prior]
     const done = ex.sets
       .filter(countsForRecords)
