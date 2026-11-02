@@ -1,4 +1,5 @@
-import { Link2, Unlink } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, Link2, Unlink } from 'lucide-react'
 import { t as tr } from '../lib/i18n'
 import { partnersOf } from '../lib/superset'
 
@@ -19,6 +20,8 @@ export function SupersetPicker({
   onLink: (other: number) => void
   onUnlink: () => void
 }) {
+  // the other exercises stay folded behind one button until you want to pair
+  const [open, setOpen] = useState(false)
   const items = groups.map((superset) => ({ superset }))
   const partners = partnersOf(items, index)
   const others = names.map((n, k) => ({ n, k })).filter((x) => x.k !== index && !partners.includes(x.k))
@@ -35,18 +38,32 @@ export function SupersetPicker({
       )}
       {others.length > 0 && (
         <>
-          <div className="small muted">{partners.length ? tr('Add another exercise to it') : tr('Superset with…')}</div>
-          <div className="list-group">
-            {others.map(({ n, k }) => (
-              <button key={k} className="list-row" onClick={() => onLink(k)}>
-                <Link2 size={16} aria-hidden />
-                <span className="grow ellipsis" style={{ textAlign: 'start' }}>
-                  {n}
-                </span>
-                {groups[k] && <span className="chip blue">{groups[k]}</span>}
-              </button>
-            ))}
-          </div>
+          <button className="btn block ssp-toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+            <Link2 size={16} aria-hidden />
+            <span className="grow" style={{ textAlign: 'start' }}>
+              {partners.length ? tr('Add another exercise to it') : tr('Superset with…')}
+            </span>
+            <ChevronDown size={16} aria-hidden style={{ transform: open ? 'rotate(180deg)' : undefined }} />
+          </button>
+          {open && (
+            <div className="list-group">
+              {others.map(({ n, k }) => (
+                <button
+                  key={k}
+                  className="list-row ssp-row"
+                  onClick={() => {
+                    onLink(k)
+                    setOpen(false)
+                  }}
+                >
+                  <span className="grow ellipsis" style={{ textAlign: 'start' }}>
+                    {n}
+                  </span>
+                  {groups[k] && <span className="chip blue">{groups[k]}</span>}
+                </button>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

@@ -2389,3 +2389,5 @@ input[type='search']::-webkit-search-decoration {
 .ex-mach { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 10px; font-size: 13px; cursor: pointer; }
 
 .stat-grid.two { grid-template-columns: repeat(2, 1fr); }
+.ssp-toggle { justify-content: flex-start; gap: 10px; }
+.list-row.ssp-row { min-height: 46px; padding-block: 8px; }
