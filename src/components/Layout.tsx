@@ -146,9 +146,47 @@ function Toasts({ inSession }: { inSession: boolean }) {
       setLeaving((l) => l.filter((x) => x !== id))
     }, wait)
   }
+  // swipe a toast sideways (or up) to send it away; a tap works too
+  const swipe = useRef<{ id: string; x: number; y: number; dx: number; dy: number } | null>(null)
+  const drag = (id: string) => ({
+    onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+      swipe.current = { id, x: e.clientX, y: e.clientY, dx: 0, dy: 0 }
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
+      const s = swipe.current
+      if (!s || s.id !== id) return
+      s.dx = e.clientX - s.x
+      s.dy = Math.min(0, e.clientY - s.y)
+      if (Math.abs(s.dx) < 6 && s.dy > -6) return
+      const el = e.currentTarget
+      el.classList.add('swiping')
+      el.style.transform = `translate(${s.dx}px, ${s.dy}px)`
+      el.style.opacity = String(Math.max(0.2, 1 - Math.max(Math.abs(s.dx), -s.dy) / 220))
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
+      const s = swipe.current
+      swipe.current = null
+      if (!s || s.id !== id) return
+      const el = e.currentTarget
+      const moved = Math.abs(s.dx) > 6 || s.dy < -6
+      if (Math.abs(s.dx) > 70 || s.dy < -30) return dismiss(id)
+      el.classList.remove('swiping')
+      el.style.transform = ''
+      el.style.opacity = ''
+      if (!moved) tap(id)
+    },
+    onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => {
+      swipe.current = null
+      e.currentTarget.classList.remove('swiping')
+      e.currentTarget.style.transform = ''
+      e.currentTarget.style.opacity = ''
+    }
+  })
+  // during a workout one toast at a time, so they never cover the sets
+  const shown = inSession ? toasts.slice(-1) : toasts
   return (
     <div className={`toasts${inSession ? ' in-session' : ''}`} role="status" aria-live="polite">
-      {toasts.map((t) => {
+      {shown.map((t) => {
         const body = (
           <>
             <div className="t">{t.text}</div>
@@ -159,8 +197,8 @@ function Toasts({ inSession }: { inSession: boolean }) {
           <div
             key={t.id}
             className={`toast ${t.kind}${t.kind === 'pr' ? ' has-ico' : ''}${leaving.includes(t.id) ? ' leaving' : ''}`}
-            onClick={() => tap(t.id)}
-            title={tr("Tap to dismiss")}
+            {...drag(t.id)}
+            title={tr("Swipe or tap to dismiss")}
           >
             {t.kind === 'pr' ? (
               <>

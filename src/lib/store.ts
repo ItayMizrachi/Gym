@@ -10,6 +10,8 @@ export interface ToastMsg {
   text: string
   sub?: string
   kind: 'info' | 'pr' | 'near' | 'error'
+  /** a new toast with the same key replaces the old one (e.g. one record toast per exercise) */
+  key?: string
 }
 
 export interface RestTimer {
@@ -313,8 +315,8 @@ export const useStore = create<State>((set, get) => {
       const id = uid()
       // fixed messages are translated here (Hebrew); ones built from data pass through unchanged
       const msg = { ...t, text: tr(t.text), sub: t.sub ? tr(t.sub) : t.sub }
-      set((s) => ({ toasts: [...s.toasts.slice(-3), { ...msg, id }] }))
-      setTimeout(() => get().dismissToast(id), t.kind === 'pr' ? 7000 : 4500)
+      set((s) => ({ toasts: [...s.toasts.filter((x) => !t.key || x.key !== t.key).slice(-3), { ...msg, id }] }))
+      setTimeout(() => get().dismissToast(id), 4500)
     },
     dismissToast(id) {
       set((s) => ({ toasts: s.toasts.filter((x) => x.id !== id) }))

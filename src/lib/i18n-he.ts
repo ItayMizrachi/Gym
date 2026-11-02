@@ -440,6 +440,7 @@ export const HE_SCREENS: Record<string, string> = {
   Supersets: 'סופרסטים',
   'Swapping an exercise': 'החלפת תרגיל',
   'Tap to dismiss': 'לחץ לסגירה',
+  'Swipe or tap to dismiss': 'החלק או לחץ לסגירה',
   'The code stops working.': 'הקוד יפסיק לעבוד.',
   'Time (minutes:seconds)': 'זמן (דקות:שניות)',
   'Time range': 'טווח זמן',

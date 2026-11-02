@@ -745,13 +745,21 @@ div.field {
   background: #2b2409;
   border-color: var(--accent-line);
   border-inline-start-color: var(--accent);
-  animation: toast-in var(--dur-slow) var(--ease), toast-out var(--dur-base) var(--ease-in) 6.8s forwards;
+  animation: toast-in var(--dur-slow) var(--ease), toast-out var(--dur-base) var(--ease-in) 4.3s forwards;
 }
 /* tapped away: a quick fade up instead of vanishing */
 .toast.leaving,
 .toast.pr.leaving {
   animation: toast-out var(--dur-fast) var(--ease-in) forwards;
   pointer-events: none;
+}
+.toast {
+  touch-action: pan-y;
+  user-select: none;
+}
+.toast.swiping {
+  animation: none;
+  transition: none;
 }
 .toast.has-ico {
   display: flex;

@@ -377,26 +377,23 @@ function ExerciseCard({
   const toggleCard = () => (finished ? setShut((v) => !v) : setDetails((v) => !v))
   // the set that was just logged: its check pops, a new record also gets a light glow
   const [pop, setPop] = useState<{ id: string; pr: boolean } | null>(null)
-  // a finished exercise folds down to one line; tapping its name opens it again
+  // a finished exercise folds down to one line once the next one has its first set logged (so you can still look
+  // back or add a set right after finishing); tapping its name opens it again
   const finished = se.sets.length > 0 && se.sets.every((x) => x.done)
-  const [shut, setShut] = useState(finished)
-  const wasFinished = useRef(finished)
+  const laterStarted = session.data.exercises.slice(index + 1).some((e) => e.sets.some((x) => x.done))
+  const foldNow = finished && laterStarted
+  const [shut, setShut] = useState(foldNow)
+  const wasFold = useRef(foldNow)
   useEffect(() => {
-    const was = wasFinished.current
-    wasFinished.current = finished
-    if (!finished) {
-      setShut(false)
-      return
-    }
-    if (was) return
-    // let the green tick land before folding the card away
-    const t = setTimeout(() => {
-      setShut(true)
-      setDetails(false)
-      setTimeout(revealNextSet, 260)
-    }, 700)
-    return () => clearTimeout(t)
+    if (!finished) setShut(false)
   }, [finished])
+  useEffect(() => {
+    const was = wasFold.current
+    wasFold.current = foldNow
+    if (!foldNow || was) return
+    setShut(true)
+    setDetails(false)
+  }, [foldNow])
   useEffect(() => {
     if (!pop) return
     const t = setTimeout(() => setPop(null), 900)
@@ -486,6 +483,7 @@ function ExerciseCard({
         const label = t(res.types.includes('weight') ? 'Heaviest ever' : res.types.includes('e1rm') ? 'Best estimated 1-rep max' : 'Rep record')
         toast({
           kind: 'pr',
+          key: `pr:${se.exercise_id}`,
           text: t('🏆 New PR! {name}', { name: ex?.name ?? se.name }),
           sub: t('{set} · {label} · est. 1-rep max {m}', { set: setLabel(s, tracking, false), label, m: fmtKg(Math.round(res.e1rm * 10) / 10) })
         })
