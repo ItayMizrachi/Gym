@@ -68,10 +68,11 @@ html {
   animation: pwa-fade 220ms ease-out;
   /* the app scrolls in here, not the page: on iPhone a fixed tab bar floated mid-screen during a fast page scroll
      (src/lib/scroll.ts) */
-  height: 100%;
+  /* pinned to the whole screen exactly like the fixed tab bar, so both share one bottom edge on every phone */
+  position: fixed;
+  inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
 
