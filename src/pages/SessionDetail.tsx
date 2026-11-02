@@ -116,6 +116,7 @@ export default function SessionDetail() {
   const [confirm, setConfirm] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [allMuscles, setAllMuscles] = useState(false)
+  const [allPrs, setAllPrs] = useState(false)
   const [editing, setEditing] = useState(false)
   const save = useStore((st) => st.save)
   const userId = useStore((st) => st.user?.id ?? 'local')
@@ -329,18 +330,21 @@ export default function SessionDetail() {
             <Trophy size={20} /> {prs.length} personal record{prs.length > 1 ? 's' : ''}
           </h2>
           <div style={{ marginTop: 6 }}>
-            {prs.map((p, i) => (
+            {/* the first three; the kind of record is on the exercise page */}
+            {(allPrs ? prs : prs.slice(0, 3)).map((p, i) => (
               <div key={i} className="pr-item">
-                <div className="n">
-                  {prName(p)}
-                  <div className="tiny muted">{p.types.map((t) => PR_LABEL[t]).join(' · ')}</div>
-                </div>
+                <div className="n">{prName(p)}</div>
                 <div className="w">
                   {fmtKg(p.weight)} kg × {p.reps}
                 </div>
               </div>
             ))}
           </div>
+          {prs.length > 3 && (
+            <button className="btn ghost sm" style={{ marginTop: 4 }} onClick={() => setAllPrs((v) => !v)}>
+              {allPrs ? tr('Show less') : tr('See {n} more', { n: prs.length - 3 })}
+            </button>
+          )}
         </div>
       )}
 

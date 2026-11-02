@@ -148,11 +148,17 @@ export function ImageField({
           <button type="button" className="photo-x" onClick={remove} aria-label={tr("Remove photo")}>
             <X size={16} aria-hidden />
           </button>
+          {/* change it from the corner too: no big button under a photo */}
+          <button type="button" className="photo-x photo-cam" disabled={busy} onClick={() => inputRef.current?.click()} aria-label={tr("Change photo")}>
+            <Camera size={16} aria-hidden />
+          </button>
         </div>
       )}
-      <button type="button" className={`btn block${quiet && !url ? ' ghost' : ''}`} disabled={busy} onClick={() => inputRef.current?.click()}>
-        <Camera size={18} aria-hidden /> {busy ? 'Uploading…' : url ? 'Change photo' : label}
-      </button>
+      {!url && (
+        <button type="button" className={`btn block${quiet ? ' ghost' : ''}`} disabled={busy} onClick={() => inputRef.current?.click()}>
+          <Camera size={18} aria-hidden /> {busy ? 'Uploading…' : label}
+        </button>
+      )}
       {viewing && path && <PhotoViewer photos={[{ id: path, photo_path: path }]} start={0} onClose={() => setViewing(false)} />}
     </div>
   )
