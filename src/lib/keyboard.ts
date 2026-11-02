@@ -38,12 +38,17 @@ export function installKeyboardHelpers() {
   const vv = window.visualViewport
   if (!vv) return
   const root = document.documentElement.style
+  const last = { vvh: '', kb: '' }
   const sync = () => {
     // only while a field is focused: iPhone does not always report the viewport growing back after the keyboard
     // closes, and a stale value would push sheets up and cut off their bottom
     const typing = isField(document.activeElement)
-    root.setProperty('--vvh', `${Math.round(typing ? vv.height : window.innerHeight)}px`)
-    root.setProperty('--kb', `${typing ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0}px`)
+    const vvh = `${Math.round(typing ? vv.height : window.innerHeight)}px`
+    const kb = `${typing ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0}px`
+    // write only on a change: this runs on every scroll frame, and touching a root variable restyles the whole
+    // page (on iPhone that made scrolling stutter and the header and tab bar lag behind)
+    if (vvh !== last.vvh) root.setProperty('--vvh', (last.vvh = vvh))
+    if (kb !== last.kb) root.setProperty('--kb', (last.kb = kb))
   }
   vv.addEventListener('resize', sync)
   vv.addEventListener('scroll', sync)
