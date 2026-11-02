@@ -1,9 +1,10 @@
 /*
- * The app scrolls inside one container (.pwa-enter, see styles/pwa.css), not the page itself: on iPhone a fixed
- * tab bar floated mid-screen during a fast scroll of the page. Code that scrolls goes through these helpers.
+ * Code that scrolls the app goes through these helpers (the page itself scrolls). A scroll container was tried for
+ * the iPhone tab bar drifting while scrolling, but an installed iPhone app then cannot draw below the reported
+ * screen height, so the bar sat too high or was cut off.
  */
 
-export const scroller = (): HTMLElement => (document.querySelector('.pwa-enter') as HTMLElement | null) ?? (document.scrollingElement as HTMLElement) ?? document.documentElement
+export const scroller = (): HTMLElement => (document.scrollingElement as HTMLElement) ?? document.documentElement
 
 export const scrollY = () => scroller().scrollTop
 

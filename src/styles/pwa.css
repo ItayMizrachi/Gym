@@ -19,7 +19,7 @@ html {
 /* Boot screen: mark centred exactly like the iOS launch screen; name and progress sit below it. */
 .pwa-boot {
   position: fixed;
-  inset: 0 0 calc(0px - var(--vgap, 0px)) 0;
+  inset: 0;
   display: grid;
   place-items: center;
   background: var(--bg);
@@ -66,14 +66,6 @@ html {
 /* Screens fade in from the boot screen instead of popping (opacity only, so fixed children keep working). */
 .pwa-enter {
   animation: pwa-fade 220ms ease-out;
-  /* the app scrolls in here, not the page: on iPhone a fixed tab bar floated mid-screen during a fast page scroll
-     (src/lib/scroll.ts) */
-  /* pinned to the whole screen exactly like the fixed tab bar, so both share one bottom edge on every phone */
-  position: fixed;
-  inset: 0 0 calc(0px - var(--vgap, 0px)) 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior-y: contain;
 }
 
 /* Update banner: a card above the tab bar. */
@@ -81,7 +73,7 @@ html {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(var(--nav-h) + var(--safe-b) + 12px - var(--vgap, 0px));
+  bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
   max-width: 560px;
   margin: 0 auto;
   z-index: 90;
@@ -97,7 +89,7 @@ html {
   animation: pwa-rise 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .pwa-update.above-rest {
-  bottom: calc(var(--nav-h) + var(--safe-b) + 84px - var(--vgap, 0px));
+  bottom: calc(var(--nav-h) + var(--safe-b) + 84px);
 }
 .pwa-update-text {
   flex: 1;

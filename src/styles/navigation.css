@@ -3,7 +3,7 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--nav-h) + var(--safe-b) + 8px - var(--vgap, 0px));
+  bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
   width: calc(100% - 24px);
   max-width: 520px;
   min-height: 52px;

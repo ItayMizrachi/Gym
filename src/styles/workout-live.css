@@ -116,7 +116,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(0px - var(--vgap, 0px));
+  bottom: 0;
   z-index: 60;
   max-width: 720px;
   margin: 0 auto;
