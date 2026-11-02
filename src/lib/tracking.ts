@@ -8,12 +8,23 @@ export function fmtTime(sec: number | null | undefined): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
-/** "1:15" -> 75, "45" -> 45 (plain number = seconds), "1:" -> 60, "" -> null, junk -> null */
+/**
+ * Digits typed like a timer fill in from the right: "1000" -> "10:00", "130" -> "1:30", "45" -> "0:45".
+ * The colon sits before the last two digits; at most 4 digits (99:59).
+ */
+export function clockFromDigits(digits: string): string {
+  const d = digits.replace(/\D/g, '').replace(/^0+/, '').slice(0, 4)
+  if (!d) return ''
+  const s = d.padStart(3, '0')
+  return `${parseInt(s.slice(0, -2), 10)}:${s.slice(-2)}`
+}
+
+/** "1:15" -> 75, "45" -> 45 (one or two digits = seconds), "1000" -> 600 (3+ digits = minutes and seconds, as on a timer), "1:" -> 60, "" -> null, junk -> null */
 export function parseTime(input: string): number | null {
   const t = input.trim().replace(/[.,]/g, ':')
   if (!t) return null
   if (!/^\d*(:\d{0,2})?$/.test(t)) return null
-  if (!t.includes(':')) return parseInt(t, 10)
+  if (!t.includes(':')) return t.length >= 3 ? parseTime(clockFromDigits(t)) : parseInt(t, 10)
   const [m, s] = t.split(':')
   const sec = (parseInt(m || '0', 10) || 0) * 60 + (parseInt(s || '0', 10) || 0)
   return sec

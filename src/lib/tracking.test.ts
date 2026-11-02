@@ -80,3 +80,18 @@ describe('records ignore time sets', () => {
     expect(prs[0].types).toContain('reps')
   })
 })
+
+import { clockFromDigits } from './tracking'
+describe('timer-style time entry', () => {
+  it('fills digits in from the right', () => {
+    expect(clockFromDigits('1000')).toBe('10:00')
+    expect(clockFromDigits('130')).toBe('1:30')
+    expect(clockFromDigits('45')).toBe('0:45')
+    expect(clockFromDigits('')).toBe('')
+  })
+  it('reads 3+ digits as minutes and seconds', () => {
+    expect(parseTime('1000')).toBe(600)
+    expect(parseTime('130')).toBe(90)
+    expect(parseTime('45')).toBe(45)
+  })
+})

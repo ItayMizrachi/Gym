@@ -8,7 +8,7 @@ import { ArrowLeftRight, GripVertical, Timer, Check, ChevronDown, ChevronLeft, C
 import { useStore } from '../lib/store'
 import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
-import { fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
+import { clockFromDigits, fmtTime, missingForLog, parseTime, prevLabel, setLabel } from '../lib/tracking'
 import { addExerciseToSession, replaceExerciseInSession, addWarmupSets, discardSession, finishSession, newSet, toggleProgression } from '../lib/actions'
 import { evaluateSet, lastPerformance, priorSets, recordsFor, repsForPR, SetRec, e1rm } from '../lib/pr'
 import { nextSetLabel } from '../lib/nextSet'
@@ -226,8 +226,10 @@ function TimeInput({ value, onChange, placeholder, running }: { value: number | 
       onChange={(e) => {
         const raw = e.target.value
         if (!/^[\d:.,]*$/.test(raw)) return
-        setText(raw)
-        onChange(parseTime(raw))
+        // phone keyboard has no colon: plain digits fill in like a timer (1000 -> 10:00)
+        const shown = /^\d+$/.test(raw) ? clockFromDigits(raw) : raw
+        setText(shown)
+        onChange(parseTime(shown))
       }}
     />
   )

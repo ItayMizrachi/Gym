@@ -3,7 +3,7 @@ import { t as tr } from '../lib/i18n'
 import { Calculator, ChevronDown, Delete, Disc, Keyboard } from 'lucide-react'
 import { evalExpr, isExpr } from '../lib/calc'
 import { fmtKg, parseNum } from '../lib/format'
-import { fmtTime, parseTime } from '../lib/tracking'
+import { clockFromDigits, fmtTime, parseTime } from '../lib/tracking'
 import { PlateCalc } from './PlateCalc'
 import '../styles/workout-live.css'
 
@@ -150,6 +150,12 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
     const { field: f, text: t, fresh: isFresh } = st.current
     if (!f) return
     const base = isFresh ? '' : t
+    if (/^\d$/.test(k) && f.kind === 'time') {
+      // a timer: digits fill in from the right and the colon sits where it belongs (1-0-0-0 = 10:00)
+      const d = (base.replace(/\D/g, '') + k).replace(/^0+/, '')
+      if (d.length > 4) return
+      return apply(clockFromDigits(d))
+    }
     if (/^\d$/.test(k)) {
       const cand = base + k
       // keep plain numbers sane: two decimals for kg, 4 digits for reps
@@ -164,10 +170,15 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
       return apply(base + (seg === '' ? '0.' : '.'))
     }
     if (k === ':') {
-      if (base.includes(':')) return
-      return apply((base || '0') + ':')
+      // "10" then ":" = 10 minutes
+      const d = base.replace(/\D/g, '').replace(/^0+/, '')
+      if (!d || d.length > 2) return
+      return apply(clockFromDigits(d + '00'))
     }
-    if (k === 'back') return apply(isFresh ? '' : t.slice(0, -1))
+    if (k === 'back') {
+      if (f.kind === 'time') return apply(isFresh ? '' : clockFromDigits(t.replace(/\D/g, '').slice(0, -1)))
+      return apply(isFresh ? '' : t.slice(0, -1))
+    }
     if ('+−×÷'.includes(k)) {
       const cur = isFresh ? fmtVal(f.kind, f.value) || '0' : t
       return apply(/[-+*/×÷−]$/.test(cur) ? cur.slice(0, -1) + k : cur + k)
