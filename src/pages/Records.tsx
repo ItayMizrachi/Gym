@@ -20,14 +20,16 @@ function RecordRow({ r, onOpen }: { r: ExerciseRecord; onOpen: () => void }) {
     <button className="rec-row" onClick={onOpen} aria-label={`${r.name}: ${weighted ? `estimated 1-rep max ${kg(r.e1rm)}, best set ${fmtKg(r.best.weight)} by ${r.best.reps}` : `${r.mostReps.reps} reps`}. Open exercise`}>
       <ExerciseThumb exercise={ex} name={r.name} size={40} />
       <span className="grow" style={{ minWidth: 0 }}>
-        <span className="rec-name ellipsis">{r.name}</span>
+        {/* the name may take two lines rather than be cut */}
+        <span className="rec-name rec-name2">{r.name}</span>
         <span className="small muted ellipsis" style={{ display: 'block' }}>
-          {weighted ? `Best set ${fmtKg(r.best.weight)} × ${r.best.reps}` : 'Most reps in one set'} · {relativeDay(r.lastPR)}
+          {weighted ? `${tr('est. max')} ${kg(r.e1rm)}` : tr('Most reps in one set')} · {relativeDay(r.lastPR)}
         </span>
       </span>
+      {/* the best set itself is the record people recognise */}
       <span className="rec-main">
-        <span className="rec-v accent">{weighted ? kg(r.e1rm) : r.mostReps.reps}</span>
-        <span className="rec-l">{weighted ? 'est. max' : 'reps'}</span>
+        <span className="rec-v accent">{weighted ? `${fmtKg(r.best.weight)} × ${r.best.reps}` : r.mostReps.reps}</span>
+        <span className="rec-l">{weighted ? tr('kg × reps') : tr('reps')}</span>
       </span>
     </button>
   )
@@ -47,7 +49,7 @@ export default function Records() {
 
   return (
     <div className="stack" style={{ gap: 16 }}>
-      <PageHeader title={tr("Records")} sub={tr("Newest record first. Est. max = the most you could likely lift once.")} back="/profile" />
+      <PageHeader title={tr("Records")} sub={tr("Newest record first.")} back="/profile" />
 
       {all.length === 0 ? (
         <Empty icon={<Trophy size={28} />} title={tr("No records yet")} text={tr("Finish a workout with weights and reps, and your best lifts show up here.")}>
