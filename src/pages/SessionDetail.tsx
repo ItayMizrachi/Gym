@@ -317,6 +317,9 @@ export default function SessionDetail() {
         </div>
       )}
 
+      {/* the photo button right under the hero, so it is seen without scrolling */}
+      {photo}
+
       {stats}
       <CoachNotes sessionId={s.id} />
 
@@ -342,8 +345,6 @@ export default function SessionDetail() {
       )}
 
       {comparison}
-
-      {photo}
 
       {muscles}
 
