@@ -4,7 +4,7 @@ import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftRight, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
+import { ArrowLeftRight, Flame, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
@@ -376,6 +376,12 @@ function ExerciseCard({
   const [plateSet, setPlateSet] = useState<string | null>(null)
   const [rpeSet, setRpeSet] = useState<string | null>(null)
   const [warmup, setWarmup] = useState(false)
+  // "Warm-up sets" in the exercise's ⋯ sheet opens this card's warm-up sheet
+  useEffect(() => {
+    const on = (e: Event) => (e as CustomEvent<number>).detail === index && setWarmup(true)
+    window.addEventListener('gl-warmup', on)
+    return () => window.removeEventListener('gl-warmup', on)
+  }, [index])
   const [details, setDetails] = useState(false)
   const [kindFor, setKindFor] = useState<string | null>(null)
   const [restOpen, setRestOpen] = useState(false)
@@ -537,6 +543,7 @@ function ExerciseCard({
   const name = ex?.name ?? se.name
   const firstTime = !last && prior.length === 0 && tracking !== 'time'
   // rest has its own button on the card, so the line under the name is just the target
+  const nextTodoId = se.sets.find((x) => !x.done)?.id
   const plan = tracking !== 'time' && se.rep_min && se.rep_max ? t('{a}–{b} reps', { a: se.rep_min, b: se.rep_max }) : t(tracking === 'time' ? 'Timed' : 'Reps')
   const hasNotes = !!(se.note || lastNote || ex?.setup)
   const prog = se.progression
@@ -602,7 +609,7 @@ function ExerciseCard({
             {finished && shut ? (
               <span className="ex-sum-t done">{doneLine}</span>
             ) : (
-              <span className="ex-sum-t">{[plan, splitName(name)[1]].filter(Boolean).join(' · ')}</span>
+              <span className="ex-sum-t">{plan}</span>
             )}
             {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label={t("Has notes")} />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
@@ -679,7 +686,6 @@ function ExerciseCard({
           <button onClick={() => mutate(toggleProgression, true)}>{prog.applied === false ? t('Redo') : t('Undo')}</button>
         </div>
       )}
-      {prog?.kind === 'hold' && <div className="prog hold-chip">{t('Hold {w} kg · aim for {r}+ reps', { w: fmtKg(prog.from), r: se.rep_min })}</div>}
 
       <div className={`sets t-${tracking}`}>
         <div className="set-row">
@@ -706,6 +712,7 @@ function ExerciseCard({
           <div className="hdr">✓</div>
         </div>
         {se.sets.map((s, i) => {
+          // (the next set to do is the only one with a record hint)
           // "Prev" = the same kind of set from last time (so a new warm-up row does not shift everything by one)
           const kindIdx = se.sets.slice(0, i).filter((x) => x.kind === s.kind).length
           const prev = last?.sets.filter((x) => x.kind === s.kind)[kindIdx]
@@ -796,7 +803,7 @@ function ExerciseCard({
                   </div>
                 </div>
               )}
-              {hintReps != null && nearTarget && !setLift && (
+              {hintReps != null && nearTarget && !setLift && s.id === nextTodoId && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
                     🏆 {hintReps} {hintReps === 1 ? 'rep' : 'reps'}{tracking === 'weight_reps' || s.weight > 0 ? ` at ${fmtKg(s.weight)} kg` : ''} = new PR
@@ -828,25 +835,6 @@ function ExerciseCard({
           }
         >
           <Plus size={18} /> {t('Add set')}
-        </button>
-        {tracking === 'weight_reps' && (
-        <button
-          className="btn sm"
-          onClick={() =>
-            mutate(
-              (e) => {
-                const lastRow = [...e.sets].reverse().find((x) => x.kind !== 'drop') ?? e.sets[e.sets.length - 1]
-                return { ...e, sets: [...e.sets, newSet('drop', roundTo((lastRow?.weight ?? 0) * 0.75, 0.5))] }
-              },
-              true
-            )
-          }
-        >
-          <Plus size={14} /> {t('Drop')}
-        </button>
-        )}
-        <button className="btn sm" onClick={() => setWarmup(true)}>
-          <Plus size={14} /> {t('Warm-up')}
         </button>
       </div>
       </div>
@@ -1078,7 +1066,7 @@ export default function SessionPage() {
               <span className="u">kg</span>
             </div>
             <div className={`l${beatLast ? ' beat' : ''}`}>
-              {beatLast ? t('Beat last time') : lastVolume ? t('last: {v}', { v: fmtVolume(lastVolume) }) : t('Volume')}
+              {beatLast ? t('Beat last time') : t('Volume')}
             </div>
           </div>
           <div className="ls-stat">
@@ -1486,6 +1474,15 @@ function MoreSheet({
       <div className="stack">
         <button className="btn block" onClick={onReplace}>
           <Repeat size={16} aria-hidden /> {t("Replace exercise")}
+        </button>
+        <button
+          className="btn block"
+          onClick={() => {
+            onClose()
+            setTimeout(() => window.dispatchEvent(new CustomEvent('gl-warmup', { detail: index })), 250)
+          }}
+        >
+          <Flame size={16} aria-hidden /> {t('Add warm-up sets')}
         </button>
         <div className="small muted" style={{ marginTop: -4 }}>
           {t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}
