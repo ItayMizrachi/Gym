@@ -4,7 +4,7 @@ import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftRight, Flame, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2 } from 'lucide-react'
+import { ArrowLeftRight, Flame, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2, Pause } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
@@ -281,7 +281,8 @@ function StopwatchBtn({ set, target, onStop }: { set: SessionSet; target?: numbe
       }}
       aria-label={running ? 'Stop timer' : 'Start timer'}
     >
-      {running ? <Square size={16} /> : <Play size={16} />}
+      {/* quiet: a pause sign on a soft tint while it runs, not a solid yellow stop block */}
+      {running ? <Pause size={16} /> : <Play size={16} />}
     </button>
   )
 }

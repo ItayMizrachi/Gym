@@ -254,11 +254,18 @@ function SyncDot() {
   const err = useStore((s) => s.syncError)
   const repo = useStore((s) => s.repo)
   const queued = useStore((s) => s.queued)
+  // a change still waiting after a few seconds (offline, slow) is worth a word; a normal save is not
+  const [stuck, setStuck] = useState(false)
+  useEffect(() => {
+    setStuck(false)
+    if (!queued) return
+    const id = setTimeout(() => setStuck(true), 4000)
+    return () => clearTimeout(id)
+  }, [queued > 0])
   if (!repo) return null
-  // All saved is the normal state: say nothing. Only saving, waiting or a failed save shows up.
+  // Saving is silent: only a failed save, or changes stuck waiting (offline), show up.
   // (Local mode is a developer tool and shows its label in dev builds only.)
-  const idle = !queued && !err && !pending
-  if (idle && (repo.mode === 'cloud' || !import.meta.env.DEV)) return null
+  if (!err && !(queued && stuck) && (repo.mode === 'cloud' || !import.meta.env.DEV)) return null
   return (
     <div className="sync" role="status">
       <span aria-hidden className={`dot ${err ? 'err' : pending || queued ? 'busy' : ''}`} />

@@ -16,7 +16,7 @@
   transition: transform var(--t-fast) var(--ease);
 }
 .sw:active { transform: scale(0.92); }
-.sw.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.sw.on { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
 .sw:disabled { opacity: 0.35; }
 
 /* ---------- body map ---------- */
@@ -401,3 +401,11 @@
 .ex-titles .ex-sum { cursor: pointer; }
 .ex-sum .ex-rest { min-height: 26px; padding: 0 8px; font-size: 13px; gap: 3px; background: var(--card2); }
 .ex-sum .ex-rest::after { inset: -9px -3px; }
+
+/* calmer exercise card (owner: "a bit busy"): the weight bump is a line of text, Add set is a quiet text button,
+   no chevron under the name (tapping the name still opens the details), a smaller record hint */
+.ex .prog { background: none; border: 0; padding: 0; gap: 6px; font-size: 13px; }
+.ex .prog button { background: none; padding: 2px 4px; color: var(--muted); text-decoration: underline; font-weight: 600; }
+.wl-addrow .wl-addset { background: none; border-color: transparent; color: var(--text-2); min-height: 40px; }
+.ex .ex-chev { display: none; }
+.ex .set-hint.pr { font-size: 12px; opacity: 0.85; }
