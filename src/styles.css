@@ -132,11 +132,7 @@ body,
 body {
   overscroll-behavior-y: none;
 }
-/* the page itself never scrolls: .pwa-enter does (styles/pwa.css) */
-html,
-body {
-  overflow: hidden;
-}
+/* the page itself never scrolls: .pwa-enter does (styles/pwa.css); it is fixed, so the page has no height to scroll */
 button,
 input,
 select,

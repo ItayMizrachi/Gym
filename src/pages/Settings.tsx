@@ -318,7 +318,7 @@ export default function SettingsPage() {
           </button>
         </section>
       )}
-      <div className="tiny muted center set-version">GymLog</div>
+      <ScreenInfo />
 
       {importOther && <ImportOther onClose={() => setImportOther(false)} />}
       {deleting && <DeleteAccountSheet email={user?.email ?? 'your account'} onExport={exportJson} onClose={() => setDeleting(false)} />}
@@ -331,6 +331,35 @@ export default function SettingsPage() {
           onClose={() => setConfirmImport(null)}
         />
       )}
+    </div>
+  )
+}
+
+/** "GymLog" at the bottom; five taps show the screen sizes the phone reports (to debug layout on a real iPhone) */
+function ScreenInfo() {
+  const [taps, setTaps] = useState(0)
+  const info = () => {
+    const sc = document.querySelector('.pwa-enter')?.getBoundingClientRect()
+    const nav = document.querySelector('.nav')?.getBoundingClientRect()
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;padding-bottom:env(safe-area-inset-bottom);visibility:hidden'
+    document.body.appendChild(probe)
+    const vh = probe.getBoundingClientRect().height
+    probe.remove()
+    return [
+      `screen ${screen.width}x${screen.height}`,
+      `inner ${innerWidth}x${innerHeight}`,
+      `visual ${Math.round(visualViewport?.height ?? 0)}`,
+      `100vh+safe ${Math.round(vh)}`,
+      `scroller ${Math.round(sc?.top ?? -1)}-${Math.round(sc?.bottom ?? -1)}`,
+      `nav ${Math.round(nav?.top ?? -1)}-${Math.round(nav?.bottom ?? -1)}`,
+      `standalone ${(navigator as Navigator & { standalone?: boolean }).standalone ?? matchMedia('(display-mode: standalone)').matches}`
+    ].join(' · ')
+  }
+  return (
+    <div className="tiny muted center set-version" onClick={() => setTaps((n) => n + 1)}>
+      GymLog
+      {taps >= 5 && <div style={{ marginTop: 6, userSelect: 'text' }}>{info()}</div>}
     </div>
   )
 }
