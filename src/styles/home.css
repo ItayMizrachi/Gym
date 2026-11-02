@@ -13,7 +13,7 @@
 }
 .hm-hero::after {
   /* a 20 kg plate seen edge-on, purely decorative */
-  content: '';
+  content: none;
   position: absolute;
   right: -46px;
   top: -46px;

@@ -37,8 +37,6 @@ import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
 import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
 import { FolderGroup, groupByFolder } from '../lib/folders'
-import { WeekLine } from '../components/GoalRing'
-import { RecoveryLine } from '../components/RecoveryCard'
 import { Sheet } from '../components/ui'
 import { StartChecklist } from '../components/StartChecklist'
 import { useAchievementToasts } from '../components/Achievements'
@@ -71,19 +69,6 @@ function startedText(iso: string): string {
     : t('Started {date}', { date: d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) })
 }
 
-function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
-  const d = now - before
-  // nothing last week: "↑ 17 vs last wk" says nothing new, so say it plainly
-  if (before === 0) return now > 0 ? <div className="delta muted">{t('none last wk')}</div> : null
-  if (Math.abs(d) < 0.5) return <div className="delta muted">{t('same as last wk')}</div>
-  // the header says "vs last week" once; each box only shows how much. Less is grey, not red (red means failure)
-  return (
-    <div className={`delta ${d > 0 ? 'up' : 'muted'}`} aria-label={t(d > 0 ? '{v} more than last week' : '{v} less than last week', { v: fmt(Math.abs(d)) })}>
-      {d > 0 ? <ArrowUp size={12} aria-hidden /> : <ArrowDown size={12} aria-hidden />}
-      {fmt(Math.abs(d))}
-    </div>
-  )
-}
 
 /** collapsed folder headers on the Train tab (this device only) */
 const FOLDS_KEY = 'gymlog:folds'
@@ -114,7 +99,6 @@ export default function Home() {
     })
   }
   const user = useStore((s) => s.user)
-  const [muscleWeek, setMuscleWeek] = useState<'this' | 'last'>('this')
   const [renaming, setRenaming] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [folded, setFolded] = useState<string[]>(loadFolds)
@@ -143,12 +127,7 @@ export default function Home() {
   const planned = useMemo(() => todaysWorkout(db), [db])
   // planned for today, else the rotation, unless its muscles are still recovering (src/lib/upNext.ts)
   const next = useMemo(() => upNext(db, now), [db, now])
-  const weeks = useMemo(() => compareWeeks(db, now), [db, now])
   const streak = useMemo(() => weeklyStreak(db, now), [db, now])
-  const muscles = useMemo(() => {
-    const from = muscleWeek === 'this' ? weeks.weekStart : addDays(weeks.weekStart, -7)
-    return muscleSets(db, from, addDays(from, 7), plannedMuscles(db))
-  }, [db, weeks.weekStart, muscleWeek])
 
   function loadStarter() {
     const plan = buildStarterPlan(user?.id ?? 'local', db.exercises, db.workouts.length)
@@ -177,19 +156,8 @@ export default function Home() {
   const hour = now.getHours()
   const greeting = t(hour < 5 ? 'Late session?' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
   const hero = next && !active ? templateInfo(db, next.workout) : null
-  const tw = weeks.thisWeek
-  const lw = weeks.lastWeekToDate
-  const scaleMax = Math.max(MUSCLE_SETS_MAX + 4, ...muscles.map((m) => m.sets + 1))
-  const pct = (n: number) => `${(n / scaleMax) * 100}%`
 
   const [heroName, heroWhen] = next ? splitName(next.workout.name) : ['', '']
-  // this week + recovery: inside the hero, or inside the "in progress" card while a workout is open
-  const weekRows = workouts.length > 0 && (
-    <div className="hm-foot">
-      <WeekLine />
-      <RecoveryLine />
-    </div>
-  )
 
   function folderBlock(g: FolderGroup, withHead: boolean) {
     const shut = folded.includes(g.label)
@@ -288,7 +256,6 @@ export default function Home() {
           >
             <Play size={18} aria-hidden /> {t('Resume workout')}
           </button>
-          {weekRows}
         </div>
       )}
 
@@ -346,12 +313,10 @@ export default function Home() {
                 </span>
               )}
             </div>
-            {hero.names.length > 0 && <div className="hm-preview">{hero.names.join(' · ')}</div>}
             <button className="btn primary block hm-go" onClick={() => start(next.workout)} disabled={hero.wes.length === 0}>
               <Play size={18} aria-hidden /> {t('Start {name}', { name: heroName })}
             </button>
-            {weekRows}
-          </div>
+            </div>
         )
       )}
 
@@ -419,122 +384,6 @@ export default function Home() {
         </Sheet>
       )}
 
-      {finished.length > 0 && (
-        <>
-          <section className="stack" style={{ gap: 10 }} aria-label={t("This week")}>
-            <div className="sec-head">
-              <h2>{t("This week")}</h2>
-              <span className="small muted">
-                {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())} · {t('vs last week')}
-              </span>
-            </div>
-            <div className="stat-grid">
-              <div className="stat">
-                <div className="v">{tw.workouts}</div>
-                <div className="l">{t('workouts')}</div>
-                <Delta now={tw.workouts} before={lw.workouts} fmt={String} />
-              </div>
-              <div className="stat">
-                <div className="v">{tw.sets}</div>
-                <div className="l">{t('sets')}</div>
-                <Delta now={tw.sets} before={lw.sets} fmt={String} />
-              </div>
-              <div className="stat">
-                <div className="v">{fmtVolume(tw.volume).replace(/ (kg|t)$/, '')}</div>
-                <div className="l">{t(tw.volume >= 1000 ? 'tonnes lifted' : 'kg lifted')}</div>
-                <Delta now={tw.volume} before={lw.volume} fmt={fmtVolume} />
-              </div>
-            </div>
-            {!streak.thisWeekDone && streak.current > 0 && (
-              <div className="small muted nudge">
-                <Flame size={14} /> {t('Train once this week to keep your {n}-week streak.', { n: streak.current })}
-              </div>
-            )}
-          </section>
-
-          <section className="card stack" style={{ gap: 12 }}>
-            <div>
-              <div className="row">
-                <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>{t("Sets per muscle")}</div>
-                <div className="seg sm">
-                  <button className={muscleWeek === 'this' ? 'on' : ''} onClick={() => setMuscleWeek('this')}>
-                    {t("This wk")}
-                  </button>
-                  <button className={muscleWeek === 'last' ? 'on' : ''} onClick={() => setMuscleWeek('last')}>
-                    {t("Last wk")}
-                  </button>
-                </div>
-              </div>
-              <div className="small muted" style={{ marginTop: 4 }}>
-                Shaded band: {MUSCLE_SETS_MIN}–{MUSCLE_SETS_MAX} sets a week, a good range to grow.
-              </div>
-            </div>
-            {muscles.length === 0 ? (
-              <div className="small muted">{t("No sets logged yet.")}</div>
-            ) : (
-              <div className="mbars">
-                {muscles.map((m) => (
-                  <div key={m.muscle} className={`mbar ${guidelineZone(m.sets)}`}>
-                    <div className="mbar-name">{m.muscle}</div>
-                    <div className="mbar-track">
-                      <div className="mbar-band" style={{ left: pct(MUSCLE_SETS_MIN), width: pct(MUSCLE_SETS_MAX - MUSCLE_SETS_MIN) }} />
-                      <div className="mbar-fill" style={{ width: pct(m.sets) }} />
-                    </div>
-                    <div className="mbar-v">{m.sets === 0 ? '–' : fmtSets(m.sets)}</div>
-                  </div>
-                ))}
-                <div className="mbar legend">
-                  <div />
-                  <div className="mbar-track bare">
-                    <span style={{ left: pct(MUSCLE_SETS_MIN) }}>{MUSCLE_SETS_MIN}</span>
-                    <span style={{ left: pct(MUSCLE_SETS_MAX) }}>{MUSCLE_SETS_MAX}</span>
-                  </div>
-                  <div />
-                </div>
-              </div>
-            )}
-          </section>
-        </>
-      )}
-
-      <div className="list-group home-links">
-        {workouts.length > 0 && (
-          <button className="list-row" onClick={() => nav('/programs')}>
-            <LayoutGrid size={20} aria-hidden />
-            <span className="grow">
-              <span className="home-link-t">{t("Browse programs")}</span>
-              <span className="tiny muted">{t("Single workouts and weekly plans, ready to go")}</span>
-            </span>
-            <ChevronRight size={18} aria-hidden />
-          </button>
-        )}
-        {finished.length > 0 && (
-          <button className="list-row" onClick={() => nav('/records')}>
-            <Trophy size={20} aria-hidden />
-            <span className="grow">
-              <span className="home-link-t">{t("Records")}</span>
-              <span className="tiny muted">{t("Your best lifts for every exercise")}</span>
-            </span>
-            <ChevronRight size={18} aria-hidden />
-          </button>
-        )}
-        <button className="list-row" onClick={() => nav('/exercises')}>
-          <BookOpen size={20} aria-hidden />
-          <span className="grow">
-            <span className="home-link-t">{t("Exercises")}</span>
-            <span className="tiny muted">{t("Your exercise list, photos, setup notes and records")}</span>
-          </span>
-          <ChevronRight size={18} aria-hidden />
-        </button>
-        <button className="list-row" onClick={() => nav('/help')}>
-          <HelpCircle size={20} aria-hidden />
-          <span className="grow">
-            <span className="home-link-t">{t("How it works")}</span>
-            <span className="tiny muted">{t("Short answers about every part of GymLog")}</span>
-          </span>
-          <ChevronRight size={18} aria-hidden />
-        </button>
-      </div>
     </div>
   )
 }

@@ -1,5 +1,7 @@
 import { plateaus } from '../lib/plateau'
 import { GoalsList } from '../components/GoalCard'
+import { WeekSummary } from '../components/WeekSummary'
+import { RecoveryLine } from '../components/RecoveryCard'
 import '../styles/records.css'
 import { t as tr } from '../lib/i18n'
 import { useMemo, useRef, useState } from 'react'
@@ -95,6 +97,12 @@ export default function Profile() {
                 <div className="hv-v">{fmtVolume(sum.volume)}</div>
               </div>
             </div>
+          </div>
+
+          {/* this week, muscle recovery and sets per muscle live here; Train only says what to do now */}
+          <WeekSummary />
+          <div className="card">
+            <RecoveryLine />
           </div>
 
           <div className="card">

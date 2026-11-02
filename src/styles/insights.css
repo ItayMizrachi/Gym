@@ -610,10 +610,11 @@
   min-height: 40px;
   padding: 0 14px;
   border-radius: var(--r-pill);
-  background: var(--accent-soft);
-  border-color: var(--accent-line);
-  color: var(--accent);
-  font-weight: 650;
+  /* quiet: only the workout up next is yellow, so one thing on the screen asks to be tapped */
+  background: var(--card2);
+  border-color: var(--line);
+  color: var(--text-2);
+  font-weight: 600;
   gap: 6px;
 }
 .trow.next .btn.trow-start { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
