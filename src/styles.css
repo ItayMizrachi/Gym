@@ -2384,3 +2384,5 @@ input[type='search']::-webkit-search-decoration {
 
 /* which of two machines (live workout card) */
 .ex-mach { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 0 10px; font-size: 13px; cursor: pointer; }
+
+.stat-grid.two { grid-template-columns: repeat(2, 1fr); }

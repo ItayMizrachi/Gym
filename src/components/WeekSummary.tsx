@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, Flame } from 'lucide-react'
 import { t } from '../lib/i18n'
 import { useStore } from '../lib/store'
+import { RecoveryLine } from './RecoveryCard'
 import { fmtDate } from '../lib/format'
 import { addDays, compareWeeks, fmtSets, fmtVolume, guidelineZone, muscleSets, MUSCLE_SETS_MAX, MUSCLE_SETS_MIN, plannedMuscles, weeklyStreak } from '../lib/stats'
 import '../styles/insights.css'
@@ -35,6 +36,8 @@ export function WeekSummary() {
   const tw = weeks.thisWeek
   const lw = weeks.lastWeekToDate
   const scaleMax = Math.max(MUSCLE_SETS_MAX + 4, ...muscles.map((m) => m.sets + 1))
+  // only muscles with sets; the rest would be a column of dashes
+  const trained = muscles.filter((m) => m.sets > 0)
   const pct = (n: number) => `${(n / scaleMax) * 100}%`
   return (
     <>
@@ -45,12 +48,7 @@ export function WeekSummary() {
             {fmtDate(weeks.weekStart.toISOString())} – {fmtDate(addDays(weeks.weekStart, 6).toISOString())} · {t('vs last week')}
           </span>
         </div>
-        <div className="stat-grid">
-          <div className="stat">
-            <div className="v">{tw.workouts}</div>
-            <div className="l">{t('workouts')}</div>
-            <Delta now={tw.workouts} before={lw.workouts} fmt={String} />
-          </div>
+        <div className="stat-grid two">
           <div className="stat">
             <div className="v">{tw.sets}</div>
             <div className="l">{t('sets')}</div>
@@ -70,6 +68,7 @@ export function WeekSummary() {
       </section>
 
       <section className="card stack" style={{ gap: 12 }}>
+        <RecoveryLine />
         <div>
           <div className="row">
             <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>{t("Sets per muscle")}</div>
@@ -83,14 +82,14 @@ export function WeekSummary() {
             </div>
           </div>
           <div className="small muted" style={{ marginTop: 4 }}>
-            Shaded band: {MUSCLE_SETS_MIN}–{MUSCLE_SETS_MAX} sets a week, a good range to grow.
+            {t('Shaded: {a}–{b} sets a week', { a: MUSCLE_SETS_MIN, b: MUSCLE_SETS_MAX })}
           </div>
         </div>
-        {muscles.length === 0 ? (
+        {trained.length === 0 ? (
           <div className="small muted">{t("No sets logged yet.")}</div>
         ) : (
           <div className="mbars">
-            {muscles.map((m) => (
+            {trained.map((m) => (
               <div key={m.muscle} className={`mbar ${guidelineZone(m.sets)}`}>
                 <div className="mbar-name">{m.muscle}</div>
                 <div className="mbar-track">

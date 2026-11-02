@@ -1,14 +1,13 @@
 import { plateaus } from '../lib/plateau'
 import { GoalsList } from '../components/GoalCard'
 import { WeekSummary } from '../components/WeekSummary'
-import { RecoveryLine } from '../components/RecoveryCard'
 import '../styles/records.css'
 import { t as tr } from '../lib/i18n'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, ChevronRight, Flame, Moon, Trophy } from 'lucide-react'
+import { BookOpen, ChevronRight, Flame, Medal, Moon, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
-import { Empty, PageHeader } from '../components/ui'
+import { Empty, PageHeader, Sheet } from '../components/ui'
 import { CalendarHeat } from '../components/CalendarHeat'
 import { WeekBars } from '../components/WeekBars'
 import { GoalRing, GoalSheet } from '../components/GoalRing'
@@ -71,6 +70,7 @@ export default function Profile() {
   const week = useMemo(() => weekGoal(db, goal), [db, goal])
   const inRow = useMemo(() => goalWeeksInRow(db, goal), [db, goal])
   const [editGoal, setEditGoal] = useState(false)
+  const [ach, setAch] = useState(false)
   useAchievementToasts()
 
 
@@ -78,32 +78,29 @@ export default function Profile() {
     <div className="stack" style={{ gap: 18 }}>
       <PageHeader title={tr("Progress")} sub={tr("Your training at a glance.")} />
 
+      {sum.workouts > 0 && (
+        <section className="card goal-streak" aria-label={tr("Weekly goal")}>
+          <GoalRing done={week.done} goal={week.goal} size={56} />
+          <div className="grow" style={{ minWidth: 0 }}>
+            <div className="goal-title">
+              {inRow > 0 ? tr(inRow === 1 ? '{n} week in a row' : '{n} weeks in a row', { n: inRow }) : tr('Weekly goal')}
+            </div>
+            <div className="small muted">
+              {week.done >= week.goal ? tr('Goal met: {n} workouts this week', { n: week.done }) : tr('{a} of {b} workouts this week', { a: week.done, b: week.goal })}
+            </div>
+          </div>
+          <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label={tr("Change weekly goal")}>
+            {tr("Change")}
+          </button>
+        </section>
+      )}
+      {editGoal && <GoalSheet onClose={() => setEditGoal(false)} />}
+
       {sum.workouts === 0 ? (
         <Empty title={tr("Nothing here yet")} text={tr("Finish your first workout and your weekly chart, totals and calendar show up here.")} />
       ) : (
         <>
-          <div className="card hv-card">
-            <div className="hv-stats three">
-              <div>
-                <div className="hv-l">{tr("Workouts")}</div>
-                <div className="hv-v">{sum.workouts}</div>
-              </div>
-              <div>
-                <div className="hv-l">{tr("Total time")}</div>
-                <div className="hv-v">{hours(sum.minutes)}</div>
-              </div>
-              <div>
-                <div className="hv-l">{tr("Volume")}</div>
-                <div className="hv-v">{fmtVolume(sum.volume)}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* this week, muscle recovery and sets per muscle live here; Train only says what to do now */}
           <WeekSummary />
-          <div className="card">
-            <RecoveryLine />
-          </div>
 
           <div className="card">
             <div className="prof-seg">
@@ -131,16 +128,20 @@ export default function Profile() {
         </>
       )}
 
-      <button className="list-group list-row rec-link" onClick={() => nav('/records')}>
-        <Trophy size={22} aria-hidden className="accent-ico" />
-        <span className="grow">
-          <span className="title">{tr("Records")}</span>
-          <span className="meta" style={{ display: 'block' }}>
-            {tr("Best lifts for every exercise")}
-          </span>
-        </span>
-        <ChevronRight size={18} aria-hidden className="muted" />
-      </button>
+
+      {sum.workouts > 0 && (
+        <div className="card" ref={calRef} style={{ scrollMarginTop: 12 }}>
+          <div className="prof-chips">
+            <span className={`chip${streak.current > 0 ? ' ok' : ''}`}>
+              <Flame size={13} /> {streak.current} week streak
+            </span>
+            <span className="chip">
+              <Moon size={13} /> {tr(rest === 1 ? '{n} rest day this week' : '{n} rest days this week', { n: rest })}
+            </span>
+          </div>
+          <CalendarHeat days={days} names={names} onDay={(_, d) => nav(`/history/${d.sessionIds[d.sessionIds.length - 1]}`)} />
+        </div>
+      )}
 
       <GoalsList db={db} onOpen={(id) => nav(`/exercise/${id}`)} />
 
@@ -162,48 +163,30 @@ export default function Profile() {
         </section>
       )}
 
-      <section className="card goal-streak" aria-label={tr("Weekly goal")}>
-        <GoalRing done={week.done} goal={week.goal} size={56} />
-        <div className="grow" style={{ minWidth: 0 }}>
-          <div className="goal-title">
-            {inRow > 0 ? tr(inRow === 1 ? '{n} week in a row' : '{n} weeks in a row', { n: inRow }) : tr('Weekly goal')}
-          </div>
-          <div className="small muted">
-            {week.done >= week.goal ? tr('Goal met: {n} workouts this week', { n: week.done }) : tr('{a} of {b} workouts this week', { a: week.done, b: week.goal })}
-          </div>
-        </div>
-        <button className="btn sm secondary" onClick={() => setEditGoal(true)} aria-label={tr("Change weekly goal")}>
-          {tr("Change")}
+
+
+
+      <div className="list-group">
+        <button className="list-row" onClick={() => nav('/records')}>
+          <Trophy size={20} aria-hidden className="accent-ico" />
+          <span className="grow">{tr('Records')}</span>
+          <ChevronRight size={18} aria-hidden className="muted" />
         </button>
-      </section>
-      {editGoal && <GoalSheet onClose={() => setEditGoal(false)} />}
-
-      <AchievementsSection />
-
-      {/* Body and History are tabs and the calendar is right below: only the exercise list needs a way in */}
-      <button className="list-group list-row rec-link" onClick={() => nav('/exercises')}>
-        <BookOpen size={22} aria-hidden className="muted" />
-        <span className="grow">
-          <span className="title">{tr("Exercises")}</span>
-          <span className="meta" style={{ display: 'block' }}>
-            {tr("Your list, photos, setup notes and records per exercise")}
-          </span>
-        </span>
-        <ChevronRight size={18} aria-hidden className="muted" />
-      </button>
-
-      {sum.workouts > 0 && (
-        <div className="card" ref={calRef} style={{ scrollMarginTop: 12 }}>
-          <div className="prof-chips">
-            <span className={`chip${streak.current > 0 ? ' ok' : ''}`}>
-              <Flame size={13} /> {streak.current} week streak
-            </span>
-            <span className="chip">
-              <Moon size={13} /> {tr(rest === 1 ? '{n} rest day this week' : '{n} rest days this week', { n: rest })}
-            </span>
-          </div>
-          <CalendarHeat days={days} names={names} onDay={(_, d) => nav(`/history/${d.sessionIds[d.sessionIds.length - 1]}`)} />
-        </div>
+        <button className="list-row" onClick={() => setAch(true)}>
+          <Medal size={20} aria-hidden className="muted" />
+          <span className="grow">{tr('Achievements')}</span>
+          <ChevronRight size={18} aria-hidden className="muted" />
+        </button>
+        <button className="list-row" onClick={() => nav('/exercises')}>
+          <BookOpen size={20} aria-hidden className="muted" />
+          <span className="grow">{tr('Exercises')}</span>
+          <ChevronRight size={18} aria-hidden className="muted" />
+        </button>
+      </div>
+      {ach && (
+        <Sheet title={tr('Achievements')} onClose={() => setAch(false)}>
+          <AchievementsSection />
+        </Sheet>
       )}
     </div>
   )

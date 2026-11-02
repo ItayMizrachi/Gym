@@ -187,6 +187,7 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  'Shaded: {a}–{b} sets a week': 'מוצלל: {a}–{b} סטים בשבוע',
   Superset: 'סופרסט',
   'Superset with {names}': 'בסופרסט עם {names}',
   'Machine {n}': 'מכונה {n}',
