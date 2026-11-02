@@ -29,8 +29,9 @@ export default function Exercises() {
   const toast = useStore((s) => s.toast)
   // search and filters live in the URL, so coming back from a detail page keeps them
   const [params, setParams] = useSearchParams()
-  const tab = (params.get('tab') as Tab) || 'all'
   const q = params.get('q') ?? ''
+  // your own list first; a search looks everywhere; the library is one tap away
+  const tab = (params.get('tab') as Tab) || (q || !db.exercises.length ? 'all' : 'mine')
   const muscle = params.get('muscle') ?? 'All'
   const eq = params.get('eq') ?? 'All'
   const level = params.get('level') ?? 'All'
@@ -83,8 +84,8 @@ export default function Exercises() {
         ? `Best ${fmtKg(rec.heaviest.weight)} kg × ${rec.heaviest.reps}`
         : `Best ${Math.max(...rec.repTable.map((r) => r.reps))} reps`
       : ''
-    // the best set is on the right (est. max) or, for reps-only moves, the only extra on this line
-    const meta = [withMuscle ? e.muscle : '', e.equipment, best == null ? bestSet : ''].filter(Boolean).join(' · ')
+    // the best set closes the line (records have their own page)
+    const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
     return (
       <div key={e.id} className="lib-row">
         <ThumbButton exercise={e} size={48} />
@@ -93,17 +94,6 @@ export default function Exercises() {
           <div className="title clamp2">{e.name}</div>
           <div className="meta ellipsis">{meta || 'Not logged yet'}</div>
         </div>
-        {best != null && (
-          <div className="trail">
-            <div className="kpi">
-              {best}
-              <span className="muted" style={{ fontSize: 13, marginLeft: 2 }}>
-                kg
-              </span>
-            </div>
-            <div className="tiny muted">est. max</div>
-          </div>
-        )}
         </button>
       </div>
     )
@@ -148,7 +138,7 @@ export default function Exercises() {
 
       <div className="seg lib-seg" role="group" aria-label={tr("Which exercises")}>
         {TABS.map((t) => (
-          <button key={t.id} aria-pressed={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, 'all')} style={{ flex: 1 }}>
+          <button key={t.id} aria-pressed={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, '')} style={{ flex: 1 }}>
             {t.label}
           </button>
         ))}
@@ -198,7 +188,7 @@ export default function Exercises() {
                 <div style={{ fontWeight: 600 }}>{tr("No exercises of your own yet")}</div>
                 <div className="small muted">{tr("Add any exercise from the library, or create your own with a photo of the machine.")}</div>
                 <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <button className="btn primary" onClick={() => set('tab', 'library', 'all')}>
+                  <button className="btn primary" onClick={() => set('tab', 'library', '')}>
                     {tr("Browse the library")}
                   </button>
                   <button className="btn" onClick={() => setCreating(true)}>
