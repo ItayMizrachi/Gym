@@ -34,6 +34,11 @@ const x = (n: string, m: string, s: string[], e: string, p: string, t: Tracking 
 })
 
 export const LIBRARY_EXTRA: ExtraEntry[] = [
+  // cardio and mobility, logged by time (as in Hevy)
+  x('Stretching', 'Other', [], 'Other', 'Hamstring_Stretch', 'time'),
+  x('Jump Rope', 'Other', ['Calves'], 'Other', 'Rope_Jumping', 'time'),
+  x('Running', 'Other', ['Quads'], 'Other', 'Trail_Running_Walking', 'time'),
+  x('Climbing', 'Other', ['Back', 'Forearms'], 'Other', 'Rope_Climb', 'time'),
   // chest
   x('Bench Press (Machine)', 'Chest', ['Triceps', 'Shoulders'], 'Machine', 'Leverage_Chest_Press'),
   x('Decline Chest Press (Machine)', 'Chest', ['Triceps'], 'Machine', 'Leverage_Decline_Chest_Press'),

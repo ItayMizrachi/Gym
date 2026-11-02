@@ -31,11 +31,19 @@ const PHRASES: [string, string][] = [
   ['דיפס', 'dip'],
   ['פיסוק בולגרי', 'split squat'],
   ['סקוואט בולגרי', 'split squat'],
-  ['רגל אחת', 'single']
+  ['רגל אחת', 'single'],
+  ['קפיצה בחבל', 'jump rope'],
+  ['דילגית', 'jump rope']
 ]
 
 const WORDS: Record<string, string> = {
   סקוואט: 'squat',
+  חימום: 'warm up',
+  מתיחות: 'stretching',
+  מתיחה: 'stretching',
+  ריצה: 'running',
+  טיפוס: 'climbing',
+  חבל: 'rope',
   דדליפט: 'deadlift',
   מתח: 'pull up',
   חתירה: 'row',

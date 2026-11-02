@@ -9,6 +9,7 @@ function s(ex: CatalogExercise, sets: number, range: string, rest: number, o: { 
 const wo = (name: string, notes: string, exercises: ProgramExercise[]): ProgramWorkout => ({ name, notes, exercises })
 const PLANK = (sets = 2) => s(X.plank, sets, '30-60', 60, { note: 'Keep a straight line from head to heels.' })
 // shared parts of the Ultimate 4-Day Plan
+const ULT_GENERAL = () => s(X.warmUp, 1, '300-600', 0, { note: 'General warm-up, 5-10 min: bike, rower, jump rope or mobility.' })
 const ULT_WARMUP = () =>
   s(X.latPd, 3, '6-15', 15, { warmup: true, note: 'Warm-up, wide grip: 15 / 10 / 6 reps, light to moderate, not to failure. Not counted as working sets.' })
 const ULT_LATERAL = () => s(X.oneArmLateral, 3, '10-15', 60, { note: 'Strict form, controlled tempo.' })
@@ -183,6 +184,7 @@ const W = {
   // parts of weekly programs only
   // The Ultimate 4-Day Plan: 2 hard sets per lift, under 75 minutes a day
   ultUpperA: wo('Upper A', 'Back and chest focus. 2 working sets per lift; under 75 min.', [
+    ULT_GENERAL(),
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 180),
     s(X.inclineMachine, 2, '6-10', 180),
@@ -199,6 +201,7 @@ const W = {
     s(X.pushdown, 2, '10-12', 90, { ss: 'B', drop: true })
   ]),
   ultLowerA: wo('Lower A', 'Quad focus. 2 working sets per lift; under 75 min.', [
+    ULT_GENERAL(),
     s(X.rdl, 2, '6-10', 180, { note: 'Main hip hinge of the week: stretch the hamstrings to mid-shin, 2-3 s on the way down.' }),
     ULT_LEG_PRESS('8-12', 180),
     s(X.legExt, 2, '10-15', 90, { drop: true }),
@@ -209,6 +212,7 @@ const W = {
     ...ULT_WRISTS()
   ]),
   ultUpperB: wo('Upper B', 'Chest and back, arms. 2 working sets per lift; under 75 min.', [
+    ULT_GENERAL(),
     s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine.' }),
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-10', 180),
@@ -222,6 +226,7 @@ const W = {
     s(X.ohExt, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Long-head focus: full stretch behind the head, elbows stay pointed forward.' })
   ]),
   ultLowerB: wo('Lower B', 'Glute and hamstring focus. 2 working sets per lift; under 75 min.', [
+    ULT_GENERAL(),
     s(X.hipThrust, 3, '8-12', 150, { note: 'Pause 1-2 s at the top; full lockout with the glutes.' }),
     ULT_LEG_PRESS('10-12', 150),
     s(X.standingCurl, 2, '10-12', 90, { drop: true }),
@@ -470,7 +475,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
   weekly({
     id: 'ultimate-4',
     // 2 (2026-11-02): lat pulldown warm-ups, Bayesian curl, woodchop, 3rd lateral day, straight sets for delts
-    version: 2,
+    // 3 (2026-11-02): a timed general warm-up first in every workout
+    version: 3,
     name: 'The Ultimate 4-Day Plan',
     description:
       'Upper / lower on Sunday, Monday, Wednesday and Thursday. Only 2 hard working sets per lift, so every day fits in 75 minutes with warm-ups. Drop sets and supersets on the small muscles, forearms twice a week.',

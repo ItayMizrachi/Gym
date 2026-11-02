@@ -104,6 +104,7 @@ export const X = {
   revWristCurl: e('Reverse Wrist Curl (Cable)', 'Forearms', 'Cable'),
   // core
   plank: hold('Plank', 'Abs'),
+  warmUp: hold('Warm Up', 'Other', 'Other'),
   sidePlank: hold('Side Plank', 'Abs'),
   cableCrunch: e('Cable Crunch', 'Abs', 'Cable'),
   woodchop: e('Woodchop (Cable)', 'Abs', 'Cable'),
