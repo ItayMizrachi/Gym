@@ -60,11 +60,31 @@ function RestBar({ inSession }: { inSession: boolean }) {
     else if (!rest.finished) scheduleRestNotification(rest.endsAt, rest.label)
   }, [rest?.endsAt, rest == null, restNotify])
 
+  // rest over: say so for a few seconds, then get out of the way on its own (no button to tap between sets)
+  useEffect(() => {
+    if (!rest?.finished) return
+    const id = setTimeout(() => {
+      if (document.visibilityState === 'visible') useStore.getState().clearRest()
+    }, 4000)
+    const back = () => document.visibilityState === 'visible' && setTimeout(() => useStore.getState().rest?.finished && useStore.getState().clearRest(), 4000)
+    document.addEventListener('visibilitychange', back)
+    return () => {
+      clearTimeout(id)
+      document.removeEventListener('visibilitychange', back)
+    }
+  }, [rest?.finished, rest?.endsAt])
+
   if (!rest) return null
   const left = Math.max(0, (rest.endsAt - Date.now()) / 1000)
   const frac = rest.finished ? 1 : Math.min(1, Math.max(0, (rest.total - left) / rest.total))
   return (
-    <div className={`rp ${rest.finished ? 'done' : ''} ${inSession ? 'full' : ''}`} role="timer" aria-live="off">
+    <div
+      className={`rp ${rest.finished ? 'done' : ''} ${inSession ? 'full' : ''}`}
+      role="timer"
+      aria-live="off"
+      // when it is over, a tap anywhere on it closes it sooner
+      onClick={rest.finished ? clear : undefined}
+    >
       <div className="rp-ring">
         <svg viewBox="0 0 72 72" aria-hidden>
           <circle className="track" cx="36" cy="36" r={RING_R} />
@@ -87,11 +107,7 @@ function RestBar({ inSession }: { inSession: boolean }) {
         </div>
         <div className="rp-label ellipsis">{rest.label && rest.label.includes(' · Set ') ? `Next: ${rest.label}` : rest.label}</div>
         <div className="rp-ctrl">
-          {rest.finished ? (
-            <button className="btn sm ok grow" onClick={clear}>
-              <Check size={16} /> {tr("Next set")}
-            </button>
-          ) : (
+          {rest.finished ? null : (
             <>
               <button className="btn sm" onClick={() => adjust(-15)} aria-label="15 seconds less rest">
                 −15s
