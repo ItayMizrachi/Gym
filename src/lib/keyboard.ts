@@ -39,10 +39,21 @@ export function installKeyboardHelpers() {
   if (!vv) return
   const root = document.documentElement.style
   const sync = () => {
-    root.setProperty('--vvh', `${Math.round(vv.height)}px`)
-    root.setProperty('--kb', `${Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop))}px`)
+    // only while a field is focused: iPhone does not always report the viewport growing back after the keyboard
+    // closes, and a stale value would push sheets up and cut off their bottom
+    const typing = isField(document.activeElement)
+    root.setProperty('--vvh', `${Math.round(typing ? vv.height : window.innerHeight)}px`)
+    root.setProperty('--kb', `${typing ? Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop)) : 0}px`)
   }
   vv.addEventListener('resize', sync)
   vv.addEventListener('scroll', sync)
+  // the keyboard opens and closes a moment after focus moves: check right away and again once it has settled
+  const later = () => {
+    sync()
+    setTimeout(sync, 120)
+    setTimeout(sync, 450)
+  }
+  document.addEventListener('focusin', later)
+  document.addEventListener('focusout', later)
   sync()
 }
