@@ -187,6 +187,11 @@ export const HE_SCREENS: Record<string, string> = {
   'Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.':
     'רק היא תופיע במסך האימון וב"הבא בתור". האחרות יתקפלו למטה, ושום דבר לא נמחק.',
   'Show all programs': 'הצג את כל התוכניות',
+  'Latest · {d}': 'אחרון · {d}',
+  '7 days': '7 ימים',
+  '30 days': '30 ימים',
+  'trend': 'מגמה',
+  'Add measurements': 'הוסף מדידות',
   'You coach other people': 'אתה מאמן אנשים אחרים',
   'Coached by {e}': 'המאמן שלך: {e}',
   'Coach others, or connect to your coach': 'אמן אחרים, או התחבר למאמן שלך',

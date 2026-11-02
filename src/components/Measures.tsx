@@ -180,6 +180,15 @@ export function MeasuresCard({ metrics, onLog }: { metrics: Metric[]; onLog: () 
   const d = useMemo(() => (key ? measureDeltas(metrics, key) : null), [metrics, key])
   const points = useMemo(() => (key ? measureSeries(metrics, key).map((p) => ({ t: ts(p.date), y: p.value })) : []), [metrics, key])
 
+  // nothing measured yet: one quiet row instead of a whole card
+  if (!key)
+    return (
+      <button className="list-group list-row" onClick={onLog}>
+        <Ruler size={20} aria-hidden className="muted" />
+        <span className="grow">{tr('Add measurements')}</span>
+        <Plus size={18} aria-hidden className="muted" />
+      </button>
+    )
   return (
     <div className="card stack">
       <div className="card-head">

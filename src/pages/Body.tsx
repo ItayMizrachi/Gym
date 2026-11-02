@@ -231,22 +231,13 @@ export default function Body() {
       ) : (
         <>
           <div className="card stack" style={{ gap: 'var(--s3)' }}>
+            {/* one big number, then three small ones: the week, the month, and the trend per week */}
             <div className="body-hero">
               <div>
-                <div className="small muted">Latest · {fmtDate(cur.date)}</div>
+                <div className="small muted">{tr('Latest · {d}', { d: fmtDate(cur.date) })}</div>
                 <div className="big">
                   {fmtKg(cur.weight_kg)}
                   <span className="u">kg</span>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div className="kpi" style={{ fontSize: 26 }}>
-                  {avgNow != null ? fmtKg(Math.round(avgNow * 10) / 10) : '–'}
-                </div>
-                <div className="tiny muted">7-day average</div>
-                <div className={`kpi ${rateClass}`} style={{ fontSize: 18, marginTop: 6 }}>
-                  {rate == null ? '–' : `${rate > 0 ? '+' : rate < 0 ? '−' : ''}${Math.abs(Math.round(rate * 100) / 100).toFixed(2)}`}
-                  <span className="tiny muted" style={{ fontFamily: 'var(--body)', marginLeft: 4 }}>kg/wk</span>
                 </div>
               </div>
             </div>
@@ -256,21 +247,21 @@ export default function Body() {
                   {fmtDelta(delta(cur.weight_kg, d7?.weight_kg))}
                   <span className="delta-u">kg</span>
                 </div>
-                <div className="l">vs 7 days ago</div>
+                <div className="l">{tr('7 days')}</div>
               </div>
               <div>
                 <div className="kpi">
                   {fmtDelta(delta(cur.weight_kg, d30?.weight_kg))}
                   <span className="delta-u">kg</span>
                 </div>
-                <div className="l">vs 30 days ago</div>
+                <div className="l">{tr('30 days')}</div>
               </div>
               <div>
-                <div className="kpi">
-                  {fmtDelta(delta(cur.weight_kg, first.weight_kg))}
-                  <span className="delta-u">kg</span>
+                <div className={`kpi ${rateClass}`}>
+                  {rate == null ? '–' : `${rate > 0 ? '+' : rate < 0 ? '−' : ''}${Math.abs(Math.round(rate * 100) / 100).toFixed(2)}`}
+                  <span className="delta-u">kg/wk</span>
                 </div>
-                <div className="l">since {fmtDate(first.date)}</div>
+                <div className="l">{tr('trend')}</div>
               </div>
             </div>
           </div>
