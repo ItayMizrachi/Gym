@@ -41,8 +41,8 @@ export function SuggestedExercises() {
     }
   }
 
-  // nothing to review: no card at all (it shows up when someone suggests an exercise)
-  if (list != null && list.length === 0) return null
+  // nothing to review (or still checking): no card at all, so Settings does not jump when it loads
+  if (list == null || list.length === 0) return null
   return (
     <section className="card stack" aria-label={tr("Suggested exercises")}>
       <h2>{tr("Suggested exercises")}</h2>
