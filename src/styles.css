@@ -616,6 +616,9 @@ div.field {
   -webkit-backdrop-filter: saturate(160%) blur(16px);
   border-top: 1px solid var(--line);
   padding-bottom: var(--safe-b);
+  /* its own layer: on iPhone a fixed bar with a blur could lag behind a fast scroll and float mid-screen */
+  transform: translateZ(0);
+  will-change: transform;
 }
 .nav-inner {
   max-width: 720px;
