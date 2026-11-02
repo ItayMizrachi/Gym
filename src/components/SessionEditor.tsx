@@ -8,6 +8,7 @@ import { uid } from '../lib/uid'
 import { NumInput } from './ui'
 import '../styles/insights.css'
 import '../styles/progress.css'
+import { scrollToY } from '../lib/scroll'
 
 const KINDS: SetKind[] = ['work', 'warmup', 'drop', 'failure']
 const KIND_TAG: Record<SetKind, string> = { work: '', warmup: 'W', drop: 'D', failure: 'F' }
@@ -57,7 +58,7 @@ export function SessionEditor({ session, onDone }: { session: Session; onDone: (
   const [start, setStart] = useState(toLocalInput(session.started_at))
   const [minutes, setMinutes] = useState<number | null>(durationMin(session))
   useEffect(() => {
-    window.scrollTo(0, 0)
+    scrollToY(0)
   }, [])
 
   const patchEx = (i: number, fn: (sets: SessionSet[]) => SessionSet[]) =>

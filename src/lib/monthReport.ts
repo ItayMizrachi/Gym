@@ -65,6 +65,8 @@ export interface FullMonthReport {
   before: MonthNumbers
   /** days of the month with a finished workout (1-31) */
   days: number[]
+  /** the workouts of each training day, in order (tap a day to open it) */
+  byDay: Record<number, string[]>
   /** workouts per month, oldest first, ending with this month */
   trend: { month: Date; workouts: number }[]
   /** most done exercises (times = workouts they were in) */
@@ -84,6 +86,7 @@ export function fullMonthReport(db: DB, month: Date): FullMonthReport {
   const now = emptyNums()
   const before = emptyNums()
   const days = new Set<number>()
+  const byDay: Record<number, string[]> = {}
   const times = new Map<string, { name: string; times: number }>()
   const photos: { at: string; path: string }[] = []
   const trendStart = new Date(start.getFullYear(), start.getMonth() - 5, 1)
@@ -102,6 +105,7 @@ export function fullMonthReport(db: DB, month: Date): FullMonthReport {
     into.sets += sum.sets
     if (into !== now) continue
     days.add(t.getDate())
+    ;(byDay[t.getDate()] ??= []).push(s.id)
     if (s.data.photo_path) photos.push({ at, path: s.data.photo_path })
     for (const e of s.data.exercises) {
       if (!e.sets.some((x) => x.done && x.kind !== 'warmup')) continue
@@ -119,6 +123,7 @@ export function fullMonthReport(db: DB, month: Date): FullMonthReport {
     now,
     before,
     days: [...days].sort((a, b) => a - b),
+    byDay,
     trend,
     top: [...times.entries()].map(([exerciseId, v]) => ({ exerciseId, ...v })).sort((a, b) => b.times - a.times),
     records: monthReport(db, start).records,

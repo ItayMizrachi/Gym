@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { scrollToY, scrollY } from '../lib/scroll'
 
 /*
  * Press-and-hold to pick up an item in a vertical list, drag it, let go to drop: the item follows the finger
@@ -36,7 +37,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
   function measure(): Rect[] {
     return refs.current.map((el) => {
       const r = el?.getBoundingClientRect()
-      return r ? { top: r.top + window.scrollY, h: r.height } : { top: 0, h: 0 }
+      return r ? { top: r.top + scrollY(), h: r.height } : { top: 0, h: 0 }
     })
   }
 
@@ -45,8 +46,8 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
   function start(from: number, clientY: number, snap = false) {
     const rects = measure()
     const r = rects[from]
-    const off = snap && r ? clientY - (r.top - window.scrollY + r.h / 2) : 0
-    live.current = { from, y0: clientY, s0: window.scrollY, rects, y: clientY, off }
+    const off = snap && r ? clientY - (r.top - scrollY() + r.h / 2) : 0
+    live.current = { from, y0: clientY, s0: scrollY(), rects, y: clientY, off }
     suppressClick.current = true
     try {
       navigator.vibrate?.(15)
@@ -62,7 +63,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     const update = () => {
       const l = live.current
       if (!l) return
-      setDrag({ from: l.from, rects: l.rects, dy: l.y - l.y0 + l.off + (window.scrollY - l.s0) })
+      setDrag({ from: l.from, rects: l.rects, dy: l.y - l.y0 + l.off + (scrollY() - l.s0) })
     }
     const move = (e: PointerEvent) => {
       if (!live.current) return
@@ -74,7 +75,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
       live.current = null
       cancelAnimationFrame(raf)
       if (l) {
-        const dy = l.y - l.y0 + l.off + (window.scrollY - l.s0)
+        const dy = l.y - l.y0 + l.off + (scrollY() - l.s0)
         const to = toIndex(l.rects, l.from, dy)
         if (to !== l.from) dropRef.current(l.from, to)
       }
@@ -95,7 +96,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
         const bottom = window.innerHeight - 140
         const v = l.y < top ? -Math.ceil((top - l.y) / 6) : l.y > bottom ? Math.ceil((l.y - bottom) / 6) : 0
         if (v) {
-          window.scrollTo({ top: window.scrollY + v, behavior: 'instant' as ScrollBehavior })
+          scrollToY(scrollY() + v, 'instant' as ScrollBehavior)
           update()
         }
       }

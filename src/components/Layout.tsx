@@ -13,6 +13,7 @@ import { cancelPush, ensurePush } from '../lib/push'
 import { DUR, EASE, exitDelay, reducedMotion } from '../lib/motion'
 import '../styles/workout-flow.css'
 import '../styles/navigation.css'
+import { scrollToY } from '../lib/scroll'
 
 const starts = (path: string, ...prefixes: string[]) => prefixes.some((p) => path === p || path.startsWith(p + '/'))
 
@@ -406,7 +407,7 @@ export default function Layout() {
   // a new screen starts at the top, not wherever the last one was scrolled to, and arrives with a short
   // fade and 6 px rise. 'top' rather than transform so fixed children (sheets, keypad) keep the viewport.
   useEffect(() => {
-    window.scrollTo(0, 0)
+    scrollToY(0)
     if (firstScreen.current) {
       firstScreen.current = false // the very first screen already fades in from the boot screen
       return

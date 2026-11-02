@@ -6,6 +6,7 @@ import { fmtKg, parseNum } from '../lib/format'
 import { clockFromDigits, fmtTime, parseTime } from '../lib/tracking'
 import { PlateCalc } from './PlateCalc'
 import '../styles/workout-live.css'
+import { scrollByY } from '../lib/scroll'
 
 export type KpKind = 'kg' | 'reps' | 'time'
 
@@ -103,7 +104,7 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
       if (!el) return
       const r = el.getBoundingClientRect()
       const target = 150 + (window.innerHeight - kpH - 150) / 2
-      window.scrollBy({ top: r.top + r.height / 2 - target, behavior: 'smooth' })
+      scrollByY(r.top + r.height / 2 - target, 'smooth')
     }, 30)
   }, [])
 

@@ -66,6 +66,13 @@ html {
 /* Screens fade in from the boot screen instead of popping (opacity only, so fixed children keep working). */
 .pwa-enter {
   animation: pwa-fade 220ms ease-out;
+  /* the app scrolls in here, not the page: on iPhone a fixed tab bar floated mid-screen during a fast page scroll
+     (src/lib/scroll.ts) */
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* Update banner: a card above the tab bar. */

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check, ChevronDown, ChevronRight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { markSeen, seen } from './Welcome'
+import { scrollToY } from '../lib/scroll'
 
 const installed = () =>
   typeof window !== 'undefined' &&
@@ -20,7 +21,7 @@ export function StartChecklist() {
 
   const steps = [
     { done: db.workouts.length > 0, t: 'Pick a program', d: 'Or build your own workout', go: () => nav('/programs') },
-    { done: db.sessions.some((s) => s.finished_at), t: 'Finish your first workout', d: 'Tick each set as you go', go: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+    { done: db.sessions.some((s) => s.finished_at), t: 'Finish your first workout', d: 'Tick each set as you go', go: () => scrollToY(0, 'smooth') },
     { done: db.metrics.length > 0, t: 'Log your body weight', d: 'Track it next to your lifts', go: () => nav('/body') },
     { done: installed(), t: 'Add GymLog to your home screen', d: 'Opens full screen, works offline', go: () => nav('/help') }
   ]

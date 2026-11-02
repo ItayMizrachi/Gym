@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import '../styles/workout-live.css'
+import { scrollByY } from '../lib/scroll'
 
 export interface CoachStep {
   /** CSS selector of the element to point at; the first match is used */
@@ -49,7 +50,7 @@ export function CoachMarks({ id, userId, steps, enabled = true }: { id: string; 
     if (!el) return finish()
     const r0 = el.getBoundingClientRect()
     // keep the target clear of the sticky header and the note below it
-    if (r0.top < 190 || r0.bottom > window.innerHeight - 220) window.scrollBy({ top: r0.top - 230 })
+    if (r0.top < 190 || r0.bottom > window.innerHeight - 220) scrollByY(r0.top - 230)
     const measure = () => setRect(el.getBoundingClientRect())
     measure()
     window.addEventListener('resize', measure)

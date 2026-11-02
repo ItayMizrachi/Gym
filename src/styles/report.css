@@ -41,3 +41,5 @@
 .hist-report-nums { display: flex; gap: 14px; margin-top: 4px; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
 .hist-report-nums b { color: var(--text); }
 .hmonth-report { color: var(--accent); font-size: 13px; font-weight: 600; padding: 4px 8px; border-radius: var(--r-pill); background: var(--accent-soft); white-space: nowrap; }
+button.rep-day { border: 0; padding: 0; font: inherit; cursor: pointer; }
+button.rep-day:active { transform: scale(0.94); }

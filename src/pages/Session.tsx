@@ -31,6 +31,7 @@ import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/musc
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
 import '../styles/workout-live.css'
+import { scrollByY, scrollToY, scrollY } from '../lib/scroll'
 
 const KIND_ORDER: SetKind[] = ['work', 'warmup', 'drop', 'failure']
 const KIND_INFO: Record<SetKind, { t: string; tag: string; d: string }> = {
@@ -336,7 +337,7 @@ function revealNextSet() {
   if (!row) return
   const r = row.getBoundingClientRect()
   const limit = window.innerHeight - 170
-  if (r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: reducedMotion() ? 'auto' : 'smooth' })
+  if (r.bottom > limit) scrollByY(r.bottom - limit, reducedMotion() ? 'auto' : 'smooth')
 }
 
 /** Inert + aria-hidden while folded, so hidden controls are not tabbable or read out. */
@@ -977,7 +978,7 @@ export default function SessionPage() {
       // a folded list that fits on screen is shown whole, right under the header; a longer one keeps the held
       // card under the finger. Either way the held card then jumps to the finger (snap).
       const by = listH <= window.innerHeight - head - 160 ? listTop - head - 12 : r.top + r.height / 2 - lifted.y
-      window.scrollTo({ top: window.scrollY + by, behavior: 'instant' as ScrollBehavior })
+      scrollToY(scrollY() + by, 'instant' as ScrollBehavior)
     }
     dragList.start(lifted.from, lifted.y, true)
   }, [lifted?.from, lifted?.y])

@@ -98,11 +98,18 @@ export default function MonthReportPage() {
           <section className="card stack" style={{ gap: 10 }}>
             <h2 className="rep-h">{tr('{n} training days', { n: r.days.length })}</h2>
             <div className="rep-cal">
-              {cells.map((d, i) => (
-                <span key={i} className={`rep-day${d && trained.has(d) ? ' on' : ''}${d ? '' : ' blank'}`}>
-                  {d ?? ''}
-                </span>
-              ))}
+              {cells.map((d, i) =>
+                d && trained.has(d) ? (
+                  // a training day opens its workout (the last one, if there were two)
+                  <button key={i} className="rep-day on" onClick={() => nav(`/history/${r.byDay[d][r.byDay[d].length - 1]}`)} aria-label={tr('Open the workout of the {d}th', { d })}>
+                    {d}
+                  </button>
+                ) : (
+                  <span key={i} className={`rep-day${d ? '' : ' blank'}`}>
+                    {d ?? ''}
+                  </span>
+                )
+              )}
             </div>
           </section>
 
