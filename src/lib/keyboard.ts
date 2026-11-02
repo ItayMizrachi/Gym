@@ -51,6 +51,22 @@ export function installKeyboardHelpers() {
     if (kb !== last.kb) root.setProperty('--kb', (last.kb = kb))
   }
   vv.addEventListener('resize', sync)
+  // Installed on an iPhone, the phone can report a screen shorter than the one it draws (e.g. 812 of 874 points),
+  // so everything pinned to the bottom stopped short. --vgap is that difference, measured with a 100vh probe;
+  // 0 in a browser tab and on every device that reports its full height.
+  const gap = () => {
+    const standalone = matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;visibility:hidden;pointer-events:none'
+    document.body.appendChild(probe)
+    const full = probe.getBoundingClientRect().height
+    probe.remove()
+    const v = standalone ? Math.max(0, Math.round(full - window.innerHeight)) : 0
+    root.setProperty('--vgap', `${v < 120 ? v : 0}px`)
+  }
+  gap()
+  window.addEventListener('resize', gap)
+  window.addEventListener('orientationchange', () => setTimeout(gap, 300))
   vv.addEventListener('scroll', sync)
   // the keyboard opens and closes a moment after focus moves: check right away and again once it has settled
   const later = () => {

@@ -1,7 +1,7 @@
 /* ================= onboarding: welcome tour + help page ================= */
 .wl {
   position: fixed;
-  inset: 0;
+  inset: 0 0 calc(0px - var(--vgap, 0px)) 0;
   z-index: 150;
   background: var(--bg);
   display: flex;

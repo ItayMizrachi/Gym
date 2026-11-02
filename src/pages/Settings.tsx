@@ -353,7 +353,8 @@ function ScreenInfo() {
       `100vh+safe ${Math.round(vh)}`,
       `scroller ${Math.round(sc?.top ?? -1)}-${Math.round(sc?.bottom ?? -1)}`,
       `nav ${Math.round(nav?.top ?? -1)}-${Math.round(nav?.bottom ?? -1)}`,
-      `standalone ${(navigator as Navigator & { standalone?: boolean }).standalone ?? matchMedia('(display-mode: standalone)').matches}`
+      `standalone ${(navigator as Navigator & { standalone?: boolean }).standalone ?? matchMedia('(display-mode: standalone)').matches}`,
+      `gap ${getComputedStyle(document.documentElement).getPropertyValue('--vgap')}`
     ].join(' · ')
   }
   return (
