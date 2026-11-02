@@ -2399,3 +2399,4 @@ input[type='search']::-webkit-search-decoration {
 /* Settings: a card folded to one line (Coaching) */
 .set-fold { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0; background: none; border: 0; color: var(--text); font: inherit; text-align: start; cursor: pointer; }
 .set-fold-t { display: block; font-size: var(--fs-lg, 18px); font-weight: 650; }
+.ex-edit-h { margin: 8px 0 0; font-size: 15px; font-weight: 600; }

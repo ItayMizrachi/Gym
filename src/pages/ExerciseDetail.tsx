@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, MUSCLES, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, setLabel, TRACKING_LABEL } from '../lib/tracking'
@@ -35,6 +35,11 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
   const ex = db.exercises.find((e) => e.id === id)
   const [restText, setRestText] = useState<string | null>(null)
   const [confirmDel, setConfirmDel] = useState(false)
+  // long parts of the page fold away until asked for
+  const [repsOpen, setRepsOpen] = useState(false)
+  const [allRecent, setAllRecent] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [setupOpen, setSetupOpen] = useState<boolean | null>(null)
   const [metric, setMetric] = useState<'e1rm' | 'top'>('e1rm')
 
   const rec = useMemo(() => recordsFor(priorSets(db, id ?? '')), [db, id])
@@ -77,6 +82,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
     )
   const libId = libIdForExercise(ex)
   const upd = (p: Partial<typeof ex>, debounce = 400) => save('exercises', { ...ex, ...p }, { debounce })
+  const setupShown = setupOpen ?? !!(ex.setup || ex.notes)
 
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>
@@ -144,9 +150,11 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                 <div className="l">Heaviest set · {fmtDate(rec.heaviest.date, true)}</div>
               </div>
             </div>
-            <div className="small muted" style={{ marginBottom: -4 }}>
-              {tr("Best weight (kg) for at least N reps")}
-            </div>
+            <button className="set-fold" aria-expanded={repsOpen} onClick={() => setRepsOpen((v) => !v)} style={{ minHeight: 36 }}>
+              <span className="grow small muted">{tr("Best weight (kg) for at least N reps")}</span>
+              <ChevronDown size={16} aria-hidden className="muted" style={{ transform: repsOpen ? 'rotate(180deg)' : undefined }} />
+            </button>
+            {repsOpen && (
             <div className="reps-table">
               {/* only rep counts you have done: a row of dashes says nothing */}
               {REP_COLS.filter((n) => rec.repTable.some((r) => r.reps === n)).map((n) => {
@@ -161,6 +169,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
                 )
               })}
             </div>
+            )}
           </>
         ) : (
           <div className="muted small">{tr("Log this exercise in a workout and your records will appear here.")}</div>
@@ -197,8 +206,14 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
 
       {libId && <HowToCard id={libId} />}
 
+      {/* empty setup notes are one line; written ones stay open */}
       <div className="card stack">
-        <h2>Setup &amp; cues</h2>
+        <button className="set-fold" aria-expanded={setupShown} onClick={() => setSetupOpen(!setupShown)}>
+          <span className="grow set-fold-t">{tr('Setup & cues')}</span>
+          <ChevronDown size={18} aria-hidden className="muted" style={{ transform: setupShown ? 'rotate(180deg)' : undefined }} />
+        </button>
+        {setupShown && (
+        <>
         <label className="field">
           {tr("Machine setup (seat, pads, pin, grip)")}
           <textarea
@@ -217,13 +232,15 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             onChange={(e) => upd({ notes: e.target.value })}
           />
         </label>
+        </>
+        )}
       </div>
 
       {recent.length > 0 && (
         <section>
           <div className="section-label">{tr("Recent sessions")}</div>
           <div className="list-group">
-            {recent.map((r) => (
+            {(allRecent ? recent : recent.slice(0, 3)).map((r) => (
               <button key={r.session} className="list-row" onClick={() => nav(`/history/${r.session}`)}>
                 <div className="grow">
                   <div className="row" style={{ gap: 6 }}>
@@ -243,11 +260,22 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
               </button>
             ))}
           </div>
+          {recent.length > 3 && (
+            <button className="btn ghost sm" style={{ marginTop: 6 }} onClick={() => setAllRecent((v) => !v)}>
+              {allRecent ? tr('Show less') : tr('See {n} more', { n: recent.length - 3 })}
+            </button>
+          )}
         </section>
       )}
 
+      {/* name, muscle, rest, what you record, equipment and delete: folded into one line */}
       <div className="card stack">
-        <h2>{tr("Details")}</h2>
+        <button className="set-fold" aria-expanded={editOpen} onClick={() => setEditOpen((v) => !v)}>
+          <span className="grow set-fold-t">{tr('Edit exercise')}</span>
+          <ChevronDown size={18} aria-hidden className="muted" style={{ transform: editOpen ? 'rotate(180deg)' : undefined }} />
+        </button>
+        {editOpen && (
+        <>
         <label className="field">
           {tr("Name")}
           <input className="input" value={ex.name} onChange={(e) => upd({ name: e.target.value })} />
@@ -276,10 +304,7 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             />
           </label>
         </div>
-      </div>
-
-      <div className="card stack">
-        <h2>{tr("What do you record?")}</h2>
+        <h3 className="ex-edit-h">{tr("What do you record?")}</h3>
         <div className="seg" role="radiogroup" aria-label={tr("What do you record")}>
           {(['weight_reps', 'reps', 'time'] as Tracking[]).map((t) => (
             <button key={t} role="radio" aria-checked={trackingOf(ex) === t} className={trackingOf(ex) === t ? 'on' : ''} onClick={() => upd({ tracking: t }, 0)}>
@@ -303,11 +328,12 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
             ))}
           </select>
         </label>
+        <button className="btn danger" onClick={() => setConfirmDel(true)}>
+          <Trash2 size={16} /> {tr("Delete exercise")}
+        </button>
+        </>
+        )}
       </div>
-
-      <button className="btn danger" onClick={() => setConfirmDel(true)}>
-        <Trash2 size={16} /> {tr("Delete exercise")}
-      </button>
       {confirmDel && (
         <Confirm
           title={tr("Delete exercise?")}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
-import { RotateCw } from 'lucide-react'
+import { ChevronDown, RotateCw } from 'lucide-react'
 import { Exercise } from '../lib/types'
 import { libIdForExercise } from '../lib/libraryLinks'
 import { loadInstructions } from '../lib/library'
@@ -67,10 +67,15 @@ export function StepList({ id, fold = false }: { id: string; fold?: boolean }) {
 
 /** "How to do it" card used on exercise pages. */
 export function HowToCard({ id }: { id: string }) {
+  // folded to its title: the steps are there when you want them, not between you and your records
+  const [open, setOpen] = useState(false)
   return (
     <div className="card stack">
-      <h2>{tr("How to do it")}</h2>
-      <StepList id={id} fold />
+      <button className="set-fold" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <span className="grow set-fold-t">{tr("How to do it")}</span>
+        <ChevronDown size={18} aria-hidden className="muted" style={{ transform: open ? 'rotate(180deg)' : undefined }} />
+      </button>
+      {open && <StepList id={id} fold />}
     </div>
   )
 }
