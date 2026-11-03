@@ -115,8 +115,9 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
       >
         <label className="field">
           {tr("Folder name")}
-          {/* "My workouts" is not a folder yet: naming it puts these workouts in one */}
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus={!!folder} enterKeyHint="done" />
+          {/* "My workouts" is not a folder yet: naming it puts these workouts in one.
+              No autoFocus: on iPhone the open keyboard ate the tap on "Make this my current program" (the sheet dropped as it closed) */}
+          <input className="input" value={name} onChange={(e) => setName(e.target.value)} enterKeyHint="done" />
         </label>
         <button className="btn primary" type="submit" disabled={!name.trim() || name.trim() === folder}>
           {folder ? tr("Rename") : tr("Put them in a folder")}
