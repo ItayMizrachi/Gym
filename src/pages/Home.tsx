@@ -36,7 +36,7 @@ import {
 import { RenameFolderSheet } from '../components/FolderSheet'
 import { DragList } from '../components/DragList'
 import { ProgramUpdateCard } from '../components/ProgramUpdateCard'
-import { FolderGroup, groupByFolder, makeCurrent, unshelveAll } from '../lib/folders'
+import { FolderGroup, groupByFolder, makeCurrent } from '../lib/folders'
 import { Confirm, Sheet } from '../components/ui'
 import { WeekLine } from '../components/GoalRing'
 import { RecoveryLine } from '../components/RecoveryCard'
@@ -105,7 +105,6 @@ export default function Home() {
   const [adding, setAdding] = useState(false)
   /** the program 'Add a workout' was tapped in ('' = single workouts) */
   const [addTo, setAddTo] = useState('')
-  const [othersOpen, setOthersOpen] = useState(false)
   /** the workout whose ⋯ menu is open, and one waiting for 'Delete?' */
   const [menuFor, setMenuFor] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
@@ -124,7 +123,7 @@ export default function Home() {
   const now = useMemo(() => new Date(), [db])
   const workouts = useMemo(() => [...db.workouts].sort((a, b) => a.position - b.position), [db.workouts])
   // the current program on top; the rest fold away under "Other programs" (Folder ⋯ → Make this my current program)
-  const groups = useMemo(() => groupByFolder(db.workouts.filter((w) => !w.shelved)), [db.workouts])
+  const liveGroups = useMemo(() => groupByFolder(db.workouts.filter((w) => !w.shelved)), [db.workouts])
   const shelvedGroups = useMemo(() => groupByFolder(db.workouts.filter((w) => w.shelved)), [db.workouts])
   const shelvedCount = shelvedGroups.reduce((n, g) => n + g.workouts.length, 0)
   const active = db.sessions.find((s) => !s.finished_at)
@@ -136,6 +135,12 @@ export default function Home() {
   // planned for today, else the rotation, unless its muscles are still recovering (src/lib/upNext.ts)
   const next = useMemo(() => upNext(db, now), [db, now])
   const streak = useMemo(() => weeklyStreak(db, now), [db, now])
+  // the program Up next comes from leads, single workouts and other folders follow
+  const groups = useMemo(() => {
+    const i = next ? liveGroups.findIndex((g) => g.workouts.some((w) => w.id === next.workout.id)) : -1
+    return i > 0 ? [liveGroups[i], ...liveGroups.filter((_, j) => j !== i)] : liveGroups
+  }, [liveGroups, next])
+  const othersOpen = folded.includes(OTHERS)
 
   function loadStarter() {
     const plan = buildStarterPlan(user?.id ?? 'local', db.exercises, db.workouts.length)
@@ -178,13 +183,18 @@ export default function Home() {
   /** "My workouts" (no folder) reads as single workouts next to programs */
   const groupName = (g: FolderGroup) => (g.folder ? g.folder : t('Single workouts'))
 
-  function folderBlock(g: FolderGroup, withHead: boolean) {
+  function folderBlock(g: FolderGroup, withHead: boolean, shelved = false) {
     const shut = false
     return (
       <div key={g.label} className="prog-block">
         {withHead && (
           <div className="prog-head">
             <h2 className="ellipsis grow">{groupName(g)}</h2>
+            {shelved && (
+              <button className="btn sm accent-soft" onClick={() => makeCurrent(db.workouts, g.folder).forEach((w) => save('workouts', w))}>
+                {t('Make current')}
+              </button>
+            )}
             {/* rename, switch program, put away: everything about the program in one menu */}
             <button className="btn icon sm ghost" onClick={() => setRenaming(g.folder)} aria-label={t('Program options: {f}', { f: groupName(g) })}>
               <MoreHorizontal size={20} />
@@ -226,15 +236,17 @@ export default function Home() {
             }}
           </DragList>
         )}
-        <button
-          className="btn ghost sm fold-add"
-          onClick={() => {
-            setAddTo(g.folder)
-            setAdding(true)
-          }}
-        >
-          <Plus size={16} aria-hidden /> {t('Add a workout')}
-        </button>
+        {!shelved && (
+          <button
+            className="btn ghost sm fold-add"
+            onClick={() => {
+              setAddTo(g.folder)
+              setAdding(true)
+            }}
+          >
+            <Plus size={16} aria-hidden /> {t('Add a workout')}
+          </button>
+        )}
       </div>
     )
   }
@@ -355,14 +367,16 @@ export default function Home() {
       {workouts.length > 0 && (
         <section className="stack" style={{ gap: 20 }} aria-label={t("Your workouts")}>
           {groups.map((g) => folderBlock(g, true))}
+          {/* other programs open and shut in place; they stay out of Up next until one is made current */}
           {shelvedGroups.length > 0 && (
-            <button className="list-group list-row prog-others" onClick={() => setOthersOpen(true)}>
+            <button className="list-group list-row prog-others" onClick={() => toggleFold(OTHERS)} aria-expanded={othersOpen}>
               <span className="ico-tile y"><Layers size={18} aria-hidden /></span>
               <span className="grow">{t('Other programs')}</span>
               <span className="small muted">{shelvedGroups.length}</span>
-              <ChevronRight size={18} aria-hidden className="muted" />
+              <ChevronDown size={18} aria-hidden className={`muted prog-others-chev${othersOpen ? ' open' : ''}`} />
             </button>
           )}
+          {othersOpen && shelvedGroups.map((g) => folderBlock(g, true, true))}
         </section>
       )}
       {menuFor && (
@@ -407,42 +421,6 @@ export default function Home() {
           onConfirm={() => removeWorkout(deleting.id)}
           onClose={() => setDeleting(null)}
         />
-      )}
-      {othersOpen && (
-        <Sheet title={t('Other programs')} onClose={() => setOthersOpen(false)}>
-          <div className="stack" style={{ gap: 12 }}>
-            <div className="small muted">{t('Make one current to see it on Train and in Up next. Nothing is deleted.')}</div>
-            {shelvedGroups.map((g) => (
-              <div key={g.label} className="card prog-card">
-                <span className="ico-tile y">
-                  <Dumbbell size={18} aria-hidden />
-                </span>
-                <div className="grow" style={{ minWidth: 0 }}>
-                  <div className="prog-card-t ellipsis">{groupName(g)}</div>
-                  <div className="small muted ellipsis">{g.workouts.map((w) => splitName(w.name)[0]).join(' · ')}</div>
-                </div>
-                <button
-                  className="btn sm accent-soft"
-                  onClick={() => {
-                    for (const w of makeCurrent(db.workouts, g.folder)) save('workouts', w)
-                    setOthersOpen(false)
-                  }}
-                >
-                  {t('Make current')}
-                </button>
-              </div>
-            ))}
-            <button
-              className="btn ghost block"
-              onClick={() => {
-                for (const w of unshelveAll(db.workouts)) save('workouts', w)
-                setOthersOpen(false)
-              }}
-            >
-              {t('Show all programs on Train')}
-            </button>
-          </div>
-        </Sheet>
       )}
       {renaming !== null && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (

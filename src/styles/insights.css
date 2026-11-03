@@ -689,6 +689,8 @@ section + section > .month-head:first-child { margin-top: 28px; }
 .prog-head { display: flex; align-items: center; gap: 4px; min-height: 44px; }
 .prog-head h2 { margin: 0; font-size: var(--fs-xl, 20px); font-weight: 650; }
 .prog-others { min-height: 56px; }
+.prog-others-chev { transition: rotate 0.2s; }
+.prog-others-chev.open { rotate: 180deg; }
 .prog-card { display: flex; align-items: center; gap: 12px; padding: 14px var(--s4); }
 .prog-card-t { font-weight: 600; }
 

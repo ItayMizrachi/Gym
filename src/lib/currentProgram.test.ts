@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { inUse, makeCurrent, unshelveAll } from './folders'
+import { inUse, makeCurrent } from './folders'
 import { emptyDB, Workout } from './types'
 
 const w = (id: string, folder: string, shelved?: boolean): Workout => ({ id, user_id: 'u', name: id, notes: '', position: 0, created_at: '', folder, shelved })
@@ -27,9 +27,5 @@ describe('current program', () => {
     expect(inUse(db).workouts.map((x) => x.id)).toEqual(['a'])
     const all = { ...emptyDB(), workouts: [w('c', 'Old', true)] }
     expect(inUse(all)).toBe(all)
-  })
-
-  it('Show all programs unshelves everything', () => {
-    expect(unshelveAll([w('a', 'x', true), w('b', 'y')]).map((x) => x.id)).toEqual(['a'])
   })
 })

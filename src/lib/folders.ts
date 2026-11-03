@@ -44,6 +44,3 @@ export function inUse(db: DB): DB {
 export function makeCurrent(workouts: Workout[], folder: string): Workout[] {
   return workouts.filter((w) => !!w.shelved !== (folderOf(w) !== folder)).map((w) => ({ ...w, shelved: folderOf(w) !== folder }))
 }
-
-/** "Show all programs": everything back on Train. Rows that change. */
-export const unshelveAll = (workouts: Workout[]): Workout[] => workouts.filter((w) => w.shelved).map((w) => ({ ...w, shelved: false }))
