@@ -74,8 +74,6 @@ function startedText(iso: string): string {
 
 /** collapsed folder headers on the Train tab (this device only) */
 const FOLDS_KEY = 'gymlog:folds'
-/** "Other programs" starts shut; this key in the fold list means it is open (folder names never start with a space) */
-const OTHERS = ' others'
 function loadFolds(): string[] {
   try {
     const v = JSON.parse(localStorage.getItem(FOLDS_KEY) ?? '[]')
@@ -108,6 +106,7 @@ export default function Home() {
   /** the workout whose ⋯ menu is open, and one waiting for 'Delete?' */
   const [menuFor, setMenuFor] = useState<Workout | null>(null)
   const [deleting, setDeleting] = useState<Workout | null>(null)
+  const [othersOpen, setOthersOpen] = useState(false)
   const [folded, setFolded] = useState<string[]>(loadFolds)
   useAchievementToasts()
   function toggleFold(label: string) {
@@ -140,7 +139,6 @@ export default function Home() {
     const i = next ? liveGroups.findIndex((g) => g.workouts.some((w) => w.id === next.workout.id)) : -1
     return i > 0 ? [liveGroups[i], ...liveGroups.filter((_, j) => j !== i)] : liveGroups
   }, [liveGroups, next])
-  const othersOpen = folded.includes(OTHERS)
 
   function loadStarter() {
     const plan = buildStarterPlan(user?.id ?? 'local', db.exercises, db.workouts.length)
@@ -191,7 +189,13 @@ export default function Home() {
           <div className="prog-head">
             <h2 className="ellipsis grow">{groupName(g)}</h2>
             {shelved && (
-              <button className="btn sm accent-soft" onClick={() => makeCurrent(db.workouts, g.folder).forEach((w) => save('workouts', w))}>
+              <button
+                className="btn sm accent-soft"
+                onClick={() => {
+                  makeCurrent(db.workouts, g.folder).forEach((w) => save('workouts', w))
+                  setOthersOpen(false)
+                }}
+              >
                 {t('Make current')}
               </button>
             )}
@@ -367,16 +371,15 @@ export default function Home() {
       {workouts.length > 0 && (
         <section className="stack" style={{ gap: 20 }} aria-label={t("Your workouts")}>
           {groups.map((g) => folderBlock(g, true))}
-          {/* other programs open and shut in place; they stay out of Up next until one is made current */}
+          {/* only the current program lives on Train; the others open in their own sheet (Start, Make current) */}
           {shelvedGroups.length > 0 && (
-            <button className="list-group list-row prog-others" onClick={() => toggleFold(OTHERS)} aria-expanded={othersOpen}>
+            <button className="list-group list-row prog-others" onClick={() => setOthersOpen(true)}>
               <span className="ico-tile y"><Layers size={18} aria-hidden /></span>
               <span className="grow">{t('Other programs')}</span>
               <span className="small muted">{shelvedGroups.length}</span>
-              <ChevronDown size={18} aria-hidden className={`muted prog-others-chev${othersOpen ? ' open' : ''}`} />
+              <ChevronRight size={18} aria-hidden className="muted" />
             </button>
           )}
-          {othersOpen && shelvedGroups.map((g) => folderBlock(g, true, true))}
         </section>
       )}
       {menuFor && (
@@ -421,6 +424,14 @@ export default function Home() {
           onConfirm={() => removeWorkout(deleting.id)}
           onClose={() => setDeleting(null)}
         />
+      )}
+      {othersOpen && (
+        <Sheet title={t('Other programs')} onClose={() => setOthersOpen(false)}>
+          <div className="stack" style={{ gap: 20 }}>
+            <div className="small muted">{t('Make one current to see it on Train and in Up next. Nothing is deleted.')}</div>
+            {shelvedGroups.map((g) => folderBlock(g, true, true))}
+          </div>
+        </Sheet>
       )}
       {renaming !== null && <RenameFolderSheet folder={renaming} onClose={() => setRenaming(null)} />}
       {adding && (
