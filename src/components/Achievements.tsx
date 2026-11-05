@@ -46,7 +46,7 @@ function Bar({ value, label }: { value: number; label: string }) {
 }
 
 /** Progress page: next three to earn, then every achievement (earned in colour, the rest dimmed). */
-export function AchievementsSection() {
+export function AchievementsSection({ inSheet = false }: { inSheet?: boolean }) {
   const db = useStore((s) => s.db)
   const goal = usePrefs((s) => s.weeklyGoal)
   const list = useMemo(() => achievements(db, { weeklyGoal: goal }), [db, goal])
@@ -61,13 +61,16 @@ export function AchievementsSection() {
   )
 
   return (
-    <section className="stack" style={{ gap: 12 }} aria-labelledby="ach-h">
-      <div className="sec-head">
-        <h2 id="ach-h">{tr("Achievements")}</h2>
-        <span className="small muted">
-          {tr('{a} of {b} earned', { a: earned, b: list.length })}
-        </span>
-      </div>
+    <section className="stack" style={{ gap: 12 }} aria-label={tr("Achievements")}>
+      {/* in its sheet the title is already there: only the count stays */}
+      {inSheet ? (
+        <div className="small muted">{tr('{a} of {b} earned', { a: earned, b: list.length })}</div>
+      ) : (
+        <div className="sec-head">
+          <h2>{tr("Achievements")}</h2>
+          <span className="small muted">{tr('{a} of {b} earned', { a: earned, b: list.length })}</span>
+        </div>
+      )}
 
       {next.length > 0 && (
         <div className="card stack ach-next" style={{ gap: 14 }}>

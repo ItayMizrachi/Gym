@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, ChevronDown, Flame } from 'lucide-react'
 import { t, tm } from '../lib/i18n'
 import { useStore } from '../lib/store'
-import { RecoveryLine } from './RecoveryCard'
 import { fmtDate } from '../lib/format'
 import { addDays, compareWeeks, fmtSets, fmtVolume, guidelineZone, muscleSets, MUSCLE_SETS_MAX, MUSCLE_SETS_MIN, plannedMuscles, weeklyStreak } from '../lib/stats'
 import '../styles/insights.css'
@@ -70,8 +69,8 @@ export function WeekSummary() {
         )}
       </section>
 
+      {/* one topic per card: recovery lives on Train, this card is sets per muscle */}
       <section className="card stack" style={{ gap: 12 }}>
-        <RecoveryLine />
         <div>
           <div className="row">
             <div className="ins-title grow" style={{ whiteSpace: 'nowrap' }}>{t("Sets per muscle")}</div>

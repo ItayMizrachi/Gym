@@ -183,7 +183,7 @@ export default function Profile() {
       </div>
       {ach && (
         <Sheet title={tr('Achievements')} onClose={() => setAch(false)}>
-          <AchievementsSection />
+          <AchievementsSection inSheet />
         </Sheet>
       )}
     </div>
