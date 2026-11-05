@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { t as tr, tm } from '../lib/i18n'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, Pencil, Plus, Share2, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -40,10 +40,10 @@ function SetText({ x, tracking }: { x: SessionSet; tracking: Tracking }) {
         {x.reps ?? 0}
       </>
     ) : (
-      <>{x.reps ?? 0} reps</>
+      <>{tr('{n} reps', { n: x.reps ?? 0 })}</>
     )
   // a set without weight (body weight, or a warm-up) is just its reps: "0 kg × 8" reads like a mistake
-  if (!x.weight) return <>{x.reps ?? 0} reps</>
+  if (!x.weight) return <>{tr('{n} reps', { n: x.reps ?? 0 })}</>
   return (
     <>
       {fmtKg(x.weight)} kg<span className="x">×</span>
@@ -79,16 +79,16 @@ function exLine(done: SessionSet[], tracking: Tracking): string {
   if (!work.length) {
     const sec = done.reduce((t, x) => t + (x.time_sec ?? 0), 0)
     const reps = done.reduce((t, x) => t + (x.reps ?? 0), 0)
-    return ['Warm-up', sec ? fmtClock(sec) : reps ? `${reps} reps` : ''].filter(Boolean).join(' · ')
+    return [tr('Warm-up'), sec ? fmtClock(sec) : reps ? tr('{n} reps', { n: reps }) : ''].filter(Boolean).join(' · ')
   }
-  const sets = `${work.length} set${work.length === 1 ? '' : 's'}`
+  const sets = tr(work.length === 1 ? '{n} set' : '{n} sets', { n: work.length })
   if (tracking === 'time') {
     const sec = work.reduce((t, x) => t + (x.time_sec ?? 0), 0)
     return sec ? `${sets} · ${fmtClock(sec)}` : sets
   }
   if (tracking === 'reps') {
     const reps = work.reduce((t, x) => t + (x.reps ?? 0), 0)
-    return `${sets} · ${reps} reps`
+    return `${sets} · ${tr('{n} reps', { n: reps })}`
   }
   const vol = work.reduce((t, x) => t + (x.weight ?? 0) * (x.reps ?? 0), 0)
   return vol ? `${sets} · ${Math.round(vol).toLocaleString('en-GB')} kg` : sets
@@ -213,7 +213,7 @@ export default function SessionDetail() {
       </div>
       {shownSplit.map((x) => (
         <div key={x.muscle} className="split-row">
-          <span className="ellipsis">{x.muscle}</span>
+          <span className="ellipsis">{tm(x.muscle)}</span>
           <span className="split-bar">
             <i style={{ width: `${Math.max(2, x.pct)}%` }} />
           </span>
@@ -227,7 +227,7 @@ export default function SessionDetail() {
         </button>
       )}
       <div className="tiny muted" style={{ marginTop: 4 }}>
-        Share of working sets. {fmtSets(split.reduce((a, x) => a + x.sets, 0))} sets in total.
+        {tr('Share of working sets. {n} sets in total.', { n: fmtSets(split.reduce((a, x) => a + x.sets, 0)) })}
       </div>
     </div>
   )
@@ -434,7 +434,8 @@ export default function SessionDetail() {
       <button className="btn" onClick={() => setEditing(true)}>
         <Pencil size={16} /> {tr("Edit workout")}
       </button>
-      <button className="btn danger" onClick={() => setConfirm(true)}>
+      {/* rare and confirmed: quiet red text, not a red block at the end of every summary */}
+      <button className="btn ghost danger-text" onClick={() => setConfirm(true)}>
         <Trash2 size={16} /> {tr("Delete this workout")}
       </button>
       {confirm && (
