@@ -351,8 +351,8 @@ export function fmtSets(n: number): string {
 }
 
 export function fmtMinutes(min: number): string {
-  if (min < 60) return `${min} min`
-  return `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, '0')}m`
+  if (min < 60) return t('{n} min', { n: min })
+  return t('{h}h {m}m', { h: Math.floor(min / 60), m: String(min % 60).padStart(2, '0') })
 }
 
 /** "today", "yesterday", "3 days ago", "2 weeks ago". */

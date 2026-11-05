@@ -1,3 +1,4 @@
+import { dateLocale } from './i18n'
 export function fmtKg(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return '–'
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100)
@@ -5,7 +6,7 @@ export function fmtKg(n: number | null | undefined): string {
 
 export function fmtDate(iso: string, withYear = false): string {
   const d = new Date(iso.length === 10 ? iso + 'T12:00:00' : iso)
-  return d.toLocaleDateString('en-GB', {
+  return d.toLocaleDateString(dateLocale, {
     day: 'numeric',
     month: 'short',
     ...(withYear ? { year: 'numeric' } : {})
@@ -14,7 +15,7 @@ export function fmtDate(iso: string, withYear = false): string {
 
 export function fmtDateLong(iso: string): string {
   const d = new Date(iso.length === 10 ? iso + 'T12:00:00' : iso)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export function fmtDuration(startIso: string, endIso: string | null): string {

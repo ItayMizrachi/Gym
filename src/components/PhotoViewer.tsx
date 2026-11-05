@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { dateLocale, t as tr } from '../lib/i18n'
 import { ChevronLeft, ChevronRight, Pencil, X } from 'lucide-react'
 import { Metric } from '../lib/types'
 import { fmtDateLong, fmtKg } from '../lib/format'
@@ -284,7 +284,7 @@ export function PhotoTile({ m, onOpen, label }: { m: Metric; onOpen: () => void;
     <button className="ph-tile" onClick={onOpen} aria-label={`Open photo from ${fmtDateLong(m.date)}`}>
       {url && <img src={url} alt="" />}
       <span className="ph-tile-date" aria-hidden>
-        {label ?? new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        {label ?? new Date(m.date + 'T12:00:00').toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })}
       </span>
     </button>
   )

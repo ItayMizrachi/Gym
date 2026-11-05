@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, ChevronDown, Flame } from 'lucide-react'
-import { t } from '../lib/i18n'
+import { t, tm } from '../lib/i18n'
 import { useStore } from '../lib/store'
 import { RecoveryLine } from './RecoveryCard'
 import { fmtDate } from '../lib/format'
@@ -94,7 +94,7 @@ export function WeekSummary() {
           <div className="mbars">
             {shown.map((m) => (
               <div key={m.muscle} className={`mbar ${guidelineZone(m.sets)}`}>
-                <div className="mbar-name">{m.muscle}</div>
+                <div className="mbar-name">{tm(m.muscle)}</div>
                 <div className="mbar-track">
                   <div className="mbar-band" style={{ left: pct(MUSCLE_SETS_MIN), width: pct(MUSCLE_SETS_MAX - MUSCLE_SETS_MIN) }} />
                   <div className="mbar-fill" style={{ width: pct(m.sets) }} />

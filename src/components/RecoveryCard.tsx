@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { t as tr, tm } from '../lib/i18n'
 import { ChevronRight } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { recoveryView } from '../lib/recovery'
@@ -7,7 +7,7 @@ import { finishedSessions } from '../lib/stats'
 import { BodyMap } from './BodyMap'
 import { Sheet } from './ui'
 
-const list = (ms: string[], n = 2) => (ms.length > n ? `${ms.slice(0, n).join(', ')} +${ms.length - n}` : ms.join(', '))
+const list = (ms: string[], n = 2) => (ms.length > n ? `${ms.slice(0, n).map(tm).join(', ')} +${ms.length - n}` : ms.map(tm).join(', '))
 
 /** Muscle recovery on Train, folded into one tappable line; the body map and the details open in a sheet. */
 export function RecoveryLine() {
@@ -38,11 +38,11 @@ export function RecoveryLine() {
             <>
               {v.ready.length > 0 && (
                 <span className="hm-row-t ellipsis">
-                  <span className="hm-dot" /> Ready: <b>{list(v.ready)}</b>
+                  <span className="hm-dot" /> {tr('Ready:')} <b>{list(v.ready)}</b>
                 </span>
               )}
               <span className="hm-row-t ellipsis">
-                <span className="hm-dot work" /> Recovering: <b>{list(v.recovering)}</b>
+                <span className="hm-dot work" /> {tr('Recovering:')} <b>{list(v.recovering)}</b>
               </span>
             </>
           )}
@@ -55,10 +55,10 @@ export function RecoveryLine() {
             <BodyMap intensity={v.load} height={180} className="hm-map-lg" title={v.recovering.length ? `Recently worked: ${v.recovering.join(', ')}` : 'No muscles worked in the last days'} />
             <div className="stack" style={{ gap: 8 }}>
               <div className="hm-rec-line">
-                <span className="hm-dot work" aria-hidden /> Recovering: <b>{v.recovering.join(', ') || 'none'}</b>
+                <span className="hm-dot work" aria-hidden /> {tr('Recovering:')} <b>{v.recovering.map(tm).join(', ') || tr('none')}</b>
               </div>
               <div className="hm-rec-line">
-                <span className="hm-dot" aria-hidden /> Ready: <b>{v.ready.join(', ') || 'none'}</b>
+                <span className="hm-dot" aria-hidden /> {tr('Ready:')} <b>{v.ready.map(tm).join(', ') || tr('none')}</b>
               </div>
             </div>
             <div className="stack small" style={{ color: 'var(--text-2)' }}>

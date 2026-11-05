@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { dateLocale, t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, ChevronDown, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -84,7 +84,7 @@ export default function HistoryPage() {
       let g = out[out.length - 1]
       if (!g || g.key !== key) {
         const sameYear = d.getFullYear() === new Date().getFullYear()
-        g = { key, label: d.toLocaleDateString('en-GB', { month: 'long', ...(sameYear ? {} : { year: 'numeric' }) }), items: [], volume: 0 }
+        g = { key, label: d.toLocaleDateString(dateLocale, { month: 'long', ...(sameYear ? {} : { year: 'numeric' }) }), items: [], volume: 0 }
         out.push(g)
       }
       g.items.push(i)
@@ -118,12 +118,12 @@ export default function HistoryPage() {
       <button key={s.id} className="hrow" onClick={() => nav(`/history/${s.id}`)}>
         <div className="hdate">
           <div className="d">{d.getDate()}</div>
-          <div className="w">{d.toLocaleDateString('en-GB', { weekday: 'short' })}</div>
+          <div className="w">{d.toLocaleDateString(dateLocale, { weekday: 'short' })}</div>
         </div>
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="hname ellipsis">{splitName(s.name)[0]}</div>
           <div className="hmeta">
-            {fmtMinutes(m.minutes)} · {m.volume > 0 ? fmtVolume(m.volume) : `${m.sets} ${m.sets === 1 ? 'set' : 'sets'}`}
+            {fmtMinutes(m.minutes)} · {m.volume > 0 ? fmtVolume(m.volume) : tr(m.sets === 1 ? '{n} set' : '{n} sets', { n: m.sets })}
           </div>
         </div>
         {s.data.photo_path && <Thumb path={s.data.photo_path} size={36} />}

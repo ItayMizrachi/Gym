@@ -107,17 +107,17 @@ export default function Profile() {
               <div className="seg block" role="tablist" aria-label={tr("What to show")}>
                 {METRICS.map((m) => (
                   <button key={m.id} className={metric === m.id ? 'on' : ''} onClick={() => setMetric(m.id)} aria-pressed={metric === m.id}>
-                    {m.label}
+                    {tr(m.label)}
                   </button>
                 ))}
               </div>
               {/* the range is secondary: a small control on its own line, not a second full-width bar */}
               <div className="prof-range">
-                <span className="small muted">{RANGES.find((r) => r.id === range)?.label}</span>
+                <span className="small muted">{tr(RANGES.find((r) => r.id === range)?.label ?? '')}</span>
                 <div className="seg sm" role="tablist" aria-label={tr("Time range")}>
                   {RANGES.map((r) => (
-                    <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id} aria-label={r.label}>
-                      {r.short}
+                    <button key={r.id} className={range === r.id ? 'on' : ''} onClick={() => setRange(r.id)} aria-pressed={range === r.id} aria-label={tr(r.label)}>
+                      {tr(r.short)}
                     </button>
                   ))}
                 </div>

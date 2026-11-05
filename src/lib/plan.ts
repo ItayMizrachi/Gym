@@ -59,5 +59,10 @@ export function todaysWorkout(db: DB, now = new Date()): Workout | null {
 }
 
 /** "Mon, Thu" for a workout's planned days, or '' when none. */
+/** "Sun, Wed" (Hebrew: "יום א׳, יום ד׳") */
+const DAY_ABBR_HE = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת']
 export const daysLabel = (days: number[]) =>
-  [...days].sort((a, b) => a - b).map((d) => DAY_NAME[d].slice(0, 3)).join(', ')
+  [...days]
+    .sort((a, b) => a - b)
+    .map((d) => (lang === 'he' ? DAY_ABBR_HE[d] : DAY_NAME[d].slice(0, 3)))
+    .join(', ')

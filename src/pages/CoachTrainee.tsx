@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { lang, t as tr } from '../lib/i18n'
+import { dateLocale, lang, t as tr } from '../lib/i18n'
 import { monthReport } from '../lib/monthReport'
 import { renderShareCard, shareOrDownload } from '../lib/shareCard'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -350,7 +350,7 @@ function Trend({ weeks }: { weeks: { start: Date; volume: number; sets: number; 
   const val = (w: (typeof weeks)[number]) => (useVol ? w.volume : w.sets)
   const max = Math.max(1, ...weeks.map(val))
   if (!weeks.some((w) => w.workouts > 0)) return null
-  const label = weeks.map((w) => `${w.start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${useVol ? fmtVolume(w.volume) : `${w.sets} sets`}`).join(', ')
+  const label = weeks.map((w) => `${w.start.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })}: ${useVol ? fmtVolume(w.volume) : `${w.sets} sets`}`).join(', ')
   return (
     <section className="card stack" style={{ gap: 6 }} aria-label={`${useVol ? 'Volume' : 'Sets'} per week. ${label}`}>
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -365,7 +365,7 @@ function Trend({ weeks }: { weeks: { start: Date; volume: number; sets: number; 
         ))}
       </div>
       <div className="coach-trend-axis tiny muted" aria-hidden>
-        <span>{weeks[0].start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+        <span>{weeks[0].start.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })}</span>
         <span>{tr("This week")}</span>
       </div>
     </section>

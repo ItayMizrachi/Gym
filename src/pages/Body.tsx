@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { dateLocale, t as tr } from '../lib/i18n'
 import { Camera, Plus, Ruler, Scale, Trash2 } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -145,7 +145,7 @@ export function EntrySheet({ entry, onClose, measuresOpen = false }: { entry: Me
 function entryDate(iso: string): string {
   const d = new Date(iso + 'T12:00:00')
   const thisYear = d.getFullYear() === new Date().getFullYear()
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', ...(thisYear ? {} : { year: 'numeric' }) })
+  return d.toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric', month: 'short', ...(thisYear ? {} : { year: 'numeric' }) })
 }
 
 /** "Waist 84 · Chest 102 · note" line under an entry */
@@ -275,7 +275,7 @@ export default function Body() {
               <div className="seg">
                 {(['30', '90', 'all'] as const).map((r) => (
                   <button key={r} className={range === r ? 'on' : ''} onClick={() => setRange(r)}>
-                    {r === 'all' ? 'All' : `${r}d`}
+                    {r === 'all' ? tr('All') : tr('{n}d', { n: r })}
                   </button>
                 ))}
               </div>
@@ -284,9 +284,9 @@ export default function Body() {
               unit=" kg"
               digits={1}
               series={[
-                { name: 'Daily', color: '#6f6e69', points: shown.map((e) => ({ t: ts(e.date), y: e.weight_kg! })), width: 1.4 },
+                { name: tr('Daily'), color: '#6f6e69', points: shown.map((e) => ({ t: ts(e.date), y: e.weight_kg! })), width: 1.4 },
                 {
-                  name: '7-day avg',
+                  name: tr('7-day avg'),
                   color: '#f0b92a',
                   points: movingAvg(entries).filter((p) => shown.some((s) => ts(s.date) === p.t)),
                   dots: false,
@@ -315,7 +315,7 @@ export default function Body() {
           </div>
           {withPhotos.length > 3 && (
             <button className="btn block" style={{ marginTop: 'var(--s3)' }} onClick={() => nav('/body/photos')}>
-              See all {withPhotos.length} photos
+              {tr('See all {n} photos', { n: withPhotos.length })}
             </button>
           )}
         </section>

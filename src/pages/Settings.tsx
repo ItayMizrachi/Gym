@@ -201,7 +201,7 @@ export default function SettingsPage() {
             !notifySupported()
               ? 'Not available in this browser. On iPhone, add GymLog to the Home Screen first (iOS 16.4+).'
               : perm === 'denied'
-              ? 'Blocked. Allow notifications for this site in your browser settings.'
+              ? t('Blocked. Allow notifications for this site in your browser settings.')
               : 'Alerts you when rest ends while the app is in the background',
             prefs.restNotify && perm === 'granted',
             async (v) => {
@@ -305,8 +305,8 @@ export default function SettingsPage() {
           {/* only worth saying while it is not installed yet */}
           {!matchMedia('(display-mode: standalone)').matches && !(navigator as Navigator & { standalone?: boolean }).standalone && (
           <div className="tiny muted">
-            <b>{t("Install on your phone.")}</b> iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then
-            opens full screen and keeps working with a weak signal.
+            <b>{t("Install on your phone.")}</b>{' '}
+            {t('iPhone (Safari): Share, then Add to Home Screen. Android (Chrome): the ⋮ menu, then Install app. It then opens full screen and keeps working with a weak signal.')}
           </div>
           )}
         </>

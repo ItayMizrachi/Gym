@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { dateLocale, t as tr } from '../lib/i18n'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { Metric } from '../lib/types'
@@ -10,7 +10,7 @@ import { weightNear } from '../lib/photos'
 import { Camera, Check } from 'lucide-react'
 import { useImageUrl } from '../components/ui'
 
-const monthOf = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+const monthOf = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' })
 
 /** Every progress photo, newest first, by month. Tap one for the full-screen viewer. */
 export default function BodyPhotos() {
@@ -106,7 +106,7 @@ function SelectTile({ m, n, onTap }: { m: Metric; n: number; onTap: () => void }
     <button className={`ph-tile${on ? ' on' : ''}`} onClick={onTap} aria-pressed={on} aria-label={`Photo from ${m.date}${on ? ', picked' : ''}`}>
       {url && <img src={url} alt="" />}
       <span className="ph-tile-date" aria-hidden>
-        {new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        {new Date(m.date + 'T12:00:00').toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })}
       </span>
       <span className={`ph-tile-check${on ? '' : ' off'}`} aria-hidden>
         {on && <Check size={16} />}

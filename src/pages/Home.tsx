@@ -276,7 +276,7 @@ export default function Home() {
           >
             <Flame size={16} aria-hidden />
             <span>{streak.current}</span>
-            <span className="u">wk</span>
+            <span className="u">{t('wk')}</span>
           </div>
         )}
       </div>

@@ -21,6 +21,8 @@ function read(): Lang {
 
 // read() guards every access: in some runtimes (tests) even touching localStorage throws
 export const lang: Lang = read()
+/** Dates read in the app's language: "5 Nov" / "5 בנוב׳" */
+export const dateLocale = lang === 'he' ? 'he-IL' : 'en-GB'
 
 /** switch language: saved, then the app reloads so every screen picks it up */
 export function setLang(l: Lang) {

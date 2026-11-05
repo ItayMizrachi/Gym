@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { lang, t as tr } from '../lib/i18n'
+import { dateLocale, lang, t as tr } from '../lib/i18n'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { dayKey, intensityLevel, monthGrid, TrainingDay } from '../lib/stats'
 import '../styles/insights.css'
@@ -169,9 +169,9 @@ export function CalendarHeat({
     <div className={`cal${names ? ' named' : ''}`}>
       <div className="row cal-head">
         <div className="grow">
-          <div className="ins-title">{view.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</div>
+          <div className="ins-title">{view.toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' })}</div>
           <div className="small muted">
-            {count === 0 ? 'No training days' : `${count} training day${count === 1 ? '' : 's'}`}
+            {count === 0 ? tr('No training days') : tr(count === 1 ? '{n} training day' : '{n} training days', { n: count })}
           </div>
         </div>
         <button className="btn icon sm ghost" disabled={!canBack || settle != null} onClick={() => slide(-1)} aria-label={tr("Previous month")}>

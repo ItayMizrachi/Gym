@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { dateLocale, t as tr } from '../lib/i18n'
 import '../styles/progress.css'
 
 /** Weekly bar chart. Tap a bar to read its value; the current week (last bar) is picked by default. */
@@ -23,7 +23,7 @@ export function WeekBars({
   const slot = W / n
   const bw = Math.max(2, Math.min(34, slot * 0.7))
   const chartH = H - top - bottom
-  const label = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  const label = (d: Date) => d.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })
   // a few evenly spaced date labels, always including the first and last week
   const every = n <= 4 ? 1 : n <= 13 ? 4 : 13
   const cur = Math.min(sel, n - 1)
@@ -32,7 +32,7 @@ export function WeekBars({
     <div className="wbars">
       <div className="wbars-read">
         <span className="kpi">{format(values[cur] ?? 0)}</span>
-        <span className="small muted">{cur === n - 1 ? 'this week' : `week of ${label(starts[cur])}`}</span>
+        <span className="small muted">{cur === n - 1 ? tr('this week') : tr('week of {d}', { d: label(starts[cur]) })}</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={tr("Weekly totals")}>
         <line x1="0" x2={W} y1={top + chartH} y2={top + chartH} className="wbars-axis" />
