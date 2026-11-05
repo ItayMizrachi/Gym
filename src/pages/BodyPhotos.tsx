@@ -44,7 +44,7 @@ export default function BodyPhotos() {
         action={
           photos.length >= 2 && (
             <button
-              className={`btn sm${picking ? ' primary' : ''}`}
+              className="btn sm"
               onClick={() => {
                 setPicking(!picking)
                 setPicked([])

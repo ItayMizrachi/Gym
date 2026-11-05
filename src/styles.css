@@ -433,6 +433,13 @@ table.t,
   opacity: 0.4;
   pointer-events: none;
 }
+/* a primary that cannot be pressed yet goes grey, not a dim yellow block */
+.btn.primary:disabled {
+  background: var(--card3);
+  border-color: var(--line);
+  color: var(--muted);
+  opacity: 1;
+}
 
 /* =================================================================== inputs */
 .input,
