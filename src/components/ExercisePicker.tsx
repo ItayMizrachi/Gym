@@ -161,7 +161,7 @@ export function FilterChips({
       {muscles.length > 1 && (
         <div className="chips" role="group" aria-label={tr("Muscle group")}>
           {['All', ...muscles].map((m) => (
-            <button key={m} aria-pressed={muscle === m} className={`chip ${muscle === m ? 'active' : ''}`} onClick={() => setMuscle(muscle === m && m !== 'All' ? 'All' : m)}>
+            <button key={m} aria-pressed={muscle === m} className={`chip${m === 'All' ? ' any' : ''}${muscle === m ? ' active' : ''}`} onClick={() => setMuscle(muscle === m && m !== 'All' ? 'All' : m)}>
               {m === 'All' ? tr('All muscles') : tm(m)}
             </button>
           ))}
@@ -170,7 +170,7 @@ export function FilterChips({
       {equipment.length > 1 && (
         <div className="chips" role="group" aria-label={tr("Equipment")}>
           {['All', ...equipment].map((m) => (
-            <button key={m} aria-pressed={eq === m} className={`chip ${eq === m ? 'active' : ''}`} onClick={() => setEq(eq === m && m !== 'All' ? 'All' : m)}>
+            <button key={m} aria-pressed={eq === m} className={`chip${m === 'All' ? ' any' : ''}${eq === m ? ' active' : ''}`} onClick={() => setEq(eq === m && m !== 'All' ? 'All' : m)}>
               {m === 'All' ? tr('All equipment') : tm(m)}
             </button>
           ))}

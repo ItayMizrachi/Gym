@@ -2057,10 +2057,11 @@ table.t td {
   width: 100%;
   min-height: 56px;
   padding: 10px 14px;
-  border: 1px dashed var(--accent-line);
-  background: var(--accent-soft);
+  /* a quiet row like the list under it: only the plus is yellow */
+  border: 1px solid var(--line);
+  background: var(--card);
   border-radius: var(--radius);
-  color: var(--accent);
+  color: var(--text);
   font-weight: 600;
   text-align: start;
 }
@@ -2071,8 +2072,8 @@ table.t td {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--accent-soft);
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
