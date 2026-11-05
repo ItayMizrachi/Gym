@@ -216,6 +216,10 @@ table.t,
   flex: 1;
   min-width: 0;
 }
+/* charts read left to right in Hebrew too: under rtl, text-anchor start/end flip and edge labels spill out */
+[dir='rtl'] svg {
+  direction: ltr;
+}
 /* long names wrap to a second line instead of being cut */
 .page-head h1.ph-title {
   display: -webkit-box;
