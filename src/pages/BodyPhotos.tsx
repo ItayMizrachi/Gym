@@ -35,7 +35,8 @@ export default function BodyPhotos() {
   }, [photos])
 
   return (
-    <div className="stack" style={{ gap: 'var(--s5)', paddingBottom: picking ? 72 : 0 }}>
+    // months follow each other closely: the month label's own margin is the gap
+    <div className="stack" style={{ gap: 0, paddingBottom: picking ? 72 : 0 }}>
       <PageHeader
         title={tr("Photos")}
         sub={picking ? 'Pick two photos to compare' : `${photos.length} progress photo${photos.length === 1 ? '' : 's'}`}
@@ -67,7 +68,7 @@ export default function BodyPhotos() {
               picking ? (
                 <SelectTile key={m.id} m={m} n={picked.indexOf(m.id)} onTap={() => toggle(m.id)} />
               ) : (
-                <PhotoTile key={m.id} m={m} kg={weightNear(m, metrics)} onOpen={() => setOpen(i)} />
+                <PhotoTile key={m.id} m={m} onOpen={() => setOpen(i)} />
               )
             )}
           </div>

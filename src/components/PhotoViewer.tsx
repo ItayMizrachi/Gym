@@ -277,15 +277,14 @@ export function PhotoViewer<T extends ViewerPhoto>({
   )
 }
 
-/** A photo tile that opens the viewer: date in the corner, cover-cropped. */
-export function PhotoTile({ m, onOpen, label, kg }: { m: Metric; onOpen: () => void; label?: string; kg?: number | null }) {
+/** A photo tile that opens the viewer: date in the corner, cover-cropped (the weight is in the viewer; on a third of a phone it wrapped). */
+export function PhotoTile({ m, onOpen, label }: { m: Metric; onOpen: () => void; label?: string }) {
   const url = useImageUrl(m.photo_path)
   return (
     <button className="ph-tile" onClick={onOpen} aria-label={`Open photo from ${fmtDateLong(m.date)}`}>
       {url && <img src={url} alt="" />}
       <span className="ph-tile-date" aria-hidden>
         {label ?? new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-        {kg != null && ` · ${fmtKg(kg)} kg`}
       </span>
     </button>
   )

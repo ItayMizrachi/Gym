@@ -310,7 +310,7 @@ export default function Body() {
           </div>
           <div className="ph-grid preview">
             {newestFirst.slice(0, 5).map((m, i) => (
-              <PhotoTile key={m.id} m={m} kg={weightNear(m, metrics)} onOpen={() => setViewing(i)} />
+              <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
             ))}
           </div>
           {withPhotos.length > 3 && (
