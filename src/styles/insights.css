@@ -618,6 +618,8 @@
   gap: 6px;
 }
 .trow.next .btn.trow-start { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+/* while a workout is open, Resume is the one yellow button: the next row's Start goes quiet like the rest */
+.trow.next .btn.trow-start:disabled { background: var(--card2); border-color: var(--line); color: var(--muted); }
 .ins-actions { gap: var(--s2); }
 .ins-actions .btn { min-height: var(--btn-h); }
 .stat .delta { white-space: normal; line-height: 1.25; }
