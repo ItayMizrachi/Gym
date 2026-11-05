@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Check, ChevronRight, Clock, Dumbbell, Link2, Play, Plus, Target, Wand2, ChevronDown } from 'lucide-react'
+import { Check, ChevronRight, Link2, Play, Plus, Wand2, ChevronDown } from 'lucide-react'
 import { useStore } from '../lib/store'
 import {
   GEAR_LABEL,
@@ -38,22 +38,15 @@ function Avatar({ name, size = 44 }: { name: string; size?: number }) {
   return <ExerciseThumb exercise={{ name, muscle: '', image_path: null }} size={size} />
 }
 
+/** One quiet line of facts: "Intermediate · 4 days a week · Gym · Muscle and strength" */
 function Chips({ p }: { p: Program }) {
-  return (
-    <div className="pg-facts">
-      <span className={`pg-level ${p.level.toLowerCase()}`}>{tr(p.level)}</span>
-      <span>
-        {p.kind === 'single' ? <Clock size={15} aria-hidden /> : <CalendarDays size={15} aria-hidden />}
-        {p.kind === 'single' ? tr('About {n} min', { n: programMinutes(p) }) : tr('{n} days a week', { n: p.days })}
-      </span>
-      <span>
-        <Dumbbell size={15} aria-hidden /> {GEAR_LABEL[gearOf(p)]}
-      </span>
-      <span>
-        <Target size={15} aria-hidden /> {tr(p.goal)}
-      </span>
-    </div>
-  )
+  const facts = [
+    tr(p.level),
+    p.kind === 'single' ? tr('About {n} min', { n: programMinutes(p) }) : tr('{n} days a week', { n: p.days }),
+    GEAR_LABEL[gearOf(p)],
+    tr(p.goal)
+  ]
+  return <div className="pg-facts">{facts.join(' · ')}</div>
 }
 
 function Detail({ p }: { p: Program }) {
@@ -112,7 +105,6 @@ function Detail({ p }: { p: Program }) {
           </button>
         )}
         {single && active && <div className="small muted pg-center">{tr("Finish or leave your current workout first to start this one.")}</div>}
-        {!single && !added && <div className="small muted pg-center">Adds {p.workouts.length} workouts to Train. You can change anything after.</div>}
       </div>
 
       {p.workouts.map((w) => {
@@ -133,10 +125,11 @@ function Detail({ p }: { p: Program }) {
                   <div className="grow" style={{ minWidth: 0 }}>
                     <div className="pg-ex-name">{e.name}</div>
                     <div className="pg-ex-meta">
-                      {e.sets} {e.sets === 1 ? 'set' : 'sets'} × {fmtTarget(e)} · rest {fmtRest(e.rest_sec)}
+                      {e.sets} {e.sets === 1 ? 'set' : 'sets'} × {fmtTarget(e)}
+                      {e.rest_sec > 0 && ` · rest ${fmtRest(e.rest_sec)}`}
                     </div>
                     {(e.superset || e.note) && (
-                      <div className="pg-ex-meta">
+                      <div className="pg-ex-meta pg-ex-note">
                         {e.superset && (
                           <span className="pg-ss">
                             <Link2 size={12} aria-hidden /> Superset {e.superset}

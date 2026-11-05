@@ -93,6 +93,11 @@ export function programMeta(p: Program) {
 
 /** "8–12 reps", "5 reps", "30–60 s" */
 export function fmtTarget(e: Pick<ProgramExercise, 'rep_min' | 'rep_max' | 'tracking'>) {
+  // a 5-10 minute warm-up reads "5–10 min", not "300–600 s"
+  if (e.tracking === 'time' && e.rep_min >= 120 && e.rep_min % 60 === 0 && e.rep_max % 60 === 0) {
+    const m = e.rep_min === e.rep_max ? `${e.rep_min / 60}` : `${e.rep_min / 60}–${e.rep_max / 60}`
+    return `${m} min`
+  }
   const r = e.rep_min === e.rep_max ? `${e.rep_min}` : `${e.rep_min}–${e.rep_max}`
   return e.tracking === 'time' ? `${r} s` : `${r} reps`
 }

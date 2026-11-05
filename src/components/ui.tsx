@@ -523,7 +523,7 @@ export function PageHeader({
         </button>
       )}
       <div className="grow" style={{ minWidth: 0 }}>
-        <h1 className="ellipsis">{title}</h1>
+        <h1 className="ph-title">{title}</h1>
         {sub && <div className="sub">{sub}</div>}
       </div>
       {action}

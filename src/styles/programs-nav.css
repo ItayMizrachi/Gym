@@ -110,9 +110,7 @@
 .pg-level.advanced { background: var(--danger-soft); border-color: var(--danger-line); color: var(--danger-text); }
 
 /* ---------- programs: detail ---------- */
-.pg-facts { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--text-2); font-size: 15px; }
-.pg-facts > span { display: inline-flex; align-items: center; gap: 6px; }
-.pg-facts svg { color: var(--muted); }
+.pg-facts { color: var(--muted); font-size: 15px; line-height: 1.4; margin-top: calc(-1 * var(--s3)); }
 .pg-desc { margin: 0; color: var(--text); font-size: 17px; line-height: 1.5; }
 .pg-actions { display: flex; flex-direction: column; gap: 10px; }
 .pg-big { width: 100%; min-height: 52px; font-size: 17px; border-radius: 12px; }
@@ -135,6 +133,7 @@
 .pg-ex li.ss { box-shadow: inset 3px 0 0 var(--plate-blue); }
 .pg-ex-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
 .pg-ex-meta { font-size: 14px; color: var(--text-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.pg-ex-note { color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 4px; }
 .pg-ss { display: inline-flex; align-items: center; gap: 3px; color: var(--blue-text); font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
