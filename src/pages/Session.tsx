@@ -1473,20 +1473,35 @@ function MoreSheet({
   return (
     <Sheet title={se.name} onClose={onClose}>
       <div className="stack">
-        <button className="btn block" onClick={onReplace}>
-          <Repeat size={16} aria-hidden /> {t("Replace exercise")}
-        </button>
-        <button
-          className="btn block"
-          onClick={() => {
-            onClose()
-            setTimeout(() => window.dispatchEvent(new CustomEvent('gl-warmup', { detail: index })), 250)
-          }}
-        >
-          <Flame size={16} aria-hidden /> {t('Add warm-up sets')}
-        </button>
-        <div className="small muted" style={{ marginTop: -4 }}>
-          {t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}
+        {/* actions as one grouped list, each with its line of help under it */}
+        <div className="list-group exo-list">
+          <button className="list-row" onClick={onReplace}>
+            <Repeat size={18} aria-hidden />
+            <span className="grow">
+              <span className="exo-t">{t("Replace exercise")}</span>
+              <span className="small muted">{t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}</span>
+            </span>
+          </button>
+          <button
+            className="list-row"
+            onClick={() => {
+              onClose()
+              setTimeout(() => window.dispatchEvent(new CustomEvent('gl-warmup', { detail: index })), 250)
+            }}
+          >
+            <Flame size={18} aria-hidden />
+            <span className="grow">
+              <span className="exo-t">{t('Add warm-up sets')}</span>
+            </span>
+          </button>
+          {count > 1 && (
+            <button className="list-row" onClick={onReorder}>
+              <GripVertical size={18} aria-hidden />
+              <span className="grow">
+                <span className="exo-t">{t('Reorder exercises')}</span>
+              </span>
+            </button>
+          )}
         </div>
 
         {exercise && (
@@ -1512,13 +1527,11 @@ function MoreSheet({
             />
           </div>
         )}
-        <button className="btn block" disabled={count < 2} onClick={onReorder}>
-          <GripVertical size={16} aria-hidden /> {t('Reorder exercises')}
-        </button>
         <div className="exo-sep">
           <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label={t("Use the GymLog number pad (off = phone keyboard)")} />
         </div>
-        <button className="btn danger" onClick={onRemove}>
+        {/* destructive and rare: quiet red text at the bottom */}
+        <button className="btn ghost danger-text" onClick={onRemove}>
           <Trash2 size={16} aria-hidden /> {t("Remove exercise from workout")}
         </button>
       </div>
