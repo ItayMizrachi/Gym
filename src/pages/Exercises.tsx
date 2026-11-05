@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { t as tr } from '../lib/i18n'
+import { t as tr, tm } from '../lib/i18n'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, RotateCw, Search, X } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -85,7 +85,7 @@ export default function Exercises() {
         : `Best ${Math.max(...rec.repTable.map((r) => r.reps))} reps`
       : ''
     // the best set closes the line (records have their own page)
-    const meta = [withMuscle ? e.muscle : '', e.equipment, bestSet].filter(Boolean).join(' · ')
+    const meta = [withMuscle ? tm(e.muscle) : '', e.equipment ? tr(e.equipment) : '', bestSet].filter(Boolean).join(' · ')
     return (
       <div key={e.id} className="lib-row">
         <ThumbButton exercise={e} size={48} />
@@ -139,7 +139,7 @@ export default function Exercises() {
       <div className="seg lib-seg" role="group" aria-label={tr("Which exercises")}>
         {TABS.map((t) => (
           <button key={t.id} aria-pressed={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set('tab', t.id, '')} style={{ flex: 1 }}>
-            {t.label}
+            {tr(t.label)}
           </button>
         ))}
       </div>
@@ -212,7 +212,7 @@ export default function Exercises() {
               {groups.map((g) => (
                 <section key={g.muscle}>
                   <div className="section-label">
-                    <span>{g.muscle}</span>
+                    <span>{tm(g.muscle)}</span>
                     <span className="count lib-count">{g.items.length}</span>
                   </div>
                   <div className="list-group" style={{ ['--inset' as string]: '74px' }}>

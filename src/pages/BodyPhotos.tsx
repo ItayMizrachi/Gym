@@ -39,7 +39,7 @@ export default function BodyPhotos() {
     <div className="stack" style={{ gap: 0, paddingBottom: picking ? 72 : 0 }}>
       <PageHeader
         title={tr("Photos")}
-        sub={picking ? 'Pick two photos to compare' : `${photos.length} progress photo${photos.length === 1 ? '' : 's'}`}
+        sub={picking ? tr('Pick two photos to compare') : tr(photos.length === 1 ? '{n} progress photo' : '{n} progress photos', { n: photos.length })}
         back="/body"
         action={
           photos.length >= 2 && (
@@ -51,7 +51,7 @@ export default function BodyPhotos() {
               }}
               aria-pressed={picking}
             >
-              {picking ? 'Cancel' : 'Compare'}
+              {tr(picking ? 'Cancel' : 'Compare')}
             </button>
           )
         }
@@ -77,7 +77,7 @@ export default function BodyPhotos() {
       {picking && (
         <div className="ph-pickbar">
           <button className="btn primary block" disabled={picked.length < 2} onClick={() => nav('/body', { state: { compare: picked } })}>
-            {picked.length < 2 ? `Pick ${2 - picked.length} more` : 'Compare these two'}
+            {picked.length < 2 ? tr('Pick {n} more', { n: 2 - picked.length }) : tr('Compare these two')}
           </button>
         </div>
       )}

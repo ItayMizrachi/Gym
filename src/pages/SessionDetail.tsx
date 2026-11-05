@@ -181,7 +181,7 @@ export default function SessionDetail() {
       <div className="hv-stats">
         <div>
           <div className="hv-l">{tr("Time")}</div>
-          <div className="hv-v">{m.minutes < 60 ? `${m.minutes} min` : `${Math.floor(m.minutes / 60)}h ${m.minutes % 60}m`}</div>
+          <div className="hv-v">{fmtMinutes(m.minutes)}</div>
         </div>
         <div>
           <div className="hv-l">{tr("Volume")}</div>
@@ -200,7 +200,7 @@ export default function SessionDetail() {
       </div>
       {/* one quiet line; how it is worked out is in the tooltip / screen-reader label */}
       <div className="hv-foot" title={`Estimated from the time and ${bodyKg ? `your ${fmtKg(bodyKg)} kg` : 'an average 75 kg'}`}>
-        <span>≈ {kcal} kcal burned</span>
+        <span>{tr('≈ {n} kcal burned', { n: kcal })}</span>
       </div>
     </div>
   )
