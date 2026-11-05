@@ -71,10 +71,13 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
   const anyShelved = workouts.some((w) => w.shelved)
   // already the only program on Train
   const isCurrent = anyShelved && workouts.every((w) => !!w.shelved === (folderOf(w) !== folder))
+  // the only program there is: nothing to switch from
+  const onlyOne = workouts.every((w) => folderOf(w) === folder)
+  const renamed = !!name.trim() && name.trim() !== folder
   return (
     <Sheet title={folder || tr("Single workouts")} onClose={onClose}>
-      <div className="list-group" style={{ marginBottom: 16 }}>
-        {!isCurrent && (
+      {!isCurrent && !onlyOne && (
+        <div className="list-group" style={{ marginBottom: 16 }}>
           <button
             className="list-row"
             onClick={() => {
@@ -90,8 +93,8 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
               </span>
             </span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
       <form
         className="stack"
         onSubmit={(e) => {
@@ -105,7 +108,8 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
               No autoFocus: on iPhone the open keyboard ate the tap on "Make this my current program" (the sheet dropped as it closed) */}
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} enterKeyHint="done" />
         </label>
-        <button className="btn primary" type="submit" disabled={!name.trim() || name.trim() === folder}>
+        {/* yellow only once there is a new name to save */}
+        <button className={`btn${renamed ? ' primary' : ''}`} type="submit" disabled={!renamed}>
           {folder ? tr("Rename") : tr("Put them in a folder")}
         </button>
         {folder && (
