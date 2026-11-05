@@ -1431,8 +1431,8 @@ function RestSheet({ name, value, onSet, onClose }: { name: string; value: numbe
     <Sheet title={t("Rest time")} onClose={onClose}>
       <div className="stack">
         <div className="small muted">
-          After each set of <b style={{ color: 'var(--text)' }}>{name}</b> the rest timer starts with this time. Applies to this workout; save it
-          to the plan when you finish.
+          {t('After each set of')} <b style={{ color: 'var(--text)' }}>{name}</b>{' '}
+          {t('the rest timer starts with this time. Applies to this workout; save it to the plan when you finish.')}
         </div>
         <RestEditor value={value} onSet={onSet} />
         <button className="btn primary block" onClick={onClose}>

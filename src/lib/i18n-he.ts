@@ -47,6 +47,9 @@ export const HE_SCREENS: Record<string, string> = {
   '1y': 'שנה',
   Daily: 'יומי',
   Off: 'כבוי',
+  'After each set of': 'אחרי כל סט של',
+  'the rest timer starts with this time. Applies to this workout; save it to the plan when you finish.':
+    'טיימר המנוחה מתחיל מהזמן הזה. חל על האימון הזה; אפשר לשמור אותו בתוכנית כשמסיימים.',
   '{n} reps': '{n} חזרות',
   Compare: 'השוואה',
   'Compare these two': 'השווה בין השתיים',
