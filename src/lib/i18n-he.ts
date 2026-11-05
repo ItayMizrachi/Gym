@@ -26,6 +26,8 @@ export const HE_SCREENS: Record<string, string> = {
   'Bar weight and available plates can be changed in Settings.': 'משקל המוט והפלטות הזמינות ניתנים לשינוי בהגדרות.',
   Best: 'הכי טוב',
   'Best est. 1-rep max': 'מקסימום משוער הכי גבוה',
+  'Best set': 'הסט הכי טוב',
+  reps: 'חזרות',
   'Best lifts for every exercise': 'ההרמות הטובות בכל תרגיל',
   'Best weight (kg) for at least N reps': 'המשקל הטוב ביותר (ק"ג) לפחות ל-N חזרות',
   'Body kg': 'משקל גוף',

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { t as tr } from '../lib/i18n'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ChevronDown, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Plus, RotateCw, Trash2, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { EQUIPMENT, MUSCLES, SetKind, Tracking, trackingOf } from '../lib/types'
 import { fmtTime, setLabel, TRACKING_LABEL } from '../lib/tracking'
@@ -86,14 +86,12 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
 
   return (
     <div className="stack" style={{ gap: 'var(--s4)' }}>
-      <div className="page-head" style={{ marginBottom: 0 }}>
-        <button className="btn icon ghost" onClick={() => nav(-1)} aria-label={tr("Back")}>
-          <ArrowLeft size={22} />
+      <div className="page-head ph" style={{ marginBottom: 0 }}>
+        <button className="btn icon ghost ph-back" onClick={() => nav(-1)} aria-label={tr("Back")}>
+          <ChevronLeft size={26} />
         </button>
-        <div className="grow">
-          <h1 className="ellipsis" style={{ fontSize: 30 }}>
-            {ex.name}
-          </h1>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <h1 className="ph-title">{ex.name}</h1>
           <div className="small muted" style={{ marginTop: 2 }}>
             {[ex.muscle, ex.equipment].filter(Boolean).join(' · ')} · rest {fmtRest(ex.rest_sec)}
           </div>
@@ -133,22 +131,36 @@ function MyExerciseDetail({ id }: { id: string | undefined }) {
           )
         ) : rec.heaviest ? (
           <>
+            {/* the best set leads (90 × 10, like Records); the estimated max follows only when there is one */}
             <div className="pr-hero">
               <div className="stat gold">
                 <div className="v">
-                  {rec.bestE1rm ? fmtKg(Math.round(rec.bestE1rm.value * 10) / 10) : '–'}
-                  <span className="u">kg</span>
+                  {rec.heaviest.weight > 0 ? (
+                    <>
+                      {fmtKg(rec.heaviest.weight)}
+                      <span className="u">kg</span>
+                      <span style={{ fontSize: '0.7em', marginInlineStart: 4 }}>×{rec.heaviest.reps}</span>
+                    </>
+                  ) : (
+                    <>
+                      {rec.heaviest.reps}
+                      <span className="u">{tr('reps')}</span>
+                    </>
+                  )}
                 </div>
-                <div className="l">{tr("Best est. 1-rep max")}</div>
-              </div>
-              <div className="stat">
-                <div className="v">
-                  {fmtKg(rec.heaviest.weight)}
-                  <span className="u">kg</span>
-                  <span style={{ fontSize: '0.7em', marginLeft: 4 }}>×{rec.heaviest.reps}</span>
+                <div className="l">
+                  {tr('Best set')} · {fmtDate(rec.heaviest.date, true)}
                 </div>
-                <div className="l">Heaviest set · {fmtDate(rec.heaviest.date, true)}</div>
               </div>
+              {rec.bestE1rm && rec.bestE1rm.value > 0 && (
+                <div className="stat">
+                  <div className="v">
+                    {fmtKg(Math.round(rec.bestE1rm.value * 10) / 10)}
+                    <span className="u">kg</span>
+                  </div>
+                  <div className="l">{tr("Best est. 1-rep max")}</div>
+                </div>
+              )}
             </div>
             <button className="set-fold" aria-expanded={repsOpen} onClick={() => setRepsOpen((v) => !v)} style={{ minHeight: 36 }}>
               <span className="grow small muted">{tr("Best weight (kg) for at least N reps")}</span>
@@ -362,12 +374,12 @@ function LibraryDetail({ id }: { id: string }) {
   const [picking, setPicking] = useState(false)
 
   const head = (title: string, sub?: string) => (
-    <div className="page-head" style={{ marginBottom: 0 }}>
-      <button className="btn icon ghost" onClick={() => nav(-1)} aria-label={tr("Back")}>
-        <ArrowLeft size={22} />
+    <div className="page-head ph" style={{ marginBottom: 0 }}>
+      <button className="btn icon ghost ph-back" onClick={() => nav(-1)} aria-label={tr("Back")}>
+        <ChevronLeft size={26} />
       </button>
       <div className="grow" style={{ minWidth: 0 }}>
-        <h1 style={{ fontSize: 26, lineHeight: 1.15 }}>{title}</h1>
+        <h1 className="ph-title">{title}</h1>
         {sub && (
           <div className="small muted" style={{ marginTop: 2 }}>
             {sub}
