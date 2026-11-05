@@ -187,9 +187,11 @@ function Card({ p, have }: { p: Program; have: boolean }) {
       <div className="pg-card-top">
         <div className="grow" style={{ minWidth: 0 }}>
           <div className="pg-name">{p.name}</div>
-          <div className="pg-meta">{programMeta(p)}</div>
+          {/* the level reads as plain text in the meta line, like the program page */}
+          <div className="pg-meta">
+            {tr(p.level)} · {programMeta(p)}
+          </div>
         </div>
-        <span className={`pg-level ${p.level.toLowerCase()}`}>{tr(p.level)}</span>
       </div>
       <div className="pg-blurb">{tr(p.description)}</div>
       <div className="pg-foot">
