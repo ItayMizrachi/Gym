@@ -5,7 +5,7 @@ import '../styles/records.css'
 import { t as tr } from '../lib/i18n'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, ChevronRight, Flame, Medal, Moon, Trophy } from 'lucide-react'
+import { BookOpen, ChevronRight, Medal, Trophy } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { Empty, PageHeader, Sheet } from '../components/ui'
 import { CalendarHeat } from '../components/CalendarHeat'
@@ -131,15 +131,13 @@ export default function Profile() {
 
       {sum.workouts > 0 && (
         <div className="card" ref={calRef} style={{ scrollMarginTop: 12 }}>
-          <div className="prof-chips">
-            <span className={`chip${streak.current > 0 ? ' ok' : ''}`}>
-              <Flame size={13} /> {streak.current} week streak
-            </span>
-            <span className="chip">
-              <Moon size={13} /> {tr(rest === 1 ? '{n} rest day this week' : '{n} rest days this week', { n: rest })}
-            </span>
-          </div>
           <CalendarHeat days={days} names={names} onDay={(_, d) => nav(`/history/${d.sessionIds[d.sessionIds.length - 1]}`)} />
+          {/* one quiet line under the month instead of two pills above it */}
+          <div className="small muted prof-streak">
+            {[streak.current > 0 ? tr('{n}-week streak', { n: streak.current }) : '', tr(rest === 1 ? '{n} rest day this week' : '{n} rest days this week', { n: rest })]
+              .filter(Boolean)
+              .join(' · ')}
+          </div>
         </div>
       )}
 

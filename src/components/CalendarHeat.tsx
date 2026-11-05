@@ -199,14 +199,6 @@ export function CalendarHeat({
           <div className="cal-pane">{canNext ? grid(offset + 1) : null}</div>
         </div>
       </div>
-      <div className="row cal-legend tiny muted">
-        <span className="grow">Shade = sets that day</span>
-        <span>{tr("Less")}</span>
-        <i className="cal-key l1" />
-        <i className="cal-key l2" />
-        <i className="cal-key l3" />
-        <span>{tr("More")}</span>
-      </div>
     </div>
   )
 }
