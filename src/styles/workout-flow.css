@@ -242,7 +242,9 @@
 .exo-step.big { justify-content: center; gap: var(--s4); }
 .exo-step.big .btn.icon { width: 56px; height: 56px; font-size: 26px; }
 .exo-step.big .exo-step-v { font-size: 34px; min-width: 96px; }
-.exo-presets { justify-content: center; flex-wrap: wrap; }
+/* five quick times in one even row (wrapping left 3:00 alone on a second line) */
+.exo-presets { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.exo-presets .chip { justify-content: center; padding-inline: 0; }
 /* the waiting rest bar: same place and controls, quieter */
 .rp.idle .rp-time { color: var(--text-2); font-size: 15px; }
 .rp.idle .rp-title { color: var(--text-2); }
