@@ -138,7 +138,8 @@ export default function HistoryPage() {
           <h1>{tr("History")}</h1>
           {all.length > 0 && (
             <div className="sub">
-              {tr(all.length === 1 ? '{n} workout' : '{n} workouts', { n: all.length })} · {tr('this week {v}', { v: fmtVolume(thisWeek) })}
+              {tr(all.length === 1 ? '{n} workout' : '{n} workouts', { n: all.length })}
+              {thisWeek > 0 && ` · ${tr('this week {v}', { v: fmtVolume(thisWeek) })}`}
               {avg > 0 && ` · avg ${fmtVolume(avg)}`}
             </div>
           )}

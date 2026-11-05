@@ -211,10 +211,13 @@ export default function Body() {
       <PageHeader
         title={tr("Body")}
         sub={tr("Weight, measurements and progress photos.")}
+        // with nothing logged yet the empty card's button is the one action
         action={
-          <button className="btn primary" onClick={() => setEditing('new')}>
-            <Plus size={18} aria-hidden /> {tr("Log weight")}
-          </button>
+          entries.length > 0 && (
+            <button className="btn primary" onClick={() => setEditing('new')}>
+              <Plus size={18} aria-hidden /> {tr("Log weight")}
+            </button>
+          )
         }
       />
 

@@ -10,8 +10,8 @@ import '../styles/home.css'
 
 function Delta({ now, before, fmt }: { now: number; before: number; fmt: (n: number) => string }) {
   const d = now - before
-  // nothing last week: "↑ 17 vs last wk" says nothing new, so say it plainly
-  if (before === 0) return now > 0 ? <div className="delta muted">{t('none last wk')}</div> : null
+  // nothing last week: no comparison to make, so the tile is just the number
+  if (before === 0) return null
   if (Math.abs(d) < 0.5) return <div className="delta muted">{t('same as last wk')}</div>
   // the header says "vs last week" once; each box only shows how much. Less is grey, not red (red means failure)
   return (
