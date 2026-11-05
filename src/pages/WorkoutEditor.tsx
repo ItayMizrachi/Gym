@@ -9,7 +9,7 @@ import '../styles/programs-nav.css'
 import { MoveToFolderSheet } from '../components/FolderSheet'
 import { moved, useDragReorder } from '../components/useDragReorder'
 import { folderOf, NO_FOLDER } from '../lib/folders'
-import { DAY_NAME, DAY_SHORT, plannedDays } from '../lib/plan'
+import { DAY_NAME, DAY_SHORT, daysLabel, plannedDays } from '../lib/plan'
 import { useStore } from '../lib/store'
 import { duplicateWorkout, removeWorkout } from '../lib/actions'
 import { ExercisePicker } from '../components/ExercisePicker'
@@ -276,7 +276,8 @@ export default function WorkoutEditor() {
           <span className="grow" style={{ minWidth: 0 }}>
             <span className="set-fold-t">{tr('Details')}</span>
             <span className="small muted ellipsis" style={{ display: 'block' }}>
-              {[folderOf(w) || tr(NO_FOLDER), plannedDays(w).length ? plannedDays(w).map((d) => DAY_SHORT[d]).join(' ') : '', w.notes].filter(Boolean).join(' · ')}
+              {/* "Sun, Wed" reads; a lone "S" did not */}
+              {[folderOf(w) || tr(NO_FOLDER), plannedDays(w).length ? daysLabel(plannedDays(w)) : '', w.notes].filter(Boolean).join(' · ')}
             </span>
           </span>
           <ChevronDown size={18} aria-hidden className="muted" style={{ transform: detailsOpen ? 'rotate(180deg)' : undefined }} />
