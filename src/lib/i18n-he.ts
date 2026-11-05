@@ -46,6 +46,7 @@ export const HE_SCREENS: Record<string, string> = {
   '3m': '3 ח׳',
   '1y': 'שנה',
   Daily: 'יומי',
+  Off: 'כבוי',
   '{n}d': '{n} ימים',
   'this week': 'השבוע',
   'week of {d}': 'שבוע של {d}',

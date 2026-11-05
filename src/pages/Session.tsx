@@ -605,7 +605,7 @@ function ExerciseCard({
               aria-label={`Rest ${se.rest_sec ? fmtRest(se.rest_sec) : 'off'} for ${name}. Change`}
             >
               <Timer size={13} aria-hidden />
-              <span>{se.rest_sec ? fmtRest(se.rest_sec) : 'Off'}</span>
+              <span>{se.rest_sec ? fmtRest(se.rest_sec) : t('Off')}</span>
             </button>
             {finished && shut ? (
               <span className="ex-sum-t done">{doneLine}</span>
@@ -1409,7 +1409,7 @@ function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => v
           −
         </button>
         <span className="exo-step-v" aria-live="polite">
-          {value ? fmtRest(value) : 'Off'}
+          {value ? fmtRest(value) : t('Off')}
         </span>
         <button className="btn icon" onClick={() => set(value + 15)} disabled={value >= 600} aria-label="15 seconds more">
           +
@@ -1418,7 +1418,7 @@ function RestEditor({ value, onSet }: { value: number; onSet: (sec: number) => v
       <div className="chips exo-presets" role="group" aria-label={t("Rest presets")}>
         {[0, 60, 90, 120, 180].map((v) => (
           <button key={v} className={`chip${value === v ? ' active' : ''}`} aria-pressed={value === v} onClick={() => set(v)}>
-            {v ? fmtRest(v) : 'Off'}
+            {v ? fmtRest(v) : t('Off')}
           </button>
         ))}
       </div>
