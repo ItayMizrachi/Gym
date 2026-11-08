@@ -51,6 +51,7 @@ export const X = {
   pullUp: e('Pull Up', 'Back', 'Bodyweight'),
   wPullUp: e('Pull Up (Weighted)', 'Back', 'Bodyweight'),
   isoRow: e('Iso-Lateral Row (Machine)', 'Back', 'Machine'),
+  tbarRow: e('Chest Supported T Bar Row', 'Back', 'Machine'),
   closeRow: e('Seated Cable Row (Close Grip)', 'Back', 'Cable'),
   straightArm: e('Cable Pullover (Straight Arm)', 'Back', 'Cable'),
   chinUp: e('Chin Up', 'Back', 'Bodyweight'),

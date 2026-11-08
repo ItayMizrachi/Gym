@@ -243,8 +243,8 @@ const W = {
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 180),
     s(X.inclineMachine, 2, '6-10', 180),
-    s(X.isoRow, 2, '8-10', 150, {
-      note: 'Or a chest-supported T-bar row, whichever is free (iso-lateral preferred). After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
+    s(X.tbarRow, 2, '8-10', 150, {
+      note: 'Heavy and stable: easy to add weight week to week. The iso-lateral row if the T-bar is taken. After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
     }),
     s(X.wDip, 2, '6-10', 150, {
       note: 'Parallel bars preferred (more chest stretch, better overload); the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
@@ -545,6 +545,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
   }),
   weekly({
     id: 'ultimate-5',
+    // 2 (2026-11-08): chest-supported T-bar row instead of the iso-lateral row on Upper A
+    version: 2,
     name: 'The Ultimate 5-Day Plan',
     description:
       'The Ultimate 4-Day Plan spread over Sunday to Thursday, so every day is about 55 minutes. Same lifts and sets: upper and lower alternate, shoulders and arms get their own Thursday, forearms twice a week.',
