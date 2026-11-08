@@ -77,7 +77,7 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
   return (
     <Sheet title={folder || tr("Single workouts")} onClose={onClose}>
       {!isCurrent && !onlyOne && (
-        <div className="list-group" style={{ marginBottom: 16 }}>
+        <div className="list-group make-current" style={{ marginBottom: 16 }}>
           <button
             className="list-row"
             onClick={() => {
@@ -87,7 +87,7 @@ export function RenameFolderSheet({ folder, onClose }: { folder: string; onClose
           >
             <Pin size={18} aria-hidden />
             <span className="grow" style={{ textAlign: 'start' }}>
-              {tr('Make this my current program')}
+              <span className="make-current-t">{tr('Make this my current program')}</span>
               <span className="small muted" style={{ display: 'block' }}>
                 {tr('Only this one shows on Train and in Up next. The others fold away below; nothing is deleted.')}
               </span>

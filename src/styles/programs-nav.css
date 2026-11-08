@@ -207,6 +207,10 @@
 .home-links .list-row > svg { color: var(--muted); flex: none; }
 .home-links .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .home-link-t { font-weight: 600; }
+/* program menu: "Make this my current program" reads as a button (soft yellow), not a line of text */
+.list-group.make-current { background: var(--accent-soft); border-color: var(--accent-line); }
+.make-current .list-row > svg { color: var(--accent); }
+.make-current-t { display: block; color: var(--accent); font-weight: 650; }
 .we-help { align-self: flex-start; margin-inline-start: -8px; color: var(--muted); }
 .we-gloss { margin: 0 0 4px; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; }
 .we-gloss dt { font-weight: 650; color: var(--text); }
