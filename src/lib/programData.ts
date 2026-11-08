@@ -236,6 +236,64 @@ const W = {
     s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' }),
     ...ULT_WRISTS()
   ]),
+  // The Ultimate 5-Day Plan: the 4-day plan's exercises and sets spread over Sunday to Thursday, about 55 min a day.
+  // Upper and lower alternate; shoulders and arms move to their own Thursday; forearms stay twice a week.
+  ult5UpperA: wo('Upper A', 'Back and chest. 2 working sets per lift; about 55 min.', [
+    ULT_GENERAL(),
+    ULT_WARMUP(),
+    s(X.wPullUp, 2, '6-8', 180),
+    s(X.inclineMachine, 2, '6-10', 180),
+    s(X.isoRow, 2, '8-10', 150, {
+      note: 'Or a chest-supported T-bar row, whichever is free (iso-lateral preferred). After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
+    }),
+    s(X.wDip, 2, '6-10', 150, {
+      note: 'Parallel bars preferred (more chest stretch, better overload); the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
+    }),
+    ULT_LATERAL(),
+    ULT_REAR_FLY()
+  ]),
+  ult5LowerA: wo('Lower A', 'Quads, forearms at the end. 2 working sets per lift; about 60 min.', [
+    ULT_GENERAL(),
+    s(X.rdl, 2, '6-10', 180, { note: 'Main hip hinge of the week: stretch the hamstrings to mid-shin, 2-3 s on the way down.' }),
+    ULT_LEG_PRESS('8-12', 180),
+    s(X.legExt, 2, '10-15', 90, { drop: true }),
+    s(X.standingCurl, 2, '10-12', 90, { drop: true, note: 'Lean forward on the pad for more hamstring stretch; slow on the way down.' }),
+    ULT_CALF(),
+    s(X.cableCrunch, 3, '10-15', 60, { note: 'Straight crunch; the woodchop covers the obliques.' }),
+    s(X.woodchop, 2, '10-12', 60, { note: 'Reps per side, high to low. Same cable station as the crunch; rotate through the torso, hips stable, controlled return.' }),
+    ...ULT_WRISTS()
+  ]),
+  ult5UpperB: wo('Upper B', 'Chest and back. 2 working sets per lift; about 55 min.', [
+    ULT_GENERAL(),
+    s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine.' }),
+    ULT_WARMUP(),
+    s(X.wPullUp, 2, '6-10', 180),
+    s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
+    s(X.closeRow, 2, '8-12', 150),
+    s(X.straightArm, 2, '12-15', 90, { drop: true, note: 'Lats in the stretch; elbows soft and fixed.' }),
+    s(X.chestFly, 2, '10-15', 90, { drop: true }),
+    s(X.cableLateral, 2, '12-15', 90, { note: 'Cable or dumbbell. Side delts on Sunday, Tuesday and Thursday.' })
+  ]),
+  ult5LowerB: wo('Lower B', 'Glutes and hamstrings. 2 working sets per lift; about 50 min.', [
+    ULT_GENERAL(),
+    s(X.hipThrust, 3, '8-12', 150, { note: 'Pause 1-2 s at the top; full lockout with the glutes.' }),
+    ULT_LEG_PRESS('10-12', 150),
+    s(X.standingCurl, 2, '10-12', 90, { drop: true }),
+    s(X.legExt, 2, '12-15', 90, { drop: true }),
+    ULT_CALF(),
+    s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' })
+  ]),
+  ult5Arms: wo('Shoulders & Arms', 'Shoulders, biceps, triceps and forearms. Arms in supersets; about 55 min.', [
+    ULT_GENERAL(),
+    s(X.plateOhp, 2, '8-10', 150),
+    ULT_LATERAL(),
+    ULT_REAR_FLY(),
+    s(X.bayesianCurl, 2, '10-12', 30, { ss: 'A', drop: true, note: 'Face away from the cable, arm behind the body: long-head stretch. One arm at a time.' }),
+    s(X.pushdown, 2, '10-12', 90, { ss: 'A', drop: true }),
+    s(X.hammer, 2, '10-12', 30, { ss: 'B', drop: true }),
+    s(X.ohExt, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Long-head focus: full stretch behind the head, elbows stay pointed forward.' }),
+    ...ULT_WRISTS()
+  ]),
   fbA: wo('Full Body A', 'Start light. Add weight once you reach the top of the rep range on every set.', [
     s(X.legPress, 3, '8-12', 120),
     s(X.chestPress, 3, '8-12', 120),
@@ -484,6 +542,16 @@ export const WEEKLY_PROGRAMS: Program[] = [
     goal: 'Muscle and strength',
     days: 4,
     workouts: [W.ultUpperA, W.ultLowerA, W.ultUpperB, W.ultLowerB]
+  }),
+  weekly({
+    id: 'ultimate-5',
+    name: 'The Ultimate 5-Day Plan',
+    description:
+      'The Ultimate 4-Day Plan spread over Sunday to Thursday, so every day is about 55 minutes. Same lifts and sets: upper and lower alternate, shoulders and arms get their own Thursday, forearms twice a week.',
+    level: 'Intermediate',
+    goal: 'Muscle and strength',
+    days: 5,
+    workouts: [W.ult5UpperA, W.ult5LowerA, W.ult5UpperB, W.ult5LowerB, W.ult5Arms]
   }),
   weekly({
     id: 'beginner-full-body',
