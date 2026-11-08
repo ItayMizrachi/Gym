@@ -96,6 +96,8 @@ export const X = {
   bayesianCurl: e('Bayesian Curl (Cable)', 'Biceps', 'Cable'),
   preacher: e('Preacher Curl (Machine)', 'Biceps', 'Machine'),
   pushdown: e('Triceps Pushdown', 'Triceps', 'Cable'),
+  ropePushdown: e('Triceps Pushdown (Rope)', 'Triceps', 'Cable'),
+  inclineCurl: e('Incline Dumbbell Curl', 'Biceps', 'Dumbbell'),
   ohExt: e('Overhead Triceps Extension (Cable)', 'Triceps', 'Cable'),
   dbOhExt: e('Overhead Triceps Extension (Dumbbell)', 'Triceps', 'Dumbbell'),
   skull: e('Skull Crusher (Barbell)', 'Triceps', 'Barbell'),

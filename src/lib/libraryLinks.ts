@@ -47,6 +47,8 @@ export const NAME_TO_LIB: Record<string, string> = {
   'chest dip (weighted)': 'Dips_-_Chest_Version',
   'chest fly (machine)': 'Butterfly',
   'triceps pushdown': 'Triceps_Pushdown',
+  'triceps pushdown (rope)': 'Triceps_Pushdown_-_Rope_Attachment',
+  'incline dumbbell curl': 'Incline_Dumbbell_Curl',
   'hammer curl (dumbbell)': 'Hammer_Curls',
   'warm up': 'Jogging_Treadmill',
   plank: 'Plank',
