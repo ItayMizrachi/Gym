@@ -87,6 +87,9 @@ export const X = {
   hipFlexor: hold('Hip Flexor Stretch', 'Glutes'),
   calf: e('Standing Calf Raise (Machine)', 'Calves', 'Machine'),
   seatedCalf: e('Seated Calf Raise (Machine)', 'Calves', 'Machine'),
+  // the Hevy name, so a saved plan keeps the history imported from Hevy
+  seatedCalfRaise: e('Seated Calf Raise', 'Calves', 'Machine'),
+  slCalf: e('Single Leg Calf Raise (Bodyweight)', 'Calves', 'Bodyweight'),
   dbCalf: e('Calf Raise (Dumbbell)', 'Calves', 'Dumbbell'),
   // arms
   curl: e('Bicep Curl (Dumbbell)', 'Biceps', 'Dumbbell'),

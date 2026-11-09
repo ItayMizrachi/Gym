@@ -17,6 +17,9 @@ const ULT_REAR_FLY = () => s(X.oneArmRearFly, 2, '12-15', 60)
 const ULT_LEG_PRESS = (range: string, rest: number) =>
   s(X.legPress, 2, range, rest, { note: 'Natural stance (about shoulder width), as deep as you can without the pelvis lifting; knees over toes, no knee pain.' })
 const ULT_CALF = () => s(X.calf, 3, '10-15', 90, { drop: true, note: 'Pause 1-2 s at the bottom; full stretch. Drop set on the last set.' })
+/** 5-day plan: two single-leg bodyweight sets to failure right after the calf machine */
+const ULT_CALF_FINISH = () =>
+  s(X.slCalf, 2, '10-30', 30, { note: 'Straight after the last calf set. One leg per set, on a step, no weight, to failure; full stretch at the bottom.' })
 const ULT_WRISTS = () => [
   s(X.wristCurl, 2, '12-20', 30, { ss: 'C', drop: true, note: 'Forearm flexors. Cable or dumbbell.' }),
   s(X.revWristCurl, 2, '12-20', 90, { ss: 'C', drop: true, note: 'Forearm extensors. Cable or dumbbell.' })
@@ -259,6 +262,7 @@ const W = {
     s(X.legExt, 2, '10-15', 90, { drop: true }),
     s(X.standingCurl, 2, '10-12', 90, { drop: true, note: 'Lean forward on the pad for more hamstring stretch; slow on the way down.' }),
     ULT_CALF(),
+    ULT_CALF_FINISH(),
     s(X.cableCrunch, 3, '10-15', 60, { note: 'Straight crunch; the woodchop covers the obliques.' }),
     s(X.woodchop, 2, '10-12', 60, { note: 'Reps per side, high to low. Same cable station as the crunch; rotate through the torso, hips stable, controlled return.' }),
     ...ULT_WRISTS()
@@ -281,7 +285,9 @@ const W = {
     ULT_LEG_PRESS('10-12', 150),
     s(X.standingCurl, 2, '10-12', 90, { drop: true }),
     s(X.legExt, 2, '12-15', 90, { drop: true }),
-    ULT_CALF(),
+    // seated on Wednesday, standing on Monday: bent knees shift the work to the soleus
+    s(X.seatedCalfRaise, 3, '12-20', 90, { drop: true, note: 'Knees bent: mostly the soleus (standing on Monday covers the gastrocnemius). Pause 1-2 s at the bottom.' }),
+    ULT_CALF_FINISH(),
     s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' })
   ]),
   ult5UpperC: wo('Upper C', 'Dips and isolation for chest and back, shoulders, arms and forearms. About 55 min.', [
@@ -552,7 +558,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 2 (2026-11-08): chest-supported T-bar row instead of the iso-lateral row on Upper A
     // 3 (2026-11-08): Thursday is Upper C (dips, pullover, press, fly); arm supersets on all three upper days
     // 4 (2026-11-09): Upper A gets a chest fly and a cable curl (no Bayesian), full rest on pull-ups; its rear fly moves to Upper B
-    version: 4,
+    // 5 (2026-11-09): calves standing on Lower A, seated on Lower B, each followed by 2 single-leg bodyweight sets to failure
+    version: 5,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about 50-55 minutes a day. Chest, back and arms three times a week (heavy presses and rows early in the week, dips and isolation on Thursday), legs twice, forearms twice.',

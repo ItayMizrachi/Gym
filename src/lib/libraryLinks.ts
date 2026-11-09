@@ -101,6 +101,8 @@ export const NAME_TO_LIB: Record<string, string> = {
   'standing calf raise (machine)': 'Standing_Calf_Raises',
   'seated calf raise (machine)': 'Seated_Calf_Raise',
   'calf raise (dumbbell)': 'Standing_Dumbbell_Calf_Raise',
+  'single leg calf raise (bodyweight)': 'Standing_Dumbbell_Calf_Raise',
+  'seated calf raise': 'Seated_Calf_Raise',
   'bicep curl (dumbbell)': 'Dumbbell_Bicep_Curl',
   'bicep curl (barbell)': 'Barbell_Curl',
   'preacher curl (machine)': 'Machine_Preacher_Curls',
