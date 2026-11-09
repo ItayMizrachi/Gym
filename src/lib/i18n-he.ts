@@ -47,6 +47,9 @@ export const HE_SCREENS: Record<string, string> = {
   '1y': 'שנה',
   Daily: 'יומי',
   Off: 'כבוי',
+  'Now on machine {n}': 'עכשיו על מכונה {n}',
+  'Two machines with different weight stacks: last time, weights and records are kept apart for each one.':
+    'שתי מכונות עם משקלות שונים: הפעם הקודמת, המשקלים והשיאים נשמרים בנפרד לכל אחת.',
   'After each set of': 'אחרי כל סט של',
   'the rest timer starts with this time. Applies to this workout; save it to the plan when you finish.':
     'טיימר המנוחה מתחיל מהזמן הזה. חל על האימון הזה; אפשר לשמור אותו בתוכנית כשמסיימים.',

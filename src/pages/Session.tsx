@@ -68,6 +68,8 @@ function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionS
   )
 }
 // sets that already fired a record / near-record message, so un-ticking and re-ticking does not repeat it
+/** how many times the "machine 1 / 2" toast was shown on this device */
+const MACH_HINT_KEY = 'gymlog:machineHint'
 const celebrated = new Set<string>()
 const ELIGIBLE = new Set(['work', 'failure'])
 
@@ -536,9 +538,23 @@ function ExerciseCard({
       }),
       true
     )
+    // the first two switches say what the number means (this device only)
+    try {
+      const seen = Number(localStorage.getItem(MACH_HINT_KEY) ?? 0)
+      if (seen < 2) {
+        localStorage.setItem(MACH_HINT_KEY, String(seen + 1))
+        toast({
+          kind: 'info',
+          text: t('Now on machine {n}', { n: next === '2' ? 2 : 1 }),
+          sub: t('Two machines with different weight stacks: last time, weights and records are kept apart for each one.')
+        })
+      }
+    } catch {
+      /* ignore */
+    }
   }
 
-  const workNo = (i: number) => se.sets.slice(0, i + 1).filter((x) => x.kind === 'work').length
+  const workNo =(i: number) => se.sets.slice(0, i + 1).filter((x) => x.kind === 'work').length
   const lastDesc = last ? last.sets.map((x) => setLabel(x, tracking)).join(' · ') : null
 
   const name = ex?.name ?? se.name
@@ -585,15 +601,17 @@ function ExerciseCard({
             )}
             {ex?.machines && (
               // two machines with different stacks: tap to switch; last time and records follow the machine
+              // icon + number only (soft yellow = machine 1, solid yellow = machine 2); the first taps explain it in a toast
               <button
-                className="chip ex-mach"
+                className={`chip ex-mach${se.machine === '2' ? ' m2' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation()
                   switchMachine()
                 }}
+                title={t('Machine {n}', { n: se.machine === '2' ? 2 : 1 })}
                 aria-label={t('On machine {n}. Switch machine', { n: se.machine === '2' ? 2 : 1 })}
               >
-                <ArrowLeftRight size={13} aria-hidden /> {t('Machine {n}', { n: se.machine === '2' ? 2 : 1 })}
+                <ArrowLeftRight size={13} aria-hidden /> {se.machine === '2' ? 2 : 1}
               </button>
             )}
             <button
