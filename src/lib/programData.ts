@@ -298,8 +298,8 @@ const W = {
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 240, { note: 'Rest fully between the two sets (nothing in between). Weighted pull-ups on Sunday and Thursday.' }),
     s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
-    s(X.plateOhp, 2, '8-10', 150),
     s(X.chestFly, 2, '10-15', 90, { drop: true }),
+    s(X.plateOhp, 2, '8-10', 150),
     ULT_LATERAL(),
     ULT_REAR_FLY(),
     s(X.inclineCurl, 2, '10-12', 30, { ss: 'B', drop: true, note: 'Bench at about 60°, arms hang straight down: long-head stretch.' }),
@@ -563,7 +563,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 6 (2026-11-09): weighted pull-ups Sun + Thu, weighted dips Tue after the chest press; pullover to Tue, incline DB to Thu, Thursday's forearms to Lower B
     // 7 (2026-11-09): Upper A rows on the T-bar before the chest fly
     // 8 (2026-11-09): Upper B alternates chest and back (press, row, dips, pullover)
-    version: 8,
+    // 9 (2026-11-09): Upper C does the chest fly before the shoulder press
+    version: 9,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
