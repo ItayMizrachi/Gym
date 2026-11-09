@@ -269,17 +269,18 @@ const W = {
   ]),
   ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
-    s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine.' }),
-    ULT_WARMUP(),
-    s(X.wPullUp, 2, '6-10', 180),
-    s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
+    s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine. Also warms the chest, shoulders and elbows up for the dips.' }),
+    s(X.wDip, 2, '6-10', 180, {
+      note: 'Weighted dips on Tuesday only, never on a weighted pull-up day. Parallel bars preferred; the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
+    }),
     s(X.closeRow, 2, '8-12', 150),
+    s(X.straightArm, 2, '12-15', 90, { drop: true, note: 'Lats in the stretch; elbows soft and fixed. The vertical-pull work of the day.' }),
     s(X.cableLateral, 2, '12-15', 90, { note: 'Cable or dumbbell. Side delts on Sunday, Tuesday and Thursday.' }),
     ULT_REAR_FLY(),
     s(X.hammer, 2, '10-12', 30, { ss: 'B', drop: true }),
     s(X.ohExt, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Long-head focus: full stretch behind the head, elbows stay pointed forward.' })
   ]),
-  ult5LowerB: wo('Lower B', 'Glutes and hamstrings. 2 working sets per lift; about 50 min.', [
+  ult5LowerB: wo('Lower B', 'Glutes and hamstrings, forearms at the end. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
     s(X.hipThrust, 3, '8-12', 150, { note: 'Pause 1-2 s at the top; full lockout with the glutes.' }),
     ULT_LEG_PRESS('10-12', 150),
@@ -288,21 +289,20 @@ const W = {
     // seated on Wednesday, standing on Monday: bent knees shift the work to the soleus
     s(X.seatedCalfRaise, 3, '12-20', 90, { drop: true, note: 'Knees bent: mostly the soleus (standing on Monday covers the gastrocnemius). Pause 1-2 s at the bottom.' }),
     ULT_CALF_FINISH(),
-    s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' })
+    s(X.kneeRaise, 3, '10-15', 60, { note: 'Move on to straight-leg hanging leg raises when 15 reps are easy.' }),
+    ...ULT_WRISTS()
   ]),
-  ult5UpperC: wo('Upper C', 'Dips and isolation for chest and back, shoulders, arms and forearms. About 55 min.', [
+  ult5UpperC: wo('Upper C', 'Weighted pull-ups, upper chest, shoulders and arms. About 65 min.', [
     ULT_GENERAL(),
-    s(X.wDip, 2, '6-10', 150, {
-      note: 'Parallel bars preferred (more chest stretch, better overload); the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
-    }),
-    s(X.straightArm, 2, '12-15', 90, { drop: true, note: 'Lats in the stretch; elbows soft and fixed.' }),
-    s(X.plateOhp, 2, '8-10', 150, { note: 'After the dips and pullover, so the press does not tire the triceps before the dips.' }),
+    ULT_WARMUP(),
+    s(X.wPullUp, 2, '6-8', 240, { note: 'Rest fully between the two sets (nothing in between). Weighted pull-ups on Sunday and Thursday.' }),
+    s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
+    s(X.plateOhp, 2, '8-10', 150),
     s(X.chestFly, 2, '10-15', 90, { drop: true }),
     ULT_LATERAL(),
     ULT_REAR_FLY(),
     s(X.inclineCurl, 2, '10-12', 30, { ss: 'B', drop: true, note: 'Bench at about 60°, arms hang straight down: long-head stretch.' }),
-    s(X.ropePushdown, 2, '10-15', 90, { ss: 'B', drop: true, note: 'Spread the rope at the bottom.' }),
-    ...ULT_WRISTS()
+    s(X.ropePushdown, 2, '10-15', 90, { ss: 'B', drop: true, note: 'Spread the rope at the bottom.' })
   ]),
   fbA: wo('Full Body A', 'Start light. Add weight once you reach the top of the rep range on every set.', [
     s(X.legPress, 3, '8-12', 120),
@@ -559,10 +559,11 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 3 (2026-11-08): Thursday is Upper C (dips, pullover, press, fly); arm supersets on all three upper days
     // 4 (2026-11-09): Upper A gets a chest fly and a cable curl (no Bayesian), full rest on pull-ups; its rear fly moves to Upper B
     // 5 (2026-11-09): calves standing on Lower A, seated on Lower B, each followed by 2 single-leg bodyweight sets to failure
-    version: 5,
+    // 6 (2026-11-09): weighted pull-ups Sun + Thu, weighted dips Tue after the chest press; pullover to Tue, incline DB to Thu, Thursday's forearms to Lower B
+    version: 6,
     name: 'The Ultimate 5-Day Plan',
     description:
-      'Upper / lower from Sunday to Thursday, about 50-55 minutes a day. Chest, back and arms three times a week (heavy presses and rows early in the week, dips and isolation on Thursday), legs twice, forearms twice.',
+      'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
     level: 'Intermediate',
     goal: 'Muscle and strength',
     days: 5,
