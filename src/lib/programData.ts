@@ -239,17 +239,17 @@ const W = {
   // The Ultimate 5-Day Plan: the 4-day plan spread over Sunday to Thursday, about 50-55 min a day.
   // Chest, back and arms three times a week (Sun, Tue, Thu: heavy presses and rows early in the week, dips and
   // isolation on Thursday), legs twice, forearms twice.
-  ult5UpperA: wo('Upper A', 'Back and chest, biceps and triceps. 2 working sets per lift; about 50 min.', [
+  ult5UpperA: wo('Upper A', 'Back and chest, biceps and triceps. 2 working sets per lift; about 65 min.', [
     ULT_GENERAL(),
     ULT_WARMUP(),
-    s(X.wPullUp, 2, '6-8', 180),
+    s(X.wPullUp, 2, '6-8', 240, { note: 'Rest fully between the two sets (nothing in between): the second set should be nearly as good as the first.' }),
     s(X.inclineMachine, 2, '6-10', 180),
+    s(X.chestFly, 2, '10-15', 90, { drop: true, note: 'Second chest lift of the day: full stretch, squeeze at the middle.' }),
     s(X.tbarRow, 2, '8-10', 150, {
       note: 'Heavy and stable: easy to add weight week to week. The iso-lateral row if the T-bar is taken. After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
     }),
     ULT_LATERAL(),
-    ULT_REAR_FLY(),
-    s(X.bayesianCurl, 2, '10-12', 30, { ss: 'A', drop: true, note: 'Face away from the cable, arm behind the body: long-head stretch. One arm at a time.' }),
+    s(X.cableCurl, 2, '10-12', 30, { ss: 'A', drop: true }),
     s(X.pushdown, 2, '10-12', 90, { ss: 'A', drop: true })
   ]),
   ult5LowerA: wo('Lower A', 'Quads, forearms at the end. 2 working sets per lift; about 60 min.', [
@@ -263,7 +263,7 @@ const W = {
     s(X.woodchop, 2, '10-12', 60, { note: 'Reps per side, high to low. Same cable station as the crunch; rotate through the torso, hips stable, controlled return.' }),
     ...ULT_WRISTS()
   ]),
-  ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 50 min.', [
+  ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
     s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine.' }),
     ULT_WARMUP(),
@@ -271,6 +271,7 @@ const W = {
     s(X.inclineDb, 2, '8-12', 150, { note: 'Or the incline machine. Upper chest twice a week; dumbbells add variety to Sunday’s machine.' }),
     s(X.closeRow, 2, '8-12', 150),
     s(X.cableLateral, 2, '12-15', 90, { note: 'Cable or dumbbell. Side delts on Sunday, Tuesday and Thursday.' }),
+    ULT_REAR_FLY(),
     s(X.hammer, 2, '10-12', 30, { ss: 'B', drop: true }),
     s(X.ohExt, 2, '10-12', 90, { ss: 'B', drop: true, note: 'Long-head focus: full stretch behind the head, elbows stay pointed forward.' })
   ]),
@@ -550,7 +551,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     id: 'ultimate-5',
     // 2 (2026-11-08): chest-supported T-bar row instead of the iso-lateral row on Upper A
     // 3 (2026-11-08): Thursday is Upper C (dips, pullover, press, fly); arm supersets on all three upper days
-    version: 3,
+    // 4 (2026-11-09): Upper A gets a chest fly and a cable curl (no Bayesian), full rest on pull-ups; its rear fly moves to Upper B
+    version: 4,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about 50-55 minutes a day. Chest, back and arms three times a week (heavy presses and rows early in the week, dips and isolation on Thursday), legs twice, forearms twice.',
