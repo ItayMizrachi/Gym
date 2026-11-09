@@ -270,10 +270,11 @@ const W = {
   ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
     s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine. Also warms the chest, shoulders and elbows up for the dips.' }),
+    // chest and back take turns, never two of the same in a row
+    s(X.closeRow, 2, '8-12', 150),
     s(X.wDip, 2, '6-10', 180, {
       note: 'Weighted dips on Tuesday only, never on a weighted pull-up day. Parallel bars preferred; the seated dip machine if the bars are taken or shoulders feel off. Slight forward lean, deep but pain-free.'
     }),
-    s(X.closeRow, 2, '8-12', 150),
     s(X.straightArm, 2, '12-15', 90, { drop: true, note: 'Lats in the stretch; elbows soft and fixed. The vertical-pull work of the day.' }),
     s(X.cableLateral, 2, '12-15', 90, { note: 'Cable or dumbbell. Side delts on Sunday, Tuesday and Thursday.' }),
     ULT_REAR_FLY(),
@@ -561,7 +562,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 5 (2026-11-09): calves standing on Lower A, seated on Lower B, each followed by 2 single-leg bodyweight sets to failure
     // 6 (2026-11-09): weighted pull-ups Sun + Thu, weighted dips Tue after the chest press; pullover to Tue, incline DB to Thu, Thursday's forearms to Lower B
     // 7 (2026-11-09): Upper A rows on the T-bar before the chest fly
-    version: 7,
+    // 8 (2026-11-09): Upper B alternates chest and back (press, row, dips, pullover)
+    version: 8,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
