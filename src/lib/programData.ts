@@ -246,7 +246,7 @@ const W = {
     ULT_GENERAL(),
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 240, { note: 'Rest fully between the two sets (nothing in between): the second set should be nearly as good as the first.' }),
-    s(X.inclineMachine, 2, '6-10', 180),
+    s(X.inclineMachine, 2, '6-10', 150),
     s(X.tbarRow, 2, '8-10', 150, {
       note: 'Heavy and stable: easy to add weight week to week. The iso-lateral row if the T-bar is taken. After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
     }),
@@ -269,7 +269,7 @@ const W = {
   ]),
   ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
-    s(X.chestPress, 2, '6-10', 180, { note: 'Bench press machine. Also warms the chest, shoulders and elbows up for the dips.' }),
+    s(X.chestPress, 2, '6-10', 150, { note: 'Bench press machine. Also warms the chest, shoulders and elbows up for the dips.' }),
     // chest and back take turns, never two of the same in a row
     s(X.closeRow, 2, '8-12', 150),
     s(X.wDip, 2, '6-10', 180, {
@@ -564,7 +564,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 7 (2026-11-09): Upper A rows on the T-bar before the chest fly
     // 8 (2026-11-09): Upper B alternates chest and back (press, row, dips, pullover)
     // 9 (2026-11-09): Upper C does the chest fly before the shoulder press
-    version: 9,
+    // 10 (2026-11-09): chest presses rest 2:30 instead of 3:00
+    version: 10,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
