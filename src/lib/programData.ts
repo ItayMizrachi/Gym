@@ -247,10 +247,10 @@ const W = {
     ULT_WARMUP(),
     s(X.wPullUp, 2, '6-8', 240, { note: 'Rest fully between the two sets (nothing in between): the second set should be nearly as good as the first.' }),
     s(X.inclineMachine, 2, '6-10', 180),
-    s(X.chestFly, 2, '10-15', 90, { drop: true, note: 'Second chest lift of the day: full stretch, squeeze at the middle.' }),
     s(X.tbarRow, 2, '8-10', 150, {
       note: 'Heavy and stable: easy to add weight week to week. The iso-lateral row if the T-bar is taken. After failure on the last set: shrugs to failure (15-25 reps) for the upper traps.'
     }),
+    s(X.chestFly, 2, '10-15', 90, { drop: true, note: 'Second chest lift of the day: full stretch, squeeze at the middle.' }),
     ULT_LATERAL(),
     s(X.cableCurl, 2, '10-12', 30, { ss: 'A', drop: true }),
     s(X.pushdown, 2, '10-12', 90, { ss: 'A', drop: true })
@@ -560,7 +560,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 4 (2026-11-09): Upper A gets a chest fly and a cable curl (no Bayesian), full rest on pull-ups; its rear fly moves to Upper B
     // 5 (2026-11-09): calves standing on Lower A, seated on Lower B, each followed by 2 single-leg bodyweight sets to failure
     // 6 (2026-11-09): weighted pull-ups Sun + Thu, weighted dips Tue after the chest press; pullover to Tue, incline DB to Thu, Thursday's forearms to Lower B
-    version: 6,
+    // 7 (2026-11-09): Upper A rows on the T-bar before the chest fly
+    version: 7,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
