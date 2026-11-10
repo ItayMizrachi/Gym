@@ -269,9 +269,7 @@ const W = {
   ]),
   ult5UpperB: wo('Upper B', 'Chest and back, biceps and triceps. 2 working sets per lift; about 60 min.', [
     ULT_GENERAL(),
-    s(X.chestPress, 2, '6-10', 150, {
-      note: 'The lying, plate-loaded chest press (small jumps, deep stretch); the seated pin machine only if it is taken. Also warms the chest, shoulders and elbows up for the dips.'
-    }),
+    s(X.chestPress, 2, '6-10', 150, { note: 'Also warms the chest, shoulders and elbows up for the dips.' }),
     // chest and back take turns, never two of the same in a row
     s(X.closeRow, 2, '8-12', 150),
     s(X.wDip, 2, '6-10', 180, {
@@ -568,7 +566,8 @@ export const WEEKLY_PROGRAMS: Program[] = [
     // 9 (2026-11-09): Upper C does the chest fly before the shoulder press
     // 10 (2026-11-09): chest presses rest 2:30 instead of 3:00
     // 11 (2026-11-10): Tuesday's chest press is the lying plate-loaded machine (seated pin machine only if taken)
-    version: 11,
+    // 12 (2026-11-10): that machine note is gone again (the owner keeps it to the two-machine button)
+    version: 12,
     name: 'The Ultimate 5-Day Plan',
     description:
       'Upper / lower from Sunday to Thursday, about an hour a day. Chest, back and arms three times a week: weighted pull-ups on Sunday and Thursday, weighted dips on Tuesday (never on the same day). Legs and forearms twice a week.',
