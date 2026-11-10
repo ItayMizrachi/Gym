@@ -13,6 +13,9 @@
   padding: calc(var(--safe-t) + 18px) 16px 8px;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
+  /* own layer too: on iPhone the sticky header slipped off the top during a fast scroll */
+  transform: translateZ(0);
+  will-change: transform;
 }
 .sp-row { display: flex; align-items: center; gap: var(--s2); }
 .btn.sp-finish { padding: 0 14px; font-size: 16px; min-height: 44px; }
@@ -53,6 +56,9 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  /* its own layer, like the tab bar: on iPhone the fixed rest player lagged behind a fast scroll and floated mid-screen */
+  transform: translateZ(0);
+  will-change: transform;
 }
 .rp.full { bottom: calc(var(--safe-b) + 12px); }
 .rp.done { background: #16261d; border-color: #2b5a41; }
