@@ -9,6 +9,7 @@ import { SuggestedExercises } from '../components/SuggestedExercises'
 import { CoachSettings } from '../components/CoachSettings'
 import '../styles/library.css'
 import { useStore } from '../lib/store'
+import { DRIFT_KEY } from '../lib/keyboard'
 import { buildStarterPlan } from '../lib/seed'
 import { DB, emptyDB } from '../lib/types'
 import { Confirm, PageHeader, Toggle } from '../components/ui'
@@ -369,7 +370,9 @@ function ScreenInfo() {
       `100vh+safe ${Math.round(vh)}`,
       `scroller ${Math.round(sc?.top ?? -1)}-${Math.round(sc?.bottom ?? -1)}`,
       `nav ${Math.round(nav?.top ?? -1)}-${Math.round(nav?.bottom ?? -1)}`,
-      `standalone ${(navigator as Navigator & { standalone?: boolean }).standalone ?? matchMedia('(display-mode: standalone)').matches}`
+      `standalone ${(navigator as Navigator & { standalone?: boolean }).standalone ?? matchMedia('(display-mode: standalone)').matches}`,
+      `vvTop ${Math.round(visualViewport?.offsetTop ?? 0)}`,
+      `drift ${localStorage.getItem(DRIFT_KEY) ?? 'none'}`
     ].join(' · ')
   }
   return (

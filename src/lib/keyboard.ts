@@ -12,6 +12,9 @@ function isField(el: Element | null): el is HTMLElement {
   return (el as HTMLElement).isContentEditable
 }
 
+/** largest fixed-layer drift seen on this device (see pin() below) */
+export const DRIFT_KEY = 'gymlog:drift'
+
 export function installKeyboardHelpers() {
   let y0: number | null = null
   document.addEventListener(
@@ -49,6 +52,50 @@ export function installKeyboardHelpers() {
     // page (on iPhone that made scrolling stutter and the header and tab bar lag behind)
     if (vvh !== last.vvh) root.setProperty('--vvh', (last.vvh = vvh))
     if (kb !== last.kb) root.setProperty('--kb', (last.kb = kb))
+    pin(typing)
+  }
+
+  /*
+   * iPhone (installed app, iOS 26) sometimes slides the whole fixed layer up while the page scrolls: the rest
+   * player and the number pad float mid-screen and the sticky header leaves the top. The visual viewport says
+   * by how much, so the pinned pieces are moved back by that amount. Written on the elements themselves (not a
+   * root variable, which would restyle the page on every scroll frame), and only when the amount changes.
+   */
+  const PINNED_BOTTOM = '.rp, .kp, .nav'
+  const PINNED_TOP = '.sp-head'
+  // how much taller the visible area is than the layout viewport when nothing is wrong (62px on the owner's phone)
+  const base = vv.height - window.innerHeight
+  const shown = { top: 0, bottom: 0 }
+  const pin = (typing: boolean) => {
+    const top = typing ? 0 : Math.max(0, Math.round(vv.offsetTop))
+    const bottom = typing ? 0 : Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
+    if (top > shown.top || bottom > shown.bottom) noteDrift(top, bottom)
+    if (top === shown.top && bottom === shown.bottom && !top && !bottom) return
+    shown.top = top
+    shown.bottom = bottom
+    document.querySelectorAll<HTMLElement>(PINNED_TOP).forEach((el) => (el.style.translate = top ? `0 ${top}px` : ''))
+    document.querySelectorAll<HTMLElement>(PINNED_BOTTOM).forEach((el) => (el.style.translate = bottom ? `0 ${bottom}px` : ''))
+  }
+  /** the largest drift seen, for Settings → 5 taps on "GymLog" (so a report from the phone carries numbers) */
+  const noteDrift = (top: number, bottom: number) => {
+    try {
+      const was = JSON.parse(localStorage.getItem(DRIFT_KEY) ?? '{}')
+      if (top <= (was.top ?? 0) && bottom <= (was.bottom ?? 0)) return
+      localStorage.setItem(
+        DRIFT_KEY,
+        JSON.stringify({
+          top: Math.max(top, was.top ?? 0),
+          bottom: Math.max(bottom, was.bottom ?? 0),
+          inner: window.innerHeight,
+          vvh: Math.round(vv.height),
+          vvTop: Math.round(vv.offsetTop),
+          base: Math.round(base),
+          at: new Date().toISOString().slice(0, 16)
+        })
+      )
+    } catch {
+      /* ignore */
+    }
   }
   vv.addEventListener('resize', sync)
   vv.addEventListener('scroll', sync)
