@@ -13,7 +13,7 @@ function isField(el: Element | null): el is HTMLElement {
 }
 
 /** largest fixed-layer drift seen on this device (see pin() below) */
-export const DRIFT_KEY = 'gymlog:drift'
+export const DRIFT_KEY = 'gymlog:drift2'
 
 export function installKeyboardHelpers() {
   let y0: number | null = null
@@ -67,8 +67,12 @@ export function installKeyboardHelpers() {
   const base = vv.height - window.innerHeight
   const shown = { top: 0, bottom: 0 }
   const pin = (typing: boolean) => {
-    const top = typing ? 0 : Math.max(0, Math.round(vv.offsetTop))
-    const bottom = typing ? 0 : Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
+    // not while the page is pulled past its end (rubber band): iPhone reports an offset then too, but the fixed
+    // pieces are in place, and moving them sent the header and the rest player down the screen
+    const max = document.documentElement.scrollHeight - window.innerHeight
+    const off = typing || window.scrollY < -1 || window.scrollY > max + 1
+    const top = off ? 0 : Math.max(0, Math.round(vv.offsetTop))
+    const bottom = off ? 0 : Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
     if (top > shown.top || bottom > shown.bottom) noteDrift(top, bottom)
     if (top === shown.top && bottom === shown.bottom && !top && !bottom) return
     shown.top = top
@@ -99,6 +103,8 @@ export function installKeyboardHelpers() {
   }
   vv.addEventListener('resize', sync)
   vv.addEventListener('scroll', sync)
+  // the pull past the end is over once the page stops: look again then
+  window.addEventListener('scrollend', sync)
   // the keyboard opens and closes a moment after focus moves: check right away and again once it has settled
   const later = () => {
     sync()
