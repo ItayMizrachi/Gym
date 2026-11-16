@@ -31,6 +31,7 @@ export function buildSessionExercise(
     drop_last: boolean
     note: string
     warmup?: boolean
+    warmup_sets?: number
   },
   excludeSessionId?: string,
   increment = getPrefs().increment
@@ -55,6 +56,18 @@ export function buildSessionExercise(
     const base = rows[rows.length - 1].weight
     rows.push(newSet('drop', lastDrop ? lastDrop.weight : roundTo(base * 0.75, 0.5)))
   }
+  // the plan's warm-up sets come first, with last time's warm-up weights and reps (else a ladder up to the first work set)
+  const warmN = Math.max(0, cfg.warmup_sets ?? 0)
+  if (warmN > 0) {
+    const lastWarm = last?.sets.filter((s) => s.kind === 'warmup') ?? []
+    const first = rows[0]?.weight ?? cfg.weight
+    const warm = Array.from({ length: warmN }, (_, i) => {
+      const ref = lastWarm[i]
+      const s = newSet('warmup', ref ? ref.weight : roundTo(first * warmupShare(i, warmN), 0.5))
+      return ref?.reps != null ? { ...s, reps: ref.reps } : s
+    })
+    rows.unshift(...warm)
+  }
   return {
     exercise_id: exercise.id,
     name: exercise.name,
@@ -66,6 +79,13 @@ export function buildSessionExercise(
     sets: rows,
     progression
   }
+}
+
+/** Share of the first work weight for warm-up set i of n: 75% alone, 50% then 75% for two, 40% → 80% for more. */
+export function warmupShare(i: number, n: number): number {
+  if (n <= 1) return 0.75
+  if (n === 2) return i === 0 ? 0.5 : 0.75
+  return 0.4 + (0.4 * i) / (n - 1)
 }
 
 /** Undo (or re-apply) the suggested weight increase on the sets that are not logged yet. */
@@ -90,6 +110,8 @@ export function startSessionFromWorkout(workout: Workout): string {
     exercises.push(buildSessionExercise(db, ex, we))
   }
   if (getPrefs().autoWarmup) withAutoWarmups(exercises, db.exercises, (se, ex) => addWarmupSets(se, ex))
+  // remember the warm-ups each exercise started with, so finishing can tell warm-ups the lifter added or removed
+  exercises.forEach((se, i) => (exercises[i] = { ...se, plan_warmups: se.sets.filter((s) => s.kind === 'warmup').length }))
   const session: Session = {
     id: uid(),
     user_id: userId(),

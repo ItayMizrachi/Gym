@@ -59,6 +59,8 @@ export interface WorkoutExercise {
   note: string
   /** warm-up only: every set is a warm-up set (not counted for records, volume or progression) */
   warmup?: boolean
+  /** warm-up sets before the work sets (saved from a workout via "update the plan"); weights and reps come from last time */
+  warmup_sets?: number
 }
 
 export interface SessionSet {
@@ -87,6 +89,8 @@ export interface SessionExercise {
   progression?: Progression | null
   /** which of two machines (Exercise.machines): '' or missing = machine 1, '2' = machine 2 */
   machine?: string
+  /** warm-up sets it started with (from the plan or automatic); missing on older sessions */
+  plan_warmups?: number
 }
 
 export interface Session {

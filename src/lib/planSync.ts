@@ -12,7 +12,14 @@ import { uid } from './uid'
 const mainSets = (e: SessionExercise) => e.sets.filter((s) => s.kind === 'work' || s.kind === 'failure').length
 const hasDrop = (e: SessionExercise) => e.sets.some((s) => s.kind === 'drop')
 /** sets that match the plan row's count: warm-ups for a warm-up-only row, work sets otherwise */
-const planSets = (e: SessionExercise, we: Pick<WorkoutExercise, 'warmup'> | null) => (we?.warmup ? e.sets.filter((s) => s.kind === 'warmup').length : mainSets(e))
+const planSets = (e: SessionExercise, we: Pick<WorkoutExercise, 'warmup'> | null) => (we?.warmup ? warmSets(e) : mainSets(e))
+const warmSets = (e: SessionExercise) => e.sets.filter((s) => s.kind === 'warmup').length
+/**
+ * Warm-ups the lifter added or removed during the workout (compared with what it started with, so automatic
+ * warm-ups alone are not a change). Older sessions do not know what they started with: no change.
+ */
+const warmChanged = (e: SessionExercise, we: Pick<WorkoutExercise, 'warmup'> | null) =>
+  !we?.warmup && e.plan_warmups != null && warmSets(e) !== e.plan_warmups
 
 /** Pair each session exercise with a plan row of the same exercise (in order, each row used once). */
 function match(session: Session, wes: WorkoutExercise[]) {
@@ -39,6 +46,10 @@ export function planChanges(session: Session, wes: WorkoutExercise[], nameOf: (e
     }
     const n = Math.max(1, planSets(e, we))
     if (n !== we.sets) out.push(`${e.name}: ${n} sets instead of ${we.sets}`)
+    if (warmChanged(e, we)) {
+      const w = warmSets(e)
+      out.push(`${e.name}: ${w ? `${w} warm-up set${w === 1 ? '' : 's'}` : 'no warm-up sets'}`)
+    }
     if (hasDrop(e) !== we.drop_last) out.push(`${e.name}: ${hasDrop(e) ? 'drop set added' : 'no drop set'}`)
     if (e.rest_sec !== we.rest_sec) out.push(`${e.name}: rest ${fmtRest(e.rest_sec)} instead of ${fmtRest(we.rest_sec)}`)
     if ((e.superset || '') !== (we.superset || '')) out.push(`${e.name}: ${e.superset ? `superset ${e.superset}` : 'no superset'}`)
@@ -56,7 +67,9 @@ export function planUpdate(session: Session, wes: WorkoutExercise[], workoutId: 
   const { pairs, removed } = match(session, wes)
   const save = pairs.map(({ e, we }, position): WorkoutExercise => {
     const firstWork = e.sets.find((s) => s.kind === 'work' || s.kind === 'failure')
-    return {
+    // an added exercise with warm-up sets only (light pulldowns before pull ups) becomes a warm-up row
+    const warmOnly = !we && mainSets(e) === 0 && warmSets(e) > 0
+    const row = {
       ...(we ?? {
         id: uid(),
         user_id: userId,
@@ -65,14 +78,18 @@ export function planUpdate(session: Session, wes: WorkoutExercise[], workoutId: 
         rep_min: e.rep_min,
         rep_max: e.rep_max,
         weight: firstWork?.weight ?? 0,
-        note: ''
+        note: '',
+        ...(warmOnly ? { warmup: true } : {})
       }),
       position,
-      sets: Math.max(1, planSets(e, we)),
+      sets: Math.max(1, warmOnly ? warmSets(e) : planSets(e, we)),
       drop_last: hasDrop(e),
       rest_sec: e.rest_sec,
       superset: e.superset || ''
     } as WorkoutExercise
+    // warm-ups before the work sets: kept when the lifter added or removed some, or on a newly added exercise
+    if (!row.warmup && (warmChanged(e, we) || (!we && warmSets(e) > 0))) row.warmup_sets = warmSets(e)
+    return row
   })
   return { save, remove: removed.map((w) => w.id) }
 }

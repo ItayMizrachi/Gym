@@ -71,6 +71,32 @@ describe('planUpdate', () => {
   })
 })
 
+describe('warm-up sets and the plan', () => {
+  it('warm-ups the lifter added are a plan change and are saved on the row', () => {
+    const s = session([se('a', ['warmup', 'warmup', 'work', 'work', 'work'], { plan_warmups: 0 }), se('b', ['work', 'work', 'work'], { plan_warmups: 0 })])
+    expect(planChanges(s, plan, name)).toEqual(['A: 2 warm-up sets'])
+    const { save } = planUpdate(s, plan, 'w', 'u')
+    expect(save.map((r) => [r.exercise_id, r.sets, r.warmup_sets])).toEqual([
+      ['a', 3, 2],
+      ['b', 3, undefined]
+    ])
+  })
+  it('automatic warm-ups alone are not a change; removing planned ones is', () => {
+    const auto = session([se('a', ['warmup', 'work', 'work', 'work'], { plan_warmups: 1 }), se('b', ['work', 'work', 'work'], { plan_warmups: 0 })])
+    expect(planChanges(auto, plan, name)).toEqual([])
+    const fewer = session([se('a', ['work', 'work', 'work'], { plan_warmups: 2 }), se('b', ['work', 'work', 'work'], { plan_warmups: 0 })])
+    const rows = [we('1', 'a', 0, { warmup_sets: 2 }), we('2', 'b', 1)]
+    expect(planChanges(fewer, rows, name)).toEqual(['A: no warm-up sets'])
+    expect(planUpdate(fewer, rows, 'w', 'u').save[0].warmup_sets).toBe(0)
+  })
+  it('an added exercise with warm-ups only becomes a warm-up row with that many sets', () => {
+    const s = session([se('lat', ['warmup', 'warmup', 'warmup']), se('a', ['work', 'work', 'work'], { plan_warmups: 0 }), se('b', ['work', 'work', 'work'], { plan_warmups: 0 })])
+    expect(planChanges(s, plan, name)).toEqual(['Added LAT'])
+    const lat = planUpdate(s, plan, 'w', 'u').save[0]
+    expect([lat.exercise_id, lat.warmup, lat.sets, lat.warmup_sets]).toEqual(['lat', true, 3, undefined])
+  })
+})
+
 describe('workoutFromSession', () => {
   it('keeps order, work sets, the rep range done and drops warm-up-only exercises', async () => {
     const { workoutFromSession } = await import('./planSync')

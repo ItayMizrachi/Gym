@@ -656,3 +656,9 @@ create extension if not exists pg_cron;
 
 grant select, insert, update, delete on public.push_subs, public.rest_pushes to authenticated, service_role;
 notify pgrst, 'reload schema';
+
+-- 2026-11-16: warm-up sets before a plan row's work sets, saved from a workout via "update the plan"
+-- (their weights and reps come from last time).
+alter table public.workout_exercises add column if not exists warmup_sets integer;
+
+notify pgrst, 'reload schema';
