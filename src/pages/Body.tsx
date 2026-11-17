@@ -300,8 +300,16 @@ export default function Body() {
 
       <MeasuresCard metrics={metrics} onLog={() => setEditing('measures')} />
 
-      {/* before / after opens from the gallery's Compare; Body itself stays short */}
-      {withPhotos.length >= 2 && compareIds && <PhotoCompare photos={withPhotos} all={metrics} initial={compareIds} onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))} />}
+      {/* before / after: first and latest photo by default (or the two picked in the gallery's Compare) */}
+      {withPhotos.length >= 2 && (
+        <PhotoCompare
+          key={compareIds?.join() ?? 'default'}
+          photos={withPhotos}
+          all={metrics}
+          initial={compareIds}
+          onOpen={(m) => setViewing(newestFirst.findIndex((x) => x.id === m.id))}
+        />
+      )}
       {withPhotos.length > 0 && (
         <section>
           <div className="section-label">

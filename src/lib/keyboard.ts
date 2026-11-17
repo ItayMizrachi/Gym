@@ -84,9 +84,10 @@ export function installKeyboardHelpers() {
    * the fixed layer (rest player, header) floats until the next scroll. Scrolling to where the page already is
    * makes iPhone settle the viewport and draw the fixed pieces in place again.
    */
-  const settle = () => {
+  const settle = (always = false) => {
     if (isField(document.activeElement)) return
-    if (Math.abs(vv.offsetTop) < 1 && Math.abs(vv.height - window.innerHeight - base) < 1) return
+    // after the keyboard, always: the phone does not always report the shift (videos 2026-11-17)
+    if (!always && Math.abs(vv.offsetTop) < 1 && Math.abs(vv.height - window.innerHeight - base) < 1) return
     window.scrollTo(window.scrollX, window.scrollY)
   }
   /** the largest drift seen, for Settings → 5 taps on "GymLog" (so a report from the phone carries numbers) */
@@ -125,9 +126,9 @@ export function installKeyboardHelpers() {
   }
   const closed = () => {
     later()
-    setTimeout(settle, 80)
-    setTimeout(settle, 400)
-    setTimeout(settle, 800)
+    setTimeout(() => settle(true), 80)
+    setTimeout(() => settle(true), 400)
+    setTimeout(() => settle(true), 800)
   }
   document.addEventListener('focusin', later)
   document.addEventListener('focusout', closed)
