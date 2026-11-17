@@ -57,28 +57,37 @@ export function installKeyboardHelpers() {
 
   /*
    * iPhone (installed app, iOS 26) sometimes slides the whole fixed layer up while the page scrolls: the rest
-   * player and the number pad float mid-screen and the sticky header leaves the top. The visual viewport says
-   * by how much, so the pinned pieces are moved back by that amount. Written on the elements themselves (not a
-   * root variable, which would restyle the page on every scroll frame), and only when the amount changes.
+   * player and the number pad float mid-screen and the sticky header leaves the top.
    */
-  const PINNED_BOTTOM = '.rp, .kp, .nav'
-  const PINNED_TOP = '.sp-head'
   // how much taller the visible area is than the layout viewport when nothing is wrong (62px on the owner's phone)
   const base = vv.height - window.innerHeight
   const shown = { top: 0, bottom: 0 }
+  /*
+   * Moving the pieces back by what the visual viewport reports (deployed 2026-11-14) made things worse on the
+   * phone: right after the keyboard closed, and while the page was pulled past its end, iPhone still reports
+   * an offset although the fixed pieces are in place, so the header slid down the screen. Now it only records
+   * the drift (Settings → 5 taps on "GymLog"); the fix for the keyboard case is settle() below.
+   */
   const pin = (typing: boolean) => {
-    // not while the page is pulled past its end (rubber band): iPhone reports an offset then too, but the fixed
-    // pieces are in place, and moving them sent the header and the rest player down the screen
     const max = document.documentElement.scrollHeight - window.innerHeight
-    const off = typing || window.scrollY < -1 || window.scrollY > max + 1
-    const top = off ? 0 : Math.max(0, Math.round(vv.offsetTop))
-    const bottom = off ? 0 : Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
-    if (top > shown.top || bottom > shown.bottom) noteDrift(top, bottom)
-    if (top === shown.top && bottom === shown.bottom && !top && !bottom) return
-    shown.top = top
-    shown.bottom = bottom
-    document.querySelectorAll<HTMLElement>(PINNED_TOP).forEach((el) => (el.style.translate = top ? `0 ${top}px` : ''))
-    document.querySelectorAll<HTMLElement>(PINNED_BOTTOM).forEach((el) => (el.style.translate = bottom ? `0 ${bottom}px` : ''))
+    if (typing || window.scrollY < -1 || window.scrollY > max + 1) return
+    const top = Math.max(0, Math.round(vv.offsetTop))
+    const bottom = Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
+    if (top > shown.top || bottom > shown.bottom) {
+      shown.top = Math.max(top, shown.top)
+      shown.bottom = Math.max(bottom, shown.bottom)
+      noteDrift(top, bottom)
+    }
+  }
+  /*
+   * After the iPhone keyboard closes, the visual viewport can stay shifted by part of the keyboard's height and
+   * the fixed layer (rest player, header) floats until the next scroll. Scrolling to where the page already is
+   * makes iPhone settle the viewport and draw the fixed pieces in place again.
+   */
+  const settle = () => {
+    if (isField(document.activeElement)) return
+    if (Math.abs(vv.offsetTop) < 1 && Math.abs(vv.height - window.innerHeight - base) < 1) return
+    window.scrollTo(window.scrollX, window.scrollY)
   }
   /** the largest drift seen, for Settings → 5 taps on "GymLog" (so a report from the phone carries numbers) */
   const noteDrift = (top: number, bottom: number) => {
@@ -104,14 +113,23 @@ export function installKeyboardHelpers() {
   vv.addEventListener('resize', sync)
   vv.addEventListener('scroll', sync)
   // the pull past the end is over once the page stops: look again then
-  window.addEventListener('scrollend', sync)
+  window.addEventListener('scrollend', () => {
+    sync()
+    settle()
+  })
   // the keyboard opens and closes a moment after focus moves: check right away and again once it has settled
   const later = () => {
     sync()
     setTimeout(sync, 120)
     setTimeout(sync, 450)
   }
+  const closed = () => {
+    later()
+    setTimeout(settle, 80)
+    setTimeout(settle, 400)
+    setTimeout(settle, 800)
+  }
   document.addEventListener('focusin', later)
-  document.addEventListener('focusout', later)
+  document.addEventListener('focusout', closed)
   sync()
 }
