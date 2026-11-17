@@ -11,10 +11,30 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
-/* Body shows one row: three photos on a phone, five on a tablet */
-@media (max-width: 639px) {
-  .ph-grid.preview > :nth-child(n + 4) {
-    display: none;
+/* Body: one row that scrolls sideways with the finger, edge to edge, snapping to a photo */
+.ph-strip {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-inline: calc(-1 * var(--s4));
+  padding-inline: var(--s4);
+  scroll-padding-inline: var(--s4);
+}
+.ph-strip::-webkit-scrollbar {
+  display: none;
+}
+.ph-strip > .ph-tile {
+  /* three and a bit on a phone, so the next photo shows there is more */
+  flex: 0 0 calc((100% - 8px) / 3.25);
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) {
+  .ph-strip > .ph-tile {
+    flex-basis: calc((100% - 16px) / 5.25);
   }
 }
 .ph-tile {

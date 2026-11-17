@@ -316,8 +316,9 @@ export default function Body() {
             <span>{tr("Photos")}</span>
             <span className="count">{withPhotos.length}</span>
           </div>
-          <div className="ph-grid preview">
-            {newestFirst.slice(0, 5).map((m, i) => (
+          {/* a carousel: swipe sideways for older photos; the next one peeks in at the edge */}
+          <div className="ph-strip">
+            {newestFirst.slice(0, 30).map((m, i) => (
               <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
             ))}
           </div>
