@@ -168,7 +168,7 @@ export function ImageField({
 
 /** Bottom sheet with a drag handle: drag it down (or tap the backdrop) to close. */
 /**
- * Freeze the page behind a sheet. overflow:hidden alone does not stop iOS Safari, so while a sheet is
+ * Freeze the page behind a sheet: while a sheet is
  * open any touch drag outside a sheet, or on a sheet with nothing to scroll, is cancelled; the sheet's
  * own scrolling stays (overscroll-behavior keeps it from chaining to the page). The body is not pinned
  * with position:fixed: in the installed iOS app that cut the sheet short of the bottom of the screen.
@@ -190,17 +190,27 @@ function blockTouch(e: TouchEvent) {
   const sheet = target?.closest?.('.sheet')
   if (!sheet || !canScroll(target, sheet)) e.preventDefault()
 }
+/** mouse wheel / trackpad: the same rule as touch (only a sheet's own scrolling moves) */
+function blockWheel(e: WheelEvent) {
+  const target = e.target as Element | null
+  const sheet = target?.closest?.('.sheet')
+  if (!sheet || !canScroll(target, sheet)) e.preventDefault()
+}
+/*
+ * No overflow:hidden on the page any more (2026-11-19): on the installed iPhone app, switching the page's
+ * overflow while it was scrolled shifted the layer the fixed pieces sit on (tab bar, rest player, number pad,
+ * workout header) and it did not always come back when the sheet closed, so they floated mid-screen. Blocking
+ * the touch and wheel events is enough to keep the page still behind a sheet.
+ */
 export function lockScroll() {
   if (locks++ === 0) {
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
     document.addEventListener('touchmove', blockTouch, { passive: false })
+    document.addEventListener('wheel', blockWheel, { passive: false })
   }
   return () => {
     if (--locks > 0) return
-    document.documentElement.style.overflow = ''
-    document.body.style.overflow = ''
     document.removeEventListener('touchmove', blockTouch)
+    document.removeEventListener('wheel', blockWheel)
   }
 }
 

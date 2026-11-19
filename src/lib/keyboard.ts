@@ -13,7 +13,7 @@ function isField(el: Element | null): el is HTMLElement {
 }
 
 /** largest fixed-layer drift seen on this device (see pin() below) */
-export const DRIFT_KEY = 'gymlog:drift2'
+export const DRIFT_KEY = 'gymlog:drift3'
 
 export function installKeyboardHelpers() {
   let y0: number | null = null
@@ -73,10 +73,12 @@ export function installKeyboardHelpers() {
     if (typing || window.scrollY < -1 || window.scrollY > max + 1) return
     const top = Math.max(0, Math.round(vv.offsetTop))
     const bottom = Math.max(0, Math.round(vv.offsetTop + vv.height - window.innerHeight - base))
-    if (top > shown.top || bottom > shown.bottom) {
+    // also when the layout viewport got shorter than it has been (the phone kept part of the keyboard's height)
+    const short = Math.max(0, Math.round(tallest - window.innerHeight))
+    if (top > shown.top || bottom > shown.bottom || short > 4) {
       shown.top = Math.max(top, shown.top)
       shown.bottom = Math.max(bottom, shown.bottom)
-      noteDrift(top, bottom)
+      noteDrift(top, bottom, short)
     }
   }
   /*
@@ -132,15 +134,20 @@ export function installKeyboardHelpers() {
     if (shifted()) heal()
   }
   /** the largest drift seen, for Settings → 5 taps on "GymLog" (so a report from the phone carries numbers) */
-  const noteDrift = (top: number, bottom: number) => {
+  const noteDrift = (top: number, bottom: number, short = 0) => {
     try {
       const was = JSON.parse(localStorage.getItem(DRIFT_KEY) ?? '{}')
-      if (top <= (was.top ?? 0) && bottom <= (was.bottom ?? 0)) return
+      if (top <= (was.top ?? 0) && bottom <= (was.bottom ?? 0) && short <= (was.short ?? 0)) return
       localStorage.setItem(
         DRIFT_KEY,
         JSON.stringify({
           top: Math.max(top, was.top ?? 0),
           bottom: Math.max(bottom, was.bottom ?? 0),
+          short: Math.max(short, was.short ?? 0),
+          tallest: Math.round(tallest),
+          screen: window.screen?.height,
+          client: document.documentElement.clientHeight,
+          y: Math.round(window.scrollY),
           inner: window.innerHeight,
           vvh: Math.round(vv.height),
           vvTop: Math.round(vv.offsetTop),
