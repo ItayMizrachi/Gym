@@ -8,6 +8,7 @@ import { applyLang } from './lib/i18n'
 import '@fontsource-variable/inter/opsz.css'
 import './styles.css'
 import './styles/pwa.css'
+import './styles/premium-app.css'
 
 // New builds download in the background; UpdateBanner offers "Reload" (never on the workout screen).
 registerUpdates()

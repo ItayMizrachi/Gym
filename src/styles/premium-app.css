@@ -1,0 +1,55 @@
+/* ================= app-wide premium pass (2026-11-19) =================
+   The calm look of the live workout, everywhere: surfaces without outlines (the card colour on the graphite
+   background separates them), filled secondary buttons, quieter accents. Every rule starts with :root so it
+   wins over the older styles whatever order they load in. Remove the import in main.tsx to go back. */
+
+/* ---------- surfaces: no outlines ---------- */
+:root .card,
+:root .stat,
+:root .list-item,
+:root .list-group,
+:root .empty,
+:root .we-card,
+:root .tlist,
+:root .hlist,
+:root .hrow,
+:root .ms-section,
+:root .help-list,
+:root .pg-card,
+:root .pg-ex,
+:root .prof-link,
+:root .ach-tile,
+:root .ach-grid,
+:root .rec-list,
+:root .fp-card,
+:root .fp-opt,
+:root .coach-entry,
+:root .coach-stats > div,
+:root .lib-facts > div,
+:root .cr-row,
+:root .ro-row,
+:root .wu-row {
+  border-color: transparent;
+}
+
+/* ---------- buttons: secondary buttons are filled, no outline ---------- */
+:root .btn:not(.primary):not(.ghost):not(.danger) {
+  border-color: transparent;
+}
+:root .seg {
+  border-color: transparent;
+}
+
+/* ---------- History: the month report is a quiet card with a yellow icon, not a yellow block ---------- */
+:root .hist-report {
+  background: var(--card);
+  border-color: transparent;
+}
+
+/* ---------- toggles: iOS-like, a chalk knob on every state ---------- */
+:root .toggle { border-color: transparent; }
+:root .toggle.on { background: var(--accent); }
+:root .toggle.blue.on { background: var(--plate-blue); }
+:root .toggle::after { top: 4px; left: 4px; width: 23px; height: 23px; background: var(--text); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35); }
+:root .toggle.on::after,
+:root .toggle.blue.on::after { background: var(--text); }
