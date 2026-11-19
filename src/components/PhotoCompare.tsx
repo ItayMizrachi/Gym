@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { PHOTO_DROP, PhotoDropDetail } from './photoDrop'
 import { t as tr } from '../lib/i18n'
 import { ArrowLeftRight, Check, Columns2, Share2 } from 'lucide-react'
 import { useStore } from '../lib/store'
@@ -82,6 +83,22 @@ export function PhotoCompare({
     if (!r) return
     setPos(Math.min(100, Math.max(0, ((clientX - r.left) / r.width) * 100)))
   }
+
+  // a photo dragged here from the carousel replaces the one it was dropped on
+  useEffect(() => {
+    const onDrop = (e: Event) => {
+      const { id, side } = (e as CustomEvent<PhotoDropDetail>).detail
+      if (side === 'a') {
+        setAId(id)
+        setBId(b.id)
+      } else {
+        setAId(a.id)
+        setBId(id)
+      }
+    }
+    window.addEventListener(PHOTO_DROP, onDrop)
+    return () => window.removeEventListener(PHOTO_DROP, onDrop)
+  }, [a.id, b.id])
 
   const pickFrom = picking === 'a' ? a : b
   const pick = (m: Metric) => {

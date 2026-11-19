@@ -8,6 +8,7 @@ import { Confirm, Empty, ImageField, NumInput, PageHeader, Sheet, Thumb } from '
 import { fmtDate, fmtKg } from '../lib/format'
 import { nowIso, todayStr, uid } from '../lib/uid'
 import { PhotoCompare } from '../components/PhotoCompare'
+import { usePhotoDrag } from '../components/photoDrop'
 import { weightNear } from '../lib/photos'
 import { PhotoTile, PhotoViewer } from '../components/PhotoViewer'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -181,6 +182,8 @@ export default function Body() {
   }, [entries, range])
   const withPhotos = useMemo(() => metrics.filter((m) => m.photo_path).sort((a, b) => a.date.localeCompare(b.date)), [metrics])
   const newestFirst = useMemo(() => [...withPhotos].reverse(), [withPhotos])
+  // hold a photo in the carousel and drag it onto before / after to put it there
+  const stripRef = usePhotoDrag((i) => newestFirst[i]?.id, withPhotos.length >= 2)
   const all = useMemo(() => [...metrics].sort((a, b) => b.date.localeCompare(a.date)), [metrics])
 
   const cur = entries[entries.length - 1]
@@ -317,7 +320,7 @@ export default function Body() {
             <span className="count">{withPhotos.length}</span>
           </div>
           {/* a carousel: swipe sideways for older photos; the next one peeks in at the edge */}
-          <div className="ph-strip">
+          <div className="ph-strip" ref={stripRef}>
             {newestFirst.slice(0, 30).map((m, i) => (
               <PhotoTile key={m.id} m={m} onOpen={() => setViewing(i)} />
             ))}

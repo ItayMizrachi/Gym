@@ -393,3 +393,24 @@ span.pv-btn {
 .pc-line-sum .tnum { color: var(--text); font-weight: 600; }
 .pc-change { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin-top: -6px; }
 .pc-change .btn { color: var(--text-2); min-height: 40px; }
+
+/* ---------- drag a carousel photo onto before / after ---------- */
+.ph-strip .ph-tile { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.ph-strip .ph-tile img { -webkit-user-drag: none; pointer-events: none; }
+.ph-tile.ph-lifted { opacity: 0.35; }
+.ph-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  width: 80px;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  background: var(--card2) center / cover no-repeat;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+/* while a photo is being dragged, the comparison shows where it can go; the half under the finger lights up */
+.pc-frame.pc-drop-ready { outline: 2px dashed var(--accent-line); outline-offset: 3px; }
+.pc-drop-on { box-shadow: inset 0 0 0 3px var(--accent); }
+.pc-drop-on img { opacity: 0.6; }
