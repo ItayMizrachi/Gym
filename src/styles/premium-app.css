@@ -111,3 +111,7 @@
 :root .trow:not(.next) .trow-start-t { display: none; }
 :root .trow:not(.next) .btn.trow-start svg { margin-inline-start: 2px; }
 :root .trow .btn.trow-start { border-color: transparent; }
+
+/* ---------- workout summary: numbers lead, the label sits under them (as in the live workout header) ---------- */
+:root .hv-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; }
+:root .hv-stats .hv-l { color: var(--muted); font-size: 12px; }
