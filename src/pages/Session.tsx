@@ -565,7 +565,12 @@ function ExerciseCard({
   const plan = tracking !== 'time' && se.rep_min && se.rep_max ? t('{a}–{b} reps', { a: se.rep_min, b: se.rep_max }) : t(tracking === 'time' ? 'Timed' : 'Reps')
   const hasNotes = !!(se.note || lastNote || ex?.setup)
   const prog = se.progression
-  const doneLine = `${se.sets.length} ${se.sets.length === 1 ? 'set' : 'sets'} · ${se.sets.map((x) => setLabel(x, tracking)).join(' · ')}`
+  // a finished exercise folds to one quiet line: how many sets and the volume moved (or each set when there is no weight)
+  const doneVol = se.sets.reduce((a, x) => a + (x.kind === 'warmup' ? 0 : (x.weight || 0) * (x.reps || 0)), 0)
+  const doneLine =
+    tracking === 'weight_reps' && doneVol > 0
+      ? `${t(se.sets.length === 1 ? '{n} set' : '{n} sets', { n: se.sets.length })} · ${Math.round(doneVol).toLocaleString('en-US')} ${t('kg')}`
+      : `${t(se.sets.length === 1 ? '{n} set' : '{n} sets', { n: se.sets.length })} · ${se.sets.map((x) => setLabel(x, tracking)).join(' · ')}`
 
   return (
     <div
@@ -826,7 +831,10 @@ function ExerciseCard({
               {hintReps != null && nearTarget && !setLift && s.id === nextTodoId && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
-                    🏆 {hintReps} {hintReps === 1 ? 'rep' : 'reps'}{tracking === 'weight_reps' || s.weight > 0 ? ` at ${fmtKg(s.weight)} kg` : ''} = new PR
+                    🏆{' '}
+                    {tracking === 'weight_reps' || s.weight > 0
+                      ? t(hintReps === 1 ? '1 rep at {w} kg = new PR' : '{n} reps at {w} kg = new PR', { n: hintReps, w: fmtKg(s.weight) })
+                      : t(hintReps === 1 ? '1 rep = new PR' : '{n} reps = new PR', { n: hintReps })}
                   </div>
                 </div>
               )}

@@ -1,33 +1,33 @@
 /* ================= live workout, premium pass (2026-11-19) =================
    Calmer and more modern: fewer borders, the numbers lead, the next set is the one thing that stands out,
-   a slim rest player with an optional big timer. Loaded last on the workout screen; deleting this file's import
+   a slim rest player with an optional big timer. Every rule starts with :root so it wins over the older workout styles whatever order they load in; deleting this file's import
    (Session.tsx, Layout.tsx) brings back the previous look. Restore point: git tag before-workout-redesign. */
 
 /* ---------- header: a quiet line of numbers ---------- */
-.sp-head { border-bottom-color: transparent; box-shadow: 0 1px 0 var(--line); }
-.ls-map { border-color: transparent; background: transparent; }
-.ls-stat .v,
-.ls-stat .sp-clock { font-size: 21px; font-weight: 650; }
-.ls-stat .l { color: var(--faint); }
-.sp-progress { height: 3px; margin-top: 10px; }
+:root .sp-head { border-bottom-color: transparent; box-shadow: 0 1px 0 var(--line); }
+:root .ls-map { border-color: transparent; background: transparent; }
+:root .ls-stat .v,
+:root .ls-stat .sp-clock { font-size: 21px; font-weight: 650; }
+:root .ls-stat .l { color: var(--faint); }
+:root .sp-progress { height: 3px; margin-top: 10px; }
 
 /* ---------- exercise cards: no outline, space does the separating ---------- */
-.ex { border-color: transparent; background: var(--card); }
-.ex.current { border-color: transparent; }
+:root .ex { border-color: transparent; background: var(--card); }
+:root .ex.current { border-color: transparent; }
 /* the superset spine stays, thinner */
-.ex.ss { border-inline-start: 3px solid var(--plate-blue); }
-.ex.current.ss { border-inline-start-color: var(--plate-blue); }
-.ex .ex-name { font-size: 17px; letter-spacing: -0.01em; }
+:root .ex.ss { border-inline-start: 3px solid var(--plate-blue); }
+:root .ex.current.ss { border-inline-start-color: var(--plate-blue); }
+:root .ex .ex-name { font-size: 17px; letter-spacing: -0.01em; }
 /* rest under the name: plain muted text with its icon, not a chip */
-.ex-sum .ex-rest { background: none; border: 0; padding: 0 6px 0 2px; color: var(--muted); font-weight: 500; }
-.ex-sum .ex-rest svg { color: var(--faint); }
+:root .ex-sum .ex-rest { background: none; border: 0; padding: 0 6px 0 2px; color: var(--muted); font-weight: 500; }
+:root .ex-sum .ex-rest svg { color: var(--faint); }
 
 /* ---------- set table ---------- */
-.ex .sets { gap: 6px; }
-.ex .sets .set-row .hdr { font-size: 12px; font-weight: 500; color: var(--faint); }
-.ex .sets .set-row .hdr-btn { font-size: 12px; color: var(--faint); }
+:root .ex .sets { gap: 6px; }
+:root .ex .sets .set-row .hdr { font-size: 12px; font-weight: 500; color: var(--faint); }
+:root .ex .sets .set-row .hdr-btn { font-size: 12px; color: var(--faint); }
 /* the set number is plain text (W / D / F keep their plate colour); the circle is gone */
-.ex .kind {
+:root .ex .kind {
   border: 0;
   background: transparent;
   width: 40px;
@@ -38,21 +38,21 @@
   font-weight: 650;
   color: var(--text-2);
 }
-.ex .kind.warmup { border: 0; color: var(--muted); }
-.ex .kind.drop { color: var(--blue-text); }
-.ex .kind.failure { color: var(--danger-text); }
-.ex .set-row.done .kind,
-.ex .set-row.done .kind.warmup,
-.ex .set-row.done .kind.drop,
-.ex .set-row.done .kind.failure { background: transparent; }
-.ex .set-row.done .kind { color: var(--text); }
-.ex .set-row.done .kind.warmup { color: var(--text-2); }
-.ex .set-row.done .kind.drop { color: var(--blue-text); }
-.ex .set-row.done .kind.failure { color: var(--danger-text); }
-.ex .kind:active { background: var(--card2); }
+:root .ex .kind.warmup { border: 0; color: var(--muted); }
+:root .ex .kind.drop { color: var(--blue-text); }
+:root .ex .kind.failure { color: var(--danger-text); }
+:root .ex .set-row.done .kind,
+:root .ex .set-row.done .kind.warmup,
+:root .ex .set-row.done .kind.drop,
+:root .ex .set-row.done .kind.failure { background: transparent; }
+:root .ex .set-row.done .kind { color: var(--text); }
+:root .ex .set-row.done .kind.warmup { color: var(--text-2); }
+:root .ex .set-row.done .kind.drop { color: var(--blue-text); }
+:root .ex .set-row.done .kind.failure { color: var(--danger-text); }
+:root .ex .kind:active { background: var(--card2); }
 
 /* inputs: filled, no outline; numbers bigger */
-.ex .sets .set-row .num {
+:root .ex .sets .set-row .num {
   background: var(--bg2);
   border-color: transparent;
   font-family: var(--body);
@@ -60,33 +60,33 @@
   font-weight: 650;
   letter-spacing: -0.01em;
 }
-.ex .sets .set-row .num.active,
-.ex .sets .set-row .num:focus { border-color: var(--accent); background: var(--card2); }
-.ex .prev { font-size: 14px; color: var(--faint); }
-.ex .sets .set-row .check { background: var(--bg2); border-color: transparent; color: var(--faint); }
+:root .ex .sets .set-row .num.active,
+:root .ex .sets .set-row .num:focus { border-color: var(--accent); background: var(--card2); }
+:root .ex .prev { font-size: 14px; color: var(--faint); }
+:root .ex .sets .set-row .check { background: var(--bg2); border-color: transparent; color: var(--faint); }
 
 /* the next set to do: lifted a little, the check outlined in yellow */
-.ex .sets .set-row.next { background: var(--card2); }
-.ex .sets .set-row.next .num { background: var(--card3); }
-.ex .sets .set-row.next .prev { color: var(--muted); }
-.ex .sets .set-row.next .kind { color: var(--text); }
-.ex .sets .set-row.next .check { background: var(--card3); border-color: var(--accent-line); color: var(--accent); }
+:root .ex .sets .set-row.next { background: var(--card2); }
+:root .ex .sets .set-row.next .num { background: var(--card3); }
+:root .ex .sets .set-row.next .prev { color: var(--muted); }
+:root .ex .sets .set-row.next .kind { color: var(--text); }
+:root .ex .sets .set-row.next .check { background: var(--card3); border-color: var(--accent-line); color: var(--accent); }
 
 /* done: a green row, the numbers in chalk, a solid green check */
-.ex .sets .set-row.done { background: var(--ok-soft); }
-.ex .sets .set-row.done .num { background: transparent; color: var(--text); }
-.ex .sets .set-row.done .check { background: var(--ok); border-color: var(--ok); color: var(--ok-ink); }
+:root .ex .sets .set-row.done { background: var(--ok-soft); }
+:root .ex .sets .set-row.done .num { background: transparent; color: var(--text); }
+:root .ex .sets .set-row.done .check { background: var(--ok); border-color: var(--ok); color: var(--ok-ink); }
 
 /* Add set: quiet, centred */
-.wl-addrow .wl-addset { color: var(--muted); font-weight: 600; }
+:root .wl-addrow .wl-addset { color: var(--muted); font-weight: 600; }
 
 /* ---------- bottom of the workout ---------- */
 /* Add exercise: neutral with a yellow plus, so Finish stays the one yellow button */
-.btn.wl-addex { background: var(--card); border-color: transparent; color: var(--text); font-size: 16px; font-weight: 650; }
-.btn.wl-addex svg { color: var(--accent); }
+:root .btn.wl-addex { background: var(--card); border-color: transparent; color: var(--text); font-size: 16px; font-weight: 650; }
+:root .btn.wl-addex svg { color: var(--accent); }
 
 /* ---------- rest player: one slim line ---------- */
-.rp {
+:root .rp {
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   padding: 8px 8px 8px 8px;
@@ -94,7 +94,7 @@
   border-color: var(--line);
   background: var(--card2);
 }
-.rp-ring {
+:root .rp-ring {
   position: relative;
   width: 48px;
   height: 48px;
@@ -102,23 +102,23 @@
   padding: 0;
   border-radius: 50%;
 }
-.rp-ring svg { display: block; }
-.rp-ring circle { fill: none; stroke-width: 7; }
-.rp-ring .track { stroke: var(--line-strong); }
-.rp-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
-.rp.done .rp-ring .fill { stroke: var(--ok); }
-.rp-ring .rp-time { font-size: 14px; font-weight: 700; }
-.rp-ring:active { transform: scale(0.95); }
-.rp-title { font-size: 14px; font-weight: 650; white-space: nowrap; }
-.rp-label { margin-bottom: 0; margin-top: 1px; }
-.rp-ctrl { gap: 4px; }
-.rp-ctrl .btn { min-height: 40px; padding: 0 10px; border-radius: 12px; background: var(--card3); border-color: transparent; font-weight: 650; }
-.rp-ctrl .rp-skip span { display: none; }
-.rp-ctrl .rp-skip { padding: 0 12px; }
-.app.in-session.has-rest { padding-bottom: calc(var(--safe-b) + 110px); }
+:root .rp-ring svg { display: block; }
+:root .rp-ring circle { fill: none; stroke-width: 7; }
+:root .rp-ring .track { stroke: var(--line-strong); }
+:root .rp-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+:root .rp.done .rp-ring .fill { stroke: var(--ok); }
+:root .rp-ring .rp-time { font-size: 14px; font-weight: 700; }
+:root .rp-ring:active { transform: scale(0.95); }
+:root .rp-title { font-size: 14px; font-weight: 650; white-space: nowrap; }
+:root .rp-label { margin-bottom: 0; margin-top: 1px; }
+:root .rp-ctrl { gap: 4px; }
+:root .rp-ctrl .btn { min-height: 40px; padding: 0 10px; border-radius: 12px; background: var(--card3); border-color: transparent; font-weight: 650; }
+:root .rp-ctrl .rp-skip span { display: none; }
+:root .rp-ctrl .rp-skip { padding: 0 12px; }
+:root .app.in-session.has-rest { padding-bottom: calc(var(--safe-b) + 110px); }
 
 /* big timer: the whole screen, a large ring, big buttons in the thumb zone */
-.rp-big {
+:root .rp-big {
   position: fixed;
   inset: 0;
   z-index: 70;
@@ -129,30 +129,34 @@
   padding: calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 16px);
   animation: fade 0.2s ease-out;
 }
-.rp-big-in { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.rp-big-ring { position: relative; width: min(260px, 72vw); aspect-ratio: 1; }
-.rp-big-ring svg { width: 100%; height: 100%; display: block; }
-.rp-big-ring circle { fill: none; stroke-width: 4; }
-.rp-big-ring .track { stroke: var(--card2); }
-.rp-big-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
-.rp-big-time { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-.rp-big-time .t { font-size: 64px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; }
-.rp-big-time .of { font-size: 14px; color: var(--muted); }
-.rp-big-label { font-size: 16px; color: var(--text-2); text-align: center; text-wrap: balance; }
-.rp-big-ctrl { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; width: 100%; }
-.rp-big-ctrl .btn { min-height: 56px; font-size: 18px; font-weight: 650; border-radius: 16px; background: var(--card2); border-color: transparent; font-variant-numeric: tabular-nums; }
-.rp-big-ctrl .rp-skip { background: var(--accent); color: var(--accent-ink); }
-.rp-big-close { color: var(--muted); min-height: 44px; }
+:root .rp-big-in { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+:root .rp-big-ring { position: relative; width: min(260px, 72vw); aspect-ratio: 1; }
+:root .rp-big-ring svg { width: 100%; height: 100%; display: block; }
+:root .rp-big-ring circle { fill: none; stroke-width: 4; }
+:root .rp-big-ring .track { stroke: var(--card2); }
+:root .rp-big-ring .fill { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+:root .rp-big-time { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+:root .rp-big-time .t { font-size: 64px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+:root .rp-big-time .of { font-size: 14px; color: var(--muted); }
+:root .rp-big-label { font-size: 16px; color: var(--text-2); text-align: center; text-wrap: balance; }
+:root .rp-big-ctrl { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; width: 100%; }
+:root .rp-big-ctrl .btn { min-height: 56px; font-size: 18px; font-weight: 650; border-radius: 16px; background: var(--card2); border-color: transparent; font-variant-numeric: tabular-nums; }
+:root .rp-big-ctrl .rp-skip { background: var(--accent); color: var(--accent-ink); }
+:root .rp-big-close { color: var(--muted); min-height: 44px; }
 
 @media (max-width: 360px) {
-  .rp-ctrl .btn { padding: 0 8px; }
-  .rp-big-time .t { font-size: 54px; }
+  :root .rp-ctrl .btn { padding: 0 8px; }
+  :root .rp-big-time .t { font-size: 54px; }
 }
 
 /* the set-type legend matches the plain set numbers */
-.ex .lg-dot,
-.ex .lg-dot.warmup,
-.ex .lg-dot.drop,
-.ex .lg-dot.failure { border: 0; width: auto; min-width: 12px; font-family: var(--body); font-size: 12px; font-weight: 700; }
-.ex .lg-dot.warmup { color: var(--muted); }
-.ex .set-legend { gap: 4px 10px; color: var(--faint); }
+:root .ex .lg-dot,
+:root .ex .lg-dot.warmup,
+:root .ex .lg-dot.drop,
+:root .ex .lg-dot.failure { border: 0; width: auto; min-width: 12px; font-family: var(--body); font-size: 12px; font-weight: 700; }
+:root .ex .lg-dot.warmup { color: var(--muted); }
+:root .ex .set-legend { gap: 4px 10px; color: var(--faint); }
+
+/* Finish: clear but not shouting, a compact yellow pill */
+:root .btn.sp-finish { min-height: 38px; padding: 0 16px; font-size: 15px; border-radius: 999px; }
+:root .btn.sp-finish svg { width: 16px; height: 16px; }
