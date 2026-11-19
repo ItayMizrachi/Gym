@@ -95,3 +95,13 @@
 :root .input:focus,
 :root .select:focus,
 :root .textarea:focus { border-color: var(--accent); }
+
+/* ---------- one type scale: page title 28, section title 20, card title 17 ---------- */
+:root .ins-title,
+:root .card > h2,
+:root .card > .row > h2 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+:root .set-fold-t { font-size: 17px; font-weight: 650; }
+
+/* ---------- Programs: the finder is a quiet card with a yellow icon; tabs without an outline ---------- */
+:root .pg-finder { background: var(--card); border-color: transparent; }
+:root .pg-tabs { border-color: transparent; }
