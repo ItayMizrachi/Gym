@@ -66,7 +66,7 @@ export function installKeyboardHelpers() {
    * Moving the pieces back by what the visual viewport reports (deployed 2026-11-14) made things worse on the
    * phone: right after the keyboard closed, and while the page was pulled past its end, iPhone still reports
    * an offset although the fixed pieces are in place, so the header slid down the screen. Now it only records
-   * the drift (Settings → 5 taps on "GymLog"); the fix for the keyboard case is settle() below.
+   * the drift (Settings → 5 taps on "GymLog"); the fix is heal() below.
    */
   const pin = (typing: boolean) => {
     const max = document.documentElement.scrollHeight - window.innerHeight
@@ -80,15 +80,56 @@ export function installKeyboardHelpers() {
     }
   }
   /*
-   * After the iPhone keyboard closes, the visual viewport can stay shifted by part of the keyboard's height and
-   * the fixed layer (rest player, header) floats until the next scroll. Scrolling to where the page already is
-   * makes iPhone settle the viewport and draw the fixed pieces in place again.
+   * After the iPhone keyboard closes (installed app, iOS 26), the layout viewport can stay short or shifted by
+   * part of the keyboard's height, and the fixed layer (rest player, number pad, tab bar, workout header) floats
+   * mid-screen. A scroll to the same place is ignored by the phone. What makes it measure the screen again is a
+   * full-height relayout (hide for one synchronous reflow, show again, put the scroll back), all in one task so
+   * nothing is painted in between.
    */
-  const settle = (always = false) => {
+  let tallest = window.innerHeight
+  window.addEventListener('resize', () => {
+    if (!isField(document.activeElement)) tallest = Math.max(tallest, window.innerHeight)
+  })
+  const app = document.getElementById('root')
+  // a full-height probe: re-laying it out is the gentle way to make the phone measure the screen again
+  const probe = document.createElement('div')
+  probe.setAttribute('aria-hidden', 'true')
+  probe.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:100vh;visibility:hidden;pointer-events:none'
+  document.body.appendChild(probe)
+  const shifted = () =>
+    window.innerHeight < tallest - 4 || Math.abs(vv.offsetTop) > 1 || Math.abs(vv.height - window.innerHeight - base) > 1
+  const heal = () => {
+    if (!app || isField(document.activeElement)) return
+    const x = window.scrollX
+    const y = window.scrollY
+    probe.style.display = 'none'
+    void probe.offsetHeight
+    probe.style.display = ''
+    void probe.offsetHeight
+    if (shifted()) {
+      // still off: re-lay out the whole app (it replays entry animations, so only when the screen is wrong anyway);
+      // inner scroll positions (sheets, carousels) are kept
+      const kept: [Element, number, number][] = []
+      app.querySelectorAll('*').forEach((el) => {
+        if (el.scrollTop || el.scrollLeft) kept.push([el, el.scrollTop, el.scrollLeft])
+      })
+      app.style.display = 'none'
+      void app.offsetHeight
+      app.style.display = ''
+      void app.offsetHeight
+      kept.forEach(([el, t, l]) => {
+        el.scrollTop = t
+        el.scrollLeft = l
+      })
+    }
+    window.scrollTo(x, y)
+  }
+  /** after a scroll: heal only when the phone reports the shift (and the page is not pulled past its end) */
+  const settle = () => {
     if (isField(document.activeElement)) return
-    // after the keyboard, always: the phone does not always report the shift (videos 2026-11-17)
-    if (!always && Math.abs(vv.offsetTop) < 1 && Math.abs(vv.height - window.innerHeight - base) < 1) return
-    window.scrollTo(window.scrollX, window.scrollY)
+    const max = document.documentElement.scrollHeight - window.innerHeight
+    if (window.scrollY < -1 || window.scrollY > max + 1) return
+    if (shifted()) heal()
   }
   /** the largest drift seen, for Settings → 5 taps on "GymLog" (so a report from the phone carries numbers) */
   const noteDrift = (top: number, bottom: number) => {
@@ -126,11 +167,16 @@ export function installKeyboardHelpers() {
   }
   const closed = () => {
     later()
-    setTimeout(() => settle(true), 80)
-    setTimeout(() => settle(true), 400)
-    setTimeout(() => settle(true), 800)
+    // after the keyboard, always: the phone does not always report the shift (videos 2026-11-17)
+    setTimeout(heal, 140)
+    setTimeout(heal, 500)
+    setTimeout(settle, 900)
   }
   document.addEventListener('focusin', later)
   document.addEventListener('focusout', closed)
+  // coming back to the app (from the lock screen or another app) can leave the same shift
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') setTimeout(settle, 300)
+  })
   sync()
 }
