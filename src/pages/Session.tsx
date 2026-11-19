@@ -1141,7 +1141,7 @@ export default function SessionPage() {
         </button>
       )}
 
-      <label className="field">
+      <label className="field sp-notes">
         {t('Workout notes')}
         <textarea
           className="textarea"

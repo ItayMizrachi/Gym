@@ -187,3 +187,13 @@
 :root .jl-ss { flex: none; font-size: 12px; font-weight: 700; color: var(--blue-text); }
 :root .jl-n { flex: none; font-size: 15px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 :root .jl-row.all .jl-n { color: var(--ok); }
+
+/* narrow phones: the rest player's text cuts cleanly instead of running under the buttons */
+:root .rp-title { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 360px) {
+  :root .rp-title .muted { display: none; }
+}
+
+/* workout notes: a filled field like the set inputs */
+:root .sp-notes .textarea { background: var(--card); border-color: transparent; }
+:root .sp-notes .textarea:focus { border-color: var(--accent); }
