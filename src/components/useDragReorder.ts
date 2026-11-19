@@ -6,13 +6,21 @@ import { scrollToY, scrollY } from '../lib/scroll'
  * and the others slide out of its way (like Hevy). Items may have different heights.
  * While dragging the page does not scroll by itself under the finger, but it scrolls near the top and bottom
  * edges so a long list can be crossed.
+ *
+ * Smoothness: the held item is moved by writing its transform straight onto the element, once per frame, so a
+ * finger move does not re-render the list (with full workout cards that re-render made the drag stutter). React
+ * only re-renders when the slot under the finger changes, to slide the other items. On release the item glides
+ * into its slot before the list is reordered, so nothing jumps.
  */
 
 type Rect = { top: number; h: number }
-type Drag = { from: number; dy: number; rects: Rect[] }
+/** `to` is where the held item would land; `settle` is set while it glides into that slot after the finger lifts */
+type Drag = { from: number; to: number; rects: Rect[]; settle?: boolean }
 
 const HOLD_MS = 400
 const SLOP = 8
+const EASE = 'cubic-bezier(0.2, 0, 0, 1)'
+const SETTLE_MS = 200
 
 export function toIndex(rects: Rect[], from: number, dy: number): number {
   const c = rects[from].top + rects[from].h / 2 + dy
@@ -23,10 +31,20 @@ export function toIndex(rects: Rect[], from: number, dy: number): number {
   return to
 }
 
+/** how far the held item moves to sit exactly in slot `to` (the others have slid out of its way) */
+export function slotOffset(rects: Rect[], from: number, to: number): number {
+  if (to === from) return 0
+  if (to > from) return rects[to].top + rects[to].h - (rects[from].top + rects[from].h)
+  return rects[to].top - rects[from].top
+}
+
+type Live = { from: number; y0: number; s0: number; rects: Rect[]; y: number; off: number; to: number }
+const dyOf = (l: Live) => l.y - l.y0 + l.off + (scrollY() - l.s0)
+
 export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd?: () => void) {
   const [drag, setDrag] = useState<Drag | null>(null)
   const refs = useRef<(HTMLElement | null)[]>([])
-  const live = useRef<{ from: number; y0: number; s0: number; rects: Rect[]; y: number; off: number } | null>(null)
+  const live = useRef<Live | null>(null)
   const hold = useRef<{ t: number; x: number; y: number } | null>(null)
   const suppressClick = useRef(false)
   const dropRef = useRef(onDrop)
@@ -47,47 +65,72 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     const rects = measure()
     const r = rects[from]
     const off = snap && r ? clientY - (r.top - scrollY() + r.h / 2) : 0
-    live.current = { from, y0: clientY, s0: scrollY(), rects, y: clientY, off }
+    live.current = { from, y0: clientY, s0: scrollY(), rects, y: clientY, off, to: from }
     suppressClick.current = true
+    const el = refs.current[from]
+    if (el) {
+      el.style.transition = `rotate 0.15s ${EASE}, scale 0.15s ${EASE}`
+      el.style.transform = `translate3d(0, ${off}px, 0)`
+    }
     try {
       navigator.vibrate?.(15)
     } catch {
       /* ignore */
     }
-    setDrag({ from, dy: off, rects })
+    setDrag({ from, to: from, rects })
   }
 
   useEffect(() => {
     if (!drag) return
     let raf = 0
-    const update = () => {
+    let dirty = false
+    // one write per frame: the held item follows the finger; the list re-renders only when the slot changes
+    const paint = () => {
       const l = live.current
-      if (!l) return
-      setDrag({ from: l.from, rects: l.rects, dy: l.y - l.y0 + l.off + (scrollY() - l.s0) })
+      if (!l || !dirty) return
+      dirty = false
+      const dy = dyOf(l)
+      const el = refs.current[l.from]
+      if (el) el.style.transform = `translate3d(0, ${dy}px, 0)`
+      const to = toIndex(l.rects, l.from, dy)
+      if (to !== l.to) {
+        l.to = to
+        setDrag({ from: l.from, to, rects: l.rects })
+      }
     }
     const move = (e: PointerEvent) => {
       if (!live.current) return
       live.current.y = e.clientY
-      update()
+      dirty = true
     }
     const end = () => {
       const l = live.current
       live.current = null
-      cancelAnimationFrame(raf)
-      if (l) {
-        const dy = l.y - l.y0 + l.off + (scrollY() - l.s0)
-        const to = toIndex(l.rects, l.from, dy)
-        if (to !== l.from) dropRef.current(l.from, to)
+      if (!l) return
+      const to = toIndex(l.rects, l.from, dyOf(l))
+      const el = refs.current[l.from]
+      // glide into the slot, then reorder for real
+      if (el) {
+        el.style.transition = `transform ${SETTLE_MS}ms ${EASE}, rotate ${SETTLE_MS}ms ${EASE}, scale ${SETTLE_MS}ms ${EASE}`
+        el.style.transform = `translate3d(0, ${slotOffset(l.rects, l.from, to)}px, 0)`
       }
-      setDrag(null)
-      endRef.current?.()
-      // the click that follows the long press must not open the item
-      window.setTimeout(() => (suppressClick.current = false), 50)
+      setDrag({ from: l.from, to, rects: l.rects, settle: true })
+      window.setTimeout(() => {
+        if (el) {
+          el.style.transition = ''
+          el.style.transform = ''
+        }
+        if (to !== l.from) dropRef.current(l.from, to)
+        setDrag(null)
+        endRef.current?.()
+        // the click that follows the long press must not open the item
+        window.setTimeout(() => (suppressClick.current = false), 50)
+      }, SETTLE_MS)
     }
     // keep the page still under the finger (iOS would otherwise scroll and cancel the drag)
     const noScroll = (e: TouchEvent) => e.preventDefault()
-    // near the edges, scroll the page a little each frame
-    const edge = () => {
+    // every frame: near the edges scroll the page a little, then draw the held item
+    const frame = () => {
       const l = live.current
       if (l) {
         // the zones start just inside the sticky header and above the rest bar, so they are easy to reach
@@ -97,12 +140,13 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
         const v = l.y < top ? -Math.ceil((top - l.y) / 6) : l.y > bottom ? Math.ceil((l.y - bottom) / 6) : 0
         if (v) {
           scrollToY(scrollY() + v, 'instant' as ScrollBehavior)
-          update()
+          dirty = true
         }
+        paint()
       }
-      raf = requestAnimationFrame(edge)
+      raf = requestAnimationFrame(frame)
     }
-    raf = requestAnimationFrame(edge)
+    raf = requestAnimationFrame(frame)
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', end)
     window.addEventListener('pointercancel', end)
@@ -116,8 +160,6 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     }
   }, [drag != null])
 
-  const to = drag ? toIndex(drag.rects, drag.from, drag.dy) : -1
-
   /** props for item i: hold to pick it up (or pass `onHold` to do something else on hold, e.g. switch to a compact list) */
   function item(i: number, onHold?: (clientY: number) => void) {
     const cancel = () => {
@@ -130,6 +172,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
       },
       onPointerDown: (e: React.PointerEvent) => {
         if (e.pointerType === 'mouse' && e.button !== 0) return
+        if (drag) return
         const y = e.clientY
         hold.current = {
           x: e.clientX,
@@ -160,17 +203,17 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
 
   function styleFor(i: number): React.CSSProperties | undefined {
     if (!drag) return undefined
-    const { from, dy, rects } = drag
+    const { from, to, rects, settle } = drag
     if (i === from) {
-      // the held item follows the finger with a slight tilt, eased in as it lifts (none with Reduce Motion)
+      // the held item: its position is written directly (see paint); here only the lift — a slight tilt and
+      // grow, eased in, and eased out again while it settles (none with Reduce Motion)
       const calm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
       return {
-        transform: `translateY(${dy}px)`,
-        rotate: calm ? undefined : '2deg',
-        scale: calm ? undefined : '1.03',
+        rotate: calm || settle ? '0deg' : '2deg',
+        scale: calm || settle ? '1' : '1.03',
         zIndex: 20,
         position: 'relative',
-        transition: 'rotate 0.15s ease-out, scale 0.15s ease-out'
+        willChange: 'transform'
       } as React.CSSProperties
     }
     // the gap the dragged item leaves: its height plus the spacing to its neighbour
@@ -180,7 +223,7 @@ export function useDragReorder(onDrop: (from: number, to: number) => void, onEnd
     let shift = 0
     if (from < to && i > from && i <= to) shift = -room
     if (from > to && i >= to && i < from) shift = room
-    return { transform: `translateY(${shift}px)`, transition: 'transform 0.18s ease' }
+    return { transform: `translate3d(0, ${shift}px, 0)`, transition: `transform 0.22s ${EASE}` }
   }
 
   return { item, start, dragging: drag?.from ?? null }
