@@ -76,3 +76,22 @@
 :root .we-card.open + .we-card { margin-top: 0; border-top-color: transparent; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); }
 :root .we-card:has(+ .we-card.open) { border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius); }
 :root .we-card.open { border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius); }
+
+/* ---------- text fields: filled, no outline until focused ----------
+   on the page: the card colour; inside a card: the darker inset; inside a sheet: one step lighter than the sheet */
+:root .input,
+:root .select,
+:root .textarea { border-color: transparent; background-color: var(--card); }
+:root .card .input,
+:root .card .select,
+:root .card .textarea,
+:root .list-group .input,
+:root .we-card .input,
+:root .we-card .select,
+:root .we-card .textarea { background-color: var(--bg2); }
+:root .sheet .input,
+:root .sheet .select,
+:root .sheet .textarea { background-color: var(--card2); }
+:root .input:focus,
+:root .select:focus,
+:root .textarea:focus { border-color: var(--accent); }
