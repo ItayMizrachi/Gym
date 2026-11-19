@@ -103,8 +103,11 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
       const kpH = panel.current?.offsetHeight ?? 300
       if (!el) return
       const r = el.getBoundingClientRect()
-      const target = 150 + (window.innerHeight - kpH - 150) / 2
-      scrollByY(r.top + r.height / 2 - target, 'smooth')
+      // only when the keypad (or the header) would cover it: a field already in view stays where it is
+      const head = document.querySelector('.sp-head')?.getBoundingClientRect().bottom ?? 0
+      const floor = window.innerHeight - kpH - 12
+      if (r.bottom > floor) scrollByY(r.bottom - floor + 16, 'smooth')
+      else if (r.top < head + 8) scrollByY(r.top - head - 24, 'smooth')
     }, 30)
   }, [])
 

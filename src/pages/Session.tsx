@@ -336,15 +336,6 @@ const WORKOUT_TIPS: CoachStep[] = [
 
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** After a set is logged, keep the next set to do above the rest player instead of hidden under it. */
-function revealNextSet() {
-  const row = document.querySelector<HTMLElement>('.ex:not(.shut) .set-row.todo')
-  if (!row) return
-  const r = row.getBoundingClientRect()
-  const limit = window.innerHeight - 170
-  if (r.bottom > limit) scrollByY(r.bottom - limit, reducedMotion() ? 'auto' : 'smooth')
-}
-
 /** Inert + aria-hidden while folded, so hidden controls are not tabbable or read out. */
 const folded = (shut: boolean) => (shut ? ({ inert: '', 'aria-hidden': true } as any) : {})
 
@@ -520,9 +511,8 @@ function ExerciseCard({
     patchSet(s.id, { done: true, done_at: nowIso(), ...(tracking === 'time' ? { time_sec: s.time_sec } : { reps: s.reps }) }, true)
     setPop({ id: s.id, pr: isPR })
     // every logged set starts the rest timer, supersets included (the owner's call: going straight on is one tap on Skip).
-    // The screen never scrolls by itself (it moved under the lifter's thumb).
+    // The screen never scrolls by itself after a set is logged (owner, 2026-11-19: it moved under the lifter's thumb).
     startRest(s.kind === 'warmup' ? 30 : se.rest_sec, nextSetLabel(useStore.getState().db.sessions.find((x) => x.id === session.id) ?? session, index))
-    setTimeout(revealNextSet, 300)
   }
 
   function switchMachine() {
