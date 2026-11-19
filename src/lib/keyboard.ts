@@ -16,6 +16,49 @@ function isField(el: Element | null): el is HTMLElement {
 export const DRIFT_KEY = 'gymlog:drift3'
 
 export function installKeyboardHelpers() {
+  /*
+   * The page stays where it was (owner, 2026-11-19): when a field takes the phone keyboard, iPhone scrolls the
+   * page to lift the field, and it does not scroll back when the keyboard closes, so after typing reps and logging
+   * the set the workout had moved. The scroll position from before the first field took focus is put back once
+   * the keyboard is gone, unless the finger has moved the page in the meantime (then the lifter scrolled on purpose).
+   */
+  let home: number | null = null
+  let fingerMoved = false
+  let backT: number | undefined
+  document.addEventListener(
+    'focusin',
+    (e) => {
+      if (!isField(e.target as Element)) return
+      window.clearTimeout(backT)
+      if (home == null) {
+        home = window.scrollY
+        fingerMoved = false
+      }
+    },
+    true
+  )
+  document.addEventListener(
+    'focusout',
+    () => {
+      window.clearTimeout(backT)
+      // focus may be moving to the next field: wait for the keyboard to settle
+      backT = window.setTimeout(() => {
+        if (isField(document.activeElement) || home == null) return
+        const y = home
+        home = null
+        if (!fingerMoved && Math.abs(window.scrollY - y) > 2) window.scrollTo(window.scrollX, y)
+      }, 350)
+    },
+    true
+  )
+  document.addEventListener(
+    'touchmove',
+    () => {
+      if (home != null) fingerMoved = true
+    },
+    { passive: true, capture: true }
+  )
+
   let y0: number | null = null
   document.addEventListener(
     'touchstart',
