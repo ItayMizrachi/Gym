@@ -958,6 +958,7 @@ export default function SessionPage() {
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
   const [showMuscles, setShowMuscles] = useState(false)
+  const [jump, setJump] = useState(false)
   const [tools, setTools] = useState(false)
   const [replaceIdx, setReplaceIdx] = useState<number | null>(null)
   const [planAsk, setPlanAsk] = useState<string[] | null>(null)
@@ -1097,13 +1098,16 @@ export default function SessionPage() {
               {beatLast ? t('Beat last time') : t('Volume')}
             </div>
           </div>
-          <div className="ls-stat">
+          {/* sets: tap for the list of exercises, to jump straight to one */}
+          <button className="ls-stat ls-tap" onClick={() => setJump(true)} aria-label={t('Exercises in this workout')}>
             <div className="v">
               {doneSets}
               <span className="u">/{totalSets}</span>
             </div>
-            <div className="l">{t('Sets')}</div>
-          </div>
+            <div className="l">
+              {t('Sets')} <ChevronDown size={12} aria-hidden />
+            </div>
+          </button>
           <button className="ls-map" onClick={() => setShowMuscles(true)} aria-label={t("Sets per muscle")}>
             <BodyMap intensity={liveIntensity(muscles)} height={40} />
           </button>
@@ -1214,6 +1218,18 @@ export default function SessionPage() {
       <CoachMarks id="workout" userId={userId} steps={WORKOUT_TIPS} enabled={session.data.exercises.some((e) => e.sets.length > 0)} />
       {tools && <ToolsSheet onClose={() => setTools(false)} weight={session.data.exercises.flatMap((e) => e.sets).find((x) => !x.done && x.kind === 'work')?.weight ?? 0} />}
       {showMuscles && <MusclesSheet rows={muscles} onClose={() => setShowMuscles(false)} />}
+      {jump && (
+        <JumpSheet
+          session={session}
+          exercises={db.exercises}
+          onPick={(i) => {
+            setJump(false)
+            // after the sheet has closed (it gives the page its scroll back)
+            setTimeout(() => document.getElementById(`ex-${i}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 260)
+          }}
+          onClose={() => setJump(false)}
+        />
+      )}
 
       {confirmFinish && (
         <Confirm
@@ -1275,6 +1291,38 @@ export default function SessionPage() {
       )}
     </div>
     </KeypadProvider>
+  )
+}
+
+/** Every exercise in this workout with how far along it is; tap one to jump to it. */
+function JumpSheet({ session, exercises, onPick, onClose }: { session: Session; exercises: Exercise[]; onPick: (i: number) => void; onClose: () => void }) {
+  const cur = session.data.exercises.findIndex((e) => e.sets.some((x) => !x.done))
+  return (
+    <Sheet title={t('Exercises in this workout')} onClose={onClose}>
+      <div className="jl">
+        {session.data.exercises.map((e, i) => {
+          const done = e.sets.filter((x) => x.done).length
+          const all = e.sets.length > 0 && done === e.sets.length
+          return (
+            <button key={i} className={`jl-row${i === cur ? ' cur' : ''}${all ? ' all' : ''}`} onClick={() => onPick(i)}>
+              <span className="jl-thumb">
+                <ExerciseThumb exercise={exercises.find((x) => x.id === e.exercise_id)} name={e.name} size={40} />
+                {all && (
+                  <span className="ex-tick" aria-hidden>
+                    <Check size={12} strokeWidth={3} />
+                  </span>
+                )}
+              </span>
+              <span className="jl-name ellipsis">{splitName(e.name)[0]}</span>
+              {e.superset && <span className="jl-ss">{e.superset}</span>}
+              <span className="jl-n">
+                {done}/{e.sets.length}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </Sheet>
   )
 }
 
