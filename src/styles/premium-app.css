@@ -106,10 +106,11 @@
 :root .pg-finder { background: var(--card); border-color: transparent; }
 :root .pg-tabs { border-color: transparent; }
 
-/* ---------- Train: only the workout up next says "Start"; the others are a round play button ---------- */
-:root .trow:not(.next) .btn.trow-start { width: 40px; padding: 0; justify-content: center; border-color: transparent; }
-:root .trow:not(.next) .trow-start-t { display: none; }
-:root .trow:not(.next) .btn.trow-start svg { margin-inline-start: 2px; }
+/* ---------- Train: round play buttons on every workout row ---------- */
+/* every row the same: a round play button in the same place; the workout up next is the yellow one */
+:root .trow .btn.trow-start { width: 44px; min-height: 44px; padding: 0; justify-content: center; border-color: transparent; }
+:root .trow .trow-start-t { display: none; }
+:root .trow .btn.trow-start svg { margin-inline-start: 2px; width: 18px; height: 18px; }
 :root .trow .btn.trow-start { border-color: transparent; }
 
 /* ---------- workout summary: numbers lead, the label sits under them (as in the live workout header) ---------- */
