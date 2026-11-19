@@ -46,10 +46,11 @@ const KIND_INFO: Record<SetKind, { t: string; tag: string; d: string }> = {
 function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionSet; label: string; onPick: (k: SetKind) => void; onRemove: () => void; onClose: () => void }) {
   return (
     <Sheet title={label} onClose={onClose}>
-      <div className="stack" style={{ gap: 'var(--s2)' }}>
-        <div className="kind-list" role="radiogroup" aria-label={t("Set type")}>
+      {/* one grouped list like the exercise options; the type marks look like they do in the set table */}
+      <div className="stack kind-sheet" style={{ gap: 'var(--s3)' }}>
+        <div className="list-group kind-list" role="radiogroup" aria-label={t("Set type")}>
           {KIND_ORDER.map((k) => (
-            <button key={k} role="radio" aria-checked={set.kind === k} className={`kind-opt${set.kind === k ? ' on' : ''}`} onClick={() => onPick(k)}>
+            <button key={k} role="radio" aria-checked={set.kind === k} className={`list-row kind-opt${set.kind === k ? ' on' : ''}`} onClick={() => onPick(k)}>
               <span className={`kind ${k}`} aria-hidden>
                 {KIND_INFO[k].tag}
               </span>
@@ -61,7 +62,7 @@ function SetTypeSheet({ set, label, onPick, onRemove, onClose }: { set: SessionS
             </button>
           ))}
         </div>
-        <button className="btn danger block" onClick={onRemove}>
+        <button className="btn ghost danger-text" onClick={onRemove}>
           <Trash2 size={16} aria-hidden /> {t("Remove set")}
         </button>
       </div>

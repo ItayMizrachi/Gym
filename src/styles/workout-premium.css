@@ -239,3 +239,28 @@
 :root .ex .lg-dot.drop { background: var(--blue-soft); border-radius: 5px; padding: 0 4px; }
 :root .ex .lg-dot.failure { background: var(--danger-soft); border-radius: 5px; padding: 0 4px; }
 :root .ex.ss .ex-sum-ico { display: none; } /* superset cards: the A/B chip already fills the line */
+
+/* ---------- set type sheet: matches the workout screen ---------- */
+:root .kind-sheet .kind-opt { border: 0; border-radius: 0; background: none; min-height: 64px; padding: 12px var(--s4); }
+:root .kind-sheet .kind-opt + .kind-opt { border-top: 1px solid var(--line); }
+:root .kind-sheet .kind-opt:active { background: var(--card2); }
+:root .kind-sheet .kind-opt.on { background: none; }
+:root .kind-sheet .kind-opt-t { font-size: 16px; }
+:root .kind-sheet .kind-opt.on .kind-opt-t { color: var(--accent); }
+:root .kind-sheet .kind-opt-d { font-size: 13px; color: var(--muted); margin-top: 1px; }
+/* the marks: work = a plain number, W / D / F = soft pills in their plate colour */
+:root .kind-sheet .kind {
+  width: 36px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font-family: var(--body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+:root .kind-sheet .kind.warmup { background: var(--card3); color: var(--text-2); font-size: 14px; }
+:root .kind-sheet .kind.drop { background: var(--blue-soft); color: var(--blue-text); font-size: 14px; }
+:root .kind-sheet .kind.failure { background: var(--danger-soft); color: var(--danger-text); font-size: 14px; }
+:root .kind-sheet > .btn.ghost { align-self: center; min-height: 44px; }
