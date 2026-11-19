@@ -185,6 +185,8 @@ const HE: Record<string, string> = {
   Resting: 'מנוחה',
   Skip: 'דלג',
   'Rest over': 'המנוחה נגמרה',
+  '{n} day apart': 'יום אחד בין התמונות',
+  '{n} days apart': '{n} ימים בין התמונות',
   'Exercises in this workout': 'התרגילים באימון',
   '1 rep at {w} kg = new PR': 'חזרה אחת ב-{w} ק"ג = שיא חדש',
   '{n} reps at {w} kg = new PR': '{n} חזרות ב-{w} ק"ג = שיא חדש',

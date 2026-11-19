@@ -381,3 +381,15 @@ span.pv-btn {
     transition: none;
   }
 }
+
+/* ---------- compare card, calmer (2026-11-19): icons for the view, a date on each photo, one summary line ---------- */
+.pc-head { display: flex; align-items: center; gap: 6px; }
+.pc-head h2 { margin: 0; }
+.pc-modes { display: flex; gap: 2px; padding: 2px; border-radius: 10px; background: var(--bg2); }
+.pc-modes button { width: 36px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--muted); }
+.pc-modes button.on { background: var(--card3); color: var(--text); }
+.pc-chip { flex-direction: row; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: rgba(0, 0, 0, 0.55); }
+.pc-line-sum { display: flex; justify-content: center; gap: 14px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pc-line-sum .tnum { color: var(--text); font-weight: 600; }
+.pc-change { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); margin-top: -6px; }
+.pc-change .btn { color: var(--text-2); min-height: 40px; }
