@@ -31,6 +31,7 @@ import { liveIntensity, muscleSets, MuscleRow, sessionVolume } from '../lib/musc
 import { usePrefs } from '../lib/prefs'
 import '../styles/workout-flow.css'
 import '../styles/workout-live.css'
+import '../styles/workout-premium.css'
 import { scrollByY, scrollToY, scrollY } from '../lib/scroll'
 
 const KIND_ORDER: SetKind[] = ['work', 'warmup', 'drop', 'failure']
@@ -747,7 +748,7 @@ function ExerciseCard({
               <div
                 ref={rowRef}
                 style={rowStyle}
-                className={`set-row ${s.done ? 'done' : 'todo'}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}${setDrag.dragging === i ? ' lifted' : ''}`}
+                className={`set-row ${s.done ? 'done' : 'todo'}${current && s.id === nextTodoId ? ' next' : ''}${pop?.id === s.id ? (pop.pr ? ' pop pr-pop' : ' pop') : ''}${setDrag.dragging === i ? ' lifted' : ''}`}
               >
                 <button
                   {...hold}

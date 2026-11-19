@@ -12,6 +12,7 @@ import { cancelRestNotification, notifyPermission, scheduleRestNotification } fr
 import { cancelPush, ensurePush } from '../lib/push'
 import { DUR, EASE, exitDelay, reducedMotion } from '../lib/motion'
 import '../styles/workout-flow.css'
+import '../styles/workout-premium.css'
 import '../styles/navigation.css'
 import { scrollToY } from '../lib/scroll'
 
@@ -35,6 +36,11 @@ function RestBar({ inSession }: { inSession: boolean }) {
   const adjust = useStore((s) => s.adjustRest)
   const restNotify = usePrefs((s) => s.restNotify)
   const [, tick] = useState(0)
+  // the big full-screen timer (tap the ring); closes on its own when the rest ends
+  const [big, setBig] = useState(false)
+  useEffect(() => {
+    if (!rest || rest.finished) setBig(false)
+  }, [rest == null, rest?.finished])
   const serverOff = useRef(false)
   // each new rest may get a server alert again
   useEffect(() => {
@@ -93,52 +99,76 @@ function RestBar({ inSession }: { inSession: boolean }) {
   if (!rest) return null
   const left = Math.max(0, (rest.endsAt - Date.now()) / 1000)
   const frac = rest.finished ? 1 : Math.min(1, Math.max(0, (rest.total - left) / rest.total))
+  const label = rest.label && rest.label.includes(' · Set ') ? tr('Next: {x}', { x: rest.label }) : rest.label
+  const ring = (size: number) => (
+    <svg viewBox="0 0 72 72" aria-hidden width={size} height={size}>
+      <circle className="track" cx="36" cy="36" r={RING_R} />
+      <circle
+        className="fill"
+        cx="36"
+        cy="36"
+        r={RING_R}
+        strokeDasharray={RING_C}
+        strokeDashoffset={RING_C * (1 - frac)}
+        transform="rotate(-90 36 36)"
+      />
+    </svg>
+  )
+  const controls = (
+    <>
+      <button className="btn sm rp-adj" onClick={() => adjust(-15)} aria-label="15 seconds less rest">
+        −15
+      </button>
+      <button className="btn sm rp-adj" onClick={() => adjust(15)} aria-label="15 seconds more rest">
+        +15
+      </button>
+      <button className="btn sm rp-skip" onClick={clear} aria-label={tr('Skip')}>
+        <SkipForward size={16} /> <span>{tr('Skip')}</span>
+      </button>
+    </>
+  )
   return (
-    <div
-      className={`rp ${rest.finished ? 'done' : ''} ${inSession ? 'full' : ''}`}
-      role="timer"
-      aria-live="off"
-      // when it is over, a tap anywhere on it closes it sooner
-      onClick={rest.finished ? clear : undefined}
-    >
-      <div className="rp-ring">
-        <svg viewBox="0 0 72 72" aria-hidden>
-          <circle className="track" cx="36" cy="36" r={RING_R} />
-          <circle
-            className="fill"
-            cx="36"
-            cy="36"
-            r={RING_R}
-            strokeDasharray={RING_C}
-            strokeDashoffset={RING_C * (1 - frac)}
-            transform="rotate(-90 36 36)"
-          />
-        </svg>
-        <div className="rp-time">{rest.finished ? 'Go' : fmtClock(Math.ceil(left))}</div>
-      </div>
-      <div className="rp-body">
-        <div className="rp-title">
-          <span>{rest.finished ? 'Rest over' : 'Resting'}</span>
-          {!rest.finished && <span className="muted"> · {fmtClock(rest.total)}</span>}
+    <>
+      {/* one slim line: ring, what comes next, −15 / +15 / Skip; tap the ring for a big timer */}
+      <div
+        className={`rp ${rest.finished ? 'done' : ''} ${inSession ? 'full' : ''}`}
+        role="timer"
+        aria-live="off"
+        // when it is over, a tap anywhere on it closes it sooner
+        onClick={rest.finished ? clear : undefined}
+      >
+        <button className="rp-ring" onClick={() => !rest.finished && setBig(true)} aria-label={tr('Show a big timer')}>
+          {ring(48)}
+          <span className="rp-time">{rest.finished ? 'Go' : fmtClock(Math.ceil(left))}</span>
+        </button>
+        <div className="rp-body">
+          <div className="rp-title">
+            {rest.finished ? tr('Rest over') : tr('Resting')}
+            {!rest.finished && <span className="muted"> · {fmtClock(rest.total)}</span>}
+          </div>
+          {label && <div className="rp-label ellipsis">{label}</div>}
         </div>
-        <div className="rp-label ellipsis">{rest.label && rest.label.includes(' · Set ') ? `Next: ${rest.label}` : rest.label}</div>
-        <div className="rp-ctrl">
-          {rest.finished ? null : (
-            <>
-              <button className="btn sm" onClick={() => adjust(-15)} aria-label="15 seconds less rest">
-                −15s
-              </button>
-              <button className="btn sm" onClick={() => adjust(15)} aria-label="15 seconds more rest">
-                +15s
-              </button>
-              <button className="btn sm grow" onClick={clear}>
-                <SkipForward size={16} /> {tr("Skip")}
-              </button>
-            </>
-          )}
-        </div>
+        {!rest.finished && <div className="rp-ctrl">{controls}</div>}
       </div>
-    </div>
+      {big && !rest.finished && (
+        <div className="rp-big" role="dialog" aria-modal="true" aria-label={tr('Resting')} onClick={() => setBig(false)}>
+          <div className="rp-big-in" onClick={(e) => e.stopPropagation()}>
+            <div className="rp-big-ring">
+              {ring(260)}
+              <div className="rp-big-time">
+                <div className="t">{fmtClock(Math.ceil(left))}</div>
+                <div className="of">{tr('Resting')} · {fmtClock(rest.total)}</div>
+              </div>
+            </div>
+            {label && <div className="rp-big-label">{label}</div>}
+            <div className="rp-big-ctrl">{controls}</div>
+            <button className="btn ghost rp-big-close" onClick={() => setBig(false)}>
+              <ChevronDown size={18} aria-hidden /> {tr('Back to the workout')}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
