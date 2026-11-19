@@ -19,7 +19,7 @@
 :root .ex.current.ss { border-inline-start-color: var(--plate-blue); }
 :root .ex .ex-name { font-size: 17px; letter-spacing: -0.01em; }
 /* rest under the name: plain muted text with its icon, not a chip */
-:root .ex-sum .ex-rest { background: none; border: 0; padding: 0 6px 0 2px; color: var(--muted); font-weight: 500; }
+:root .ex-sum .ex-rest { background: none; border: 0; padding: 0 2px; color: var(--muted); font-weight: 500; }
 :root .ex-sum .ex-rest svg { color: var(--faint); }
 
 /* ---------- set table ---------- */
@@ -197,3 +197,45 @@
 /* workout notes: a filled field like the set inputs */
 :root .sp-notes .textarea { background: var(--card); border-color: transparent; }
 :root .sp-notes .textarea:focus { border-color: var(--accent); }
+
+/* ================= orientation cues (2026-11-19): colour and icons, plate colours only ================= */
+
+/* progress ring around each exercise photo: grey track, yellow arc on the exercise you are on, green when done */
+:root .ex-thumb { position: relative; }
+:root .ex-ring { position: absolute; inset: -5px; width: calc(100% + 10px); height: calc(100% + 10px); pointer-events: none; }
+:root .ex-ring circle { fill: none; stroke-width: 2.5; }
+:root .ex-ring .trk { stroke: var(--line); }
+:root .ex-ring .arc { stroke: var(--muted); stroke-linecap: round; transition: stroke-dasharray 0.3s var(--ease); }
+:root .ex.current .ex-ring .arc { stroke: var(--accent); }
+:root .ex.finished .ex-ring .arc { stroke: var(--ok); }
+:root .ex.finished .ex-ring .trk { stroke: transparent; }
+/* the green tick badge sits on top of the ring */
+:root .ex-tick { z-index: 1; }
+:root .ex .ex-head { padding-inline-start: 4px; }
+
+/* small icons in the line under the name: rest (timer) and the rep target */
+:root .ex-sum-ico { color: var(--faint); vertical-align: -2px; margin-inline-end: 4px; }
+:root .ex-sum-t.done .ex-sum-ico { display: none; }
+
+/* set types read at a glance: W / D / F sit in a soft pill of their plate colour, work sets stay plain numbers */
+:root .ex .kind.warmup,
+:root .ex .kind.drop,
+:root .ex .kind.failure { width: 30px; height: 28px; border-radius: 8px; font-size: 13px; font-weight: 750; }
+:root .ex .kind.warmup { background: var(--card3); color: var(--text-2); }
+:root .ex .kind.drop { background: var(--blue-soft); color: var(--blue-text); }
+:root .ex .kind.failure { background: var(--danger-soft); color: var(--danger-text); }
+:root .ex .set-row.done .kind.warmup { background: var(--card3); }
+:root .ex .set-row.done .kind.drop { background: var(--blue-soft); }
+:root .ex .set-row.done .kind.failure { background: var(--danger-soft); }
+/* warm-up rows are lighter: their numbers in grey, so the work sets stand out */
+:root .ex .set-row.todo:has(.kind.warmup) .num { color: var(--text-2); }
+
+/* the record hint: a yellow trophy icon instead of an emoji */
+:root .ex .set-hint.pr { display: inline-flex; align-items: center; gap: 5px; opacity: 1; }
+:root .ex .set-hint.pr svg { flex: none; color: var(--accent); }
+
+/* the legend matches the pills */
+:root .ex .lg-dot.warmup { background: var(--card3); color: var(--text-2); border-radius: 5px; padding: 0 4px; }
+:root .ex .lg-dot.drop { background: var(--blue-soft); border-radius: 5px; padding: 0 4px; }
+:root .ex .lg-dot.failure { background: var(--danger-soft); border-radius: 5px; padding: 0 4px; }
+:root .ex.ss .ex-sum-ico { display: none; } /* superset cards: the A/B chip already fills the line */

@@ -582,6 +582,23 @@ function ExerciseCard({
       <div className="ex-head" {...longPress(onReorder)}>
         <button className="ex-thumb" onClick={() => setInfo(true)} aria-label={`How to do ${name}`}>
           <ExerciseThumb exercise={ex} name={se.name} size={48} />
+          {/* a ring around the photo shows how far along the exercise is: yellow while on it, green when done */}
+          {se.sets.length > 0 && (
+            <svg className="ex-ring" viewBox="0 0 60 60" aria-hidden>
+              <circle className="trk" cx="30" cy="30" r="28" />
+              {se.sets.some((x) => x.done) && (
+              <circle
+                className="arc"
+                cx="30"
+                cy="30"
+                r="28"
+                pathLength={100}
+                strokeDasharray={`${(se.sets.filter((x) => x.done).length / se.sets.length) * 100} 100`}
+                transform="rotate(-90 30 30)"
+              />
+              )}
+            </svg>
+          )}
           {finished && (
             <span className="ex-tick" aria-hidden>
               <Check size={12} strokeWidth={3} />
@@ -634,7 +651,10 @@ function ExerciseCard({
             {finished && shut ? (
               <span className="ex-sum-t done">{doneLine}</span>
             ) : (
-              <span className="ex-sum-t">{plan}</span>
+              <span className="ex-sum-t">
+                <Repeat size={13} aria-hidden className="ex-sum-ico" />
+                {plan}
+              </span>
             )}
             {hasNotes && !(finished && shut) && <StickyNote size={14} className="ex-sum-i" aria-label={t("Has notes")} />}
             <ChevronDown size={16} className={`ex-chev ${(finished ? !shut : details) ? 'up' : ''}`} aria-hidden />
@@ -831,7 +851,7 @@ function ExerciseCard({
               {hintReps != null && nearTarget && !setLift && s.id === nextTodoId && (
                 <div className="set-row" style={{ marginTop: -2 }}>
                   <div className="set-hint pr">
-                    🏆{' '}
+                    <Trophy size={13} aria-hidden />
                     {tracking === 'weight_reps' || s.weight > 0
                       ? t(hintReps === 1 ? '1 rep at {w} kg = new PR' : '{n} reps at {w} kg = new PR', { n: hintReps, w: fmtKg(s.weight) })
                       : t(hintReps === 1 ? '1 rep = new PR' : '{n} reps = new PR', { n: hintReps })}
