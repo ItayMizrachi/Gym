@@ -233,7 +233,7 @@ export default function Home() {
                     onClick={() => start(w)}
                     aria-label={`Start ${w.name}`}
                   >
-                    <Play size={14} aria-hidden /> {t('Start')}
+                    <Play size={14} aria-hidden /> <span className="trow-start-t">{t('Start')}</span>
                   </button>
                 </div>
               )
