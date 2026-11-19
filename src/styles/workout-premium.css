@@ -275,3 +275,15 @@
 /* rest over: the slim bar turns green (outline, ring and title) for the few seconds before it leaves */
 :root .rp.done { background: var(--card2); border-color: var(--ok); }
 :root .rp.done .rp-title { color: var(--ok); }
+
+/* ---------- exercise options sheet: grouped lists, short lines, switches on the side ---------- */
+:root .exo { gap: var(--s3); }
+:root .exo .list-group { background: var(--card2); }
+:root .exo-list .list-row { min-height: 56px; padding: 10px var(--s4); }
+:root .exo-list .list-row + .list-row { border-top: 1px solid var(--line-strong); }
+:root .exo-d { font-size: 13px; color: var(--muted); line-height: 1.3; }
+:root .exo-set .toggle { flex: none; }
+:root .exo-note { cursor: text; }
+:root .exo-input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--text); font-size: 16px; padding: 6px 0; }
+:root .exo-input::placeholder { color: var(--muted); }
+:root .exo > .btn.ghost { align-self: center; min-height: 44px; }

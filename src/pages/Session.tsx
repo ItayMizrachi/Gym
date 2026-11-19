@@ -4,7 +4,7 @@ import { fmtVolume, previousOfTemplate, summarizeSession } from '../lib/stats'
 import { t } from '../lib/i18n'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftRight, Flame, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2, Pause } from 'lucide-react'
+import { ArrowLeftRight, Keyboard, Flame, GripVertical, Timer, Check, ChevronDown, ChevronLeft, ChevronUp, Disc, MoreHorizontal, Plus, Flag, Trash2, TrendingUp, HelpCircle, Play, Square, Trophy, Calculator, Repeat, StickyNote, Info, Link2, Pause } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { beep } from '../lib/beep'
 import { Exercise, Session, SessionExercise, SessionSet, SetKind, Tracking, trackingOf } from '../lib/types'
@@ -1558,14 +1558,14 @@ function MoreSheet({
   // most used first (swap a taken machine), settings in the middle, the destructive one last
   return (
     <Sheet title={se.name} onClose={onClose}>
-      <div className="stack">
-        {/* actions as one grouped list, each with its line of help under it */}
+      <div className="stack exo">
+        {/* actions: one grouped list */}
         <div className="list-group exo-list">
           <button className="list-row" onClick={onReplace}>
             <Repeat size={18} aria-hidden />
             <span className="grow">
               <span className="exo-t">{t("Replace exercise")}</span>
-              <span className="small muted">{t("Machine taken? Swap it for another one. Sets you already logged stay as they are.")}</span>
+              <span className="exo-d">{t('Machine taken? Swap it for another one.')}</span>
             </span>
           </button>
           <button
@@ -1590,32 +1590,51 @@ function MoreSheet({
           )}
         </div>
 
-        {exercise && (
-          <Toggle
-            on={!!exercise.machines}
-            onChange={(v) => saveRow('exercises', { ...exercise, machines: v })}
-            label={t('Two machines (different stacks), tracked apart')}
+        {/* this exercise: note and superset */}
+        <div className="list-group exo-list">
+          <label className="list-row exo-note">
+            <StickyNote size={18} aria-hidden />
+            <input
+              className="exo-input"
+              value={se.note}
+              onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))}
+              placeholder={t('Note for this workout')}
+              aria-label={t('Note for this workout')}
+            />
+          </label>
+        </div>
+        {count > 1 && (
+          <SupersetPicker
+            names={all.map((e) => e.name)}
+            groups={all.map((e) => e.superset)}
+            index={index}
+            onLink={(k) => onGroups(linkSuperset(all, index, k))}
+            onUnlink={() => onGroups(unlinkSuperset(all, index))}
           />
         )}
-        <label className="field">
-          {t("Note for this workout")}
-          <input className="input" value={se.note} onChange={(e) => onChange((x) => ({ ...x, note: e.target.value }))} placeholder="Seat 4, slow on the way down…" />
-        </label>
-        {count > 1 && (
-          <div className="field">
-            {t('Superset')}
-            <SupersetPicker
-              names={all.map((e) => e.name)}
-              groups={all.map((e) => e.superset)}
-              index={index}
-              onLink={(k) => onGroups(linkSuperset(all, index, k))}
-              onUnlink={() => onGroups(unlinkSuperset(all, index))}
-            />
+
+        {/* settings: a row each, title and one short line, the switch on the side */}
+        <div className="list-group exo-list">
+          {exercise && (
+            <div className="list-row exo-set">
+              <ArrowLeftRight size={18} aria-hidden />
+              <span className="grow">
+                <span className="exo-t">{t('Two machines')}</span>
+                <span className="exo-d">{t('Weights and records kept apart')}</span>
+              </span>
+              <Toggle on={!!exercise.machines} onChange={(v) => saveRow('exercises', { ...exercise, machines: v })} ariaLabel={t('Two machines (different stacks), tracked apart')} />
+            </div>
+          )}
+          <div className="list-row exo-set">
+            <Keyboard size={18} aria-hidden />
+            <span className="grow">
+              <span className="exo-t">{t('GymLog number pad')}</span>
+              <span className="exo-d">{t('Off = phone keyboard')}</span>
+            </span>
+            <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} ariaLabel={t('Use the GymLog number pad (off = phone keyboard)')} />
           </div>
-        )}
-        <div className="exo-sep">
-          <Toggle on={kpMode === 'app'} onChange={(v) => setKpMode(v ? 'app' : 'native')} label={t("Use the GymLog number pad (off = phone keyboard)")} />
         </div>
+
         {/* destructive and rare: quiet red text at the bottom */}
         <button className="btn ghost danger-text" onClick={onRemove}>
           <Trash2 size={16} aria-hidden /> {t("Remove exercise from workout")}
