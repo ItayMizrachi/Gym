@@ -133,3 +133,11 @@
   border-top-right-radius: 0;
   padding-top: var(--s3);
 }
+
+/* ---------- number fields in sheets (Tools, plate calculator, rest): filled, no outline until focused ---------- */
+:root .sheet .num { background: var(--card2); border-color: transparent; }
+:root .sheet .num:focus { border-color: var(--accent); }
+:root .tl-table { border-color: transparent; background: var(--card); }
+
+/* warm-up sheet: W as the same grey pill as in the set table */
+:root .wu-row .kind.warmup { width: 30px; height: 28px; border: 0; border-radius: 8px; background: var(--card3); color: var(--text-2); font-family: var(--body); font-size: 13px; font-weight: 750; }

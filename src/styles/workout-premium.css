@@ -287,3 +287,7 @@
 :root .exo-input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--text); font-size: 16px; padding: 6px 0; }
 :root .exo-input::placeholder { color: var(--muted); }
 :root .exo > .btn.ghost { align-self: center; min-height: 44px; }
+
+/* header numbers size to their content, so a long duration (1:05:12) does not run into the volume */
+:root .ls-strip { gap: 14px; }
+:root .ls-stat { flex: 1 1 auto; }
