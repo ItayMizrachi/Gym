@@ -343,18 +343,19 @@ export function Confirm({
   return (
     <Sheet title={title} onClose={onClose}>
       {text && <p className="confirm-text">{text}</p>}
-      <div className="row" style={{ gap: 'var(--s2)' }}>
-        <button className="btn grow" onClick={onClose}>
-          {cancelLabel}
-        </button>
+      {/* the answer first, full width under the thumb; Cancel is a quiet text button under it */}
+      <div className="confirm-actions">
         <button
-          className={`btn grow ${danger ? 'danger' : 'primary'}`}
+          className={`btn block ${danger ? 'danger' : 'primary'}`}
           onClick={() => {
             onConfirm()
             onClose()
           }}
         >
           {confirmLabel}
+        </button>
+        <button className="btn ghost block confirm-cancel" onClick={onClose}>
+          {cancelLabel}
         </button>
       </div>
     </Sheet>

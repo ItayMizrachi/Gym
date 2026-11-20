@@ -116,3 +116,10 @@
 /* ---------- workout summary: numbers lead, the label sits under them (as in the live workout header) ---------- */
 :root .hv-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; }
 :root .hv-stats .hv-l { color: var(--muted); font-size: 12px; }
+
+/* ---------- confirm sheets: the answer full width, Cancel quiet under it ---------- */
+:root .confirm-text { color: var(--text-2); font-size: 15px; line-height: 1.45; margin: 0 0 var(--s4); }
+:root .confirm-actions { display: flex; flex-direction: column; gap: var(--s1); }
+:root .confirm-actions .btn { min-height: 52px; font-size: 17px; font-weight: 650; border-radius: 14px; }
+:root .confirm-actions .btn.danger { background: var(--danger-soft); border-color: transparent; color: var(--danger-text); }
+:root .confirm-actions .confirm-cancel { color: var(--muted); font-weight: 600; min-height: 48px; }
