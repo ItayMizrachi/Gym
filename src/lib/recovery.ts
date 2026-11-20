@@ -46,12 +46,21 @@ export interface RecoveryView {
   ready: string[]
 }
 
+/*
+ * Any working set inside a muscle's recovery window means it is recovering, however few sets (owner, 2026-11-20:
+ * two hard sets of leg curls the day before showed hamstrings as "ready" because the load was under a quarter of
+ * 8 sets; with a 2-sets-per-exercise program that was wrong). The set count only sets how bright it is, with a
+ * floor so a muscle worked lightly still shows on the map.
+ */
+const SHOWN = 0.3
+
 export function recoveryView(db: DB, now = new Date()): RecoveryView {
-  const load = recoveryLoad(db, now)
+  const raw = recoveryLoad(db, now)
+  const load: Record<string, number> = {}
+  for (const [m, v] of Object.entries(raw)) if (v > 0) load[m] = Math.max(SHOWN, v)
   const recovering = Object.entries(load)
-    .filter(([, v]) => v >= 0.25)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1] - a[1] || (raw[b[0]] ?? 0) - (raw[a[0]] ?? 0))
     .map(([m]) => m)
-  const ready = MAIN_MUSCLES.filter((m) => (load[m] ?? 0) < 0.25)
+  const ready = MAIN_MUSCLES.filter((m) => !load[m])
   return { load, recovering, ready }
 }

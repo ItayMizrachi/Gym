@@ -35,4 +35,14 @@ describe('recoveryView', () => {
     expect(v.ready).not.toContain('Quads')
     expect(v.ready).toContain('Chest')
   })
+  it('two hard sets yesterday still read as recovering (2-sets programs)', () => {
+    const v = recoveryView(db(24, 'Hamstrings', [set(), set()]), NOW)
+    expect(v.recovering).toContain('Hamstrings')
+    expect(v.ready).not.toContain('Hamstrings')
+    expect(v.load.Hamstrings).toBeGreaterThanOrEqual(0.3)
+  })
+  it('a muscle is ready again once its window has passed', () => {
+    const v = recoveryView(db(73, 'Hamstrings', [set(), set()]), NOW)
+    expect(v.ready).toContain('Hamstrings')
+  })
 })
