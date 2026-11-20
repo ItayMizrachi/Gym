@@ -96,7 +96,7 @@ export default function MonthReportPage() {
           </section>
 
           <section className="card stack" style={{ gap: 10 }}>
-            <h2 className="rep-h">{tr('{n} training days', { n: r.days.length })}</h2>
+            <h2 className="rep-h">{tr(r.days.length === 1 ? '{n} training day' : '{n} training days', { n: r.days.length })}</h2>
             <div className="rep-cal">
               {cells.map((d, i) =>
                 d && trained.has(d) ? (

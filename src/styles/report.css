@@ -21,10 +21,10 @@
 
 .rep-m { display: grid; grid-template-columns: 92px 1fr 40px; align-items: center; gap: 10px; font-size: 14px; }
 .rep-m-track { height: 10px; border-radius: 6px; background: var(--card2); overflow: hidden; }
-.rep-m-fill { display: block; height: 100%; border-radius: 6px; background: var(--blue-text); }
+.rep-m-fill { display: block; height: 100%; border-radius: 6px; background: var(--text-2); /* chalk: blue is kept for drop sets and supersets */ }
 .rep-m-v { text-align: end; font-variant-numeric: tabular-nums; color: var(--text-2); }
 
-.rep-top .list-row { min-height: 48px; }
+.rep-top .list-row { min-height: 48px; padding-inline: 0; } /* in line with the card title */
 .rep-pr { display: flex; gap: 10px; font-size: 15px; padding: 4px 0; }
 .rep-pr b { color: var(--accent); font-variant-numeric: tabular-nums; }
 
