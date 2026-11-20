@@ -6,7 +6,7 @@ import { fmtKg, parseNum } from '../lib/format'
 import { clockFromDigits, fmtTime, parseTime } from '../lib/tracking'
 import { PlateCalc } from './PlateCalc'
 import '../styles/workout-live.css'
-import { scrollByY, scrollToY } from '../lib/scroll'
+import { scrollByY } from '../lib/scroll'
 
 export type KpKind = 'kg' | 'reps' | 'time'
 
@@ -91,25 +91,7 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
   const st = useRef({ field, text, fresh, calc, plates })
   st.current = { field, text, fresh, calc, plates }
 
-  // where the page was before the pad opened: put back when it closes, unless the finger moved the page meanwhile
-  // (owner, 2026-11-19: logging a set must not leave the workout scrolled)
-  const home = useRef<{ y: number; moved: boolean } | null>(null)
-  const last = useRef<{ y: number; moved: boolean } | null>(null)
-  useEffect(() => {
-    const moved = () => {
-      if (home.current) home.current.moved = true
-      if (last.current) last.current.moved = true
-    }
-    document.addEventListener('touchmove', moved, { passive: true, capture: true })
-    document.addEventListener('wheel', moved, { passive: true, capture: true })
-    return () => {
-      document.removeEventListener('touchmove', moved, { capture: true })
-      document.removeEventListener('wheel', moved, { capture: true })
-    }
-  }, [])
-
   const open = useCallback((f: KpFieldSpec) => {
-    if (!st.current.field) home.current = { y: window.scrollY, moved: false }
     setField(f)
     setText(fmtVal(f.kind, f.value))
     setFresh(true)
@@ -156,14 +138,6 @@ export function KeypadProvider({ children }: { children: ReactNode }) {
     commit()
     setField(null)
     setPlates(false)
-    const h = home.current
-    home.current = null
-    last.current = h
-    // a tap outside closes the pad on finger-down: wait a moment, so a scroll that starts with it wins
-    if (h)
-      window.setTimeout(() => {
-        if (!h.moved && !st.current.field && Math.abs(window.scrollY - h.y) > 2) scrollToY(h.y, 'smooth')
-      }, 250)
   }
 
   function next() {
