@@ -123,3 +123,13 @@
 :root .confirm-actions .btn { min-height: 52px; font-size: 17px; font-weight: 650; border-radius: 14px; }
 :root .confirm-actions .btn.danger { background: var(--danger-soft); border-color: transparent; color: var(--danger-text); }
 :root .confirm-actions .confirm-cancel { color: var(--muted); font-weight: 600; min-height: 48px; }
+
+/* ---------- Settings: hairlines between rows inside a group, like iOS Settings ---------- */
+/* doubled :root: the filled-button rule above is more specific than a plain :root rule */
+:root:root .card > .set-link:not(h2 + .set-link),
+:root:root .card > .set-tog:not(h2 + .set-tog) {
+  border-top: 1px solid var(--line);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding-top: var(--s3);
+}
