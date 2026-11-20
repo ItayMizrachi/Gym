@@ -180,3 +180,11 @@
 .prog-upd-t { font-weight: 600; }
 .prog-upd-w { margin: 0; font-size: 16px; font-weight: 600; }
 .prog-upd-list { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--text-2); font-size: 14px; }
+
+/* recovery sheet: muscles as chips in two short groups (2026-11-20) */
+.hm-group { display: flex; flex-direction: column; gap: 8px; }
+.hm-group-t { font-size: 13px; font-weight: 600; color: var(--muted); }
+.hm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hm-chip { padding: 6px 12px; border-radius: 999px; background: var(--card2); color: var(--text); font-size: 14px; font-weight: 600; }
+.hm-chip.work { background: var(--accent-soft); color: var(--accent); }
+.hm-note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--muted); }

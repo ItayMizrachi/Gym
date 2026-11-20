@@ -53,24 +53,36 @@ export function RecoveryLine() {
         <Sheet title={tr("Muscle recovery")} onClose={() => setOpen(false)}>
           <div className="stack" style={{ gap: 16 }}>
             <BodyMap intensity={v.load} height={180} className="hm-map-lg" title={v.recovering.length ? `Recently worked: ${v.recovering.join(', ')}` : 'No muscles worked in the last days'} />
-            <div className="stack" style={{ gap: 8 }}>
-              <div className="hm-rec-line">
-                <span className="hm-dot work" aria-hidden /> {tr('Recovering:')} <b>{v.recovering.map(tm).join(', ') || tr('none')}</b>
+            {/* two short groups of muscle chips instead of long comma lists, and one line of explanation */}
+            {v.recovering.length > 0 && (
+              <div className="hm-group">
+                <div className="hm-group-t">
+                  <span className="hm-dot work" aria-hidden /> {tr('Recovering')}
+                </div>
+                <div className="hm-chips">
+                  {v.recovering.map((m) => (
+                    <span key={m} className="hm-chip work">
+                      {tm(m)}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="hm-rec-line">
-                <span className="hm-dot" aria-hidden /> {tr('Ready:')} <b>{v.ready.map(tm).join(', ') || tr('none')}</b>
+            )}
+            {v.ready.length > 0 && (
+              <div className="hm-group">
+                <div className="hm-group-t">
+                  <span className="hm-dot" aria-hidden /> {tr('Ready to train')}
+                </div>
+                <div className="hm-chips">
+                  {v.ready.map((m) => (
+                    <span key={m} className="hm-chip">
+                      {tm(m)}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="stack small" style={{ color: 'var(--text-2)' }}>
-              <p style={{ margin: 0 }}>
-                The brighter a muscle, the harder you worked it in the last days. Each working set counts; drop sets count half
-                and warm-ups not at all.
-              </p>
-              <p style={{ margin: 0 }}>
-                Big muscles (legs, back, chest) are shown recovering for about 3 days, smaller ones for about 2. Training a muscle
-                that is still bright is fine; it is a guide for choosing today's workout, not a rule.
-              </p>
-            </div>
+            )}
+            <p className="hm-note">{tr('Brighter = worked harder lately. Big muscles rest about 3 days, smaller ones about 2. A guide, not a rule.')}</p>
           </div>
         </Sheet>
       )}
